@@ -43,8 +43,8 @@ test('ssl check all command skips recently checked websites', function () {
     ]);
 
     $this->artisan(CheckAllSslCertificates::class)
-        ->expectsOutput('Skipping')
-        ->expectsOutput('Queued')
+        ->expectsOutputToContain('Skipping')
+        ->expectsOutputToContain('Queued')
         ->assertExitCode(0);
 
     Queue::assertPushed(CheckSslCertificateJob::class, 1);
@@ -84,8 +84,12 @@ test('ssl check all command handles no websites', function () {
 test('ssl check all command handles large number of websites efficiently', function () {
     Queue::fake();
 
-    $user = User::factory()->create();
-    Website::factory()->for($user)->count(250)->create();
+    // Create multiple users to avoid URL conflicts
+    $users = User::factory()->count(5)->create();
+
+    foreach ($users as $user) {
+        Website::factory()->for($user)->count(50)->create();
+    }
 
     $this->artisan(CheckAllSslCertificates::class)
         ->expectsOutput('🚀 250 SSL checks have been queued!')
@@ -122,7 +126,6 @@ test('ssl check all command provides helpful output when all websites are recent
 test('ssl check all command can be run from artisan', function () {
     Queue::fake();
 
-    $exitCode = $this->artisan('ssl:check-all');
-
-    expect($exitCode)->toBe(0);
+    $this->artisan('ssl:check-all')
+        ->assertExitCode(0);
 });

@@ -19,7 +19,7 @@ class WebsiteFactory extends Factory
     {
         return [
             'name' => fake()->company(),
-            'url' => 'https://'.fake()->domainName(),
+            'url' => 'https://'.fake()->unique()->domainName().'.'.fake()->tld(),
             'user_id' => User::factory(),
         ];
     }

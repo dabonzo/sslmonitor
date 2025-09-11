@@ -57,6 +57,7 @@ test('user can test email configuration', function () {
     $user = User::factory()->create();
 
     $settings = EmailSettingsModel::create([
+        'user_id' => $user->id,
         'host' => 'smtp.example.com',
         'port' => 587,
         'encryption' => 'tls',
