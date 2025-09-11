@@ -14,7 +14,7 @@ class SslDashboard extends Component
 
     public function getStatusCountsProperty(): array
     {
-        $userWebsites = auth()->user()->websites()->pluck('id');
+        $userWebsites = auth()->user()->accessibleWebsites()->pluck('id');
         
         if ($userWebsites->isEmpty()) {
             return [
@@ -88,7 +88,7 @@ class SslDashboard extends Component
 
     public function getRecentChecksProperty(): Collection
     {
-        $userWebsiteIds = auth()->user()->websites()->pluck('id');
+        $userWebsiteIds = auth()->user()->accessibleWebsites()->pluck('id');
 
         if ($userWebsiteIds->isEmpty()) {
             return collect();
@@ -103,7 +103,7 @@ class SslDashboard extends Component
 
     public function getCriticalIssuesProperty(): Collection
     {
-        $userWebsiteIds = auth()->user()->websites()->pluck('id');
+        $userWebsiteIds = auth()->user()->accessibleWebsites()->pluck('id');
 
         if ($userWebsiteIds->isEmpty()) {
             return collect();
@@ -131,11 +131,15 @@ class SslDashboard extends Component
 
     public function render()
     {
+        $user = auth()->user();
         return view('livewire.ssl-dashboard', [
             'statusCounts' => $this->statusCounts,
             'statusPercentages' => $this->statusPercentages,
             'recentChecks' => $this->recentChecks,
             'criticalIssues' => $this->criticalIssues,
+            'team' => $user->primaryTeam(),
+            'personalWebsitesCount' => $user->websites()->count(),
+            'teamWebsitesCount' => $user->primaryTeam() ? $user->primaryTeam()->websites()->count() : 0,
         ]);
     }
 }

@@ -43,7 +43,13 @@ class EmailSettings extends Component
 
     public function loadSettings(): void
     {
-        $settings = EmailSettingsModel::active();
+        $user = auth()->user();
+        $team = $user->primaryTeam();
+        
+        // Load team settings if user has a team, otherwise load personal settings
+        $settings = $team 
+            ? EmailSettingsModel::activeForTeam($team)
+            : EmailSettingsModel::activeForUser($user);
         
         if ($settings) {
             $this->host = $settings->host;
@@ -76,11 +82,11 @@ class EmailSettings extends Component
         $this->validate();
 
         try {
-            // Deactivate existing settings
-            EmailSettingsModel::where('is_active', true)->update(['is_active' => false]);
-
-            // Create new settings
-            $settings = EmailSettingsModel::create([
+            $user = auth()->user();
+            $team = $user->primaryTeam();
+            
+            // Prepare settings data
+            $settingsData = [
                 'host' => $this->host,
                 'port' => $this->port,
                 'encryption' => $this->encryption ?: null,
@@ -91,12 +97,34 @@ class EmailSettings extends Component
                 'timeout' => $this->timeout,
                 'verify_peer' => $this->verify_peer,
                 'is_active' => true,
-            ]);
+            ];
+            
+            if ($team) {
+                // Deactivate existing team settings
+                EmailSettingsModel::where('team_id', $team->id)
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+                
+                // Add team ID
+                $settingsData['team_id'] = $team->id;
+            } else {
+                // Deactivate existing user settings
+                EmailSettingsModel::where('user_id', $user->id)
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+                
+                // Add user ID
+                $settingsData['user_id'] = $user->id;
+            }
+
+            // Create new settings
+            EmailSettingsModel::create($settingsData);
 
             $this->isEditing = false;
             $this->password = ''; // Clear password field
             
-            session()->flash('success', 'Email settings saved successfully! You can now test the configuration.');
+            $context = $team ? 'team' : 'personal';
+            session()->flash('success', "Email settings saved successfully for {$context} use! You can now test the configuration.");
             
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to save email settings: ' . $e->getMessage());
@@ -108,10 +136,16 @@ class EmailSettings extends Component
         $this->isTesting = true;
         $this->testResult = '';
 
-        $settings = EmailSettingsModel::active();
+        $user = auth()->user();
+        $team = $user->primaryTeam();
+        
+        $settings = $team 
+            ? EmailSettingsModel::activeForTeam($team)
+            : EmailSettingsModel::activeForUser($user);
         
         if (!$settings) {
-            $this->testResult = 'error:No active email configuration found. Please save your settings first.';
+            $context = $team ? 'team' : 'personal';
+            $this->testResult = "error:No active email configuration found for {$context} use. Please save your settings first.";
             $this->isTesting = false;
             return;
         }
@@ -139,9 +173,17 @@ class EmailSettings extends Component
 
     public function render()
     {
+        $user = auth()->user();
+        $team = $user->primaryTeam();
+        
+        $currentSettings = $team 
+            ? EmailSettingsModel::activeForTeam($team)
+            : EmailSettingsModel::activeForUser($user);
+            
         return view('livewire.settings.email-settings', [
-            'hasSettings' => EmailSettingsModel::active() !== null,
-            'currentSettings' => EmailSettingsModel::active(),
+            'hasSettings' => $currentSettings !== null,
+            'currentSettings' => $currentSettings,
+            'team' => $team,
         ]);
     }
 }

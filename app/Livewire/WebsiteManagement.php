@@ -51,10 +51,22 @@ class WebsiteManagement extends Component
 
     protected function createWebsite()
     {
-        auth()->user()->websites()->create([
+        $user = auth()->user();
+        $team = $user->primaryTeam();
+        
+        // Create website data
+        $websiteData = [
             'name' => $this->name,
             'url' => $this->url,
-        ]);
+        ];
+        
+        // If user has a team, add to team; otherwise keep personal
+        if ($team) {
+            $websiteData['team_id'] = $team->id;
+            $websiteData['added_by'] = $user->id;
+        }
+        
+        $user->websites()->create($websiteData);
 
         $this->dispatch('website-added');
         $this->resetForm();
@@ -128,8 +140,10 @@ class WebsiteManagement extends Component
 
     public function render()
     {
-        $websites = auth()->user()->websites()->latest()->get();
+        $user = auth()->user();
+        $websites = $user->accessibleWebsites()->with(['team', 'addedBy'])->latest()->get();
+        $team = $user->primaryTeam();
 
-        return view('livewire.website-management', compact('websites'));
+        return view('livewire.website-management', compact('websites', 'team'));
     }
 }

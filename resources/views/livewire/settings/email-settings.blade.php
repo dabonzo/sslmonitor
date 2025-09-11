@@ -3,6 +3,26 @@
 
     <x-settings.layout :heading="__('Email Configuration')" :subheading="__('Configure SMTP settings for SSL certificate notifications')">
         <div class="space-y-6">
+    
+    <!-- Team Context -->
+    @if($team)
+        <div class="p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+            <div class="flex items-center space-x-2">
+                <flux:icon name="users" class="h-5 w-5" />
+                <span class="font-medium">Team Email Settings: {{ $team->name }}</span>
+            </div>
+            <p class="text-sm mt-1">These settings will be used for all SSL certificate notifications sent to team members.</p>
+        </div>
+    @else
+        <div class="p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400">
+            <div class="flex items-center space-x-2">
+                <flux:icon name="user" class="h-5 w-5" />
+                <span class="font-medium">Personal Email Settings</span>
+            </div>
+            <p class="text-sm mt-1">These are your personal SMTP settings for SSL certificate notifications.</p>
+        </div>
+    @endif
+    
     <!-- Header Actions -->
     @if($hasSettings && !$isEditing)
         <div class="flex items-center justify-end space-x-2">

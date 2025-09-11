@@ -2,9 +2,32 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-white">Websites</h1>
-            <p class="text-zinc-600 dark:text-zinc-400">Monitor SSL certificates for your websites</p>
+            <div class="flex items-center space-x-3 mb-1">
+                <h1 class="text-2xl font-semibold text-zinc-900 dark:text-white">Websites</h1>
+                @if($team)
+                    <flux:badge variant="solid" color="green" size="sm">
+                        {{ $team->name }}
+                    </flux:badge>
+                @else
+                    <flux:badge variant="outline" color="blue" size="sm">
+                        Individual
+                    </flux:badge>
+                @endif
+            </div>
+            <p class="text-zinc-600 dark:text-zinc-400">
+                @if($team)
+                    Manage SSL certificates for your personal and team websites
+                @else
+                    Monitor SSL certificates for your websites
+                @endif
+            </p>
         </div>
+        
+        @if($team)
+            <flux:button :href="route('settings.team')" variant="ghost" size="sm" icon="users" wire:navigate>
+                Team Settings
+            </flux:button>
+        @endif
     </div>
 
     <!-- Add/Edit Website Form -->
@@ -128,9 +151,21 @@
                     <div class="flex items-center justify-between p-4">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3">
-                                <div>
-                                    <h3 class="text-sm font-medium text-zinc-900 dark:text-white">{{ $website->name }}</h3>
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2 mb-1">
+                                        <h3 class="text-sm font-medium text-zinc-900 dark:text-white">{{ $website->name }}</h3>
+                                        @if($website->isTeamWebsite())
+                                            <flux:badge variant="outline" color="green" size="xs">Team</flux:badge>
+                                        @else
+                                            <flux:badge variant="outline" color="blue" size="xs">Personal</flux:badge>
+                                        @endif
+                                    </div>
                                     <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ $website->url }}</p>
+                                    @if($website->isTeamWebsite() && $website->addedBy)
+                                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                                            Added by {{ $website->addedBy->name }}
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

@@ -2,13 +2,37 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-semibold text-zinc-900 dark:text-white">SSL Dashboard</h1>
-            <p class="text-zinc-600 dark:text-zinc-400">Monitor your SSL certificate status</p>
+            <div class="flex items-center space-x-3 mb-1">
+                <h1 class="text-2xl font-semibold text-zinc-900 dark:text-white">SSL Dashboard</h1>
+                @if($team)
+                    <flux:badge variant="solid" color="green" size="sm">
+                        {{ $team->name }}
+                    </flux:badge>
+                @else
+                    <flux:badge variant="outline" color="blue" size="sm">
+                        Individual
+                    </flux:badge>
+                @endif
+            </div>
+            <div class="flex items-center space-x-4 text-sm text-zinc-600 dark:text-zinc-400">
+                <span>Monitor your SSL certificate status</span>
+                @if($team)
+                    <span>•</span>
+                    <span>{{ $personalWebsitesCount }} personal, {{ $teamWebsitesCount }} team websites</span>
+                @endif
+            </div>
         </div>
         
-        <flux:button wire:click="refresh" variant="ghost" size="sm" icon="arrow-path">
-            Refresh
-        </flux:button>
+        <div class="flex items-center space-x-2">
+            @if($team)
+                <flux:button :href="route('settings.team')" variant="ghost" size="sm" icon="users" wire:navigate>
+                    Team
+                </flux:button>
+            @endif
+            <flux:button wire:click="refresh" variant="ghost" size="sm" icon="arrow-path">
+                Refresh
+            </flux:button>
+        </div>
     </div>
 
     @if($statusCounts['total'] === 0)

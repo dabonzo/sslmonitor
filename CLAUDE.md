@@ -35,6 +35,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Use Laravel Sail**: Always use `./vendor/bin/sail` prefix for artisan, composer, npm commands
 - **Clean Git Commits**: NEVER add "Generated with Claude Code" or similar attributions in commit messages
 - **Professional Standards**: Keep commit messages focused and professional
+- **Test-Driven Development**: ALWAYS use TDD approach with Pest PHP testing framework
+  - Write tests FIRST before implementing functionality
+  - Use `./vendor/bin/sail artisan make:test --pest TestName` to create tests
+  - Run tests frequently with `./vendor/bin/sail artisan test --filter=TestName`
+  - Follow red-green-refactor cycle: failing tests → implementation → passing tests
 
 ## Development Commands
 

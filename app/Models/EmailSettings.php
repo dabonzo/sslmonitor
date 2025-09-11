@@ -26,6 +26,7 @@ class EmailSettings extends Model
         'last_tested_at',
         'test_passed',
         'test_error',
+        'user_id',
         'team_id',
         'notification_emails',
         'notification_phones',
@@ -38,6 +39,7 @@ class EmailSettings extends Model
         'is_active' => 'boolean',
         'test_passed' => 'boolean',
         'last_tested_at' => 'datetime',
+        'user_id' => 'integer',
         'team_id' => 'integer',
         'notification_emails' => 'array',
         'notification_phones' => 'array',
@@ -64,6 +66,14 @@ class EmailSettings extends Model
     }
 
     /**
+     * Get the user this email setting belongs to
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Get the team this email setting belongs to
      */
     public function team(): BelongsTo
@@ -85,6 +95,14 @@ class EmailSettings extends Model
     public static function activeForTeam(Team $team): ?self
     {
         return self::where('is_active', true)->where('team_id', $team->id)->first();
+    }
+
+    /**
+     * Get active email settings for a user (personal settings)
+     */
+    public static function activeForUser(User $user): ?self
+    {
+        return self::where('is_active', true)->where('user_id', $user->id)->whereNull('team_id')->first();
     }
 
     /**
