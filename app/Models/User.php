@@ -111,11 +111,24 @@ class User extends Authenticatable
     {
         // Personal websites
         $personalWebsites = $this->websites()->get();
-        
+
         // Team websites
         $teamWebsites = Website::whereIn('team_id', $this->teams()->pluck('teams.id'))->get();
-        
+
         return $personalWebsites->concat($teamWebsites);
+    }
+
+    /**
+     * Get accessible websites as a query builder (for eager loading)
+     */
+    public function accessibleWebsitesQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $teamIds = $this->teams()->pluck('teams.id')->toArray();
+
+        return Website::where(function ($query) use ($teamIds) {
+            $query->where('user_id', $this->id) // Personal websites
+                ->orWhereIn('team_id', $teamIds); // Team websites
+        });
     }
 
     /**

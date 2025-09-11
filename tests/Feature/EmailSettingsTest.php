@@ -55,7 +55,7 @@ test('email settings form validates required fields', function () {
 
 test('user can test email configuration', function () {
     $user = User::factory()->create();
-    
+
     $settings = EmailSettingsModel::create([
         'host' => 'smtp.example.com',
         'port' => 587,

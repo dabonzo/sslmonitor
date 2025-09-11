@@ -44,7 +44,7 @@ class SslCertificate extends Model
 
     public function isExpiringSoon(int $days = 14): bool
     {
-        return !$this->isExpired() && $this->getDaysUntilExpiry() <= $days;
+        return ! $this->isExpired() && $this->getDaysUntilExpiry() <= $days;
     }
 
     public function getStatus(): string
@@ -53,7 +53,7 @@ class SslCertificate extends Model
             return 'expired';
         }
 
-        if (!$this->is_valid) {
+        if (! $this->is_valid) {
             return 'invalid';
         }
 
@@ -83,7 +83,7 @@ class SslCertificate extends Model
     public function scopeExpiringSoon($query, int $days = 14)
     {
         return $query->where('expires_at', '>=', Carbon::now())
-                     ->where('expires_at', '<=', Carbon::now()->addDays($days))
-                     ->where('is_valid', true);
+            ->where('expires_at', '<=', Carbon::now()->addDays($days))
+            ->where('is_valid', true);
     }
 }

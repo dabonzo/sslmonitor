@@ -14,8 +14,8 @@ class SslDashboard extends Component
 
     public function getStatusCountsProperty(): array
     {
-        $userWebsites = auth()->user()->accessibleWebsites()->pluck('id');
-        
+        $userWebsites = auth()->user()->accessibleWebsitesQuery()->pluck('id');
+
         if ($userWebsites->isEmpty()) {
             return [
                 'valid' => 0,
@@ -29,7 +29,7 @@ class SslDashboard extends Component
 
         // Get latest SSL check for each website
         $latestChecks = SslCheck::whereIn('website_id', $userWebsites)
-            ->whereIn('id', function($query) use ($userWebsites) {
+            ->whereIn('id', function ($query) use ($userWebsites) {
                 $query->selectRaw('MAX(id)')
                     ->from('ssl_checks')
                     ->whereIn('website_id', $userWebsites)
@@ -88,7 +88,7 @@ class SslDashboard extends Component
 
     public function getRecentChecksProperty(): Collection
     {
-        $userWebsiteIds = auth()->user()->accessibleWebsites()->pluck('id');
+        $userWebsiteIds = auth()->user()->accessibleWebsitesQuery()->pluck('id');
 
         if ($userWebsiteIds->isEmpty()) {
             return collect();
@@ -103,7 +103,7 @@ class SslDashboard extends Component
 
     public function getCriticalIssuesProperty(): Collection
     {
-        $userWebsiteIds = auth()->user()->accessibleWebsites()->pluck('id');
+        $userWebsiteIds = auth()->user()->accessibleWebsitesQuery()->pluck('id');
 
         if ($userWebsiteIds->isEmpty()) {
             return collect();
@@ -113,7 +113,7 @@ class SslDashboard extends Component
         return SslCheck::with('website')
             ->whereIn('website_id', $userWebsiteIds)
             ->whereIn('status', [SslStatusCalculator::STATUS_EXPIRED, SslStatusCalculator::STATUS_ERROR])
-            ->whereIn('id', function($query) use ($userWebsiteIds) {
+            ->whereIn('id', function ($query) use ($userWebsiteIds) {
                 $query->selectRaw('MAX(id)')
                     ->from('ssl_checks')
                     ->whereIn('website_id', $userWebsiteIds)
@@ -132,6 +132,7 @@ class SslDashboard extends Component
     public function render()
     {
         $user = auth()->user();
+
         return view('livewire.ssl-dashboard', [
             'statusCounts' => $this->statusCounts,
             'statusPercentages' => $this->statusPercentages,

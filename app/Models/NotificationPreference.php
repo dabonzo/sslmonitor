@@ -37,12 +37,12 @@ class NotificationPreference extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (!$model->expiry_days_notice) {
+            if (! $model->expiry_days_notice) {
                 $model->expiry_days_notice = [7, 14, 30];
             }
-            
+
             // Validate email format
-            if ($model->email_address && !filter_var($model->email_address, FILTER_VALIDATE_EMAIL)) {
+            if ($model->email_address && ! filter_var($model->email_address, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException('The email address format is invalid.');
             }
         });
@@ -55,7 +55,7 @@ class NotificationPreference extends Model
 
     public function shouldSendExpiryNotification(int $daysUntilExpiry): bool
     {
-        if (!$this->email_enabled) {
+        if (! $this->email_enabled) {
             return false;
         }
 

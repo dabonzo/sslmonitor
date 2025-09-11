@@ -20,8 +20,11 @@ class TeamMember extends Model
 
     // Role constants
     const ROLE_OWNER = 'owner';
+
     const ROLE_ADMIN = 'admin';
+
     const ROLE_MANAGER = 'manager';
+
     const ROLE_VIEWER = 'viewer';
 
     /**
@@ -56,7 +59,7 @@ class TeamMember extends Model
         return [
             self::ROLE_OWNER => 'Owner',
             self::ROLE_ADMIN => 'Admin',
-            self::ROLE_MANAGER => 'Manager', 
+            self::ROLE_MANAGER => 'Manager',
             self::ROLE_VIEWER => 'Viewer',
         ];
     }

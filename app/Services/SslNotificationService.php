@@ -21,7 +21,7 @@ class SslNotificationService
         $user = $sslCheck->website->user;
         $preference = $user->notificationPreference;
 
-        if (!$preference || !$preference->shouldSendExpiryNotification($sslCheck->days_until_expiry)) {
+        if (! $preference || ! $preference->shouldSendExpiryNotification($sslCheck->days_until_expiry)) {
             return;
         }
 
@@ -37,7 +37,7 @@ class SslNotificationService
         $user = $sslCheck->website->user;
         $preference = $user->notificationPreference;
 
-        if (!$preference || !$preference->email_enabled || !$preference->error_alerts) {
+        if (! $preference || ! $preference->email_enabled || ! $preference->error_alerts) {
             return;
         }
 
@@ -53,7 +53,7 @@ class SslNotificationService
         $user = $sslCheck->website->user;
         $preference = $user->notificationPreference;
 
-        if (!$preference || !$preference->email_enabled || !$preference->error_alerts) {
+        if (! $preference || ! $preference->email_enabled || ! $preference->error_alerts) {
             return;
         }
 

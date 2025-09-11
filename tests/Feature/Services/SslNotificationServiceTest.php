@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Mail;
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->website = Website::factory()->for($this->user)->create();
-    $this->service = new SslNotificationService();
-    
+    $this->service = new SslNotificationService;
+
     Mail::fake();
 });
 
@@ -178,7 +178,7 @@ describe('SslNotificationService', function () {
 
         // Should queue the notification job instead of sending immediately
         Mail::assertNothingSent();
-        
+
         // We would test job queuing here, but for now we'll just ensure method exists
         expect(method_exists($this->service, 'queueExpiryNotification'))->toBeTrue();
     });

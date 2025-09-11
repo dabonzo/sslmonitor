@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('team_id')->nullable()->constrained()->onDelete('cascade');
             $table->json('notification_emails')->nullable(); // Multiple recipient emails
             $table->json('notification_phones')->nullable(); // Multiple recipient phones (future SMS)
-            
+
             $table->index('team_id');
         });
     }

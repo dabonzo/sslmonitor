@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Http\Requests\StoreWebsiteRequest;
 use App\Models\Website;
 use App\Services\SslCertificateChecker;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,14 +19,16 @@ class WebsiteManagement extends Component
     public $url = '';
 
     public $editingWebsiteId = null;
+
     public $certificatePreview = null;
+
     public $isCheckingCertificate = false;
 
     protected SslCertificateChecker $sslChecker;
 
     public function boot()
     {
-        $this->sslChecker = new SslCertificateChecker();
+        $this->sslChecker = new SslCertificateChecker;
     }
 
     public function getFormProperty()
@@ -53,19 +54,19 @@ class WebsiteManagement extends Component
     {
         $user = auth()->user();
         $team = $user->primaryTeam();
-        
+
         // Create website data
         $websiteData = [
             'name' => $this->name,
             'url' => $this->url,
         ];
-        
+
         // If user has a team, add to team; otherwise keep personal
         if ($team) {
             $websiteData['team_id'] = $team->id;
             $websiteData['added_by'] = $user->id;
         }
-        
+
         $user->websites()->create($websiteData);
 
         $this->dispatch('website-added');
@@ -108,7 +109,7 @@ class WebsiteManagement extends Component
 
     public function checkCertificate()
     {
-        if (!$this->url) {
+        if (! $this->url) {
             return;
         }
 
@@ -121,7 +122,7 @@ class WebsiteManagement extends Component
         } catch (\Exception $e) {
             $this->certificatePreview = [
                 'status' => 'error',
-                'error_message' => 'Failed to check certificate: ' . $e->getMessage(),
+                'error_message' => 'Failed to check certificate: '.$e->getMessage(),
                 'expires_at' => null,
                 'issuer' => null,
                 'subject' => null,
@@ -141,7 +142,7 @@ class WebsiteManagement extends Component
     public function render()
     {
         $user = auth()->user();
-        $websites = $user->accessibleWebsites()->with(['team', 'addedBy'])->latest()->get();
+        $websites = $user->accessibleWebsitesQuery()->with(['team', 'addedBy'])->latest()->get();
         $team = $user->primaryTeam();
 
         return view('livewire.website-management', compact('websites', 'team'));

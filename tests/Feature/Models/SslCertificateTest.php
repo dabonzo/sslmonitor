@@ -2,12 +2,11 @@
 
 use App\Models\SslCertificate;
 use App\Models\Website;
-use App\Models\User;
 use Carbon\Carbon;
 
 test('ssl certificate can be created with valid data', function () {
     $website = Website::factory()->create();
-    
+
     $certificate = SslCertificate::create([
         'website_id' => $website->id,
         'issuer' => 'Let\'s Encrypt',
@@ -36,7 +35,7 @@ test('ssl certificate belongs to website', function () {
 test('ssl certificate calculates days until expiry', function () {
     $expiryDate = Carbon::now()->addDays(30);
     $certificate = SslCertificate::factory()->create([
-        'expires_at' => $expiryDate
+        'expires_at' => $expiryDate,
     ]);
 
     expect($certificate->getDaysUntilExpiry())->toBe(30);
@@ -45,7 +44,7 @@ test('ssl certificate calculates days until expiry', function () {
 test('ssl certificate returns negative days for expired certificates', function () {
     $expiryDate = Carbon::now()->subDays(10);
     $certificate = SslCertificate::factory()->create([
-        'expires_at' => $expiryDate
+        'expires_at' => $expiryDate,
     ]);
 
     expect($certificate->getDaysUntilExpiry())->toBe(-10);
@@ -53,11 +52,11 @@ test('ssl certificate returns negative days for expired certificates', function 
 
 test('ssl certificate determines if it is expired', function () {
     $expiredCertificate = SslCertificate::factory()->create([
-        'expires_at' => Carbon::now()->subDay()
+        'expires_at' => Carbon::now()->subDay(),
     ]);
-    
+
     $validCertificate = SslCertificate::factory()->create([
-        'expires_at' => Carbon::now()->addDays(30)
+        'expires_at' => Carbon::now()->addDays(30),
     ]);
 
     expect($expiredCertificate->isExpired())->toBeTrue()
@@ -66,11 +65,11 @@ test('ssl certificate determines if it is expired', function () {
 
 test('ssl certificate determines if it is expiring soon', function () {
     $expiringSoonCertificate = SslCertificate::factory()->create([
-        'expires_at' => Carbon::now()->addDays(5)
+        'expires_at' => Carbon::now()->addDays(5),
     ]);
-    
+
     $validCertificate = SslCertificate::factory()->create([
-        'expires_at' => Carbon::now()->addDays(60)
+        'expires_at' => Carbon::now()->addDays(60),
     ]);
 
     expect($expiringSoonCertificate->isExpiringSoon())->toBeTrue()
@@ -79,7 +78,7 @@ test('ssl certificate determines if it is expiring soon', function () {
 
 test('ssl certificate can customize expiring soon threshold', function () {
     $certificate = SslCertificate::factory()->create([
-        'expires_at' => Carbon::now()->addDays(20)
+        'expires_at' => Carbon::now()->addDays(20),
     ]);
 
     expect($certificate->isExpiringSoon(30))->toBeTrue()
@@ -89,22 +88,22 @@ test('ssl certificate can customize expiring soon threshold', function () {
 test('ssl certificate gets current status', function () {
     $expiredCert = SslCertificate::factory()->create([
         'expires_at' => Carbon::now()->subDay(),
-        'is_valid' => false
+        'is_valid' => false,
     ]);
-    
+
     $expiringSoonCert = SslCertificate::factory()->create([
         'expires_at' => Carbon::now()->addDays(5),
-        'is_valid' => true
+        'is_valid' => true,
     ]);
-    
+
     $validCert = SslCertificate::factory()->create([
         'expires_at' => Carbon::now()->addDays(60),
-        'is_valid' => true
+        'is_valid' => true,
     ]);
-    
+
     $invalidCert = SslCertificate::factory()->create([
         'expires_at' => Carbon::now()->addDays(60),
-        'is_valid' => false
+        'is_valid' => false,
     ]);
 
     expect($expiredCert->getStatus())->toBe('expired')
@@ -114,8 +113,8 @@ test('ssl certificate gets current status', function () {
 });
 
 test('ssl certificate has proper fillable attributes', function () {
-    $certificate = new SslCertificate();
-    
+    $certificate = new SslCertificate;
+
     expect($certificate->getFillable())->toContain('website_id')
         ->and($certificate->getFillable())->toContain('issuer')
         ->and($certificate->getFillable())->toContain('expires_at')
@@ -127,7 +126,7 @@ test('ssl certificate has proper fillable attributes', function () {
 
 test('ssl certificate casts expires_at to datetime', function () {
     $certificate = SslCertificate::factory()->create([
-        'expires_at' => '2025-12-31 23:59:59'
+        'expires_at' => '2025-12-31 23:59:59',
     ]);
 
     expect($certificate->expires_at)->toBeInstanceOf(Carbon::class);

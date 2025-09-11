@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Log;
 class CheckAllSslCertificates extends Command
 {
     protected $signature = 'ssl:check-all {--force : Force check even if recently checked}';
+
     protected $description = 'Queue SSL certificate checks for all websites';
 
     public function handle(): int
     {
         $this->info('🔍 Starting SSL certificate checks for all websites...');
-        
+
         $force = $this->option('force');
         $totalWebsites = 0;
         $queuedWebsites = 0;
@@ -24,16 +25,17 @@ class CheckAllSslCertificates extends Command
         Website::chunk(100, function ($websites) use (&$totalWebsites, &$queuedWebsites, &$skippedWebsites, $force) {
             foreach ($websites as $website) {
                 $totalWebsites++;
-                
+
                 // Skip if recently checked (unless forced)
-                if (!$force) {
+                if (! $force) {
                     $recentCheck = $website->sslChecks()
                         ->where('checked_at', '>', now()->subHour())
                         ->exists();
-                        
+
                     if ($recentCheck) {
                         $skippedWebsites++;
                         $this->line("   ⏭️  Skipping {$website->name} - checked recently");
+
                         continue;
                     }
                 }
@@ -41,14 +43,14 @@ class CheckAllSslCertificates extends Command
                 // Queue the SSL check job
                 CheckSslCertificateJob::dispatch($website);
                 $queuedWebsites++;
-                
+
                 $this->line("   ✅ Queued {$website->name} ({$website->url})");
             }
         });
 
         // Summary
         $this->newLine();
-        $this->info("📊 SSL Check Summary:");
+        $this->info('📊 SSL Check Summary:');
         $this->table(
             ['Metric', 'Count'],
             [
@@ -60,11 +62,11 @@ class CheckAllSslCertificates extends Command
 
         if ($queuedWebsites > 0) {
             $this->info("🚀 {$queuedWebsites} SSL checks have been queued!");
-            $this->info("💡 Process the queue with: php artisan queue:work ssl-monitoring");
+            $this->info('💡 Process the queue with: php artisan queue:work ssl-monitoring');
         } else {
-            $this->warn("⚠️  No SSL checks were queued.");
-            if ($totalWebsites > 0 && !$force) {
-                $this->info("💡 Use --force to check all websites regardless of recent checks");
+            $this->warn('⚠️  No SSL checks were queued.');
+            if ($totalWebsites > 0 && ! $force) {
+                $this->info('💡 Use --force to check all websites regardless of recent checks');
             }
         }
 

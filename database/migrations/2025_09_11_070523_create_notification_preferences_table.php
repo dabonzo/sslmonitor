@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('error_alerts')->default(true);
             $table->boolean('daily_digest')->default(false);
             $table->timestamps();
-            
+
             $table->unique('user_id');
         });
     }

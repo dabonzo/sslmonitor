@@ -22,6 +22,7 @@ Route::get('websites', function () {
 
 Route::get('websites/{website}', function (\App\Models\Website $website) {
     Gate::authorize('view', $website);
+
     return view('website-details', compact('website'));
 })->middleware(['auth', 'verified'])->name('websites.show');
 

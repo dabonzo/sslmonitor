@@ -8,9 +8,13 @@ use Carbon\Carbon;
 class SslStatusCalculator
 {
     public const STATUS_VALID = 'valid';
+
     public const STATUS_EXPIRING_SOON = 'expiring_soon';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_INVALID = 'invalid';
+
     public const STATUS_ERROR = 'error';
 
     private const DEFAULT_EXPIRING_SOON_THRESHOLD = 14;
@@ -33,7 +37,7 @@ class SslStatusCalculator
             return self::STATUS_EXPIRED;
         }
 
-        if (!$isValid) {
+        if (! $isValid) {
             return self::STATUS_INVALID;
         }
 
@@ -47,7 +51,7 @@ class SslStatusCalculator
     public function calculateDaysUntilExpiry(Carbon $expirationDate, ?Carbon $fromDate = null): int
     {
         $fromDate = $fromDate ?? now();
-        
+
         return (int) $fromDate->diffInDays($expirationDate, false);
     }
 
@@ -56,7 +60,7 @@ class SslStatusCalculator
         int $expiringSoonThreshold = self::DEFAULT_EXPIRING_SOON_THRESHOLD
     ): string {
         $daysUntilExpiry = $this->calculateDaysUntilExpiry($certificate->expires_at);
-        
+
         return $this->calculateStatus(
             $certificate->expires_at,
             $certificate->is_valid,
@@ -70,7 +74,7 @@ class SslStatusCalculator
         if ($status === null) {
             return false;
         }
-        
+
         return in_array($status, [
             self::STATUS_VALID,
             self::STATUS_EXPIRING_SOON,

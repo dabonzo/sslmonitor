@@ -2,26 +2,28 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SslCheck;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCheck;
 use Illuminate\Console\Command;
 
 class GenerateSampleData extends Command
 {
     protected $signature = 'sample:generate {--user-email=demo@example.com}';
+
     protected $description = 'Generate sample SSL monitoring data for testing the dashboard';
 
     public function handle(): int
     {
         $userEmail = $this->option('user-email');
-        
+
         // Find or create demo user
         $user = User::where('email', $userEmail)->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             $this->error("User with email {$userEmail} not found.");
-            $this->info("Please register a user account first, or specify an existing user email with --user-email=your@email.com");
+            $this->info('Please register a user account first, or specify an existing user email with --user-email=your@email.com');
+
             return Command::FAILURE;
         }
 
@@ -90,7 +92,7 @@ class GenerateSampleData extends Command
                     'expires_at' => $expiresAt,
                     'days_until_expiry' => $sampleWebsite['days_until_expiry'],
                     'issuer' => 'Let\'s Encrypt Authority X3',
-                    'subject' => 'CN=' . parse_url($sampleWebsite['url'], PHP_URL_HOST),
+                    'subject' => 'CN='.parse_url($sampleWebsite['url'], PHP_URL_HOST),
                     'is_valid' => $sampleWebsite['status'] === 'valid',
                 ]);
             } else {
@@ -103,7 +105,7 @@ class GenerateSampleData extends Command
         $this->newLine();
         $this->info('✅ Sample data generated successfully!');
         $this->info("Created {$user->websites()->count()} websites with SSL checks");
-        
+
         $this->newLine();
         $this->info('🌐 Visit your dashboard at: http://localhost/dashboard');
         $this->info('📊 You should see:');

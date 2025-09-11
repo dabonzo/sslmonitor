@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Livewire\WebsiteDetails;
+use App\Models\SslCheck;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCheck;
-use App\Services\SslCertificateChecker;
 use App\Services\SslStatusCalculator;
-use Livewire\Livewire;
 use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->website = Website::factory()->for($this->user)->create([
         'name' => 'Test Website',
-        'url' => 'https://example.com'
+        'url' => 'https://example.com',
     ]);
 });
 
@@ -64,7 +62,7 @@ test('website details component shows ssl check history', function () {
         'checked_at' => now()->subDays(7),
         'days_until_expiry' => 45,
     ]);
-    
+
     $recentCheck = SslCheck::factory()->for($this->website)->create([
         'status' => SslStatusCalculator::STATUS_EXPIRING_SOON,
         'checked_at' => now()->subHours(2),
@@ -166,12 +164,12 @@ test('website details component displays ssl checks in chronological order', fun
         'checked_at' => now()->subDays(3),
         'status' => SslStatusCalculator::STATUS_VALID,
     ]);
-    
+
     $check2 = SslCheck::factory()->for($this->website)->create([
         'checked_at' => now()->subDays(1),
         'status' => SslStatusCalculator::STATUS_EXPIRING_SOON,
     ]);
-    
+
     $check3 = SslCheck::factory()->for($this->website)->create([
         'checked_at' => now()->subHours(2),
         'status' => SslStatusCalculator::STATUS_EXPIRED,

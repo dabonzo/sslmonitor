@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('websites', function (Blueprint $table) {
             $table->foreignId('team_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('added_by')->nullable()->constrained('users')->onDelete('set null');
-            
+
             $table->index('team_id');
             $table->index('added_by');
         });

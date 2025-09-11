@@ -78,6 +78,7 @@ class Team extends Model
     public function getUserRole(User $user): ?string
     {
         $member = $this->members()->where('user_id', $user->id)->first();
+
         return $member?->pivot->role;
     }
 
@@ -87,8 +88,8 @@ class Team extends Model
     public function userHasPermission(User $user, string $permission): bool
     {
         $role = $this->getUserRole($user);
-        
-        if (!$role) {
+
+        if (! $role) {
             return false;
         }
 
@@ -103,19 +104,19 @@ class Team extends Model
         $permissions = [
             'owner' => [
                 'view_websites', 'add_websites', 'edit_websites', 'delete_websites',
-                'view_settings', 'edit_settings', 'manage_team', 'delete_team'
+                'view_settings', 'edit_settings', 'manage_team', 'delete_team',
             ],
             'admin' => [
                 'view_websites', 'add_websites', 'edit_websites', 'delete_websites',
-                'view_settings', 'edit_settings'
+                'view_settings', 'edit_settings',
             ],
             'manager' => [
                 'view_websites', 'add_websites', 'edit_websites', 'delete_websites',
-                'view_settings'
+                'view_settings',
             ],
             'viewer' => [
-                'view_websites', 'view_settings'
-            ]
+                'view_websites', 'view_settings',
+            ],
         ];
 
         return in_array($permission, $permissions[$role] ?? []);

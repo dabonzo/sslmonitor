@@ -65,7 +65,7 @@ describe('Team Management Component', function () {
     test('user with team sees team information', function () {
         $user = User::factory()->create();
         $team = Team::create(['name' => 'Existing Team', 'owner_id' => $user->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $user->id,
@@ -84,7 +84,7 @@ describe('Team Management Component', function () {
     test('team owner can invite users', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $owner->id,
@@ -110,7 +110,7 @@ describe('Team Management Component', function () {
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $member->id,
@@ -127,7 +127,7 @@ describe('Team Management Component', function () {
 
     test('user can transfer personal websites to team during creation', function () {
         $user = User::factory()->create();
-        
+
         // Create personal websites
         $website1 = Website::factory()->create(['user_id' => $user->id, 'url' => 'https://site1.com']);
         $website2 = Website::factory()->create(['user_id' => $user->id, 'url' => 'https://site2.com']);
@@ -140,11 +140,11 @@ describe('Team Management Component', function () {
             ->assertHasNoErrors();
 
         $team = Team::where('name', 'My Team')->first();
-        
+
         // First website should be transferred to team
         expect($website1->fresh()->team_id)->toBe($team->id);
         expect($website1->fresh()->added_by)->toBe($user->id);
-        
+
         // Second website should remain personal
         expect($website2->fresh()->team_id)->toBeNull();
     });
@@ -155,7 +155,7 @@ describe('Team Member Management', function () {
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create(['team_id' => $team->id, 'user_id' => $owner->id, 'role' => TeamMember::ROLE_OWNER]);
         TeamMember::create(['team_id' => $team->id, 'user_id' => $member->id, 'role' => TeamMember::ROLE_ADMIN]);
 
@@ -170,7 +170,7 @@ describe('Team Member Management', function () {
     test('team owner cannot remove themselves', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create(['team_id' => $team->id, 'user_id' => $owner->id, 'role' => TeamMember::ROLE_OWNER]);
 
         Livewire::actingAs($owner)
@@ -185,7 +185,7 @@ describe('Team Member Management', function () {
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create(['team_id' => $team->id, 'user_id' => $owner->id, 'role' => TeamMember::ROLE_OWNER]);
         TeamMember::create(['team_id' => $team->id, 'user_id' => $member->id, 'role' => TeamMember::ROLE_VIEWER]);
 

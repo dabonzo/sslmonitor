@@ -26,7 +26,7 @@ class StoreWebsiteRequest extends FormRequest
             'url' => [
                 'required',
                 'url',
-                'unique:websites,url,NULL,id,user_id,' . $this->user()->id
+                'unique:websites,url,NULL,id,user_id,'.$this->user()->id,
             ],
         ];
     }

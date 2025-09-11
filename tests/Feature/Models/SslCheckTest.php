@@ -2,12 +2,11 @@
 
 use App\Models\SslCheck;
 use App\Models\Website;
-use App\Models\User;
 use Carbon\Carbon;
 
 test('ssl check can be created with valid data', function () {
     $website = Website::factory()->create();
-    
+
     $sslCheck = SslCheck::create([
         'website_id' => $website->id,
         'status' => 'valid',
@@ -95,13 +94,13 @@ test('ssl check can determine status from certificate data', function () {
 
 test('ssl check calculates days until expiry correctly', function () {
     $website = Website::factory()->create();
-    
+
     $futureCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'expires_at' => Carbon::now()->addDays(30),
         'days_until_expiry' => 30,
     ]);
-    
+
     $pastCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'expires_at' => Carbon::now()->subDays(10),
@@ -113,8 +112,8 @@ test('ssl check calculates days until expiry correctly', function () {
 });
 
 test('ssl check has proper fillable attributes', function () {
-    $sslCheck = new SslCheck();
-    
+    $sslCheck = new SslCheck;
+
     expect($sslCheck->getFillable())->toContain('website_id')
         ->and($sslCheck->getFillable())->toContain('status')
         ->and($sslCheck->getFillable())->toContain('checked_at')
@@ -131,7 +130,7 @@ test('ssl check has proper fillable attributes', function () {
 test('ssl check casts dates to datetime', function () {
     $sslCheck = SslCheck::factory()->create([
         'checked_at' => '2025-01-01 12:00:00',
-        'expires_at' => '2025-12-31 23:59:59'
+        'expires_at' => '2025-12-31 23:59:59',
     ]);
 
     expect($sslCheck->checked_at)->toBeInstanceOf(Carbon::class)
@@ -140,7 +139,7 @@ test('ssl check casts dates to datetime', function () {
 
 test('ssl check can have error message for failed checks', function () {
     $website = Website::factory()->create();
-    
+
     $errorCheck = SslCheck::create([
         'website_id' => $website->id,
         'status' => 'error',
@@ -156,7 +155,7 @@ test('ssl check can have error message for failed checks', function () {
 
 test('ssl check scopes filter by status correctly', function () {
     $website = Website::factory()->create();
-    
+
     // Create checks with different statuses
     SslCheck::factory()->create(['website_id' => $website->id, 'status' => 'valid']);
     SslCheck::factory()->create(['website_id' => $website->id, 'status' => 'valid']);
@@ -174,13 +173,13 @@ test('ssl check scopes filter by status correctly', function () {
 
 test('ssl check can get latest check for website', function () {
     $website = Website::factory()->create();
-    
+
     // Create older check
     $olderCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'checked_at' => '2025-01-01 10:00:00',
     ]);
-    
+
     // Create newer check
     $newerCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
@@ -188,36 +187,36 @@ test('ssl check can get latest check for website', function () {
     ]);
 
     $latestCheck = SslCheck::latestChecked()->forWebsite($website->id)->first();
-    
+
     expect($latestCheck->website_id)->toBe($website->id)
         ->and($latestCheck->checked_at->isAfter($olderCheck->fresh()->checked_at))->toBeTrue();
 });
 
 test('ssl check orders by checked_at descending by default', function () {
     $website = Website::factory()->create();
-    
+
     $firstCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'checked_at' => '2025-01-01 08:00:00',
     ]);
-    
+
     $secondCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'checked_at' => '2025-01-01 10:00:00',
     ]);
-    
+
     $thirdCheck = SslCheck::factory()->create([
         'website_id' => $website->id,
         'checked_at' => '2025-01-01 12:00:00',
     ]);
 
     $orderedChecks = SslCheck::latestChecked()->forWebsite($website->id)->get();
-    
+
     expect($orderedChecks->count())->toBe(3);
-    
+
     // Check that the order is correct (latest first)
-    $times = $orderedChecks->pluck('checked_at')->map(fn($time) => $time->format('Y-m-d H:i:s'))->toArray();
-    
+    $times = $orderedChecks->pluck('checked_at')->map(fn ($time) => $time->format('Y-m-d H:i:s'))->toArray();
+
     expect($times[0])->toBe('2025-01-01 12:00:00')
         ->and($times[1])->toBe('2025-01-01 10:00:00')
         ->and($times[2])->toBe('2025-01-01 08:00:00');

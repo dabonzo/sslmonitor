@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Jobs\CheckSslCertificateJob;
+use App\Models\SslCheck;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCheck;
 use App\Services\SslCertificateChecker;
 use App\Services\SslStatusCalculator;
 use Illuminate\Support\Facades\Queue;
@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Queue;
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->website = Website::factory()->for($this->user)->create([
-        'url' => 'https://example.com'
+        'url' => 'https://example.com',
     ]);
 });
 
 test('ssl certificate job can be queued', function () {
     Queue::fake();
-    
+
     CheckSslCertificateJob::dispatch($this->website);
-    
+
     Queue::assertPushed(CheckSslCertificateJob::class, function ($job) {
         return $job->website->id === $this->website->id;
     });
@@ -54,9 +54,9 @@ test('ssl certificate job handles checker exceptions', function () {
         ->andThrow(new \Exception('Connection failed'));
 
     $job = new CheckSslCertificateJob($this->website);
-    
-    expect(fn() => $job->handle($mockChecker))->toThrow(\Exception::class);
-    
+
+    expect(fn () => $job->handle($mockChecker))->toThrow(\Exception::class);
+
     // Should create error record
     $this->assertDatabaseHas('ssl_checks', [
         'website_id' => $this->website->id,
@@ -67,7 +67,7 @@ test('ssl certificate job handles checker exceptions', function () {
 
 test('ssl certificate job has retry configuration', function () {
     $job = new CheckSslCertificateJob($this->website);
-    
+
     expect($job->tries)->toBe(3);
     expect($job->timeout)->toBe(60);
     expect($job->backoff())->toBe([30, 60, 120]);
@@ -75,14 +75,14 @@ test('ssl certificate job has retry configuration', function () {
 
 test('ssl certificate job handles deleted website gracefully', function () {
     $this->website->delete();
-    
+
     $mockChecker = $this->mock(SslCertificateChecker::class);
     $mockChecker->shouldNotReceive('checkAndStoreCertificate');
 
     $job = new CheckSslCertificateJob($this->website);
-    
+
     // Should handle gracefully without exception
-    expect(fn() => $job->handle($mockChecker))->not->toThrow(\Exception::class);
+    expect(fn () => $job->handle($mockChecker))->not->toThrow(\Exception::class);
 });
 
 test('ssl certificate job skips recent checks', function () {
@@ -124,13 +124,13 @@ test('ssl certificate job runs for old checks', function () {
 
 test('ssl certificate job uses correct queue', function () {
     $job = new CheckSslCertificateJob($this->website);
-    
+
     expect($job->queue)->toBe('ssl-monitoring');
 });
 
 test('ssl certificate job has proper configuration', function () {
     $job = new CheckSslCertificateJob($this->website);
-    
+
     expect($job->website)->toBe($this->website);
     expect($job->tries)->toBeInt();
     expect($job->timeout)->toBeInt();

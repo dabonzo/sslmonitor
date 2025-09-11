@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Models\EmailSettings;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\ServiceProvider;
 
 class EmailConfigurationProvider extends ServiceProvider
 {
@@ -32,10 +32,10 @@ class EmailConfigurationProvider extends ServiceProvider
     {
         try {
             $emailSettings = EmailSettings::active();
-            
+
             if ($emailSettings) {
                 $mailConfig = $emailSettings->toMailConfig();
-                
+
                 // Override the mail configuration
                 Config::set('mail.default', $mailConfig['default']);
                 Config::set('mail.mailers', array_merge(
@@ -47,7 +47,7 @@ class EmailConfigurationProvider extends ServiceProvider
         } catch (\Exception $e) {
             // Silently fail if database is not available or has issues
             // This allows the app to still work during migrations or database issues
-            logger('Failed to load email configuration from database: ' . $e->getMessage());
+            logger('Failed to load email configuration from database: '.$e->getMessage());
         }
     }
 }

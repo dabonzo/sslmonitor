@@ -45,7 +45,7 @@ describe('NotificationPreference Model', function () {
 
     test('email address is validated', function () {
         $this->expectException(\Exception::class);
-        
+
         NotificationPreference::create([
             'user_id' => $this->user->id,
             'email_enabled' => true,
@@ -63,7 +63,7 @@ describe('NotificationPreference Model', function () {
     });
 
     test('user_id is required', function () {
-        expect(fn() => NotificationPreference::create([
+        expect(fn () => NotificationPreference::create([
             'email_enabled' => true,
             'email_address' => 'test@example.com',
         ]))->toThrow(\Illuminate\Database\QueryException::class);

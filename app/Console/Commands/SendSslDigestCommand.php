@@ -40,14 +40,15 @@ class SendSslDigestCommand extends Command
 
             if ($digestUsers->isEmpty()) {
                 $this->info('📭 No users have daily digest enabled');
+
                 return Command::SUCCESS;
             }
 
             $this->info("📬 Found {$digestUsers->count()} users with daily digest enabled");
 
-            if (!$this->option('dry-run')) {
+            if (! $this->option('dry-run')) {
                 $notificationService->sendDailyDigest();
-                
+
                 $duration = round(microtime(true) - $startTime, 2);
                 $this->info("✅ Daily digest emails sent to {$digestUsers->count()} users in {$duration}s");
             } else {
@@ -61,6 +62,7 @@ class SendSslDigestCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("❌ Failed to send daily digest: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
     }

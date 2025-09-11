@@ -31,7 +31,7 @@ class SslExpiringNotification extends Mailable implements ShouldQueue
     {
         $website = $this->sslCheck->website;
         $daysLeft = $this->sslCheck->days_until_expiry;
-        
+
         return new Envelope(
             subject: "SSL Certificate Expiring Soon - {$website->name} ({$daysLeft} days left)",
         );

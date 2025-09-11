@@ -18,7 +18,7 @@ class SslCheckFactory extends Factory
     {
         $expiresAt = fake()->dateTimeBetween('now', '+120 days');
         $daysUntilExpiry = now()->diffInDays($expiresAt, false);
-        
+
         return [
             'website_id' => \App\Models\Website::factory(),
             'status' => 'valid',
@@ -38,7 +38,7 @@ class SslCheckFactory extends Factory
     {
         $expiresAt = fake()->dateTimeBetween('+30 days', '+120 days');
         $daysUntilExpiry = now()->diffInDays($expiresAt, false);
-        
+
         return $this->state([
             'status' => 'valid',
             'expires_at' => $expiresAt,
@@ -52,7 +52,7 @@ class SslCheckFactory extends Factory
     {
         $expiresAt = fake()->dateTimeBetween('-30 days', '-1 day');
         $daysUntilExpiry = now()->diffInDays($expiresAt, false);
-        
+
         return $this->state([
             'status' => 'expired',
             'expires_at' => $expiresAt,
@@ -66,7 +66,7 @@ class SslCheckFactory extends Factory
     {
         $expiresAt = fake()->dateTimeBetween('+1 day', '+14 days');
         $daysUntilExpiry = now()->diffInDays($expiresAt, false);
-        
+
         return $this->state([
             'status' => 'expiring_soon',
             'expires_at' => $expiresAt,
@@ -80,7 +80,7 @@ class SslCheckFactory extends Factory
     {
         $expiresAt = fake()->dateTimeBetween('+30 days', '+120 days');
         $daysUntilExpiry = now()->diffInDays($expiresAt, false);
-        
+
         return $this->state([
             'status' => 'invalid',
             'expires_at' => $expiresAt,

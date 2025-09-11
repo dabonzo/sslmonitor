@@ -7,7 +7,7 @@ use Spatie\SslCertificate\SslCertificate;
 
 test('ssl certificate checker can fetch certificate from valid URL', function () {
     $website = Website::factory()->create(['url' => 'https://github.com']);
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $result = $checker->checkCertificate($website);
 
@@ -27,7 +27,7 @@ test('ssl certificate checker can fetch certificate from valid URL', function ()
 
 test('ssl certificate checker handles network errors gracefully', function () {
     $website = Website::factory()->create(['url' => 'https://non-existent-domain-12345.com']);
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $result = $checker->checkCertificate($website);
 
@@ -40,7 +40,7 @@ test('ssl certificate checker handles network errors gracefully', function () {
 });
 
 test('ssl certificate checker can determine if certificate is expiring soon', function () {
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     // Mock a certificate that expires in 5 days
     $expirationTime = Carbon::now()->addDays(5)->timestamp;
@@ -61,7 +61,7 @@ test('ssl certificate checker can determine if certificate is expiring soon', fu
 });
 
 test('ssl certificate checker can determine if certificate is expired', function () {
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     // Mock an expired certificate
     $expirationTime = Carbon::now()->subDays(5)->timestamp;
@@ -81,7 +81,7 @@ test('ssl certificate checker can determine if certificate is expired', function
 });
 
 test('ssl certificate checker can determine if certificate is invalid', function () {
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     // Mock an invalid certificate (not expired but invalid)
     $expirationTime = Carbon::now()->addDays(30)->timestamp;
@@ -101,7 +101,7 @@ test('ssl certificate checker can determine if certificate is invalid', function
 });
 
 test('ssl certificate checker returns valid status for good certificate', function () {
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     // Mock a valid certificate
     $expirationTime = Carbon::now()->addDays(90)->timestamp;
@@ -123,7 +123,7 @@ test('ssl certificate checker returns valid status for good certificate', functi
 
 test('ssl certificate checker handles timeout errors', function () {
     $website = Website::factory()->create(['url' => 'https://10.255.255.1']); // Non-routable IP that will timeout
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $result = $checker->checkCertificate($website, 1); // 1 second timeout
 
@@ -133,7 +133,7 @@ test('ssl certificate checker handles timeout errors', function () {
 });
 
 test('ssl certificate checker can parse certificate data correctly', function () {
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $expirationTime = Carbon::parse('2025-12-31 23:59:59')->timestamp;
     $mockCert = Mockery::mock(SslCertificate::class);
@@ -157,7 +157,7 @@ test('ssl certificate checker can parse certificate data correctly', function ()
 
 test('ssl certificate checker can handle self-signed certificates', function () {
     $website = Website::factory()->create(['url' => 'https://self-signed.badssl.com']);
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $result = $checker->checkCertificate($website);
 
@@ -167,12 +167,12 @@ test('ssl certificate checker can handle self-signed certificates', function () 
 
 test('ssl certificate checker creates ssl check record for website', function () {
     $website = Website::factory()->create(['url' => 'https://github.com']);
-    $checker = new SslCertificateChecker();
+    $checker = new SslCertificateChecker;
 
     $checker->checkAndStoreCertificate($website);
 
     expect($website->sslChecks()->count())->toBe(1);
-    
+
     $sslCheck = $website->sslChecks()->first();
     expect($sslCheck->status)->toBeIn(['valid', 'expiring_soon', 'expired', 'invalid', 'error'])
         ->and($sslCheck->checked_at)->toBeInstanceOf(Carbon::class)

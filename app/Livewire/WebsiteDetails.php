@@ -14,6 +14,7 @@ class WebsiteDetails extends Component
     use AuthorizesRequests, WithPagination;
 
     public Website $website;
+
     public bool $isCheckingNow = false;
 
     public function mount(Website $website): void
@@ -44,17 +45,17 @@ class WebsiteDetails extends Component
         try {
             // Store the current check count before dispatching
             $currentCheckCount = $this->website->sslChecks()->count();
-            
+
             CheckSslCertificateJob::dispatch($this->website);
-            
+
             session()->flash('success', 'SSL check queued successfully! Results will appear shortly.');
             $this->dispatch('ssl-check-triggered');
-            
+
             // Start polling for updates
             $this->dispatch('start-polling');
-            
+
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to queue SSL check: ' . $e->getMessage());
+            session()->flash('error', 'Failed to queue SSL check: '.$e->getMessage());
             $this->isCheckingNow = false;
         }
     }
@@ -70,7 +71,7 @@ class WebsiteDetails extends Component
     {
         // Refresh the website model to get latest data
         $this->website = $this->website->fresh();
-        
+
         // If we were checking and now have a new result, stop checking
         if ($this->isCheckingNow && $this->latestSslCheck && $this->latestSslCheck->checked_at->gt(now()->subMinutes(1))) {
             $this->isCheckingNow = false;
@@ -88,10 +89,10 @@ class WebsiteDetails extends Component
     public function deleteWebsite(): void
     {
         $this->authorize('delete', $this->website);
-        
+
         $websiteName = $this->website->name;
         $this->website->delete();
-        
+
         session()->flash('success', "Website '{$websiteName}' has been deleted successfully.");
         $this->redirectRoute('websites');
     }
@@ -99,12 +100,12 @@ class WebsiteDetails extends Component
     public function getStatusColorProperty(): string
     {
         $latestCheck = $this->latestSslCheck;
-        
-        if (!$latestCheck) {
+
+        if (! $latestCheck) {
             return 'gray';
         }
 
-        return match($latestCheck->status) {
+        return match ($latestCheck->status) {
             'valid' => 'green',
             'expiring_soon' => 'yellow',
             'expired' => 'red',
@@ -116,12 +117,12 @@ class WebsiteDetails extends Component
     public function getStatusTextProperty(): string
     {
         $latestCheck = $this->latestSslCheck;
-        
-        if (!$latestCheck) {
+
+        if (! $latestCheck) {
             return 'Not checked yet';
         }
 
-        return match($latestCheck->status) {
+        return match ($latestCheck->status) {
             'valid' => 'Valid',
             'expiring_soon' => 'Expiring Soon',
             'expired' => 'Certificate expired',
@@ -133,19 +134,20 @@ class WebsiteDetails extends Component
     public function getExpiryTextProperty(): ?string
     {
         $latestCheck = $this->latestSslCheck;
-        
-        if (!$latestCheck || !$latestCheck->expires_at) {
+
+        if (! $latestCheck || ! $latestCheck->expires_at) {
             return null;
         }
 
         $daysUntilExpiry = $latestCheck->days_until_expiry;
-        
+
         if ($daysUntilExpiry > 0) {
             return "{$daysUntilExpiry} days until expiry";
         } elseif ($daysUntilExpiry === 0) {
-            return "Expires today";
+            return 'Expires today';
         } else {
             $daysExpired = abs($daysUntilExpiry);
+
             return "Expired {$daysExpired} days ago";
         }
     }

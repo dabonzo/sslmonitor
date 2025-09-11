@@ -17,6 +17,7 @@ class CheckSslCertificateJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $timeout = 60;
 
     public function __construct(
@@ -28,8 +29,9 @@ class CheckSslCertificateJob implements ShouldQueue
     public function handle(SslCertificateChecker $checker): void
     {
         // Skip if website no longer exists
-        if (!$this->website->exists) {
+        if (! $this->website->exists) {
             Log::info("Skipping SSL check for deleted website ID: {$this->website->id}");
+
             return;
         }
 
@@ -41,14 +43,15 @@ class CheckSslCertificateJob implements ShouldQueue
 
         if ($recentCheck) {
             Log::info("Skipping SSL check for {$this->website->url} - checked recently at {$recentCheck->checked_at}");
+
             return;
         }
 
         try {
             Log::info("Starting SSL certificate check for: {$this->website->url}");
-            
+
             $sslCheck = $checker->checkAndStoreCertificate($this->website);
-            
+
             Log::info("SSL check completed for {$this->website->url}", [
                 'status' => $sslCheck->status,
                 'days_until_expiry' => $sslCheck->days_until_expiry ?? 'N/A',
@@ -67,7 +70,7 @@ class CheckSslCertificateJob implements ShouldQueue
             // Create error record
             $errorCheck = $this->website->sslChecks()->create([
                 'status' => 'error',
-                'error_message' => 'Check failed: ' . $e->getMessage(),
+                'error_message' => 'Check failed: '.$e->getMessage(),
                 'checked_at' => now(),
                 'is_valid' => false,
             ]);
@@ -96,7 +99,7 @@ class CheckSslCertificateJob implements ShouldQueue
     private function dispatchNotificationIfNeeded($sslCheck): void
     {
         $notificationService = app(SslNotificationService::class);
-        
+
         // Send appropriate notification based on status
         match ($sslCheck->status) {
             'expired' => $notificationService->queueExpiredNotification($sslCheck),
@@ -107,7 +110,7 @@ class CheckSslCertificateJob implements ShouldQueue
 
         // Log the action taken
         if (in_array($sslCheck->status, ['expired', 'expiring_soon', 'error'])) {
-            Log::info("SSL notification queued", [
+            Log::info('SSL notification queued', [
                 'website' => $this->website->url,
                 'status' => $sslCheck->status,
                 'days_until_expiry' => $sslCheck->days_until_expiry ?? 'N/A',

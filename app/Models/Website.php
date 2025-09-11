@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Validation\ValidationException;
 
 class Website extends Model
 {
@@ -125,18 +123,18 @@ class Website extends Model
     {
         // Normalize the URL
         $url = strtolower($url);
-        
+
         // Remove trailing slashes and paths like /../
         $parsed = parse_url($url);
-        
-        if (!$parsed || !isset($parsed['host'])) {
+
+        if (! $parsed || ! isset($parsed['host'])) {
             return $url;
         }
 
         // Force HTTPS
         $scheme = 'https';
         $host = $parsed['host'];
-        
+
         return "{$scheme}://{$host}";
     }
 }

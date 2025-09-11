@@ -127,7 +127,7 @@ class EmailSettings extends Model
     public function toMailConfig(): array
     {
         $mailer = $this->mailer ?? 'smtp';
-        
+
         return [
             'default' => $mailer,
             'mailers' => [

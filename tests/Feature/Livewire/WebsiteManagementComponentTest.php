@@ -117,7 +117,7 @@ test('website management shows user websites list', function () {
         'name' => 'My Site',
         'url' => 'https://mysite.com',
     ]);
-    
+
     // Create another user's website to ensure it's not shown
     $otherUser = User::factory()->create();
     $otherWebsite = Website::factory()->create([
@@ -153,7 +153,7 @@ test('check certificate handles invalid urls gracefully', function () {
         ->set('url', 'https://non-existent-domain-12345.com')
         ->call('checkCertificate')
         ->assertSet('certificatePreview.status', 'error')
-        ->assertSet('certificatePreview.error_message', fn($message) => !empty($message));
+        ->assertSet('certificatePreview.error_message', fn ($message) => ! empty($message));
 });
 
 test('user can add website after previewing certificate', function () {
@@ -193,10 +193,10 @@ test('website management component shows loading states', function () {
 
     // Should not be checking initially
     $component->assertSet('isCheckingCertificate', false);
-    
+
     // Should show loading during check (we can't easily test the intermediate state)
     $component->call('checkCertificate');
-    
+
     // Should not be checking after completion
     $component->assertSet('isCheckingCertificate', false);
 });

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 use App\Console\Commands\CheckAllSslCertificates;
 use App\Jobs\CheckSslCertificateJob;
+use App\Models\SslCheck;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCheck;
 use Illuminate\Support\Facades\Queue;
 
 test('ssl check all command queues jobs for all websites', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $websites = Website::factory()->for($user)->count(3)->create();
 
@@ -26,17 +26,17 @@ test('ssl check all command queues jobs for all websites', function () {
 
 test('ssl check all command skips recently checked websites', function () {
     Queue::fake();
-    
+
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
     $website1 = Website::factory()->for($user1)->create();
     $website2 = Website::factory()->for($user2)->create();
-    
+
     // Create recent check for website1
     SslCheck::factory()->for($website1)->create([
         'checked_at' => now()->subMinutes(30),
     ]);
-    
+
     // Create old check for website2
     SslCheck::factory()->for($website2)->create([
         'checked_at' => now()->subHours(2),
@@ -55,10 +55,10 @@ test('ssl check all command skips recently checked websites', function () {
 
 test('ssl check all command forces check with --force option', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $website = Website::factory()->for($user)->create();
-    
+
     // Create recent check
     SslCheck::factory()->for($website)->create([
         'checked_at' => now()->subMinutes(30),
@@ -83,7 +83,7 @@ test('ssl check all command handles no websites', function () {
 
 test('ssl check all command handles large number of websites efficiently', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     Website::factory()->for($user)->count(250)->create();
 
@@ -96,14 +96,14 @@ test('ssl check all command handles large number of websites efficiently', funct
 
 test('ssl check all command provides helpful output when all websites are recently checked', function () {
     Queue::fake();
-    
+
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
     $websites = [
         Website::factory()->for($user1)->create(),
         Website::factory()->for($user2)->create(),
     ];
-    
+
     // Create recent checks for all websites
     foreach ($websites as $website) {
         SslCheck::factory()->for($website)->create([
@@ -121,8 +121,8 @@ test('ssl check all command provides helpful output when all websites are recent
 
 test('ssl check all command can be run from artisan', function () {
     Queue::fake();
-    
+
     $exitCode = $this->artisan('ssl:check-all');
-    
+
     expect($exitCode)->toBe(0);
 });

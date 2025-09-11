@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Livewire\SslDashboard;
+use App\Models\SslCheck;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCheck;
-use App\Services\SslStatusCalculator;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -53,11 +51,11 @@ test('dashboard shows ssl status summary cards', function () {
 
 test('dashboard only shows current user websites', function () {
     $otherUser = User::factory()->create();
-    
+
     // Create websites for both users
     $userWebsite = Website::factory()->for($this->user)->create();
     $otherWebsite = Website::factory()->for($otherUser)->create();
-    
+
     SslCheck::factory()->for($userWebsite)->valid()->create();
     SslCheck::factory()->for($otherWebsite)->valid()->create();
 
@@ -70,7 +68,7 @@ test('dashboard only shows current user websites', function () {
 test('dashboard shows recent ssl checks list', function () {
     $website1 = Website::factory()->for($this->user)->create(['name' => 'Example Site']);
     $website2 = Website::factory()->for($this->user)->create(['name' => 'Test Site']);
-    
+
     $check1 = SslCheck::factory()->for($website1)->valid()->create();
     $check2 = SslCheck::factory()->for($website2)->expiringSoon()->create();
 
@@ -105,7 +103,7 @@ test('dashboard calculates status counts correctly', function () {
     // Use separate user to avoid URL conflicts with other tests
     $testUser = User::factory()->create();
     $websites = Website::factory()->for($testUser)->count(5)->create();
-    
+
     // Create different SSL check statuses
     SslCheck::factory()->for($websites[0])->valid()->create();
     SslCheck::factory()->for($websites[1])->valid()->create();
@@ -137,7 +135,7 @@ test('dashboard can refresh ssl status data', function () {
 
 test('dashboard shows status percentages correctly', function () {
     $websites = Website::factory()->for($this->user)->count(4)->create();
-    
+
     SslCheck::factory()->for($websites[0])->valid()->create();
     SslCheck::factory()->for($websites[1])->valid()->create();
     SslCheck::factory()->for($websites[2])->expiringSoon()->create();
@@ -148,7 +146,7 @@ test('dashboard shows status percentages correctly', function () {
 
     // Test computed percentages
     $percentages = $component->instance()->statusPercentages;
-    
+
     expect($percentages['valid'])->toBe(50.0); // 2/4 = 50%
     expect($percentages['expiring_soon'])->toBe(25.0); // 1/4 = 25%
     expect($percentages['expired'])->toBe(25.0); // 1/4 = 25%
@@ -157,7 +155,7 @@ test('dashboard shows status percentages correctly', function () {
 
 test('dashboard handles pagination for recent checks', function () {
     $websites = Website::factory()->for($this->user)->count(15)->create();
-    
+
     foreach ($websites as $website) {
         SslCheck::factory()->for($website)->valid()->create();
     }
@@ -174,7 +172,7 @@ test('dashboard shows critical issues prominently', function () {
     $criticalUser = User::factory()->create();
     $website1 = Website::factory()->for($criticalUser)->create(['name' => 'Critical Site']);
     $website2 = Website::factory()->for($criticalUser)->create(['name' => 'Error Site']);
-    
+
     SslCheck::factory()->for($website1)->expired()->create();
     SslCheck::factory()->for($website2)->error()->create(['error_message' => 'Connection failed']);
 

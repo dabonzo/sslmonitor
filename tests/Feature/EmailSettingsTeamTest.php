@@ -30,7 +30,7 @@ describe('Email Settings Team Support', function () {
     test('team member can save team email settings', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $owner->id,
@@ -57,7 +57,7 @@ describe('Email Settings Team Support', function () {
     test('team settings override personal settings for team members', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $owner->id,
@@ -87,7 +87,7 @@ describe('Email Settings Team Support', function () {
         // Team settings should be loaded for team member
         $component = Livewire::actingAs($owner)
             ->test(EmailSettings::class);
-        
+
         expect($component->host)->toBe('team.smtp.com');
         expect($component->from_address)->toBe('team@company.com');
     });
@@ -107,7 +107,7 @@ describe('Email Settings Team Support', function () {
 
         $component = Livewire::actingAs($user)
             ->test(EmailSettings::class);
-        
+
         expect($component->host)->toBe('personal.smtp.com');
         expect($component->from_address)->toBe('personal@example.com');
     });
@@ -115,7 +115,7 @@ describe('Email Settings Team Support', function () {
     test('component shows team context in view', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'SSL Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $owner->id,
@@ -132,7 +132,7 @@ describe('Email Settings Team Support', function () {
     test('saving team settings deactivates previous team settings', function () {
         $owner = User::factory()->create();
         $team = Team::create(['name' => 'Test Team', 'owner_id' => $owner->id]);
-        
+
         TeamMember::create([
             'team_id' => $team->id,
             'user_id' => $owner->id,
@@ -160,7 +160,7 @@ describe('Email Settings Team Support', function () {
 
         // Old settings should be deactivated
         expect($oldSettings->fresh()->is_active)->toBeFalse();
-        
+
         // New settings should be active
         $newSettings = EmailSettingsModel::activeForTeam($team);
         expect($newSettings->host)->toBe('new.smtp.com');

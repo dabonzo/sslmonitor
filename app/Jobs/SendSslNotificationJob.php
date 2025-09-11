@@ -12,6 +12,7 @@ class SendSslNotificationJob implements ShouldQueue
     use Queueable;
 
     public SslCheck $sslCheck;
+
     public string $notificationType;
 
     /**

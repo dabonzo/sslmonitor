@@ -7,14 +7,16 @@ use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Website;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class TeamManagement extends Component
 {
     public string $teamName = '';
+
     public array $transferWebsites = [];
+
     public string $inviteEmail = '';
+
     public string $inviteRole = 'admin';
 
     public function mount(): void
@@ -45,7 +47,7 @@ class TeamManagement extends Component
         ]);
 
         // Transfer selected websites to team
-        if (!empty($this->transferWebsites)) {
+        if (! empty($this->transferWebsites)) {
             Website::whereIn('id', $this->transferWebsites)
                 ->where('user_id', $user->id) // Security: only transfer user's own websites
                 ->update([
@@ -67,7 +69,7 @@ class TeamManagement extends Component
         $team = $user->primaryTeam();
 
         // Check permissions
-        if (!$team || !$team->userHasPermission($user, 'manage_team')) {
+        if (! $team || ! $team->userHasPermission($user, 'manage_team')) {
             abort(403, 'You do not have permission to invite users.');
         }
 
@@ -86,7 +88,7 @@ class TeamManagement extends Component
         );
 
         // Add to team if not already a member
-        if (!$team->hasMember($invitedUser)) {
+        if (! $team->hasMember($invitedUser)) {
             TeamMember::create([
                 'team_id' => $team->id,
                 'user_id' => $invitedUser->id,
@@ -107,13 +109,14 @@ class TeamManagement extends Component
         $team = $user->primaryTeam();
 
         // Check permissions
-        if (!$team || !$team->userHasPermission($user, 'manage_team')) {
+        if (! $team || ! $team->userHasPermission($user, 'manage_team')) {
             abort(403);
         }
 
         // Prevent owner from removing themselves
         if ($userId === $user->id) {
             $this->addError('removeMember', 'You cannot remove yourself from the team.');
+
             return;
         }
 
@@ -131,7 +134,7 @@ class TeamManagement extends Component
         $team = $user->primaryTeam();
 
         // Check permissions
-        if (!$team || !$team->userHasPermission($user, 'manage_team')) {
+        if (! $team || ! $team->userHasPermission($user, 'manage_team')) {
             abort(403);
         }
 

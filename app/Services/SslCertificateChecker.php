@@ -14,18 +14,19 @@ class SslCertificateChecker
 
     public function __construct()
     {
-        $this->statusCalculator = new SslStatusCalculator();
+        $this->statusCalculator = new SslStatusCalculator;
     }
+
     public function checkCertificate(Website $website, int $timeout = 10): array
     {
         try {
             $url = parse_url($website->url);
             $host = $url['host'] ?? $website->url;
-            
+
             $certificate = SslCertificate::createForHostname($host, $timeout);
-            
+
             return $this->parseCertificateData($certificate);
-            
+
         } catch (Exception $e) {
             return [
                 'status' => SslStatusCalculator::STATUS_ERROR,
@@ -47,10 +48,10 @@ class SslCertificateChecker
         $expirationDate = Carbon::createFromTimestamp($rawFields['validTo_time_t']);
         $daysUntilExpiry = $this->statusCalculator->calculateDaysUntilExpiry($expirationDate);
         $isValid = $certificate->isValid();
-        
+
         // Determine status using the status calculator
         $status = $this->statusCalculator->calculateStatus($expirationDate, $isValid, $daysUntilExpiry);
-        
+
         return [
             'status' => $status,
             'expires_at' => $expirationDate,
@@ -67,7 +68,7 @@ class SslCertificateChecker
     public function checkAndStoreCertificate(Website $website, int $timeout = 10): SslCheck
     {
         $result = $this->checkCertificate($website, $timeout);
-        
+
         return SslCheck::create([
             'website_id' => $website->id,
             'status' => $result['status'],
@@ -86,24 +87,24 @@ class SslCertificateChecker
     private function getErrorMessage(Exception $e): string
     {
         $message = $e->getMessage();
-        
+
         // Handle common error patterns
         if (str_contains($message, 'timeout') || str_contains($message, 'timed out')) {
             return 'Connection timeout while checking SSL certificate';
         }
-        
+
         if (str_contains($message, 'resolve') || str_contains($message, 'DNS')) {
             return 'DNS resolution failed for hostname';
         }
-        
+
         if (str_contains($message, 'connection') || str_contains($message, 'Connection')) {
             return 'Unable to establish connection to server';
         }
-        
+
         if (str_contains($message, 'SSL') || str_contains($message, 'certificate')) {
-            return 'SSL certificate error: ' . $message;
+            return 'SSL certificate error: '.$message;
         }
-        
-        return 'Network error while checking SSL certificate: ' . $message;
+
+        return 'Network error while checking SSL certificate: '.$message;
     }
 }

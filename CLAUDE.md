@@ -41,6 +41,85 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Run tests frequently with `./vendor/bin/sail artisan test --filter=TestName`
   - Follow red-green-refactor cycle: failing tests → implementation → passing tests
 
+## Complete Development Workflow
+
+### 1. Git Branching Strategy
+- **Always use feature branches** for new features, following standard development practices
+- **Branch naming conventions**: `feature/feature-name`, `bugfix/issue-name`, `hotfix/urgent-fix`
+- **Example**: `git checkout -b feature/user-notifications`
+- **Never commit directly to main branch**
+
+### 2. Architecture & Best Practices
+- **Follow Laravel best practices** - Use service layer, form requests, policies where appropriate
+- **Leverage Laravel Boost MCP server** for Laravel-specific guidance and documentation
+- **Use Eloquent relationships** properly with type hints
+- **Apply authorization policies** for multi-user features
+- **Service classes** for complex business logic
+- **Form Request classes** for validation instead of inline validation
+
+### 3. Testing Strategy (Pragmatic TDD)
+- **Comprehensive test coverage** for new features, but avoid over-testing trivial functionality
+- **Feature tests** for user workflows and component interactions  
+- **Unit tests** for complex business logic and services
+- **Model tests** for relationships and business methods
+- **Follow Laravel testing best practices** - use factories, database transactions, etc.
+
+### 4. Code Quality Standards
+- **ALWAYS run Laravel Pint** before committing: `./vendor/bin/sail exec laravel.test ./vendor/bin/pint`
+- **Run tests** before committing to ensure nothing breaks
+- **Follow existing code patterns** and conventions in the codebase
+- **Use proper type hints** and return types on methods
+
+### 5. Documentation Requirements
+- **ALWAYS update PROJECT_PLAN.md** when adding new features or completing phases
+- **Update relevant documentation** in docs/ folder for user-facing features
+- **Create user guides** for significant new functionality
+- **Keep README.md and docs/README.md** current with feature additions
+
+## Complete Development Workflow Example
+
+### Implementing a New Feature:
+```bash
+# 1. Create feature branch
+git checkout -b feature/user-notifications
+
+# 2. Write tests FIRST (TDD Red phase)
+./vendor/bin/sail artisan make:test --pest UserNotificationTest
+
+# 3. Run failing tests to confirm red phase
+./vendor/bin/sail artisan test --filter=UserNotificationTest
+
+# 4. Implement minimal code to pass tests (TDD Green phase)
+# - Create models, migrations, services, components as needed
+# - Use Laravel Boost MCP server for best practices guidance
+
+# 5. Run tests until they pass
+./vendor/bin/sail artisan test --filter=UserNotificationTest
+
+# 6. Refactor code while maintaining test coverage (TDD Refactor phase)
+# - Clean up code, extract services, improve structure
+# - Re-run tests to ensure they still pass
+
+# 7. Run code formatting before committing
+./vendor/bin/sail exec laravel.test ./vendor/bin/pint
+
+# 8. Run all tests to ensure nothing broke
+./vendor/bin/sail artisan test
+
+# 9. Commit with clean, professional message
+git add .
+git commit -m "Add user notification system with email and SMS support"
+
+# 10. Update documentation
+# - Add to PROJECT_PLAN.md
+# - Update docs/README.md 
+# - Create user guide if needed
+
+# 11. Commit documentation updates
+git add .
+git commit -m "Update documentation for user notification feature"
+```
+
 ## Development Commands
 
 ### Core Laravel Commands (with Sail)

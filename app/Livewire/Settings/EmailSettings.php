@@ -9,19 +9,30 @@ class EmailSettings extends Component
 {
     // Form fields
     public string $host = '';
+
     public int $port = 587;
+
     public string $encryption = 'tls';
+
     public string $username = '';
+
     public string $password = '';
+
     public string $from_address = '';
+
     public string $from_name = 'SSL Monitor';
+
     public int $timeout = 30;
+
     public bool $verify_peer = true;
 
     // UI state
     public bool $isEditing = false;
+
     public bool $isTesting = false;
+
     public string $testResult = '';
+
     public bool $showPassword = false;
 
     protected array $rules = [
@@ -45,12 +56,12 @@ class EmailSettings extends Component
     {
         $user = auth()->user();
         $team = $user->primaryTeam();
-        
+
         // Load team settings if user has a team, otherwise load personal settings
-        $settings = $team 
+        $settings = $team
             ? EmailSettingsModel::activeForTeam($team)
             : EmailSettingsModel::activeForUser($user);
-        
+
         if ($settings) {
             $this->host = $settings->host;
             $this->port = $settings->port;
@@ -84,7 +95,7 @@ class EmailSettings extends Component
         try {
             $user = auth()->user();
             $team = $user->primaryTeam();
-            
+
             // Prepare settings data
             $settingsData = [
                 'host' => $this->host,
@@ -98,13 +109,13 @@ class EmailSettings extends Component
                 'verify_peer' => $this->verify_peer,
                 'is_active' => true,
             ];
-            
+
             if ($team) {
                 // Deactivate existing team settings
                 EmailSettingsModel::where('team_id', $team->id)
                     ->where('is_active', true)
                     ->update(['is_active' => false]);
-                
+
                 // Add team ID
                 $settingsData['team_id'] = $team->id;
             } else {
@@ -112,7 +123,7 @@ class EmailSettings extends Component
                 EmailSettingsModel::where('user_id', $user->id)
                     ->where('is_active', true)
                     ->update(['is_active' => false]);
-                
+
                 // Add user ID
                 $settingsData['user_id'] = $user->id;
             }
@@ -122,12 +133,12 @@ class EmailSettings extends Component
 
             $this->isEditing = false;
             $this->password = ''; // Clear password field
-            
+
             $context = $team ? 'team' : 'personal';
             session()->flash('success', "Email settings saved successfully for {$context} use! You can now test the configuration.");
-            
+
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to save email settings: ' . $e->getMessage());
+            session()->flash('error', 'Failed to save email settings: '.$e->getMessage());
         }
     }
 
@@ -138,29 +149,30 @@ class EmailSettings extends Component
 
         $user = auth()->user();
         $team = $user->primaryTeam();
-        
-        $settings = $team 
+
+        $settings = $team
             ? EmailSettingsModel::activeForTeam($team)
             : EmailSettingsModel::activeForUser($user);
-        
-        if (!$settings) {
+
+        if (! $settings) {
             $context = $team ? 'team' : 'personal';
             $this->testResult = "error:No active email configuration found for {$context} use. Please save your settings first.";
             $this->isTesting = false;
+
             return;
         }
 
         try {
             $success = $settings->test();
-            
+
             if ($success) {
-                $this->testResult = 'success:Test email sent successfully! Check your inbox at ' . $settings->from_address;
+                $this->testResult = 'success:Test email sent successfully! Check your inbox at '.$settings->from_address;
             } else {
-                $this->testResult = 'error:Test failed: ' . ($settings->test_error ?? 'Unknown error');
+                $this->testResult = 'error:Test failed: '.($settings->test_error ?? 'Unknown error');
             }
-            
+
         } catch (\Exception $e) {
-            $this->testResult = 'error:Test failed: ' . $e->getMessage();
+            $this->testResult = 'error:Test failed: '.$e->getMessage();
         }
 
         $this->isTesting = false;
@@ -168,18 +180,18 @@ class EmailSettings extends Component
 
     public function togglePasswordVisibility(): void
     {
-        $this->showPassword = !$this->showPassword;
+        $this->showPassword = ! $this->showPassword;
     }
 
     public function render()
     {
         $user = auth()->user();
         $team = $user->primaryTeam();
-        
-        $currentSettings = $team 
+
+        $currentSettings = $team
             ? EmailSettingsModel::activeForTeam($team)
             : EmailSettingsModel::activeForUser($user);
-            
+
         return view('livewire.settings.email-settings', [
             'hasSettings' => $currentSettings !== null,
             'currentSettings' => $currentSettings,
