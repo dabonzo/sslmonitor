@@ -26,6 +26,54 @@ services:
             - mariadb
             - redis
             - mailpit
+    queue-worker:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.4'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+                MYSQL_CLIENT: mariadb-client
+        image: 'sail-8.4/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        command: bash -c "sleep 10 && php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --queue=ssl-monitoring,default"
+        restart: unless-stopped
+    scheduler:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.4'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+                MYSQL_CLIENT: mariadb-client
+        image: 'sail-8.4/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        command: bash -c "sleep 15 && php artisan schedule:work"
+        restart: unless-stopped
     mariadb:
         image: 'mariadb:11'
         ports:
