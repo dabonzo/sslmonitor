@@ -14,5 +14,8 @@ Schedule::command('ssl:check-all')->dailyAt('06:00');
 // Schedule daily digest emails to run at 8:00 AM (after SSL checks)
 Schedule::command('ssl:send-digest')->dailyAt('08:00');
 
-// Alternative: Run SSL checks every 4 hours for more frequent monitoring
-// Schedule::command('ssl:check-all')->cron('0 */4 * * *');
+// Alternative options for different frequencies:
+// Schedule::command('ssl:check-all')->hourly();                    // Every hour
+// Schedule::command('ssl:check-all')->cron('0 */4 * * *');         // Every 4 hours
+// Schedule::command('ssl:check-all')->cron('0 */6 * * *');         // Every 6 hours
+// Schedule::command('ssl:check-all')->twiceDaily(6, 18);           // 6 AM and 6 PM
