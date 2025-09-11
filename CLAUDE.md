@@ -118,6 +118,21 @@ git commit -m "Add user notification system with email and SMS support"
 # 11. Commit documentation updates
 git add .
 git commit -m "Update documentation for user notification feature"
+
+# 12. Final verification and merge back to main
+# Run final comprehensive test to ensure everything works
+./vendor/bin/sail artisan test --filter=FeatureName
+
+# Switch to main branch and merge
+git checkout main
+git pull origin main  # Get any updates from remote
+git merge feature/feature-name
+
+# 13. Final test after merge
+./vendor/bin/sail artisan test --filter=FeatureName --stop-on-failure
+
+# 14. Clean up feature branch
+git branch -d feature/feature-name
 ```
 
 ## Development Commands
