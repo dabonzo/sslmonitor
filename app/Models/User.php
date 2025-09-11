@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -75,5 +76,61 @@ class User extends Authenticatable
     public function notificationPreference(): HasOne
     {
         return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * Get teams owned by this user
+     */
+    public function ownedTeams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'owner_id');
+    }
+
+    /**
+     * Get teams this user is a member of
+     */
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_members')
+            ->withPivot(['role', 'permissions'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get team member records for this user
+     */
+    public function teamMemberships(): HasMany
+    {
+        return $this->hasMany(TeamMember::class);
+    }
+
+    /**
+     * Get all websites accessible to this user (personal + team websites)
+     */
+    public function accessibleWebsites(): \Illuminate\Support\Collection
+    {
+        // Personal websites
+        $personalWebsites = $this->websites()->get();
+        
+        // Team websites
+        $teamWebsites = Website::whereIn('team_id', $this->teams()->pluck('teams.id'))->get();
+        
+        return $personalWebsites->concat($teamWebsites);
+    }
+
+    /**
+     * Check if user has team
+     */
+    public function hasTeam(): bool
+    {
+        return $this->teams()->exists() || $this->ownedTeams()->exists();
+    }
+
+    /**
+     * Get user's primary team (first team they're owner of, or first team they're in)
+     */
+    public function primaryTeam(): ?Team
+    {
+        return $this->ownedTeams()->first() ?? $this->teams()->first();
     }
 }

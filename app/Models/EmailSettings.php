@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Crypt;
 
 class EmailSettings extends Model
@@ -25,6 +26,9 @@ class EmailSettings extends Model
         'last_tested_at',
         'test_passed',
         'test_error',
+        'team_id',
+        'notification_emails',
+        'notification_phones',
     ];
 
     protected $casts = [
@@ -34,6 +38,9 @@ class EmailSettings extends Model
         'is_active' => 'boolean',
         'test_passed' => 'boolean',
         'last_tested_at' => 'datetime',
+        'team_id' => 'integer',
+        'notification_emails' => 'array',
+        'notification_phones' => 'array',
     ];
 
     protected $hidden = [
@@ -57,11 +64,43 @@ class EmailSettings extends Model
     }
 
     /**
-     * Get the active email settings
+     * Get the team this email setting belongs to
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Get the active email settings (personal)
      */
     public static function active(): ?self
     {
-        return self::where('is_active', true)->first();
+        return self::where('is_active', true)->whereNull('team_id')->first();
+    }
+
+    /**
+     * Get active email settings for a team
+     */
+    public static function activeForTeam(Team $team): ?self
+    {
+        return self::where('is_active', true)->where('team_id', $team->id)->first();
+    }
+
+    /**
+     * Check if this is a personal email setting
+     */
+    public function isPersonal(): bool
+    {
+        return $this->team_id === null;
+    }
+
+    /**
+     * Check if this is a team email setting
+     */
+    public function isTeam(): bool
+    {
+        return $this->team_id !== null;
     }
 
     /**

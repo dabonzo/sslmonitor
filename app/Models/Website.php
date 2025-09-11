@@ -17,10 +17,14 @@ class Website extends Model
         'name',
         'url',
         'user_id',
+        'team_id',
+        'added_by',
     ];
 
     protected $casts = [
         'user_id' => 'integer',
+        'team_id' => 'integer',
+        'added_by' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -38,6 +42,16 @@ class Website extends Model
         return $this->hasMany('App\Models\SslCheck');
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function addedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'added_by');
+    }
+
     public function getLatestSslCertificate()
     {
         return $this->sslCertificates()->latest()->first();
@@ -47,6 +61,52 @@ class Website extends Model
     {
         // For now, return 'unknown' until we implement SslCheck model
         return 'unknown';
+    }
+
+    /**
+     * Check if this is a personal website (not team)
+     */
+    public function isPersonal(): bool
+    {
+        return $this->team_id === null;
+    }
+
+    /**
+     * Check if this is a team website
+     */
+    public function isTeamWebsite(): bool
+    {
+        return $this->team_id !== null;
+    }
+
+    /**
+     * Get the owner of this website (either user or team owner)
+     */
+    public function getOwner(): User
+    {
+        return $this->isPersonal() ? $this->user : $this->team->owner;
+    }
+
+    /**
+     * Scope to get personal websites for a user
+     */
+    public function scopePersonal($query, User $user)
+    {
+        return $query->where('user_id', $user->id)->whereNull('team_id');
+    }
+
+    /**
+     * Scope to get team websites for teams user has access to
+     */
+    public function scopeAccessibleToUser($query, User $user)
+    {
+        return $query->where(function ($q) use ($user) {
+            // Personal websites
+            $q->where('user_id', $user->id)->whereNull('team_id');
+        })->orWhere(function ($q) use ($user) {
+            // Team websites where user is a member
+            $q->whereIn('team_id', $user->teams()->pluck('teams.id'));
+        });
     }
 
     protected static function boot()
