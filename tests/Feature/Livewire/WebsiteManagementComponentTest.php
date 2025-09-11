@@ -49,7 +49,7 @@ test('website form validates url format', function () {
     Livewire::actingAs($user)
         ->test('website-management')
         ->set('name', 'Test Site')
-        ->set('url', 'not-a-valid-url')
+        ->set('url', 'not a url at all')
         ->call('save')
         ->assertHasErrors(['url']);
 });

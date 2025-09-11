@@ -144,12 +144,16 @@ git branch -d feature/feature-name
 - `./vendor/bin/sail artisan queue:listen --tries=1` - Start queue worker
 - `./vendor/bin/sail artisan pail --timeout=0` - Start log monitoring
 
-### Asset Compilation
-- `npm run dev` - Start Vite development server with hot reload
-- `npm run build` - Build production assets
+### Asset Compilation ⚠️ CRITICAL FOR FRONTEND DEVELOPMENT
+- `./vendor/bin/sail npm run dev` - **REQUIRED: Start Vite development server with hot reload**
+  - ⚠️ **MUST BE RUNNING for CSS/JS changes to work**
+  - ⚠️ **Required for Tailwind CSS compilation**
+  - ⚠️ **Without this, hover effects and styling changes won't work**
+- `./vendor/bin/sail npm run build` - Build production assets
 
 ### Development Workflow (with Sail)
 - `./vendor/bin/sail composer run dev` - Starts all development services concurrently (server, queue, logs, vite)
+- `./vendor/bin/sail npm run dev` - **Start this FIRST for any frontend work**
 - `./vendor/bin/sail artisan test` - Clear config cache and run tests
 - `./vendor/bin/sail exec laravel.test ./vendor/bin/pest` - Run tests directly with Pest
 - `./vendor/bin/sail exec laravel.test ./vendor/bin/pint` - Format code with Laravel Pint
@@ -230,6 +234,27 @@ This project requires Flux UI credentials configured in `composer.json`:
 ```bash
 composer config http-basic.composer.fluxui.dev "username" "license-key"
 ```
+
+## Troubleshooting
+
+### Frontend Development Issues
+**Problem:** CSS changes, hover effects, or Tailwind classes not working
+**Solution:** Ensure Vite dev server is running:
+```bash
+./vendor/bin/sail npm run dev
+```
+
+**Problem:** New Tailwind classes not being recognized
+**Solution:** 
+1. Stop and restart Vite dev server
+2. If still not working, build assets: `./vendor/bin/sail npm run build`
+3. Clear browser cache and refresh
+
+**Problem:** Livewire components not updating styles
+**Solution:**
+1. Ensure Vite is running: `./vendor/bin/sail npm run dev`
+2. Check browser console for errors
+3. Refresh the page after CSS changes
 
 ## Environment Configuration
 

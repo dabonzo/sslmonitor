@@ -172,10 +172,10 @@
             @if($recentChecks->isNotEmpty())
                 <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach($recentChecks as $check)
-                        <div class="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex-shrink-0">
+                        <div class="p-4 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors cursor-pointer">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start space-x-4 flex-1">
+                                    <div class="flex-shrink-0 mt-1">
                                         @if($check->status === 'valid')
                                             <flux:icon name="shield-check" class="h-5 w-5 text-green-500" />
                                         @elseif($check->status === 'expiring_soon')
@@ -186,26 +186,27 @@
                                             <flux:icon name="x-circle" class="h-5 w-5 text-red-500" />
                                         @endif
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $check->website->name }}</p>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center space-x-3 mb-1">
+                                            <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $check->website->name }}</p>
+                                            <flux:badge 
+                                                :color="match($check->status) {
+                                                    'valid' => 'green',
+                                                    'expiring_soon' => 'yellow', 
+                                                    'expired' => 'red',
+                                                    'error' => 'red',
+                                                    default => 'gray'
+                                                }"
+                                                size="sm"
+                                            >
+                                                {{ ucwords(str_replace('_', ' ', $check->status)) }}
+                                            </flux:badge>
+                                        </div>
                                         <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $check->website->url }}</p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <div class="flex items-center space-x-2">
-                                        <flux:badge 
-                                            :color="match($check->status) {
-                                                'valid' => 'green',
-                                                'expiring_soon' => 'yellow', 
-                                                'expired' => 'red',
-                                                'error' => 'red',
-                                                default => 'gray'
-                                            }"
-                                        >
-                                            {{ ucwords(str_replace('_', ' ', $check->status)) }}
-                                        </flux:badge>
-                                    </div>
-                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                                <div class="text-right flex-shrink-0 ml-6">
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
                                         {{ $check->checked_at->diffForHumans() }}
                                     </p>
                                 </div>

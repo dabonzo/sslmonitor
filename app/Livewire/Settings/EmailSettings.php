@@ -166,7 +166,7 @@ class EmailSettings extends Component
             $success = $settings->test();
 
             if ($success) {
-                $this->testResult = 'success:Test email sent successfully! Check your inbox at '.$settings->from_address;
+                $this->testResult = 'success:Test email sent successfully! Check your inbox at '.$user->email;
             } else {
                 $this->testResult = 'error:Test failed: '.($settings->test_error ?? 'Unknown error');
             }

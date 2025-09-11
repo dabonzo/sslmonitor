@@ -27,4 +27,6 @@ yarn-error.log
 /.junie
 .mcp.json
 CURRENT_STATE.md
-PROJECT_PLAN.md
+
+# Screenshots and manual testing images
+docs/images/

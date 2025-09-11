@@ -152,16 +152,19 @@ class EmailSettings extends Model
     /**
      * Test the email configuration
      */
-    public function test(): bool
+    public function test(?string $recipientEmail = null): bool
     {
         try {
+            // Use provided recipient email or fall back to the current authenticated user
+            $recipient = $recipientEmail ?: auth()->user()->email;
+
             // Temporarily configure mail with these settings
             $originalConfig = config('mail');
             config($this->toMailConfig());
 
             // Send test email
-            \Mail::raw('This is a test email from SSL Monitor to verify email configuration.', function ($message) {
-                $message->to($this->from_address)
+            \Mail::raw('This is a test email from SSL Monitor to verify your email configuration is working correctly.', function ($message) use ($recipient) {
+                $message->to($recipient)
                     ->subject('SSL Monitor - Email Configuration Test');
             });
 

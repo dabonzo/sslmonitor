@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\CheckSslCertificateJob;
 use App\Models\Website;
 use App\Services\SslCertificateChecker;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -29,6 +30,14 @@ class WebsiteManagement extends Component
     public function boot()
     {
         $this->sslChecker = new SslCertificateChecker;
+    }
+
+    public function updatedUrl($value)
+    {
+        // Auto-add https:// if no protocol is specified
+        if ($value && ! str_starts_with($value, 'http://') && ! str_starts_with($value, 'https://')) {
+            $this->url = 'https://'.$value;
+        }
     }
 
     public function getFormProperty()
@@ -67,7 +76,10 @@ class WebsiteManagement extends Component
             $websiteData['added_by'] = $user->id;
         }
 
-        $user->websites()->create($websiteData);
+        $website = $user->websites()->create($websiteData);
+
+        // Queue SSL certificate check immediately for new website
+        CheckSslCertificateJob::dispatch($website);
 
         $this->dispatch('website-added');
         $this->resetForm();

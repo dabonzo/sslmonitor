@@ -43,8 +43,18 @@ class WebsiteDetails extends Component
         $this->isCheckingNow = true;
 
         try {
-            // Store the current check count before dispatching
-            $currentCheckCount = $this->website->sslChecks()->count();
+            // Check if we've checked recently
+            $recentCheck = $this->website->sslChecks()
+                ->where('checked_at', '>', now()->subHour())
+                ->latest('checked_at')
+                ->first();
+
+            if ($recentCheck) {
+                session()->flash('info', 'SSL certificate was checked recently. Please wait before checking again.');
+                $this->isCheckingNow = false;
+
+                return;
+            }
 
             CheckSslCertificateJob::dispatch($this->website);
 

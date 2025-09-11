@@ -46,7 +46,7 @@
                     <label class="block text-sm font-medium text-zinc-900 dark:text-white">Website URL</label>
                     <flux:input 
                         wire:model.live.debounce.500ms="url" 
-                        placeholder="https://example.com"
+                        placeholder="example.com (https:// will be added automatically)"
                         type="url" 
                     />
                     @error('url')
@@ -125,7 +125,7 @@
             @endif
 
             <!-- Form Actions -->
-            <div class="flex space-x-2">
+            <div class="flex space-x-2 mt-6">
                 <flux:button type="submit" variant="primary">
                     {{ $editingWebsiteId ? 'Update Website' : 'Add Website' }}
                 </flux:button>
