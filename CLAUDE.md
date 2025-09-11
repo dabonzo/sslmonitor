@@ -29,24 +29,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Testing**: Pest PHP testing framework
 - **Code Quality**: Laravel Pint for code formatting
 
+## Development Preferences
+
+**IMPORTANT**: Always follow these preferences in all sessions:
+- **Use Laravel Sail**: Always use `./vendor/bin/sail` prefix for artisan, composer, npm commands
+- **Clean Git Commits**: NEVER add "Generated with Claude Code" or similar attributions in commit messages
+- **Professional Standards**: Keep commit messages focused and professional
+
 ## Development Commands
 
-### Core Laravel Commands
-- `php artisan serve` - Start development server
-- `php artisan migrate` - Run database migrations
-- `php artisan key:generate` - Generate application key
-- `php artisan queue:listen --tries=1` - Start queue worker
-- `php artisan pail --timeout=0` - Start log monitoring
+### Core Laravel Commands (with Sail)
+- `./vendor/bin/sail artisan serve` - Start development server (not needed with Sail)
+- `./vendor/bin/sail artisan migrate` - Run database migrations
+- `./vendor/bin/sail artisan key:generate` - Generate application key
+- `./vendor/bin/sail artisan queue:listen --tries=1` - Start queue worker
+- `./vendor/bin/sail artisan pail --timeout=0` - Start log monitoring
 
 ### Asset Compilation
 - `npm run dev` - Start Vite development server with hot reload
 - `npm run build` - Build production assets
 
-### Development Workflow
-- `composer run dev` - Starts all development services concurrently (server, queue, logs, vite)
-- `composer run test` - Clear config cache and run tests
-- `vendor/bin/pest` - Run tests directly with Pest
-- `vendor/bin/pint` - Format code with Laravel Pint
+### Development Workflow (with Sail)
+- `./vendor/bin/sail composer run dev` - Starts all development services concurrently (server, queue, logs, vite)
+- `./vendor/bin/sail artisan test` - Clear config cache and run tests
+- `./vendor/bin/sail exec laravel.test ./vendor/bin/pest` - Run tests directly with Pest
+- `./vendor/bin/sail exec laravel.test ./vendor/bin/pint` - Format code with Laravel Pint
 
 ### Laravel Sail (Docker)
 - `./vendor/bin/sail up -d` - Start Docker containers in background
@@ -115,7 +122,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Running Tests
 - `./vendor/bin/sail artisan test` - Run all tests with Sail
-- `vendor/bin/pest` - Run tests directly with Pest
+- `./vendor/bin/sail artisan test --filter=TestName` - Run specific tests
+- `./vendor/bin/sail exec laravel.test ./vendor/bin/pest` - Run tests directly with Pest
 
 ## Flux UI Setup
 
