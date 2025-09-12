@@ -17,29 +17,36 @@ class Website extends Model
         'user_id',
         'team_id',
         'added_by',
+        'uptime_monitoring',
         'expected_status_code',
         'expected_content',
         'forbidden_content',
         'max_response_time',
         'follow_redirects',
         'max_redirects',
+        'uptime_status',
+        'last_uptime_check_at',
     ];
 
     protected $casts = [
         'user_id' => 'integer',
         'team_id' => 'integer',
         'added_by' => 'integer',
+        'uptime_monitoring' => 'boolean',
         'expected_status_code' => 'integer',
         'max_response_time' => 'integer',
         'follow_redirects' => 'boolean',
         'max_redirects' => 'integer',
+        'last_uptime_check_at' => 'datetime',
     ];
 
     protected $attributes = [
+        'uptime_monitoring' => false,
         'expected_status_code' => 200,
         'max_response_time' => 30000,
         'follow_redirects' => true,
         'max_redirects' => 3,
+        'uptime_status' => 'unknown',
     ];
 
     public function user(): BelongsTo
