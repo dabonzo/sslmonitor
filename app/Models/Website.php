@@ -17,12 +17,29 @@ class Website extends Model
         'user_id',
         'team_id',
         'added_by',
+        'expected_status_code',
+        'expected_content',
+        'forbidden_content',
+        'max_response_time',
+        'follow_redirects',
+        'max_redirects',
     ];
 
     protected $casts = [
         'user_id' => 'integer',
         'team_id' => 'integer',
         'added_by' => 'integer',
+        'expected_status_code' => 'integer',
+        'max_response_time' => 'integer',
+        'follow_redirects' => 'boolean',
+        'max_redirects' => 'integer',
+    ];
+
+    protected $attributes = [
+        'expected_status_code' => 200,
+        'max_response_time' => 30000,
+        'follow_redirects' => true,
+        'max_redirects' => 3,
     ];
 
     public function user(): BelongsTo
@@ -38,6 +55,16 @@ class Website extends Model
     public function sslChecks(): HasMany
     {
         return $this->hasMany('App\Models\SslCheck');
+    }
+
+    public function uptimeChecks(): HasMany
+    {
+        return $this->hasMany(UptimeCheck::class);
+    }
+
+    public function downtimeIncidents(): HasMany
+    {
+        return $this->hasMany(DowntimeIncident::class);
     }
 
     public function team(): BelongsTo

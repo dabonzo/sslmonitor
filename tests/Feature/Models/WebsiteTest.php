@@ -109,3 +109,55 @@ test('different users can have same url', function () {
     expect($website1)->toBeInstanceOf(Website::class)
         ->and($website2)->toBeInstanceOf(Website::class);
 });
+
+test('website has default uptime monitoring settings', function () {
+    $user = User::factory()->create();
+    $website = Website::create([
+        'name' => 'Example Site',
+        'url' => 'https://example.com',
+        'user_id' => $user->id,
+    ]);
+
+    expect($website->expected_status_code)->toBe(200)
+        ->and($website->expected_content)->toBeNull()
+        ->and($website->forbidden_content)->toBeNull()
+        ->and($website->max_response_time)->toBe(30000)
+        ->and($website->follow_redirects)->toBeTrue()
+        ->and($website->max_redirects)->toBe(3);
+});
+
+test('website can be created with custom uptime monitoring settings', function () {
+    $user = User::factory()->create();
+    $website = Website::create([
+        'name' => 'Custom Site',
+        'url' => 'https://custom.com',
+        'user_id' => $user->id,
+        'expected_status_code' => 201,
+        'expected_content' => 'Welcome to our site',
+        'forbidden_content' => 'Error 503',
+        'max_response_time' => 5000,
+        'follow_redirects' => false,
+        'max_redirects' => 1,
+    ]);
+
+    expect($website->expected_status_code)->toBe(201)
+        ->and($website->expected_content)->toBe('Welcome to our site')
+        ->and($website->forbidden_content)->toBe('Error 503')
+        ->and($website->max_response_time)->toBe(5000)
+        ->and($website->follow_redirects)->toBeFalse()
+        ->and($website->max_redirects)->toBe(1);
+});
+
+test('website has uptime checks relationship', function () {
+    $website = Website::factory()->create();
+
+    expect(method_exists($website, 'uptimeChecks'))->toBeTrue();
+    expect($website->uptimeChecks())->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class);
+});
+
+test('website has downtime incidents relationship', function () {
+    $website = Website::factory()->create();
+
+    expect(method_exists($website, 'downtimeIncidents'))->toBeTrue();
+    expect($website->downtimeIncidents())->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class);
+});
