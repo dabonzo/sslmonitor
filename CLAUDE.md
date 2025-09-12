@@ -307,6 +307,17 @@ DB_DATABASE=ssl_monitor
 DB_USERNAME=sail
 DB_PASSWORD=password
 
+# Performance Configuration (Redis for caching, sessions, queues)
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+# Redis Configuration (handled by Sail)
+REDIS_CLIENT=phpredis
+REDIS_HOST=redis
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
 # Mail Notifications
 MAIL_MAILER=smtp
 MAIL_HOST=mailpit  # For local development
