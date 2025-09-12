@@ -171,6 +171,45 @@ git branch -d feature/feature-name
 * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
 ```
 
+### Cache Management ⚠️ CRITICAL FOR PROPER FUNCTIONALITY
+Laravel caches routes, config, and other data for performance. **ALWAYS clear caches** when:
+
+#### **When to Clear Caches:**
+- ✅ **Adding new routes** (web.php, api.php changes)
+- ✅ **Installing new packages** (Telescope, Sanctum, etc.)
+- ✅ **Changing .env configuration** (APP_URL, database, mail settings)
+- ✅ **Adding middleware or service providers**
+- ✅ **Route or config changes not taking effect**
+- ✅ **"Route not found" or "Class not found" errors**
+
+#### **Essential Cache Commands:**
+```bash
+# FULL CACHE RESET (use when things aren't working)
+./vendor/bin/sail artisan optimize:clear
+
+# INDIVIDUAL CACHE CLEARING
+./vendor/bin/sail artisan route:clear      # Clear route cache
+./vendor/bin/sail artisan config:clear     # Clear config cache  
+./vendor/bin/sail artisan view:clear       # Clear compiled views
+./vendor/bin/sail artisan cache:clear      # Clear application cache
+
+# REBUILD CACHES (optional - Laravel will rebuild automatically)
+./vendor/bin/sail artisan route:cache      # Cache routes for performance
+./vendor/bin/sail artisan config:cache     # Cache config for performance
+```
+
+#### **Development Workflow Integration:**
+```bash
+# After adding new routes or changing config
+./vendor/bin/sail artisan route:clear && ./vendor/bin/sail artisan config:clear
+
+# Quick "fix everything" command when stuff breaks
+./vendor/bin/sail artisan optimize:clear
+
+# After installing packages like Telescope
+./vendor/bin/sail artisan route:clear && ./vendor/bin/sail artisan route:cache
+```
+
 ## Key Dependencies
 
 ### Core SSL Monitoring
