@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvitationController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\EmailSettings;
 use App\Livewire\Settings\Password;
@@ -25,6 +26,12 @@ Route::get('websites/{website}', function (\App\Models\Website $website) {
 
     return view('website-details', compact('website'));
 })->middleware(['auth', 'verified'])->name('websites.show');
+
+// Team invitation routes
+Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])
+    ->middleware('guest')
+    ->name('invitations.accept');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

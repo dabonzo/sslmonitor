@@ -46,9 +46,23 @@ SSL Monitor supports team collaboration, allowing you to share SSL certificate m
    - Select their role (Admin, Manager, or Viewer)
    - Click "Invite Member"
 
-3. **User Creation**
-   - If the email doesn't exist in the system, a user account is automatically created
-   - The person can log in and will have immediate team access
+3. **Professional Email Invitation**
+   - Invited person receives a professional email with INTERMEDIEN branding
+   - Email includes secure magic link for passwordless account setup
+   - Role permissions clearly explained in the invitation
+   - Invitation expires automatically after 7 days
+
+4. **Passwordless Account Setup**
+   - Invited person clicks the secure link in their email
+   - Sets up their account with name and password
+   - Immediately gains team access with assigned role
+   - No complex registration process required
+
+5. **Invitation Management**
+   - Track invitation status (Pending, Accepted, Expired)
+   - Resend invitations if needed
+   - Cancel pending invitations
+   - View invitation expiry dates
 
 ## Team Roles & Permissions
 

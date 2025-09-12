@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Website;
+use App\Services\TeamInvitationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -78,29 +79,19 @@ class TeamManagement extends Component
             'inviteRole' => 'required|in:admin,manager,viewer',
         ]);
 
-        // Create user if doesn't exist
-        $invitedUser = User::firstOrCreate(
-            ['email' => $this->inviteEmail],
-            [
-                'name' => explode('@', $this->inviteEmail)[0], // Use email username as name
-                'password' => bcrypt(str()->random(32)), // Generate random password for invited user
-            ]
-        );
+        try {
+            $invitationService = app(TeamInvitationService::class);
+            $invitationService->inviteUser($team, $this->inviteEmail, $this->inviteRole, $user);
 
-        // Add to team if not already a member
-        if (! $team->hasMember($invitedUser)) {
-            TeamMember::create([
-                'team_id' => $team->id,
-                'user_id' => $invitedUser->id,
-                'role' => $this->inviteRole,
-            ]);
+            // Reset form
+            $this->inviteEmail = '';
+            $this->inviteRole = 'admin';
+
+            session()->flash('success', 'Invitation sent successfully! The user will receive an email with setup instructions.');
+
+        } catch (\Exception $e) {
+            $this->addError('inviteEmail', $e->getMessage());
         }
-
-        // Reset form
-        $this->inviteEmail = '';
-        $this->inviteRole = 'admin';
-
-        session()->flash('success', 'User invited successfully!');
     }
 
     public function removeMember(int $userId): void
@@ -146,6 +137,46 @@ class TeamManagement extends Component
         session()->flash('success', 'Member role updated successfully!');
     }
 
+    public function resendInvitation(int $invitationId): void
+    {
+        $user = Auth::user();
+        $team = $user->primaryTeam();
+
+        if (! $team || ! $team->userHasPermission($user, 'manage_team')) {
+            abort(403);
+        }
+
+        try {
+            $invitation = $team->invitations()->findOrFail($invitationId);
+            $invitationService = app(TeamInvitationService::class);
+            $invitationService->resendInvitation($invitation);
+
+            session()->flash('success', 'Invitation resent successfully!');
+        } catch (\Exception $e) {
+            $this->addError('resend', $e->getMessage());
+        }
+    }
+
+    public function cancelInvitation(int $invitationId): void
+    {
+        $user = Auth::user();
+        $team = $user->primaryTeam();
+
+        if (! $team || ! $team->userHasPermission($user, 'manage_team')) {
+            abort(403);
+        }
+
+        try {
+            $invitation = $team->invitations()->findOrFail($invitationId);
+            $invitationService = app(TeamInvitationService::class);
+            $invitationService->cancelInvitation($invitation);
+
+            session()->flash('success', 'Invitation cancelled successfully!');
+        } catch (\Exception $e) {
+            $this->addError('cancel', $e->getMessage());
+        }
+    }
+
     public function render()
     {
         $user = Auth::user();
@@ -157,6 +188,7 @@ class TeamManagement extends Component
             'team' => $team,
             'personalWebsites' => $personalWebsites,
             'teamMembers' => $team ? $team->teamMembers()->with('user')->get() : collect(),
+            'pendingInvitations' => $team ? $team->pendingInvitations()->with('invitedBy')->get() : collect(),
         ]);
     }
 }

@@ -89,50 +89,102 @@
                         
                         <div class="space-y-3">
                             @foreach($teamMembers as $member)
-                                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                    <div class="flex items-center min-w-0 flex-1">
+                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                                             {{ substr($member->user->name, 0, 1) }}
                                         </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        <div class="ml-3 min-w-0 flex-1">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
                                                 {{ $member->user->name }}
                                             </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
                                                 {{ $member->user->email }}
                                             </div>
                                         </div>
+                                        <span class="ml-3 flex-shrink-0 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full dark:bg-green-900/30 dark:text-green-400">Active</span>
                                     </div>
                                     
-                                    <div class="flex items-center space-x-3">
+                                    <div class="flex items-center gap-2 ml-4 flex-shrink-0">
                                         @if($team->userHasPermission($user, 'manage_team') && $member->user_id !== $user->id)
-                                            <flux:select 
+                                            <select 
                                                 wire:change="changeMemberRole({{ $member->user_id }}, $event.target.value)"
-                                                class="text-sm"
+                                                class="px-3 py-1 text-xs font-medium border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                                             >
                                                 <option value="admin" @if($member->role === 'admin') selected @endif>Admin</option>
                                                 <option value="manager" @if($member->role === 'manager') selected @endif>Manager</option>
                                                 <option value="viewer" @if($member->role === 'viewer') selected @endif>Viewer</option>
-                                            </flux:select>
+                                            </select>
                                             
-                                            <flux:button 
+                                            <button 
                                                 wire:click="removeMember({{ $member->user_id }})"
-                                                variant="danger" 
-                                                size="sm"
                                                 wire:confirm="Are you sure you want to remove this member?"
+                                                class="px-3 py-1 text-xs font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                                             >
                                                 Remove
-                                            </flux:button>
+                                            </button>
                                         @else
-                                            <flux:badge variant="outline" :color="$member->role === 'owner' ? 'purple' : 'blue'">
+                                            <span class="px-3 py-1 text-xs font-medium border rounded-md {{ $member->role === 'owner' ? 'border-purple-300 text-purple-700 bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:bg-purple-900/30' : 'border-blue-300 text-blue-700 bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:bg-blue-900/30' }}">
                                                 {{ ucfirst($member->role) }}
-                                            </flux:badge>
+                                            </span>
                                         @endif
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Pending Invitations --}}
+                    @if($pendingInvitations->count() > 0 && $team->userHasPermission($user, 'manage_team'))
+                        <div class="mb-8">
+                            <flux:heading size="md" class="mb-4">Pending Invitations</flux:heading>
+                            
+                            <div class="space-y-3">
+                                @foreach($pendingInvitations as $invitation)
+                                    <div class="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg overflow-hidden">
+                                        <div class="flex items-center min-w-0 flex-1">
+                                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3 min-w-0 flex-1">
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                    {{ $invitation->email }}
+                                                </div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                                    Invited {{ $invitation->created_at->diffForHumans() }} • Expires {{ $invitation->expires_at->format('M j, g:i A') }}
+                                                </div>
+                                            </div>
+                                            <flux:badge variant="outline" color="amber" size="sm" class="ml-3 flex-shrink-0">Pending</flux:badge>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                                            <flux:badge variant="outline" color="blue" class="px-3 py-1 text-xs">
+                                                {{ ucfirst($invitation->role) }}
+                                            </flux:badge>
+                                            
+                                            <button 
+                                                wire:click="resendInvitation({{ $invitation->id }})"
+                                                class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+                                            >
+                                                Resend
+                                            </button>
+                                            
+                                            <button 
+                                                wire:click="cancelInvitation({{ $invitation->id }})"
+                                                wire:confirm="Are you sure you want to cancel this invitation?"
+                                                class="px-3 py-1 text-xs font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Invite New Member --}}
                     @if($team->userHasPermission($user, 'manage_team'))
