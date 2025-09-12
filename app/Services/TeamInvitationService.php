@@ -29,7 +29,7 @@ class TeamInvitationService
             ->where('status', TeamInvitation::STATUS_PENDING)
             ->first();
 
-        if ($existingInvitation && !$existingInvitation->isExpired()) {
+        if ($existingInvitation && ! $existingInvitation->isExpired()) {
             throw new Exception('An invitation has already been sent to this email address.');
         }
 
@@ -74,7 +74,7 @@ class TeamInvitationService
     {
         $invitation = TeamInvitation::where('token', $token)->firstOrFail();
 
-        if (!$invitation->isPending()) {
+        if (! $invitation->isPending()) {
             throw new Exception('This invitation is no longer valid.');
         }
 
@@ -82,7 +82,7 @@ class TeamInvitationService
             // Create or find user
             $user = User::where('email', $invitation->email)->first();
 
-            if (!$user) {
+            if (! $user) {
                 // Create new user
                 $user = User::create([
                     'name' => $userData['name'],
@@ -131,7 +131,7 @@ class TeamInvitationService
      */
     public function resendInvitation(TeamInvitation $invitation): void
     {
-        if (!$invitation->isPending()) {
+        if (! $invitation->isPending()) {
             throw new Exception('Cannot resend invitation - invitation is not pending.');
         }
 
