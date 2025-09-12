@@ -97,11 +97,11 @@ Comprehensive overview of the SSL Monitor application architecture, technology s
 User (1) ──────────┐
                    │
                    ▼ hasMany
-                Website (n) ──────┐
-                   │               │
-                   ▼ hasMany       ▼ hasMany
-             SslCertificate (n)  SslCheck (n)
-                   │
+                Website (n) ──────┬──────┬──────┐
+                   │               │      │      │
+                   ▼ hasMany       ▼      ▼      ▼ hasMany
+             SslCertificate (n)  SslCheck  UptimeCheck  DowntimeIncident
+                   │             (n)      (n)      (n)
                    ▼ belongsTo
                 Website
 ```
@@ -127,6 +127,8 @@ class Website extends Model
     public function user(): BelongsTo;
     public function sslCertificates(): HasMany;
     public function sslChecks(): HasMany;
+    public function uptimeChecks(): HasMany;         // NEW: Uptime monitoring
+    public function downtimeIncidents(): HasMany;    // NEW: Incident tracking
     
     // Business Logic
     public function getCurrentSslCertificate(): ?SslCertificate;
@@ -134,6 +136,14 @@ class Website extends Model
     
     // URL Sanitization
     protected function setUrlAttribute(string $value): void;
+    
+    // Uptime Settings (NEW)
+    protected $attributes = [
+        'expected_status_code' => 200,
+        'max_response_time' => 30000,
+        'follow_redirects' => true,
+        'max_redirects' => 3,
+    ];
 }
 ```
 
@@ -178,6 +188,53 @@ class SslCheck extends Model
 }
 ```
 
+#### UptimeCheck Model (NEW)
+```php
+class UptimeCheck extends Model
+{
+    // Relationships
+    public function website(): BelongsTo;
+    
+    // Status Constants - Multi-level validation results
+    const STATUS_UP = 'up';                    // All checks pass
+    const STATUS_DOWN = 'down';                // HTTP error or timeout
+    const STATUS_SLOW = 'slow';                // Responds but over threshold
+    const STATUS_CONTENT_MISMATCH = 'content_mismatch'; // Wrong content
+    
+    // Attributes include:
+    // - http_status_code, response_time_ms, response_size_bytes
+    // - content_check_passed, content_check_error, error_message
+    // - checked_at timestamp for monitoring history
+    
+    // Query Scopes
+    public function scopeUp(Builder $query): void;
+    public function scopeDown(Builder $query): void;
+    public function scopeRecent(Builder $query, int $hours = 24): void;
+}
+```
+
+#### DowntimeIncident Model (NEW)
+```php
+class DowntimeIncident extends Model
+{
+    // Relationships
+    public function website(): BelongsTo;
+    
+    // Incident Types
+    const TYPE_HTTP_ERROR = 'http_error';           // 4xx/5xx responses
+    const TYPE_TIMEOUT = 'timeout';                 // Slow/failed connections  
+    const TYPE_CONTENT_MISMATCH = 'content_mismatch'; // Wrong content detected
+    
+    // Business Logic
+    public function isOngoing(): bool;              // No ended_at timestamp
+    public function resolve(bool $automatically = false): void; // End incident
+    
+    // Automatic duration calculation via model boot event
+    // - duration_minutes calculated from started_at to ended_at
+    // - resolved_automatically tracks manual vs auto resolution
+}
+```
+
 ## 🔧 Service Layer Architecture
 
 ### SSL Certificate Services
@@ -214,6 +271,72 @@ class SslStatusCalculator
     // Centralized status calculation logic
     // Priority-based status determination
     // Consistent status representation
+}
+```
+
+### Uptime Monitoring Services (NEW)
+
+#### UptimeChecker Service
+```php
+class UptimeChecker
+{
+    public function checkWebsite(Website $website): UptimeCheckResult;
+    
+    // Multi-level validation system:
+    // 1. HTTP Request with proper headers and timeout
+    // 2. Follow redirects if enabled (with loop prevention)
+    // 3. Validate HTTP status code matches expected
+    // 4. Check response time against threshold
+    // 5. Validate content if configured (expected/forbidden text)
+    // 6. Return comprehensive structured result
+    
+    private function makeRequest(Website $website): Response;
+    private function validateContent(string $content, Website $website): array;
+}
+```
+
+#### UptimeCheckResult Class
+```php
+class UptimeCheckResult
+{
+    public function __construct(
+        public string $status,                    // up/down/slow/content_mismatch
+        public ?int $httpStatusCode = null,      // HTTP response code
+        public ?int $responseTime = null,        // milliseconds
+        public ?int $responseSize = null,        // bytes
+        public ?bool $contentCheckPassed = null, // content validation result
+        public ?string $contentCheckError = null, // validation error details
+        public ?string $errorMessage = null,     // general error message
+        public ?string $finalUrl = null,         // after redirects
+    ) {}
+    
+    // Helper methods
+    public function isUp(): bool;
+    public function isDown(): bool;
+    public function isSlow(): bool;  
+    public function hasContentMismatch(): bool;
+}
+```
+
+#### UptimeStatusCalculator Service
+```php
+class UptimeStatusCalculator
+{
+    public function calculateStatus(Website $website): string;
+    // Returns status from latest uptime check (with staleness detection)
+    
+    public function calculateUptimePercentage(Website $website, int $days = 30): float;
+    // Calculates uptime % over specified period (only 'up' counts as uptime)
+    
+    public function detectDowntimeIncident(Website $website): ?DowntimeIncident;
+    // Intelligent incident management:
+    // - Creates new incident on up→down transition  
+    // - Continues existing incident while down
+    // - Resolves incident on down→up transition
+    // - Returns existing ongoing incident or newly created
+    
+    private function createDowntimeIncident(Website $website, UptimeCheck $check): DowntimeIncident;
+    // Maps check status to incident type (http_error/timeout/content_mismatch)
 }
 ```
 
@@ -375,7 +498,12 @@ class WebsiteManagement extends Component
 tests/
 ├── Feature/
 │   ├── Models/           # Model behavior and relationships
-│   ├── Services/         # Service layer functionality  
+│   │   ├── UptimeCheckTest.php         # NEW: Uptime check model
+│   │   ├── DowntimeIncidentTest.php    # NEW: Incident model  
+│   │   └── WebsiteTest.php             # Updated: With uptime settings
+│   ├── Services/         # Service layer functionality
+│   │   ├── UptimeCheckerTest.php       # NEW: Multi-level validation
+│   │   └── UptimeStatusCalculatorTest.php # NEW: Status calculation
 │   ├── Livewire/         # Component interactions
 │   ├── Jobs/             # Background job processing
 │   ├── Commands/         # Artisan command behavior
@@ -383,6 +511,8 @@ tests/
 └── Unit/
     ├── Helpers/          # Utility functions
     └── Rules/            # Validation rules
+    
+# Test Coverage: 180+ tests, 65+ for uptime monitoring alone
 ```
 
 ### Test Patterns
@@ -413,6 +543,55 @@ test('ssl certificate checker handles valid certificate', function () {
     
     expect($result->isValid())->toBeTrue();
     expect($result->getDaysUntilExpiry())->toBeGreaterThan(0);
+});
+```
+
+#### Uptime Service Testing Pattern (NEW)
+```php
+test('uptime checker detects content mismatch', function () {
+    Http::fake([
+        'https://example.com' => Http::response('Domain Parked', 200),
+    ]);
+    
+    $website = Website::factory()->create([
+        'url' => 'https://example.com',
+        'expected_content' => 'Welcome to our site',
+        'forbidden_content' => 'Domain Parked',
+    ]);
+    
+    $checker = app(UptimeChecker::class);
+    $result = $checker->checkWebsite($website);
+    
+    expect($result->status)->toBe('content_mismatch')
+        ->and($result->httpStatusCode)->toBe(200)
+        ->and($result->contentCheckPassed)->toBeFalse()
+        ->and($result->contentCheckError)->toContain('Forbidden content found');
+});
+
+test('status calculator creates downtime incident', function () {
+    $website = Website::factory()->create();
+    
+    // Previous check was up
+    UptimeCheck::factory()->create([
+        'website_id' => $website->id,
+        'status' => 'up',
+        'checked_at' => now()->subMinutes(5),
+    ]);
+    
+    // Current check is down  
+    UptimeCheck::factory()->create([
+        'website_id' => $website->id,
+        'status' => 'down',
+        'checked_at' => now(),
+    ]);
+    
+    $calculator = app(UptimeStatusCalculator::class);
+    $incident = $calculator->detectDowntimeIncident($website);
+    
+    expect($incident)->toBeInstanceOf(DowntimeIncident::class)
+        ->and($incident->website_id)->toBe($website->id)
+        ->and($incident->ended_at)->toBeNull()
+        ->and($incident->incident_type)->toBe('http_error');
 });
 ```
 

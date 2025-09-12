@@ -10,7 +10,8 @@ Documentation for end users of the SSL Monitor application.
 - **[Getting Started](user-guide/getting-started.md)** - First-time setup and overview
 - **[Dashboard Overview](user-guide/dashboard-overview.md)** - Understanding your SSL status dashboard
 - **[Website Management](user-guide/website-management.md)** - Adding and managing monitored websites
-- **[Team Management](user-guide/team-management.md)** - Collaborating with teams and colleagues ⭐ NEW
+- **[Uptime Monitoring](user-guide/uptime-monitoring.md)** - Advanced uptime validation and content checking ⭐ NEW
+- **[Team Management](user-guide/team-management.md)** - Collaborating with teams and colleagues
 - **[Email Configuration](user-guide/email-configuration.md)** - Setting up SMTP for notifications
 - **[SSL Status Guide](user-guide/ssl-status-guide.md)** - Understanding certificate statuses and alerts
 - **[Troubleshooting](user-guide/troubleshooting.md)** - Common issues and solutions
@@ -53,13 +54,15 @@ Documentation for developers working on the SSL Monitor codebase.
 ## 🎯 Key Features
 
 - **Automated SSL Monitoring** - Daily checks of all monitored websites
-- **Real-time Dashboard** - Comprehensive overview of SSL certificate status
-- **Team Collaboration** - Share SSL monitoring with colleagues and teams ⭐ NEW
-- **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles ⭐ NEW
+- **Advanced Uptime Monitoring** - Multi-level validation beyond simple HTTP 200 checks ⭐ NEW
+- **Content Validation** - Detect hosting company default pages and maintenance screens ⭐ NEW
+- **Real-time Dashboard** - Comprehensive overview of SSL certificate and uptime status
+- **Team Collaboration** - Share SSL monitoring with colleagues and teams
+- **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles
 - **In-app Email Configuration** - Configure SMTP settings without server access
-- **Background Processing** - Queue-based SSL checking for reliability
+- **Background Processing** - Queue-based SSL and uptime checking for reliability
 - **Beautiful Interface** - Modern, responsive design with dark mode
-- **Comprehensive Testing** - 144+ tests ensuring reliability
+- **Comprehensive Testing** - 180+ tests ensuring reliability including uptime monitoring ⭐ NEW
 
 ## 🏗️ Technology Stack
 
@@ -80,7 +83,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Pest PHP 4** - Modern testing framework with TDD methodology
 - **Laravel Pint** - Code formatting and style enforcement
 - **Laravel Sail** - Docker development environment
-- **144+ comprehensive tests** - Full TDD coverage including team management
+- **180+ comprehensive tests** - Full TDD coverage including team management and uptime monitoring
 
 ## 📊 System Requirements
 

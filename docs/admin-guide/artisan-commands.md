@@ -64,6 +64,135 @@ Summary:
 - Checks completed: 5
 ```
 
+## 🟢 Uptime Monitoring Commands (NEW)
+
+### `uptime:check-all`
+
+Manually run uptime checks for all monitored websites using multi-level validation.
+
+```bash
+# Basic usage - check uptime for all websites
+php artisan uptime:check-all
+
+# Force check even if recently checked
+php artisan uptime:check-all --force
+
+# Check specific user's websites only  
+php artisan uptime:check-all --user=user@example.com
+
+# Verbose output with detailed validation information
+php artisan uptime:check-all --verbose
+```
+
+#### Options
+- `--force` - Skip recent check filtering, check all websites
+- `--user=email` - Only check websites belonging to specific user
+- `--verbose` - Show detailed multi-level validation progress
+
+#### Multi-Level Validation Process
+1. **HTTP Status Validation** - Verify expected status code (default: 200)
+2. **Content Validation** - Check for expected content presence
+3. **Forbidden Content Detection** - Alert on hosting company error pages
+4. **Response Time Monitoring** - Validate against performance thresholds
+5. **Redirect Handling** - Follow redirects with loop prevention
+
+#### Output Example
+```
+Uptime Monitor - Multi-Level Validation
+=======================================
+
+Checking uptime for 5 websites...
+
+✓ example.com - UP (200ms, content ✓)
+⚠ shop.example.com - SLOW (8.5s, content ✓) 
+🟠 blog.example.com - CONTENT MISMATCH (200 OK, "Domain Parked" found)
+✗ old.example.com - DOWN (HTTP 503 Service Unavailable)
+✗ test.example.com - DOWN (Connection timeout)
+
+Summary:
+- Total websites: 5
+- UP: 1 (healthy - all checks pass)
+- SLOW: 1 (functional but performance issue)
+- CONTENT MISMATCH: 1 (wrong content detected)  
+- DOWN: 2 (connection/HTTP errors)
+- New downtime incidents: 2
+- Resolved incidents: 0
+```
+
+### `uptime:incidents`
+
+Manage and review downtime incidents.
+
+```bash
+# Show ongoing incidents
+php artisan uptime:incidents --ongoing
+
+# Show all incidents in last 7 days  
+php artisan uptime:incidents --days=7
+
+# Show incidents for specific website
+php artisan uptime:incidents --url=example.com
+
+# Resolve incident manually
+php artisan uptime:incidents:resolve 123
+```
+
+#### Examples
+```bash
+# Daily incident review
+php artisan uptime:incidents --days=1
+
+# Check what's currently down
+php artisan uptime:incidents --ongoing
+
+# Historical analysis
+php artisan uptime:incidents --days=30 --verbose
+```
+
+### `uptime:stats`
+
+Generate uptime statistics and reports.
+
+```bash
+# Overall uptime statistics
+php artisan uptime:stats
+
+# Stats for specific time period
+php artisan uptime:stats --days=30
+
+# Detailed stats with incident breakdown  
+php artisan uptime:stats --detailed
+
+# Export stats to CSV
+php artisan uptime:stats --export=uptime-report.csv
+```
+
+#### Report Example
+```
+Uptime Statistics (Last 30 Days)
+================================
+
+Overall Statistics:
+- Total Websites: 25
+- Average Uptime: 99.2%
+- Total Incidents: 8
+- Avg Incident Duration: 12 minutes
+
+Top Issues:
+1. Content Mismatch: 3 incidents (hosting company takeovers)
+2. Slow Response: 2 incidents (performance degradation)  
+3. HTTP Errors: 2 incidents (server errors)
+4. Timeouts: 1 incident (network issues)
+
+Worst Performers:
+- staging.example.com: 95.2% (frequent maintenance)
+- api-v1.example.com: 97.8% (slow responses)
+
+Best Performers:  
+- main.example.com: 100% (no incidents)
+- cdn.example.com: 99.9% (1 brief timeout)
+```
+
 ## 📊 Queue Management Commands
 
 ### Standard Laravel Queue Commands
@@ -143,6 +272,8 @@ php artisan schedule:test
 
 SSL Monitor schedules these tasks:
 - **Daily SSL checks** - 6:00 AM daily (`ssl:check-all`)
+- **Daily uptime checks** - Every 5 minutes (`uptime:check-all`) ⭐ NEW
+- **Incident cleanup** - Daily at 1:00 AM (resolve stale incidents) ⭐ NEW
 - **Queue maintenance** - Every hour (cleanup old jobs)
 - **Log rotation** - Daily at midnight
 - **Cache cleanup** - Daily at 2:00 AM
@@ -453,6 +584,8 @@ php artisan schedule:list
 
 **Scheduled Tasks:**
 - `06:00` - SSL certificate checks (`ssl:check-all`)
+- `Every 5min` - Uptime monitoring checks (`uptime:check-all`) ⭐ NEW
+- `01:00` - Incident cleanup (`uptime:incidents:cleanup`) ⭐ NEW  
 - `02:00` - Application cache cleanup
 - `03:00` - Log file rotation
 - `04:00` - Queue maintenance
@@ -467,6 +600,16 @@ protected function schedule(Schedule $schedule)
     // Daily SSL checks at 6 AM
     $schedule->command('ssl:check-all')
              ->dailyAt('06:00')
+             ->withoutOverlapping();
+             
+    // Uptime monitoring every 5 minutes (NEW)
+    $schedule->command('uptime:check-all')
+             ->everyFiveMinutes()
+             ->withoutOverlapping();
+             
+    // Daily incident cleanup at 1 AM (NEW)
+    $schedule->command('uptime:incidents:cleanup')
+             ->dailyAt('01:00')
              ->withoutOverlapping();
              
     // Weekly email configuration test
@@ -496,6 +639,12 @@ php artisan about
 
 # Emergency SSL check
 php artisan ssl:check-all --force --verbose
+
+# Emergency uptime check (NEW)
+php artisan uptime:check-all --force --verbose
+
+# Check ongoing incidents (NEW)
+php artisan uptime:incidents --ongoing
 ```
 
 ### Troubleshooting Commands
@@ -564,6 +713,8 @@ php artisan up
 ```bash
 # Daily administrative tasks
 php artisan ssl:check-all
+php artisan uptime:incidents --ongoing          # NEW: Check active incidents
+php artisan uptime:stats --days=1               # NEW: Daily uptime summary
 php artisan queue:monitor ssl-monitoring
 php artisan log:show --tail=50
 systemctl status ssl-monitor-worker
@@ -575,6 +726,8 @@ systemctl status ssl-monitor-worker
 # Weekly administrative tasks
 php artisan optimize:clear
 php artisan ssl:check-all --force
+php artisan uptime:check-all --force             # NEW: Force uptime check
+php artisan uptime:stats --days=7 --detailed     # NEW: Weekly uptime analysis
 php artisan queue:failed
 ./vendor/bin/pint --test
 php artisan test
