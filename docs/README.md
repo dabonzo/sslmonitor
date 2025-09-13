@@ -62,7 +62,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **In-app Email Configuration** - Configure SMTP settings without server access
 - **Background Processing** - Queue-based SSL and uptime checking for reliability
 - **Beautiful Interface** - Modern, responsive design with dark mode
-- **Comprehensive Testing** - 180+ tests ensuring reliability including uptime monitoring ⭐ NEW
+- **Comprehensive Testing** - 314+ tests ensuring reliability including uptime monitoring ⭐ NEW
 
 ## 🏗️ Technology Stack
 
@@ -83,7 +83,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Pest PHP 4** - Modern testing framework with TDD methodology
 - **Laravel Pint** - Code formatting and style enforcement
 - **Laravel Sail** - Docker development environment
-- **180+ comprehensive tests** - Full TDD coverage including team management and uptime monitoring
+- **314+ comprehensive tests** - Full TDD coverage including team management and uptime monitoring
 
 ## 📊 System Requirements
 

@@ -4,7 +4,7 @@ Complete guide to understanding and using your SSL Monitor dashboard effectively
 
 ## 🎯 Overview
 
-The SSL Monitor dashboard is your central hub for monitoring website SSL certificates. It provides at-a-glance status information, critical alerts, and detailed certificate information.
+The SSL Monitor dashboard is your central hub for monitoring website SSL certificates and uptime status. It provides at-a-glance status information, critical alerts, and comprehensive monitoring insights for both SSL certificates and website availability.
 
 ## 📊 Dashboard Layout
 
@@ -15,12 +15,29 @@ The SSL Monitor dashboard is your central hub for monitoring website SSL certifi
 - **User Menu** - Profile settings and logout
 
 ### Main Dashboard Sections
-1. **Status Overview Cards** - Summary statistics
-2. **Critical Issues** - Urgent attention items
-3. **Recent SSL Checks** - Latest verification results
-4. **Website List** - All monitored sites with status
+1. **Website Overview Summary** - Total counts and availability at a glance ⭐ NEW
+2. **SSL Certificate Status Cards** - SSL certificate statistics and health
+3. **Uptime Monitoring Section** - Website availability and performance metrics ⭐ NEW
+4. **Critical Issues** - Urgent SSL and uptime issues requiring attention
+5. **Recent SSL Checks** - Latest certificate verification results
 
-## 📈 Status Overview Cards
+## 🎯 Website Overview Summary ⭐ NEW
+
+### High-Level Statistics
+The overview panel provides essential monitoring insights at a glance:
+
+- **Total Websites** - Complete count of all monitored websites
+- **Monitored Websites** - Count of websites with uptime monitoring enabled
+- **SSL Only** - Count of websites with SSL monitoring only
+- **Overall Availability** - Combined uptime percentage across all monitored websites
+
+### Overview Panel Information
+- **Total Count Display** - "8 websites total" 
+- **Monitoring Breakdown** - "3 monitored for uptime, 5 SSL only"
+- **Availability Percentage** - Large display (e.g., "92.5%") showing overall health
+- **Conditional Display** - Only appears when you have websites to monitor
+
+## 📈 SSL Certificate Status Cards
 
 ### Websites Card
 - **Total Count** - Number of monitored websites
@@ -45,14 +62,61 @@ The SSL Monitor dashboard is your central hub for monitoring website SSL certifi
 - **Issue Types** - Invalid, expired, or connection failures
 - **Priority** - Critical issues require immediate action
 
+## ⚡ Uptime Monitoring Section ⭐ NEW
+
+### Uptime Status Cards
+When uptime monitoring is enabled, you'll see a comprehensive 6-card grid:
+
+#### Up Status Card
+- **Count** - Websites currently responding correctly
+- **Percentage** - Proportion of monitored websites that are up
+- **Status Colors**: Green background indicates healthy websites
+
+#### Down Status Card  
+- **Count** - Websites completely unreachable or returning errors
+- **Percentage** - Critical websites requiring immediate attention
+- **Status Colors**: Red background indicates urgent issues
+
+#### Slow Status Card
+- **Count** - Websites responding but exceeding performance thresholds
+- **Percentage** - Performance issues that may affect user experience
+- **Status Colors**: Yellow background indicates performance warnings
+
+#### Content Issues Card
+- **Count** - Websites with content validation problems
+- **Examples** - Missing expected content or forbidden content detected
+- **Status Colors**: Orange background indicates content mismatches
+
+#### Unknown Status Card
+- **Count** - Websites with no recent uptime checks
+- **Scenarios** - New websites or monitoring configuration issues
+- **Status Colors**: Gray background indicates pending status
+
+#### Availability Card
+- **Percentage** - Overall uptime availability (Up + Slow considered available)
+- **Calculation** - (Up websites + Slow websites) / Total monitored × 100
+- **Display** - Large percentage with "X monitored" subtitle
+
+### Conditional Display
+- **Uptime section only appears** when you have websites with uptime monitoring enabled
+- **Section automatically hides** when all websites are SSL-only monitoring
+- **Real-time updates** reflect current uptime status across all monitored websites
+
 ## 🚨 Critical Issues Section
 
 ### When Issues Appear
 This section appears when you have:
+
+#### SSL Certificate Issues
 - **Expired certificates** - Already past expiration date
 - **Expiring certificates** - Within 7 days of expiry
 - **Invalid certificates** - Configuration problems
 - **Connection failures** - Unable to check certificate
+
+#### Uptime Issues ⭐ NEW
+- **Down websites** - Complete website failures
+- **Content mismatch** - Hosting company takeovers or maintenance pages
+- **Performance issues** - Slow response times exceeding thresholds
 
 ### Issue Information Displayed
 - **Website Name** - Friendly name or URL
@@ -62,10 +126,17 @@ This section appears when you have:
 - **Action Required** - Recommended next steps
 
 ### Example Issues
+
+#### SSL Certificate Examples
 - "**example.com** - Certificate expired 3 days ago"
 - "**shop.example.com** - Certificate expires in 2 days"  
 - "**api.example.com** - Invalid certificate (wrong domain)"
 - "**blog.example.com** - Connection failed (unreachable)"
+
+#### Uptime Monitoring Examples ⭐ NEW
+- "**store.example.com** - Website is down (HTTP 503 error)"
+- "**blog.example.com** - Content mismatch detected (Domain Parked page)"
+- "**api.example.com** - Slow response time (8.5s, threshold: 5s)"
 
 ## ⏰ Recent SSL Checks
 
@@ -249,6 +320,7 @@ The dashboard may include these features in future updates:
 ## 🎯 Next Steps
 
 - **[Website Management](website-management.md)** - Learn to add and manage websites
+- **[Uptime Monitoring](uptime-monitoring.md)** - Configure advanced uptime validation ⭐ NEW
 - **[Email Configuration](email-configuration.md)** - Set up SMTP notifications
 - **[SSL Status Guide](ssl-status-guide.md)** - Understand certificate statuses
 - **[Troubleshooting](troubleshooting.md)** - Resolve common issues
