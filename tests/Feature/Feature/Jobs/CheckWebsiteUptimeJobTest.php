@@ -359,5 +359,6 @@ test('job has proper queue configuration', function () {
     $reflection = new ReflectionClass($job);
     $queueProperty = $reflection->getProperty('queue');
     $queueProperty->setAccessible(true);
-    expect($queueProperty->getValue($job))->toBe('uptime-monitoring');
+    // Jobs now use default queue for simplicity and reliability
+    expect($queueProperty->getValue($job))->toBeNull(); // Default queue
 });

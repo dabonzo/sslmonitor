@@ -10,11 +10,19 @@ All background jobs use Laravel's **default queue** with Horizon for advanced mo
 - **SSL notifications** (`SendSslNotificationJob`)
 - **Uptime notifications** (`SendUptimeNotificationJob`)
 
-## Laravel Horizon Dashboard
+## Performance Monitoring Dashboards
 
-**Horizon provides a beautiful web dashboard** for monitoring queue performance:
+### Laravel Horizon Dashboard
+**Horizon provides advanced queue management and monitoring**:
 - **URL**: http://localhost/horizon (development)  
 - **Features**: Real-time job metrics, failed job management, performance insights
+- **Access**: Automatically available in local development environment
+
+### Laravel Pulse Dashboard 🆕
+**Pulse provides comprehensive application performance monitoring**:
+- **URL**: http://localhost/pulse (development)
+- **Features**: SSL check performance, slow job tracking, exception monitoring, outgoing request analysis
+- **Perfect for SSL Monitor**: Track certificate fetch times, identify slow domains, monitor uptime check performance
 - **Access**: Automatically available in local development environment
 
 ## Queue Worker Management
@@ -293,3 +301,177 @@ Access the Horizon dashboard at **http://localhost/horizon** to monitor:
 - **Job Tagging**: Organize jobs by type (ssl-monitoring, uptime-checks, notifications)
 - **Detailed Metrics**: Historical job performance data
 - **Failure Management**: Easy retry and debugging of failed checks
+
+## Laravel Pulse Features 🆕
+
+### Performance Insights Dashboard
+Access the Pulse dashboard at **http://localhost/pulse** to monitor:
+- **SSL Certificate Fetch Performance**: Track how long SSL checks take for different domains
+- **Uptime Check Response Times**: Monitor website response times and identify slow sites
+- **Failed SSL/Uptime Checks**: See exceptions and errors in real-time
+- **Queue Job Performance**: Identify slow running SSL and uptime monitoring jobs
+- **Database Query Performance**: Monitor queries as your SSL monitoring data grows
+- **Server Resource Usage**: Track CPU, memory, and disk usage
+
+### SSL Monitor Specific Metrics
+- **Slow Outgoing Requests**: Perfect for tracking SSL certificate fetches and uptime checks
+- **Slow Jobs**: Identify SSL checks taking longer than expected (default: 1000ms)
+- **Exceptions**: Monitor failed SSL certificate validations and uptime check errors
+- **Queue Monitoring**: Track SSL and uptime job processing rates and wait times
+- **Server Health**: Monitor server resources during high-load SSL checking periods
+
+### Production Optimization Benefits
+- **Performance Bottlenecks**: Identify slow SSL certificate providers or problematic domains
+- **Scaling Insights**: Understand when you need more worker processes
+- **Error Trending**: Track SSL/uptime failure patterns over time
+- **Resource Planning**: Monitor server resource usage as you monitor more websites
+- **Alert Thresholds**: Set up notifications for performance degradation
+
+## Laravel Reverb Real-time Features 🚀 NEW
+
+### Real-time WebSocket Communication
+SSL Monitor now includes **Laravel Reverb** for instant, live updates without page refreshes:
+- **URL**: http://localhost:8080 (WebSocket server)
+- **Features**: Real-time SSL status changes, live uptime monitoring, instant notifications
+- **Technology**: Native Laravel WebSocket server built on ReactPHP
+
+### Real-time SSL & Uptime Monitoring
+- **Instant Status Updates**: SSL certificate status changes broadcast immediately to all connected users
+- **Live Dashboard**: Dashboard updates in real-time when SSL certificates expire or recover
+- **Real-time Uptime Changes**: Website downtime and recovery events broadcast instantly
+- **Team Collaboration**: Multiple team members see the same real-time updates simultaneously
+- **No Refresh Required**: Page updates happen automatically via WebSocket connections
+
+### Broadcasting Channels
+SSL Monitor uses secure private channels for real-time updates:
+
+#### SSL Monitoring Channels
+- **`ssl-monitoring`**: General SSL status changes (all authenticated users)
+- **`ssl-monitoring.website.{id}`**: Website-specific SSL updates (website owners + team members only)
+
+#### Uptime Monitoring Channels  
+- **`uptime-monitoring`**: General uptime status changes (all authenticated users)
+- **`uptime-monitoring.website.{id}`**: Website-specific uptime updates (website owners + team members only)
+
+### WebSocket Events
+Real-time events broadcasted when status changes occur:
+
+#### SSL Status Events
+```javascript
+// SSL status change event structure
+{
+  "ssl_check": {
+    "id": 123,
+    "website_id": 45,
+    "website_url": "https://example.com",
+    "status": "expiring_soon",
+    "previous_status": "valid",
+    "expires_at": "2025-10-15T10:30:00Z",
+    "days_until_expiry": 7,
+    "checked_at": "2025-09-13T21:30:00Z",
+    "issuer": "Let's Encrypt",
+    "fingerprint": "abc123..."
+  },
+  "timestamp": "2025-09-13T21:30:00Z"
+}
+```
+
+#### Uptime Status Events
+```javascript
+// Uptime status change event structure
+{
+  "uptime_check": {
+    "id": 456,
+    "website_id": 45,
+    "website_url": "https://example.com",
+    "status": "down",
+    "previous_status": "up", 
+    "response_time": 0,
+    "status_code": null,
+    "checked_at": "2025-09-13T21:30:00Z",
+    "failure_reason": "Connection timeout",
+    "uptime_percentage": 98.5
+  },
+  "timestamp": "2025-09-13T21:30:00Z"
+}
+```
+
+### Frontend Integration
+The SSL Monitor frontend automatically connects to Reverb WebSocket server:
+- **Laravel Echo**: JavaScript library handles WebSocket connections automatically
+- **Auto-reconnection**: Handles network interruptions and automatically reconnects
+- **Visual Updates**: Status indicators update in real-time without JavaScript intervention
+- **Toast Notifications**: Optional real-time notifications for status changes
+- **Channel Authorization**: Secure channel access based on website ownership and team membership
+
+### Development Configuration
+Reverb WebSocket server runs automatically with Laravel Sail:
+
+```yaml
+# docker-compose.yml - Reverb service configuration
+reverb:
+  image: 'sail-8.4/app'
+  ports:
+    - '${REVERB_PORT:-8080}:8080'
+  command: bash -c "sleep 20 && php artisan reverb:start --host=0.0.0.0 --port=8080"
+  depends_on:
+    - mariadb
+    - redis
+```
+
+### Production Deployment
+For production environments, consider:
+- **SSL/TLS Termination**: Use HTTPS/WSS for secure WebSocket connections
+- **Load Balancing**: Distribute WebSocket connections across multiple Reverb instances
+- **Horizontal Scaling**: Use Redis for cross-server event broadcasting
+- **Monitoring**: Track WebSocket connection counts and broadcast performance
+- **Error Handling**: Implement graceful fallbacks when WebSocket connections fail
+
+### Testing Real-time Events
+Test real-time broadcasting functionality:
+
+```bash
+# Manually trigger SSL status change event
+./vendor/bin/sail artisan tinker --execute="
+use App\Events\SslStatusChanged;
+use App\Models\{Website, SslCheck};
+
+\$website = Website::first();
+\$sslCheck = \$website->sslChecks()->create([
+    'status' => 'expiring_soon',
+    'expires_at' => now()->addDays(7),
+    'days_until_expiry' => 7,
+    'checked_at' => now(),
+    'is_valid' => true,
+    'issuer' => 'Test CA',
+    'fingerprint' => 'test-fingerprint'
+]);
+
+SslStatusChanged::dispatch(\$sslCheck, 'valid');
+echo 'SSL status change broadcasted!';
+"
+
+# Test uptime status change event
+./vendor/bin/sail artisan tinker --execute="
+use App\Events\UptimeStatusChanged;
+use App\Models\{Website, UptimeCheck};
+
+\$website = Website::first();
+\$uptimeCheck = \$website->uptimeChecks()->create([
+    'status' => 'down',
+    'http_status_code' => 500,
+    'error_message' => 'Connection timeout',
+    'checked_at' => now()
+]);
+
+UptimeStatusChanged::dispatch(\$uptimeCheck, 'up');
+echo 'Uptime status change broadcasted!';
+"
+```
+
+### Real-time Monitoring Benefits
+- **Instant Awareness**: Know immediately when SSL certificates expire or websites go down
+- **Collaborative Monitoring**: Teams see the same real-time status across all dashboards
+- **Reduced Alert Fatigue**: Visual updates reduce need for constant email notifications  
+- **Professional UX**: Modern, responsive interface that feels like enterprise monitoring tools
+- **Scalable Architecture**: WebSocket connections scale independently of HTTP requests

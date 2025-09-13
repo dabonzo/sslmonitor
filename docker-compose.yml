@@ -74,6 +74,32 @@ services:
                 condition: service_healthy
         command: bash -c "sleep 15 && php artisan schedule:work"
         restart: unless-stopped
+    reverb:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.4'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+                MYSQL_CLIENT: mariadb-client
+        image: 'sail-8.4/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${REVERB_PORT:-8080}:8080'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        command: bash -c "sleep 20 && php artisan reverb:start --host=0.0.0.0 --port=8080"
+        restart: unless-stopped
     mariadb:
         image: 'mariadb:11'
         ports:

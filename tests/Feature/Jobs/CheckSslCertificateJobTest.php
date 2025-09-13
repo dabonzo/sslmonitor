@@ -28,16 +28,28 @@ test('ssl certificate job can be queued', function () {
 });
 
 test('ssl certificate job runs successfully', function () {
+    // Create an old SSL check to establish previous status but not trigger recent check logic
+    SslCheck::factory()->for($this->website)->create([
+        'status' => 'expired',
+        'checked_at' => now()->subHours(2), // Old check, outside 1-hour window
+    ]);
+
+    // Create the SSL check that the mock will return (but don't persist it yet)
     $sslCheck = SslCheck::factory()->for($this->website)->make([
         'status' => SslStatusCalculator::STATUS_VALID,
         'days_until_expiry' => 45,
     ]);
-
+    
+    // Simulate what checkAndStoreCertificate would do - create and return the check
     $mockChecker = $this->mock(SslCertificateChecker::class);
     $mockChecker->shouldReceive('checkAndStoreCertificate')
         ->once()
         ->with($this->website)
-        ->andReturn($sslCheck);
+        ->andReturnUsing(function () use ($sslCheck) {
+            // Persist the check when the service is called
+            $sslCheck->save();
+            return $sslCheck;
+        });
 
     $job = new CheckSslCertificateJob($this->website);
     $job->handle($mockChecker);
@@ -125,7 +137,8 @@ test('ssl certificate job runs for old checks', function () {
 test('ssl certificate job uses correct queue', function () {
     $job = new CheckSslCertificateJob($this->website);
 
-    expect($job->queue)->toBe('ssl-monitoring');
+    // Jobs now use default queue for simplicity and reliability
+    expect($job->queue)->toBeNull(); // Default queue
 });
 
 test('ssl certificate job has proper configuration', function () {

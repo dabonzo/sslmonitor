@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\SslStatusChanged;
 use App\Models\Website;
 use App\Services\SslCertificateChecker;
 use App\Services\SslNotificationService;
@@ -47,6 +48,12 @@ class CheckSslCertificateJob implements ShouldQueue
             return;
         }
 
+        // Get previous status for real-time event comparison
+        $previousCheck = $this->website->sslChecks()
+            ->latest('checked_at')
+            ->first();
+        $previousStatus = $previousCheck?->status ?? 'unknown';
+
         try {
             Log::info("Starting SSL certificate check for: {$this->website->url}");
 
@@ -54,9 +61,20 @@ class CheckSslCertificateJob implements ShouldQueue
 
             Log::info("SSL check completed for {$this->website->url}", [
                 'status' => $sslCheck->status,
+                'previous_status' => $previousStatus,
                 'days_until_expiry' => $sslCheck->days_until_expiry ?? 'N/A',
                 'website_id' => $this->website->id,
             ]);
+
+            // Dispatch real-time event if status changed
+            if ($sslCheck->status !== $previousStatus) {
+                SslStatusChanged::dispatch($sslCheck, $previousStatus);
+                Log::info("SSL status change broadcasted", [
+                    'website' => $this->website->url,
+                    'from' => $previousStatus,
+                    'to' => $sslCheck->status,
+                ]);
+            }
 
             // Dispatch notification events for critical statuses
             $this->dispatchNotificationIfNeeded($sslCheck);
@@ -74,6 +92,16 @@ class CheckSslCertificateJob implements ShouldQueue
                 'checked_at' => now(),
                 'is_valid' => false,
             ]);
+
+            // Dispatch real-time event for error status
+            if ($previousStatus !== 'error') {
+                SslStatusChanged::dispatch($errorCheck, $previousStatus);
+                Log::info("SSL error status broadcasted", [
+                    'website' => $this->website->url,
+                    'from' => $previousStatus,
+                    'to' => 'error',
+                ]);
+            }
 
             // Queue error notification
             $this->dispatchNotificationIfNeeded($errorCheck);

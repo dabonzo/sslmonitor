@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\UptimeStatusChanged;
 use App\Models\UptimeCheck;
 use App\Models\Website;
 use App\Services\UptimeChecker;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CheckWebsiteUptimeJob implements ShouldQueue
 {
@@ -52,6 +54,12 @@ class CheckWebsiteUptimeJob implements ShouldQueue
             return;
         }
 
+        // Get previous status for real-time event comparison
+        $previousCheck = $this->website->uptimeChecks()
+            ->latest('checked_at')
+            ->first();
+        $previousStatus = $previousCheck?->status ?? 'unknown';
+
         try {
             // Perform uptime check
             $checkResult = $checker->checkWebsite($this->website);
@@ -69,6 +77,23 @@ class CheckWebsiteUptimeJob implements ShouldQueue
                 'checked_at' => now(),
             ]);
 
+            Log::info("Uptime check completed for {$this->website->url}", [
+                'status' => $uptimeCheck->status,
+                'previous_status' => $previousStatus,
+                'response_time' => $checkResult->responseTime,
+                'website_id' => $this->website->id,
+            ]);
+
+            // Dispatch real-time event if status changed
+            if ($uptimeCheck->status !== $previousStatus) {
+                UptimeStatusChanged::dispatch($uptimeCheck, $previousStatus);
+                Log::info("Uptime status change broadcasted", [
+                    'website' => $this->website->url,
+                    'from' => $previousStatus,
+                    'to' => $uptimeCheck->status,
+                ]);
+            }
+
             // Detect and handle downtime incidents
             $incident = $calculator->detectDowntimeIncident($this->website);
 
@@ -81,12 +106,27 @@ class CheckWebsiteUptimeJob implements ShouldQueue
 
         } catch (Exception $exception) {
             // Handle service exceptions gracefully by creating error record
-            UptimeCheck::create([
+            $uptimeCheck = UptimeCheck::create([
                 'website_id' => $this->website->id,
                 'status' => 'down',
                 'error_message' => $exception->getMessage(),
                 'checked_at' => now(),
             ]);
+
+            Log::error("Uptime check failed for {$this->website->url}", [
+                'error' => $exception->getMessage(),
+                'website_id' => $this->website->id,
+            ]);
+
+            // Dispatch real-time event for error status
+            if ($previousStatus !== 'down') {
+                UptimeStatusChanged::dispatch($uptimeCheck, $previousStatus);
+                Log::info("Uptime error status broadcasted", [
+                    'website' => $this->website->url,
+                    'from' => $previousStatus,
+                    'to' => 'down',
+                ]);
+            }
         }
     }
 }

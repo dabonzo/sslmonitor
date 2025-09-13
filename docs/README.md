@@ -60,11 +60,12 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Comprehensive Notifications** - Professional email alerts for SSL and uptime issues ⭐ NEW
 - **Granular Alert Preferences** - Control exactly which notifications you receive ⭐ NEW
 - **Real-time Dashboard** - Comprehensive overview of SSL certificate and uptime status
-- **Team Collaboration** - Share SSL monitoring with colleagues and teams
+- **Live WebSocket Updates** - Real-time SSL and uptime status changes via Laravel Reverb 🚀 NEW
+- **Team Collaboration** - Share SSL monitoring with colleagues and teams with real-time sync
 - **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles
 - **In-app Email Configuration** - Configure SMTP settings without server access
-- **Background Processing** - Queue-based SSL and uptime checking with Laravel Horizon dashboard
-- **Beautiful Interface** - Modern, responsive design with dark mode
+- **Advanced Monitoring** - Laravel Horizon + Pulse dashboards for queue management and performance insights
+- **Beautiful Interface** - Modern, responsive design with dark mode and live updates
 - **Comprehensive Testing** - 335+ tests ensuring reliability including uptime notifications ⭐ NEW
 
 ## 🏗️ Technology Stack
@@ -74,6 +75,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **PHP 8.2+** - Latest PHP with performance improvements
 - **MySQL 8.0+ / MariaDB 10.3+** - Relational database
 - **Redis** - Caching and queue management
+- **Laravel Reverb** - Native WebSocket server for real-time updates 🚀 NEW
 
 ### Frontend
 - **Livewire 3** - Full-stack reactive components
