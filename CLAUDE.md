@@ -25,7 +25,13 @@ git checkout -b feature/name
 ./vendor/bin/sail exec laravel.test ./vendor/bin/pint
 ./vendor/bin/sail artisan test                       # Final verification
 git commit -m "Professional commit message"
-# Update PROJECT_PLAN.md + docs/ as needed
+
+# MANDATORY: Update documentation after completing features
+# 1. PROJECT_PLAN.md - phases, tasks, test counts
+# 2. docs/README.md - test counts, feature descriptions
+# 3. docs/user-guide/ - user-facing documentation
+# 4. docs/admin-guide/ - admin commands and configuration
+git commit -m "Update documentation for [feature]"
 ```
 
 ## Advanced Patterns (from uptime monitoring implementation)
@@ -47,11 +53,20 @@ Phase 3: Background Jobs & Commands (24+ tests)
 Missing columns → Update original migration (not new one) → `migrate:rollback --step=1` → Update → `migrate`
 Factory errors → `make:factory` → Add `HasFactory` trait
 
-### Documentation Order
-1. PROJECT_PLAN.md (phases + test counts)
-2. Feature docs (user guides) 
-3. API docs (endpoints/commands)
-4. CLAUDE.md (new patterns)
+### Documentation Requirements (MANDATORY)
+**Always update documentation when completing features or phases:**
+
+1. **PROJECT_PLAN.md** - Update phases, tasks, test counts, completion status
+2. **docs/README.md** - Update test counts, feature lists, technology stack
+3. **docs/user-guide/** - Add/update user-facing guides for new features
+4. **docs/admin-guide/** - Update admin commands, configuration, deployment
+5. **CLAUDE.md** - Document new development patterns and lessons learned
+
+**Documentation Workflow:**
+- Update documentation BEFORE making final commit
+- Use separate documentation commit for clarity
+- Ensure all references to test counts are accurate
+- Add ⭐ NEW markers for new features in documentation
 
 ## Essential Commands
 
