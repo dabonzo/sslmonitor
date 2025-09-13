@@ -11,6 +11,7 @@ Documentation for end users of the SSL Monitor application.
 - **[Dashboard Overview](user-guide/dashboard-overview.md)** - Understanding your SSL status dashboard
 - **[Website Management](user-guide/website-management.md)** - Adding and managing monitored websites
 - **[Uptime Monitoring](user-guide/uptime-monitoring.md)** - Advanced uptime validation and content checking ⭐ NEW
+- **[Notification Settings](user-guide/notification-settings.md)** - Configuring email alerts and preferences ⭐ NEW
 - **[Team Management](user-guide/team-management.md)** - Collaborating with teams and colleagues
 - **[Email Configuration](user-guide/email-configuration.md)** - Setting up SMTP for notifications
 - **[SSL Status Guide](user-guide/ssl-status-guide.md)** - Understanding certificate statuses and alerts
@@ -56,13 +57,15 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Automated SSL Monitoring** - Daily checks of all monitored websites
 - **Advanced Uptime Monitoring** - Multi-level validation beyond simple HTTP 200 checks ⭐ NEW
 - **Content Validation** - Detect hosting company default pages and maintenance screens ⭐ NEW
+- **Comprehensive Notifications** - Professional email alerts for SSL and uptime issues ⭐ NEW
+- **Granular Alert Preferences** - Control exactly which notifications you receive ⭐ NEW
 - **Real-time Dashboard** - Comprehensive overview of SSL certificate and uptime status
 - **Team Collaboration** - Share SSL monitoring with colleagues and teams
 - **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles
 - **In-app Email Configuration** - Configure SMTP settings without server access
 - **Background Processing** - Queue-based SSL and uptime checking for reliability
 - **Beautiful Interface** - Modern, responsive design with dark mode
-- **Comprehensive Testing** - 314+ tests ensuring reliability including uptime monitoring ⭐ NEW
+- **Comprehensive Testing** - 335+ tests ensuring reliability including uptime notifications ⭐ NEW
 
 ## 🏗️ Technology Stack
 
@@ -83,7 +86,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Pest PHP 4** - Modern testing framework with TDD methodology
 - **Laravel Pint** - Code formatting and style enforcement
 - **Laravel Sail** - Docker development environment
-- **314+ comprehensive tests** - Full TDD coverage including team management and uptime monitoring
+- **335+ comprehensive tests** - Full TDD coverage including notifications and uptime monitoring
 
 ## 📊 System Requirements
 
