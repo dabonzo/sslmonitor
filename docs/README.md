@@ -21,7 +21,7 @@ Documentation for end users of the SSL Monitor application.
 Documentation for system administrators and deployers.
 
 - **[Installation](admin-guide/installation.md)** - Complete installation guide
-- **[Deployment](admin-guide/deployment.md)** - Production deployment checklist
+- **[Production Deployment](admin-guide/production-deployment.md)** - Comprehensive production deployment with all services 🆕
 - **[Environment Configuration](admin-guide/environment-config.md)** - .env configuration reference
 - **[Queue Management](admin-guide/queue-management.md)** - Setting up and monitoring background jobs
 - **[Artisan Commands](admin-guide/artisan-commands.md)** - Complete command reference
@@ -48,9 +48,9 @@ Documentation for developers working on the SSL Monitor codebase.
 
 ### For Administrators
 1. **Install** following the [installation guide](admin-guide/installation.md)
-2. **Configure** environment variables
-3. **Set up** background queue workers
-4. **Deploy** using the production checklist
+2. **Configure** environment variables and services
+3. **Deploy to Production** using the [comprehensive deployment guide](admin-guide/production-deployment.md) 🆕
+4. **Monitor** queue workers and real-time services with [queue management guide](admin-guide/queue-management.md)
 
 ## 🎯 Key Features
 
@@ -92,11 +92,25 @@ Documentation for developers working on the SSL Monitor codebase.
 
 ## 📊 System Requirements
 
-- **PHP**: 8.2 or higher
+### Development (Laravel Sail)
+- **Docker**: 20.10+ with Docker Compose
+- **PHP**: 8.2+ (provided by Sail)
+- **Node.js**: 18+ for asset compilation
+
+### Production Deployment
+- **PHP**: 8.2+ with required extensions
 - **Laravel**: 12.x
-- **Database**: MySQL 8.0+ or MariaDB 10.3+
-- **Queue Driver**: Redis (recommended) or Database
-- **Web Server**: Apache or Nginx
+- **Database**: MySQL 8.0+ or MariaDB 10.3+ or PostgreSQL 13+
+- **Redis**: 6.0+ (for caching, queues, and real-time features)
+- **Web Server**: Nginx 1.18+ or Apache 2.4+
+- **Process Manager**: Supervisor (for background services)
+- **SSL Certificate**: Required for HTTPS/WSS connections
+
+### Service Architecture
+- **Laravel Horizon**: Queue management and monitoring
+- **Laravel Pulse**: Performance monitoring dashboard  
+- **Laravel Reverb**: Real-time WebSocket server (Port 8080)
+- **Background Scheduler**: Automated SSL/uptime checks
 
 ## 🆘 Support
 
