@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AcceptInvitationRequest;
 use App\Services\TeamInvitationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -24,15 +23,15 @@ class InvitationController extends Controller
     {
         $invitation = $this->invitationService->getInvitationByToken($token);
 
-        if (!$invitation) {
+        if (! $invitation) {
             return redirect()->route('login')->with('error', 'Invalid invitation link.');
         }
 
-        if (!$invitation->isPending()) {
-            $message = $invitation->isAccepted() 
+        if (! $invitation->isPending()) {
+            $message = $invitation->isAccepted()
                 ? 'This invitation has already been accepted.'
                 : 'This invitation has expired or is no longer valid.';
-            
+
             return redirect()->route('login')->with('error', $message);
         }
 
@@ -52,7 +51,7 @@ class InvitationController extends Controller
         try {
             $invitation = $this->invitationService->getInvitationByToken($token);
 
-            if (!$invitation || !$invitation->isPending()) {
+            if (! $invitation || ! $invitation->isPending()) {
                 return redirect()->route('login')->with('error', 'Invalid or expired invitation.');
             }
 

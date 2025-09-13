@@ -35,6 +35,48 @@
         </div>
     </div>
 
+    @if($uptimeOverview['has_websites'])
+        <!-- Website Overview Summary -->
+        <div class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Website Overview</h2>
+                    <div class="flex items-center space-x-6 mt-2 text-sm">
+                        <div class="flex items-center">
+                            <span class="font-medium text-zinc-900 dark:text-white">{{ $uptimeOverview['total_websites'] }} websites</span>
+                            <span class="text-zinc-500 dark:text-zinc-400 ml-1">total</span>
+                        </div>
+                        
+                        @if($uptimeOverview['has_uptime_monitoring'])
+                            <div class="flex items-center">
+                                <span class="font-medium text-blue-600 dark:text-blue-400">{{ $uptimeOverview['monitored_websites'] }} monitored</span>
+                                <span class="text-zinc-500 dark:text-zinc-400 ml-1">for uptime</span>
+                            </div>
+                            
+                            @if($uptimeOverview['ssl_only_websites'] > 0)
+                                <div class="flex items-center">
+                                    <span class="font-medium text-zinc-600 dark:text-zinc-400">{{ $uptimeOverview['ssl_only_websites'] }} SSL only</span>
+                                </div>
+                            @endif
+                        @else
+                            <div class="flex items-center">
+                                <span class="font-medium text-amber-600 dark:text-amber-400">SSL only</span>
+                                <span class="text-zinc-500 dark:text-zinc-400 ml-1">monitoring</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                
+                @if($uptimeOverview['has_uptime_monitoring'])
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($uptimeAvailability, 1) }}%</div>
+                        <div class="text-xs text-zinc-500 dark:text-zinc-400">uptime availability</div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     @if($statusCounts['total'] === 0)
         <!-- Empty State -->
         <div class="text-center py-12">
@@ -131,6 +173,136 @@
                 </div>
             </div>
         </div>
+
+        @if($uptimeStatusCounts['total_monitored'] > 0)
+            <!-- Uptime Monitoring Overview -->
+            <div>
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Uptime Monitoring</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                    <!-- Up Status -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-green-200 dark:border-green-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                                <flux:icon name="check-circle" class="h-6 w-6 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Up</p>
+                                <p class="text-2xl font-semibold text-green-600 dark:text-green-400">{{ $uptimeStatusCounts['up'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusPercentages['up'] }}% of monitored</span>
+                        </div>
+                    </div>
+
+                    <!-- Down Status -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                                <flux:icon name="x-circle" class="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Down</p>
+                                <p class="text-2xl font-semibold text-red-600 dark:text-red-400">{{ $uptimeStatusCounts['down'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusPercentages['down'] }}% of monitored</span>
+                        </div>
+                    </div>
+
+                    <!-- Slow Status -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-yellow-200 dark:border-yellow-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                                <flux:icon name="exclamation-triangle" class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Slow</p>
+                                <p class="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{{ $uptimeStatusCounts['slow'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusPercentages['slow'] }}% of monitored</span>
+                        </div>
+                    </div>
+
+                    <!-- Content Mismatch -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-orange-200 dark:border-orange-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                                <flux:icon name="document-text" class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Content Issues</p>
+                                <p class="text-2xl font-semibold text-orange-600 dark:text-orange-400">{{ $uptimeStatusCounts['content_mismatch'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusPercentages['content_mismatch'] }}% of monitored</span>
+                        </div>
+                    </div>
+
+                    <!-- Unknown Status -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <flux:icon name="question-mark-circle" class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Unknown</p>
+                                <p class="text-2xl font-semibold text-gray-600 dark:text-gray-400">{{ $uptimeStatusCounts['unknown'] }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusPercentages['unknown'] }}% of monitored</span>
+                        </div>
+                    </div>
+
+                    <!-- Overall Availability -->
+                    <div class="p-4 bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-700 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                                <flux:icon name="chart-bar" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Availability</p>
+                                <p class="text-2xl font-semibold text-blue-600 dark:text-blue-400">{{ number_format($uptimeAvailability, 1) }}%</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $uptimeStatusCounts['total_monitored'] }} monitored</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Uptime Issues Section -->
+        @if($uptimeCriticalIssues->isNotEmpty())
+            <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
+                <div class="flex items-center mb-3">
+                    <flux:icon name="exclamation-triangle" class="h-5 w-5 text-orange-600 dark:text-orange-400 mr-2" />
+                    <h3 class="text-sm font-medium text-orange-800 dark:text-orange-200">Uptime Issues</h3>
+                </div>
+                <div class="space-y-2">
+                    @foreach($uptimeCriticalIssues as $website)
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-medium text-orange-700 dark:text-orange-300">{{ $website->name }}</span>
+                                <span class="text-orange-600 dark:text-orange-400">•</span>
+                                <span class="text-orange-600 dark:text-orange-400">
+                                    {{ $website->uptime_status === 'down' ? 'Website is down' : 'Content mismatch detected' }}
+                                </span>
+                            </div>
+                            <span class="text-xs text-orange-500 dark:text-orange-400">
+                                {{ $website->last_uptime_check_at ? $website->last_uptime_check_at->diffForHumans() : 'Never checked' }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <!-- Critical Issues Section -->
         @if($criticalIssues->isNotEmpty())

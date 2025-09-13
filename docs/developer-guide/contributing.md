@@ -703,6 +703,207 @@ Bus::batch([
 ])->dispatch();
 ```
 
+## 🚀 Advanced Development Patterns
+
+### Multi-Phase TDD Implementation
+
+For complex features spanning multiple layers (models → services → jobs → UI), use phase-based development:
+
+```bash
+# Phase 1: Models & Database
+./vendor/bin/sail artisan make:test --pest UptimeCheckTest
+./vendor/bin/sail artisan make:test --pest DowntimeIncidentTest
+
+# Phase 2: Services  
+./vendor/bin/sail artisan make:test --pest UptimeCheckerTest
+./vendor/bin/sail artisan make:test --pest UptimeStatusCalculatorTest
+
+# Phase 3: Background Jobs
+./vendor/bin/sail artisan make:test --pest CheckWebsiteUptimeJobTest
+
+# Each phase builds on the previous, ensuring solid foundation
+```
+
+#### Value Object Pattern for Service Responses
+
+```php
+// Create structured response objects for services
+class UptimeCheckResult
+{
+    public function __construct(
+        public string $status,
+        public ?int $httpStatusCode = null,
+        public ?int $responseTime = null,
+        public ?string $errorMessage = null,
+    ) {}
+}
+
+// Use in services for clean, testable interfaces
+public function checkWebsite(Website $website): UptimeCheckResult
+{
+    return new UptimeCheckResult(
+        status: 'up',
+        httpStatusCode: 200,
+        responseTime: 350
+    );
+}
+```
+
+### Advanced Testing Debugging Techniques
+
+#### Mock Expectation Debugging
+
+When tests fail unexpectedly, use debugging techniques:
+
+```php
+// Use dump() to debug what's actually being created
+test('job processes successfully', function () {
+    $job = new CheckWebsiteUptimeJob($this->website);
+    $job->handle($mockChecker, $mockCalculator);
+    
+    // Debug: Check what we have
+    $checks = UptimeCheck::all();
+    dump("Created records:", $checks->toArray());
+    
+    expect(UptimeCheck::count())->toBe(1);
+});
+```
+
+#### Parameter Name Mismatch Resolution
+
+```php
+// When service interfaces don't match expectations:
+// 1. Check the actual class definition
+// 2. Ensure parameter names match exactly
+// 3. Update tests to use correct parameter names
+
+// Wrong:
+new UptimeCheckResult(responseTimeMs: 350)
+
+// Correct:
+new UptimeCheckResult(responseTime: 350)
+```
+
+### Service Integration Testing Patterns
+
+```php
+// Mock complex service interactions properly
+test('job integrates with services correctly', function () {
+    $mockChecker = $this->mock(UptimeChecker::class);
+    $mockCalculator = $this->mock(UptimeStatusCalculator::class);
+    
+    // Mock ALL methods the job calls
+    $mockChecker->shouldReceive('checkWebsite')->once();
+    $mockCalculator->shouldReceive('detectDowntimeIncident')->once();
+    $mockCalculator->shouldReceive('calculateStatus')->once(); // Don't forget this!
+    
+    $job->handle($mockChecker, $mockCalculator);
+});
+```
+
+### Migration and Model Integration Workflow
+
+#### Handling Migration Issues
+
+```bash
+# When migrations need corrections:
+1. Check what columns exist: DESCRIBE table_name
+2. Create corrective migration if needed
+3. Update model fillable arrays and casts
+4. Run tests to verify integration
+
+# Example corrective migration:
+./vendor/bin/sail artisan make:migration add_missing_columns_to_table
+```
+
+#### Model Relationship Testing
+
+```php
+// Test complex model relationships thoroughly
+test('website has uptime monitoring relationships', function () {
+    $website = Website::factory()->create();
+    
+    // Test relationships exist
+    expect($website->uptimeChecks())->toBeInstanceOf(HasMany::class);
+    expect($website->downtimeIncidents())->toBeInstanceOf(HasMany::class);
+    
+    // Test relationship functionality
+    UptimeCheck::factory()->create(['website_id' => $website->id]);
+    expect($website->uptimeChecks()->count())->toBe(1);
+});
+```
+
+### Documentation Integration Best Practices
+
+#### Real-time Documentation Updates
+
+```bash
+# Always update PROJECT_PLAN.md with:
+1. Test count updates (+11 tests, 63 assertions)
+2. Phase completion status (✅ COMPLETE)
+3. Current implementation status
+4. Feature descriptions and capabilities
+
+# Example commit message:
+git commit -m "Update PROJECT_PLAN.md with uptime monitoring progress
+
+- Add Phase 7: Comprehensive Uptime Monitoring (74+ tests)
+- Update test coverage: 273+ total tests
+- Document multi-level validation capabilities"
+```
+
+#### Feature Planning Documentation
+
+Before implementing complex features, create comprehensive plans:
+
+```bash
+# Create feature implementation plan
+docs/feature-[feature-name]-plan.md
+
+# Include:
+- Problem statement with real-world examples
+- Technical architecture and database design  
+- Phase-by-phase implementation with TDD approach
+- Success criteria and testing strategy
+```
+
+### Queue Job Advanced Patterns
+
+#### Handling Trait Conflicts
+
+```php
+// When queue traits conflict:
+class CheckWebsiteUptimeJob implements ShouldQueue
+{
+    use Queueable, InteractsWithQueue, SerializesModels;
+    
+    // Don't declare public $queue - use onQueue() instead
+    public function __construct(public Website $website)
+    {
+        $this->onQueue('uptime-monitoring'); // Use method, not property
+    }
+}
+```
+
+#### Comprehensive Job Testing
+
+```php
+// Test ALL job aspects:
+test('job has proper configuration', function () {
+    $job = new CheckWebsiteUptimeJob($website);
+    
+    expect($job->tries)->toBe(3);
+    expect($job->timeout)->toBe(120);
+    expect($job->backoff())->toBe([30, 60, 120]);
+    
+    // Test queue via reflection for private property access
+    $reflection = new ReflectionClass($job);
+    $queueProperty = $reflection->getProperty('queue');
+    $queueProperty->setAccessible(true);
+    expect($queueProperty->getValue($job))->toBe('uptime-monitoring');
+});
+```
+
 ## 🎯 Next Steps
 
 After setting up your development environment:

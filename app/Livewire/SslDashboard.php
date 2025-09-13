@@ -123,6 +123,116 @@ class SslDashboard extends Component
             ->get();
     }
 
+    public function getUptimeStatusCountsProperty(): array
+    {
+        $userWebsites = auth()->user()->accessibleWebsitesQuery()->get();
+
+        if ($userWebsites->isEmpty()) {
+            return [
+                'up' => 0,
+                'down' => 0,
+                'slow' => 0,
+                'content_mismatch' => 0,
+                'unknown' => 0,
+                'total_monitored' => 0,
+                'total_websites' => 0,
+            ];
+        }
+
+        // Filter websites with uptime monitoring enabled
+        $monitoredWebsites = $userWebsites->where('uptime_monitoring', true);
+
+        // Count websites by uptime status
+        $statusCounts = [
+            'up' => 0,
+            'down' => 0,
+            'slow' => 0,
+            'content_mismatch' => 0,
+            'unknown' => 0,
+        ];
+
+        foreach ($monitoredWebsites as $website) {
+            $status = $website->uptime_status ?? 'unknown';
+            $statusCounts[$status] = ($statusCounts[$status] ?? 0) + 1;
+        }
+
+        $statusCounts['total_monitored'] = $monitoredWebsites->count();
+        $statusCounts['total_websites'] = $userWebsites->count();
+
+        return $statusCounts;
+    }
+
+    public function getUptimeStatusPercentagesProperty(): array
+    {
+        $counts = $this->uptimeStatusCounts;
+        $totalMonitored = $counts['total_monitored'];
+
+        if ($totalMonitored === 0) {
+            return [
+                'up' => 0.0,
+                'down' => 0.0,
+                'slow' => 0.0,
+                'content_mismatch' => 0.0,
+                'unknown' => 0.0,
+            ];
+        }
+
+        return [
+            'up' => round(($counts['up'] / $totalMonitored) * 100, 1),
+            'down' => round(($counts['down'] / $totalMonitored) * 100, 1),
+            'slow' => round(($counts['slow'] / $totalMonitored) * 100, 1),
+            'content_mismatch' => round(($counts['content_mismatch'] / $totalMonitored) * 100, 1),
+            'unknown' => round(($counts['unknown'] / $totalMonitored) * 100, 1),
+        ];
+    }
+
+    public function getUptimeAvailabilityProperty(): float
+    {
+        $counts = $this->uptimeStatusCounts;
+        $totalMonitored = $counts['total_monitored'];
+
+        if ($totalMonitored === 0) {
+            return 0.0;
+        }
+
+        // Consider 'up' and 'slow' as available, everything else as unavailable
+        $available = $counts['up'] + $counts['slow'];
+
+        return round(($available / $totalMonitored) * 100, 1);
+    }
+
+    public function getUptimeCriticalIssuesProperty(): Collection
+    {
+        $userWebsites = auth()->user()->accessibleWebsitesQuery()->get();
+
+        if ($userWebsites->isEmpty()) {
+            return collect();
+        }
+
+        // Get websites with uptime monitoring that have critical issues
+        return $userWebsites
+            ->where('uptime_monitoring', true)
+            ->whereIn('uptime_status', ['down', 'content_mismatch'])
+            ->values();
+    }
+
+    public function getUptimeOverviewProperty(): array
+    {
+        $userWebsites = auth()->user()->accessibleWebsitesQuery()->get();
+
+        $totalWebsites = $userWebsites->count();
+        $monitoredWebsites = $userWebsites->where('uptime_monitoring', true)->count();
+        $sslOnlyWebsites = $totalWebsites - $monitoredWebsites;
+
+        return [
+            'total_websites' => $totalWebsites,
+            'monitored_websites' => $monitoredWebsites,
+            'ssl_only_websites' => $sslOnlyWebsites,
+            'has_uptime_monitoring' => $monitoredWebsites > 0,
+            'has_websites' => $totalWebsites > 0,
+        ];
+    }
+
     public function refresh(): void
     {
         // This will trigger a re-render and recalculate all computed properties
@@ -141,6 +251,11 @@ class SslDashboard extends Component
             'team' => $user->primaryTeam(),
             'personalWebsitesCount' => $user->websites()->count(),
             'teamWebsitesCount' => $user->primaryTeam() ? $user->primaryTeam()->websites()->count() : 0,
+            'uptimeStatusCounts' => $this->uptimeStatusCounts,
+            'uptimeStatusPercentages' => $this->uptimeStatusPercentages,
+            'uptimeAvailability' => $this->uptimeAvailability,
+            'uptimeCriticalIssues' => $this->uptimeCriticalIssues,
+            'uptimeOverview' => $this->uptimeOverview,
         ]);
     }
 }

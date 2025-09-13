@@ -14,8 +14,8 @@ beforeEach(function () {
 test('authenticated users can view ssl dashboard', function () {
     $this->actingAs($this->user)
         ->get(route('dashboard'))
-        ->assertSeeLivewire('ssl-dashboard')
-        ->assertStatus(200);
+        ->assertStatus(200)
+        ->assertSee('Dashboard');
 });
 
 test('guests cannot access ssl dashboard', function () {

@@ -1,346 +1,112 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
+**Laravel SSL Certificate Monitor (v2)** - Secure, interactive SSL monitoring using TALL stack (Tailwind, Alpine.js, Livewire, Laravel) with Flux UI components.
 
-**Laravel SSL Certificate Monitor (v2)** - A secure, interactive Laravel application to monitor website SSL certificates using the TALL stack (Tailwind, Alpine.js, Livewire, Laravel). Built on the Laravel Livewire Starter Kit with Flux UI components.
+**Key Features**: Authentication (Laravel Breeze), interactive UI with Livewire, TDD with Pest, "Check Before Adding" SSL workflow, global notifications, uptime monitoring
 
-### Key Features
-
-- **Secure by Default**: Authentication powered by Laravel Breeze ensures monitored sites are private
-- **Interactive UI with Livewire**: Add, preview, and manage websites without page reloads with modal settings panels
-- **Test-Driven Development**: Built with Pest for robust and reliable code
-- **Real-time SSL Certificate Checking**: "Check Before Adding" workflow - enter URL, preview certificate details, then add to monitoring
-- **Global Notifications**: Centralized email and SMS notification settings (recipients, days-to-expiry)
-- **On-Page Feedback**: Real-time toast notifications for user actions
-
-### Planned Features
-
-- **Uptime Monitoring**: Verify websites are online in addition to SSL checks
-- **Detailed Site Views**: Historical SSL checks and uptime records per site
-- **User Roles**: Admin and user role management
-
-## Architecture
-
-- **Backend**: Laravel 12 with PHP 8.2+
-- **Frontend**: Livewire components with Flux UI library and Volt (single-file Livewire components)
-- **Styling**: TailwindCSS v4 with Vite for asset compilation
-- **Testing**: Pest PHP testing framework
-- **Code Quality**: Laravel Pint for code formatting
+**Architecture**: Laravel 12 + PHP 8.2+, Livewire + Flux UI + Volt, TailwindCSS v4 + Vite, Pest testing, Laravel Pint formatting
 
 ## Development Preferences
+**CRITICAL**: Always follow in ALL sessions:
+- **Use Laravel Sail**: `./vendor/bin/sail` prefix for all artisan/composer/npm commands
+- **Clean Git Commits**: NO "Generated with Claude Code" attributions
+- **TDD First**: Write tests → implement → refactor (red-green-refactor cycle)
+- **Feature Branches**: Never commit directly to main (`feature/name`, `bugfix/name`)
+- **Laravel Best Practices**: Service layers, form requests, policies, proper relationships with type hints
 
-**IMPORTANT**: Always follow these preferences in all sessions:
-- **Use Laravel Sail**: Always use `./vendor/bin/sail` prefix for artisan, composer, npm commands
-- **Clean Git Commits**: NEVER add "Generated with Claude Code" or similar attributions in commit messages
-- **Professional Standards**: Keep commit messages focused and professional
-- **Test-Driven Development**: ALWAYS use TDD approach with Pest PHP testing framework
-  - Write tests FIRST before implementing functionality
-  - Use `./vendor/bin/sail artisan make:test --pest TestName` to create tests
-  - Run tests frequently with `./vendor/bin/sail artisan test --filter=TestName`
-  - Follow red-green-refactor cycle: failing tests → implementation → passing tests
-
-## Complete Development Workflow
-
-### 1. Git Branching Strategy
-- **Always use feature branches** for new features, following standard development practices
-- **Branch naming conventions**: `feature/feature-name`, `bugfix/issue-name`, `hotfix/urgent-fix`
-- **Example**: `git checkout -b feature/user-notifications`
-- **Never commit directly to main branch**
-
-### 2. Architecture & Best Practices
-- **Follow Laravel best practices** - Use service layer, form requests, policies where appropriate
-- **Leverage Laravel Boost MCP server** for Laravel-specific guidance and documentation
-- **Use Eloquent relationships** properly with type hints
-- **Apply authorization policies** for multi-user features
-- **Service classes** for complex business logic
-- **Form Request classes** for validation instead of inline validation
-
-### 3. Testing Strategy (Pragmatic TDD)
-- **Comprehensive test coverage** for new features, but avoid over-testing trivial functionality
-- **Feature tests** for user workflows and component interactions  
-- **Unit tests** for complex business logic and services
-- **Model tests** for relationships and business methods
-- **Follow Laravel testing best practices** - use factories, database transactions, etc.
-
-### 4. Code Quality Standards
-- **ALWAYS run Laravel Pint** before committing: `./vendor/bin/sail exec laravel.test ./vendor/bin/pint`
-- **Run tests** before committing to ensure nothing breaks
-- **Follow existing code patterns** and conventions in the codebase
-- **Use proper type hints** and return types on methods
-
-### 5. Documentation Requirements
-- **ALWAYS update PROJECT_PLAN.md** when adding new features or completing phases
-- **Update relevant documentation** in docs/ folder for user-facing features
-- **Create user guides** for significant new functionality
-- **Keep README.md and docs/README.md** current with feature additions
-
-## Complete Development Workflow Example
-
-### Implementing a New Feature:
+## TDD Workflow
 ```bash
-# 1. Create feature branch
-git checkout -b feature/user-notifications
-
-# 2. Write tests FIRST (TDD Red phase)
-./vendor/bin/sail artisan make:test --pest UserNotificationTest
-
-# 3. Run failing tests to confirm red phase
-./vendor/bin/sail artisan test --filter=UserNotificationTest
-
-# 4. Implement minimal code to pass tests (TDD Green phase)
-# - Create models, migrations, services, components as needed
-# - Use Laravel Boost MCP server for best practices guidance
-
-# 5. Run tests until they pass
-./vendor/bin/sail artisan test --filter=UserNotificationTest
-
-# 6. Refactor code while maintaining test coverage (TDD Refactor phase)
-# - Clean up code, extract services, improve structure
-# - Re-run tests to ensure they still pass
-
-# 7. Run code formatting before committing
+git checkout -b feature/name
+./vendor/bin/sail artisan make:test --pest TestName  # Write tests FIRST
+./vendor/bin/sail artisan test --filter=TestName     # Red: failing tests
+# Implement minimal code to pass tests               # Green: passing tests  
+# Refactor while maintaining test coverage           # Refactor: clean code
 ./vendor/bin/sail exec laravel.test ./vendor/bin/pint
-
-# 8. Run all tests to ensure nothing broke
-./vendor/bin/sail artisan test
-
-# 9. Commit with clean, professional message
-git add .
-git commit -m "Add user notification system with email and SMS support"
-
-# 10. Update documentation
-# - Add to PROJECT_PLAN.md
-# - Update docs/README.md 
-# - Create user guide if needed
-
-# 11. Commit documentation updates
-git add .
-git commit -m "Update documentation for user notification feature"
-
-# 12. Final verification and merge back to main
-# Run final comprehensive test to ensure everything works
-./vendor/bin/sail artisan test --filter=FeatureName
-
-# Switch to main branch and merge
-git checkout main
-git pull origin main  # Get any updates from remote
-git merge feature/feature-name
-
-# 13. Final test after merge
-./vendor/bin/sail artisan test --filter=FeatureName --stop-on-failure
-
-# 14. Clean up feature branch
-git branch -d feature/feature-name
+./vendor/bin/sail artisan test                       # Final verification
+git commit -m "Professional commit message"
+# Update PROJECT_PLAN.md + docs/ as needed
 ```
 
-## Development Commands
+## Advanced Patterns (from uptime monitoring implementation)
 
-### Core Laravel Commands (with Sail)
-- `./vendor/bin/sail artisan serve` - Start development server (not needed with Sail)
-- `./vendor/bin/sail artisan migrate` - Run database migrations
-- `./vendor/bin/sail artisan key:generate` - Generate application key
-- `./vendor/bin/sail artisan queue:listen --tries=1` - Start queue worker
-- `./vendor/bin/sail artisan pail --timeout=0` - Start log monitoring
-
-### Asset Compilation ⚠️ CRITICAL FOR FRONTEND DEVELOPMENT
-- `./vendor/bin/sail npm run dev` - **REQUIRED: Start Vite development server with hot reload**
-  - ⚠️ **MUST BE RUNNING for CSS/JS changes to work**
-  - ⚠️ **Required for Tailwind CSS compilation**
-  - ⚠️ **Without this, hover effects and styling changes won't work**
-- `./vendor/bin/sail npm run build` - Build production assets
-
-### Development Workflow (with Sail)
-- `./vendor/bin/sail composer run dev` - Starts all development services concurrently (server, queue, logs, vite)
-- `./vendor/bin/sail npm run dev` - **Start this FIRST for any frontend work**
-- `./vendor/bin/sail artisan test` - Clear config cache and run tests
-- `./vendor/bin/sail exec laravel.test ./vendor/bin/pest` - Run tests directly with Pest
-- `./vendor/bin/sail exec laravel.test ./vendor/bin/pint` - Format code with Laravel Pint
-
-### Laravel Sail (Docker)
-- `./vendor/bin/sail up -d` - Start Docker containers in background
-- `./vendor/bin/sail artisan [command]` - Run artisan commands in container
-- `./vendor/bin/sail npm [command]` - Run npm commands in container
-- Uses `docker-compose.yml` for containerized development
-- Includes MySQL database and Mailpit for local mail testing
-
-### Scheduler (Production)
+### Multi-Phase TDD
+Break large features into phases with clear testing checkpoints:
 ```bash
-# Add to crontab for production SSL monitoring checks
-* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+Phase 1: Core Models & Database (35 tests)
+Phase 2: Service Layer & Value Objects (28+ tests)  
+Phase 3: Background Jobs & Commands (24+ tests)
 ```
 
-### Cache Management ⚠️ CRITICAL FOR PROPER FUNCTIONALITY
-Laravel caches routes, config, and other data for performance. **ALWAYS clear caches** when:
+### Testing Debugging
+**Mock Issues**: Add ALL method expectations, use specific counts (`toBe(1)` not `toBeGreaterThan(0)`)
+**Parameter Mismatches**: Check actual service class parameter names  
+**Test Matrix**: Cover happy/error/edge cases + exception/business logic/infrastructure
 
-#### **When to Clear Caches:**
-- ✅ **Adding new routes** (web.php, api.php changes)
-- ✅ **Installing new packages** (Telescope, Sanctum, etc.)
-- ✅ **Changing .env configuration** (APP_URL, database, mail settings)
-- ✅ **Adding middleware or service providers**
-- ✅ **Route or config changes not taking effect**
-- ✅ **"Route not found" or "Class not found" errors**
+### Migration Workflows
+Missing columns → Update original migration (not new one) → `migrate:rollback --step=1` → Update → `migrate`
+Factory errors → `make:factory` → Add `HasFactory` trait
 
-#### **Essential Cache Commands:**
+### Documentation Order
+1. PROJECT_PLAN.md (phases + test counts)
+2. Feature docs (user guides) 
+3. API docs (endpoints/commands)
+4. CLAUDE.md (new patterns)
+
+## Essential Commands
+
+### Frontend Development (CRITICAL)
 ```bash
-# FULL CACHE RESET (use when things aren't working)
-./vendor/bin/sail artisan optimize:clear
-
-# INDIVIDUAL CACHE CLEARING
-./vendor/bin/sail artisan route:clear      # Clear route cache
-./vendor/bin/sail artisan config:clear     # Clear config cache  
-./vendor/bin/sail artisan view:clear       # Clear compiled views
-./vendor/bin/sail artisan cache:clear      # Clear application cache
-
-# REBUILD CACHES (optional - Laravel will rebuild automatically)
-./vendor/bin/sail artisan route:cache      # Cache routes for performance
-./vendor/bin/sail artisan config:cache     # Cache config for performance
+./vendor/bin/sail npm run dev        # REQUIRED for CSS/JS changes, Tailwind compilation
+./vendor/bin/sail npm run build      # Production assets
+./vendor/bin/sail composer run dev   # All dev services (server, queue, logs, vite)
 ```
 
-#### **Development Workflow Integration:**
+### Testing & Code Quality  
 ```bash
-# After adding new routes or changing config
-./vendor/bin/sail artisan route:clear && ./vendor/bin/sail artisan config:clear
-
-# Quick "fix everything" command when stuff breaks
-./vendor/bin/sail artisan optimize:clear
-
-# After installing packages like Telescope
-./vendor/bin/sail artisan route:clear && ./vendor/bin/sail artisan route:cache
+./vendor/bin/sail artisan test --filter=TestName
+./vendor/bin/sail exec laravel.test ./vendor/bin/pint
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan queue:listen --tries=1
 ```
 
-## Key Dependencies
-
-### Core SSL Monitoring
-- **spatie/ssl-certificate**: SSL certificate checking and validation
-- **laravel/breeze**: Authentication scaffolding
-
-### PHP
-- **livewire/flux**: Premium UI component library (requires license key)
-- **livewire/volt**: Single-file Livewire components
-- **pestphp/pest**: Modern PHP testing framework
-- **laravel/pint**: Code formatting tool
-
-### JavaScript
-- **@tailwindcss/vite**: TailwindCSS v4 integration
-- **concurrently**: Used for running multiple dev processes
-
-### Optional Integrations
-- **Twilio**: SMS notifications (requires TWILIO_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER in .env)
-- **Mailpit**: Local mail testing (included with Sail)
-
-## Application Structure
-
-### SSL Monitoring Workflow
-1. **"Check Before Adding" Process**:
-   - User enters URL in form
-   - Livewire immediately checks SSL certificate in background
-   - Certificate details displayed for review
-   - Single click adds site to monitoring database
-
-### Livewire Components
-- `app/Livewire/Auth/` - Authentication components (Login, Register, etc.)
-- `app/Livewire/Settings/` - User settings components (Profile, Password, etc.)
-- `app/Livewire/Actions/` - Action components (Logout, etc.)
-
-### Authentication
-- Uses Laravel Breeze authentication with Livewire components
-- Email verification support included
-- All monitoring features require user login (secure by default)
-
-## Testing
-
-### Test-Driven Development with Pest
-- Test files located in `tests/Feature/` and `tests/Unit/`
-- Uses Pest PHP framework for simplicity and readability
-- PHPUnit configuration in `phpunit.xml`
-- Test database uses SQLite (`testing` database)
-
-### Test Coverage
-- **Feature Tests**: User interactions like adding websites, SSL certificate workflow
-- **Unit Tests**: Model logic including SSL status calculations
-- **Command Tests**: Scheduled tasks and SSL monitoring commands
-
-### Running Tests
-- `./vendor/bin/sail artisan test` - Run all tests with Sail
-- `./vendor/bin/sail artisan test --filter=TestName` - Run specific tests
-- `./vendor/bin/sail exec laravel.test ./vendor/bin/pest` - Run tests directly with Pest
-
-## Flux UI Setup
-
-This project requires Flux UI credentials configured in `composer.json`:
+### Cache Management (When Things Break)
+**Clear When**: Adding routes, installing packages, changing .env, middleware/service providers
 ```bash
-composer config http-basic.composer.fluxui.dev "username" "license-key"
+./vendor/bin/sail artisan optimize:clear     # Nuclear option (fixes most issues)
+./vendor/bin/sail artisan route:clear       # After route changes
+./vendor/bin/sail artisan config:clear      # After config changes
 ```
+
+### Docker
+```bash
+./vendor/bin/sail up -d                      # Start containers
+# All commands use ./vendor/bin/sail prefix (artisan, npm, composer)
+```
+
+## Stack & Dependencies
+**Core**: spatie/ssl-certificate, laravel/breeze, livewire/flux (requires license), livewire/volt, pestphp/pest, laravel/pint
+**Frontend**: @tailwindcss/vite, concurrently  
+**Optional**: Twilio SMS (TWILIO_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER), Mailpit (included)
+
+## App Structure
+**SSL Workflow**: URL entry → Livewire background check → Certificate preview → Single-click add
+**Components**: `app/Livewire/{Auth,Settings,Actions}/`
+**Auth**: Laravel Breeze + Livewire, email verification, secure by default
+**Testing**: Pest in `tests/{Feature,Unit}/`, SQLite testing DB
 
 ## Troubleshooting
+**CSS/Tailwind not working**: Start `./vendor/bin/sail npm run dev` (MUST be running)
+**New classes not recognized**: Restart Vite dev server + clear browser cache
+**Livewire styles not updating**: Ensure Vite running + check console errors
 
-### Frontend Development Issues
-**Problem:** CSS changes, hover effects, or Tailwind classes not working
-**Solution:** Ensure Vite dev server is running:
+## Environment (Key Variables)
 ```bash
-./vendor/bin/sail npm run dev
+# Database: mysql/sail/password (handled by Sail)
+# Performance: Redis for cache/session/queue
+# Mail: mailpit for local dev (port 1025)  
+# SMS: Optional Twilio integration
 ```
-
-**Problem:** New Tailwind classes not being recognized
-**Solution:** 
-1. Stop and restart Vite dev server
-2. If still not working, build assets: `./vendor/bin/sail npm run build`
-3. Clear browser cache and refresh
-
-**Problem:** Livewire components not updating styles
-**Solution:**
-1. Ensure Vite is running: `./vendor/bin/sail npm run dev`
-2. Check browser console for errors
-3. Refresh the page after CSS changes
-
-## Environment Configuration
-
-### Required Environment Variables
-```bash
-# Database (handled by Sail)
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=ssl_monitor
-DB_USERNAME=sail
-DB_PASSWORD=password
-
-# Performance Configuration (Redis for caching, sessions, queues)
-CACHE_STORE=redis
-SESSION_DRIVER=redis
-QUEUE_CONNECTION=redis
-
-# Redis Configuration (handled by Sail)
-REDIS_CLIENT=phpredis
-REDIS_HOST=redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-# Mail Notifications
-MAIL_MAILER=smtp
-MAIL_HOST=mailpit  # For local development
-MAIL_PORT=1025
-MAIL_FROM_ADDRESS="hello@example.com"
-
-# SMS Notifications (Optional)
-TWILIO_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_phone
-```
-
-## CI/CD
-
-GitHub Actions workflows:
-- **Lint**: Runs Laravel Pint on push/PR to main/develop branches
-- **Tests**: Runs full test suite including asset building and Pest tests
-
-## Future Enhancements Roadmap
-
-- **Uptime Monitoring**: Add scheduled commands to ping URLs and check for 200 OK status with downtime logging and immediate alerts
-- **Detailed Site Views**: Dedicated pages showing historical SSL checks and uptime records per site
-- **User Roles**: Admin role for user management and user role for personal site management
 
 ===
 
@@ -357,6 +123,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - php - 8.4.12
 - laravel/framework (LARAVEL) - v12
 - laravel/prompts (PROMPTS) - v0
+- laravel/telescope (TELESCOPE) - v5
 - livewire/flux (FLUXUI_FREE) - v2
 - livewire/livewire (LIVEWIRE) - v3
 - livewire/volt (VOLT) - v1
@@ -554,7 +321,7 @@ avatar, badge, brand, breadcrumbs, button, callout, checkbox, dropdown, field, h
 
 ## Livewire Core
 - Use the `search-docs` tool to find exact version specific documentation for how to write Livewire & Livewire tests.
-- Use the `php artisan make:livewire [Posts\\CreatePost]` artisan command to create new components
+- Use the `php artisan make:livewire [Posts\CreatePost]` artisan command to create new components
 - State should live on the server, with the UI reflecting it.
 - All Livewire requests hit the Laravel backend, they're like regular HTTP requests. Always validate form data, and run authorization checks in Livewire actions.
 

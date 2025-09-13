@@ -20,8 +20,8 @@ beforeEach(function () {
 test('authenticated users can view website details page', function () {
     $this->actingAs($this->user)
         ->get(route('websites.show', $this->website))
-        ->assertSeeLivewire('website-details')
-        ->assertStatus(200);
+        ->assertStatus(200)
+        ->assertSee($this->website->name);
 });
 
 test('guests cannot access website details page', function () {

@@ -55,6 +55,67 @@
                 </div>
             </div>
 
+            <!-- Uptime Monitoring Settings -->
+            <div class="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
+                <div class="flex items-center space-x-2 mb-4">
+                    <flux:switch wire:model.live="uptime_monitoring" />
+                    <label class="text-sm font-medium text-zinc-900 dark:text-white">Enable Uptime Monitoring</label>
+                </div>
+
+                @if($uptime_monitoring)
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-zinc-900 dark:text-white">Expected Status Code</label>
+                            <flux:input wire:model="expected_status_code" type="number" min="100" max="599" placeholder="200" />
+                            @error('expected_status_code')
+                                <div class="text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-zinc-900 dark:text-white">Max Response Time (ms)</label>
+                            <flux:input wire:model="max_response_time" type="number" min="1000" max="120000" placeholder="30000" />
+                            @error('max_response_time')
+                                <div class="text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-zinc-900 dark:text-white">Expected Content</label>
+                            <flux:input wire:model="expected_content" placeholder="Text that should be present on the page" />
+                            @error('expected_content')
+                                <div class="text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-zinc-900 dark:text-white">Forbidden Content</label>
+                            <flux:input wire:model="forbidden_content" placeholder="Text that should NOT be present on the page" />
+                            @error('forbidden_content')
+                                <div class="text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <flux:switch wire:model.live="follow_redirects" />
+                            <label class="text-sm font-medium text-zinc-900 dark:text-white">Follow Redirects</label>
+                        </div>
+
+                        @if($follow_redirects)
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-zinc-900 dark:text-white">Max Redirects</label>
+                                <flux:input wire:model="max_redirects" type="number" min="1" max="10" placeholder="3" class="w-24" />
+                                @error('max_redirects')
+                                    <div class="text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
             <!-- SSL Certificate Preview -->
             @if($url && !$isCheckingCertificate && !$certificatePreview)
                 <div class="mt-4">
@@ -159,8 +220,46 @@
                                         @else
                                             <flux:badge variant="outline" color="blue" size="xs">Personal</flux:badge>
                                         @endif
+
+                                        <!-- Uptime Status -->
+                                        @if($website->uptime_monitoring)
+                                            <flux:badge 
+                                                :color="match($website->uptime_status) {
+                                                    'up' => 'green',
+                                                    'down' => 'red',
+                                                    'slow' => 'yellow',
+                                                    'content_mismatch' => 'orange',
+                                                    'unknown' => 'gray',
+                                                    default => 'gray'
+                                                }" 
+                                                size="xs"
+                                            >
+                                                {{ match($website->uptime_status) {
+                                                    'up' => 'Up',
+                                                    'down' => 'Down',
+                                                    'slow' => 'Slow',
+                                                    'content_mismatch' => 'Content Issue',
+                                                    'unknown' => 'Unknown',
+                                                    default => 'Unknown'
+                                                } }}
+                                            </flux:badge>
+                                        @else
+                                            <flux:badge variant="outline" color="zinc" size="xs">SSL Only</flux:badge>
+                                        @endif
                                     </div>
                                     <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ $website->url }}</p>
+                                    
+                                    <!-- Uptime Check Info -->
+                                    @if($website->uptime_monitoring)
+                                        <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                                            @if($website->last_uptime_check_at)
+                                                <span>Last checked: {{ $website->last_uptime_check_at->diffForHumans() }}</span>
+                                            @else
+                                                <span>Never checked</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    
                                     @if($website->isTeamWebsite() && $website->addedBy)
                                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                                             Added by {{ $website->addedBy->name }}
@@ -171,6 +270,17 @@
                         </div>
                         
                         <div class="flex items-center space-x-2">
+                            @if($website->uptime_monitoring)
+                                <flux:button 
+                                    wire:click="checkUptime({{ $website->id }})" 
+                                    variant="ghost" 
+                                    size="sm"
+                                    icon="arrow-path"
+                                >
+                                    Check Uptime
+                                </flux:button>
+                            @endif
+                            
                             <flux:button 
                                 href="{{ route('websites.show', $website) }}" 
                                 variant="ghost" 

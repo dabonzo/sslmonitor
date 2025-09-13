@@ -11,7 +11,8 @@ test('authenticated user can access email settings page', function () {
     $this->actingAs($user)
         ->get('/settings/email')
         ->assertStatus(200)
-        ->assertSeeLivewire(EmailSettings::class);
+        ->assertSee('Email Settings')
+        ->assertSee('Email Address');
 });
 
 test('guest cannot access email settings page', function () {

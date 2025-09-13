@@ -2,16 +2,19 @@
 
 namespace App\Jobs;
 
-use App\Models\{UptimeCheck, Website};
-use App\Services\{UptimeChecker, UptimeStatusCalculator};
+use App\Models\UptimeCheck;
+use App\Models\Website;
+use App\Services\UptimeChecker;
+use App\Services\UptimeStatusCalculator;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\{InteractsWithQueue, SerializesModels};
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CheckWebsiteUptimeJob implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels;
+    use InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * The number of times the job may be attempted.
@@ -45,7 +48,7 @@ class CheckWebsiteUptimeJob implements ShouldQueue
     public function handle(UptimeChecker $checker, UptimeStatusCalculator $calculator): void
     {
         // Skip if uptime monitoring is not enabled for this website
-        if (!$this->website->uptime_monitoring) {
+        if (! $this->website->uptime_monitoring) {
             return;
         }
 

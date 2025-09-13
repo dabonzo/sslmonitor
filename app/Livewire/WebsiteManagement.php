@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Jobs\CheckSslCertificateJob;
+use App\Jobs\CheckWebsiteUptimeJob;
 use App\Models\Website;
 use App\Services\SslCertificateChecker;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,6 +19,25 @@ class WebsiteManagement extends Component
 
     #[Validate('required|url|max:255')]
     public $url = '';
+
+    public $uptime_monitoring = false;
+
+    #[Validate('nullable|integer|min:100|max:599')]
+    public $expected_status_code = 200;
+
+    #[Validate('nullable|string|max:500')]
+    public $expected_content = '';
+
+    #[Validate('nullable|string|max:500')]
+    public $forbidden_content = '';
+
+    #[Validate('nullable|integer|min:1000|max:120000')]
+    public $max_response_time = 30000;
+
+    public $follow_redirects = true;
+
+    #[Validate('nullable|integer|min:1|max:10')]
+    public $max_redirects = 3;
 
     public $editingWebsiteId = null;
 
@@ -45,18 +65,48 @@ class WebsiteManagement extends Component
         return (object) [
             'name' => $this->name,
             'url' => $this->url,
+            'uptime_monitoring' => $this->uptime_monitoring,
+            'expected_status_code' => $this->expected_status_code,
+            'expected_content' => $this->expected_content,
+            'forbidden_content' => $this->forbidden_content,
+            'max_response_time' => $this->max_response_time,
+            'follow_redirects' => $this->follow_redirects,
+            'max_redirects' => $this->max_redirects,
         ];
     }
 
     public function save()
     {
-        $this->validate();
+        $this->validateForm();
 
         if ($this->editingWebsiteId) {
             $this->updateWebsite();
         } else {
             $this->createWebsite();
         }
+    }
+
+    protected function validateForm()
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'url' => 'required|url|max:255',
+            'uptime_monitoring' => 'boolean',
+        ];
+
+        if ($this->uptime_monitoring) {
+            $rules['expected_status_code'] = 'required|integer|min:100|max:599';
+            $rules['expected_content'] = 'nullable|string|max:500';
+            $rules['forbidden_content'] = 'nullable|string|max:500';
+            $rules['max_response_time'] = 'required|integer|min:1000|max:120000';
+            $rules['follow_redirects'] = 'boolean';
+
+            if ($this->follow_redirects) {
+                $rules['max_redirects'] = 'required|integer|min:1|max:10';
+            }
+        }
+
+        $this->validate($rules);
     }
 
     protected function createWebsite()
@@ -68,6 +118,13 @@ class WebsiteManagement extends Component
         $websiteData = [
             'name' => $this->name,
             'url' => $this->url,
+            'uptime_monitoring' => $this->uptime_monitoring,
+            'expected_status_code' => $this->expected_status_code,
+            'expected_content' => $this->expected_content,
+            'forbidden_content' => $this->forbidden_content,
+            'max_response_time' => $this->max_response_time,
+            'follow_redirects' => $this->follow_redirects,
+            'max_redirects' => $this->max_redirects,
         ];
 
         // If user has a team, add to team; otherwise keep personal
@@ -93,6 +150,13 @@ class WebsiteManagement extends Component
         $website->update([
             'name' => $this->name,
             'url' => $this->url,
+            'uptime_monitoring' => $this->uptime_monitoring,
+            'expected_status_code' => $this->expected_status_code,
+            'expected_content' => $this->expected_content,
+            'forbidden_content' => $this->forbidden_content,
+            'max_response_time' => $this->max_response_time,
+            'follow_redirects' => $this->follow_redirects,
+            'max_redirects' => $this->max_redirects,
         ]);
 
         $this->dispatch('website-updated');
@@ -107,6 +171,13 @@ class WebsiteManagement extends Component
         $this->editingWebsiteId = $websiteId;
         $this->name = $website->name;
         $this->url = $website->url;
+        $this->uptime_monitoring = $website->uptime_monitoring;
+        $this->expected_status_code = $website->expected_status_code;
+        $this->expected_content = $website->expected_content;
+        $this->forbidden_content = $website->forbidden_content;
+        $this->max_response_time = $website->max_response_time;
+        $this->follow_redirects = $website->follow_redirects;
+        $this->max_redirects = $website->max_redirects;
         $this->certificatePreview = null;
     }
 
@@ -146,9 +217,35 @@ class WebsiteManagement extends Component
         $this->isCheckingCertificate = false;
     }
 
+    public function checkUptime($websiteId)
+    {
+        $website = Website::findOrFail($websiteId);
+        $this->authorize('update', $website);
+
+        if (! $website->uptime_monitoring) {
+            return;
+        }
+
+        // Queue uptime check job
+        CheckWebsiteUptimeJob::dispatch($website);
+
+        $this->dispatch('uptime-check-queued');
+    }
+
     public function resetForm()
     {
-        $this->reset(['name', 'url', 'editingWebsiteId', 'certificatePreview']);
+        $this->reset([
+            'name', 'url', 'editingWebsiteId', 'certificatePreview',
+            'uptime_monitoring', 'expected_status_code', 'expected_content',
+            'forbidden_content', 'max_response_time', 'follow_redirects', 'max_redirects',
+        ]);
+
+        // Reset to defaults
+        $this->uptime_monitoring = false;
+        $this->expected_status_code = 200;
+        $this->max_response_time = 30000;
+        $this->follow_redirects = true;
+        $this->max_redirects = 3;
     }
 
     public function render()

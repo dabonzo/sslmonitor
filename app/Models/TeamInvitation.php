@@ -11,7 +11,7 @@ class TeamInvitation extends Model
     protected $fillable = [
         'team_id',
         'email',
-        'role', 
+        'role',
         'token',
         'invited_by',
         'status',
@@ -26,8 +26,11 @@ class TeamInvitation extends Model
 
     // Status constants
     const STATUS_PENDING = 'pending';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_EXPIRED = 'expired';
+
     const STATUS_CANCELLED = 'cancelled';
 
     /**
@@ -51,7 +54,7 @@ class TeamInvitation extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING && !$this->isExpired();
+        return $this->status === self::STATUS_PENDING && ! $this->isExpired();
     }
 
     /**
@@ -112,7 +115,7 @@ class TeamInvitation extends Model
     {
         return [
             'admin' => 'Admin',
-            'manager' => 'Manager', 
+            'manager' => 'Manager',
             'viewer' => 'Viewer',
         ];
     }

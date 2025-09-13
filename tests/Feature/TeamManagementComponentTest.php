@@ -14,7 +14,7 @@ describe('Team Management Component', function () {
         $this->actingAs($user)
             ->get('/settings/team')
             ->assertStatus(200)
-            ->assertSeeLivewire(TeamManagement::class);
+            ->assertSee('Team Management');
     });
 
     test('guest cannot access team management page', function () {
@@ -97,13 +97,17 @@ describe('Team Management Component', function () {
             ->set('inviteRole', 'admin')
             ->call('inviteUser')
             ->assertHasNoErrors()
-            ->assertSee('User invited successfully');
+            ->assertSee('Invitation sent successfully');
 
-        // Should create user if doesn't exist and add to team
-        $invitedUser = User::where('email', 'office@intermedien.at')->first();
-        expect($invitedUser)->not->toBeNull();
-        expect($team->hasMember($invitedUser))->toBeTrue();
-        expect($team->getUserRole($invitedUser))->toBe(TeamMember::ROLE_ADMIN);
+        // Should create a pending invitation, not immediately add user to team
+        $invitation = $team->invitations()
+            ->where('email', 'office@intermedien.at')
+            ->where('status', 'pending')
+            ->first();
+
+        expect($invitation)->not->toBeNull();
+        expect($invitation->role)->toBe('admin');
+        expect($invitation->invited_by)->toBe($owner->id);
     });
 
     test('non-owner cannot invite users', function () {

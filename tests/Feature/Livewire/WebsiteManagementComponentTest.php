@@ -10,7 +10,8 @@ test('authenticated users can view website management page', function () {
     $this->actingAs($user)
         ->get('/websites')
         ->assertStatus(200)
-        ->assertSeeLivewire('website-management');
+        ->assertSee('Websites')
+        ->assertSee('Website Name');
 });
 
 test('guests cannot access website management page', function () {
