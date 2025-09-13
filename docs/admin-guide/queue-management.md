@@ -1,29 +1,37 @@
 # Queue Management
 
-SSL Monitor uses Laravel's queue system for background processing of SSL certificate checks, uptime monitoring, and email notifications. This guide covers queue management for administrators.
+SSL Monitor uses Laravel's queue system with **Laravel Horizon** for advanced queue management and monitoring. This guide covers queue management for administrators.
 
 ## Overview
 
-All background jobs use Laravel's **default queue** for simplicity and reliability:
+All background jobs use Laravel's **default queue** with Horizon for advanced monitoring:
 - **SSL certificate checks** (`CheckSslCertificateJob`)
 - **Uptime monitoring checks** (`CheckWebsiteUptimeJob`) 
 - **SSL notifications** (`SendSslNotificationJob`)
 - **Uptime notifications** (`SendUptimeNotificationJob`)
 
+## Laravel Horizon Dashboard
+
+**Horizon provides a beautiful web dashboard** for monitoring queue performance:
+- **URL**: http://localhost/horizon (development)  
+- **Features**: Real-time job metrics, failed job management, performance insights
+- **Access**: Automatically available in local development environment
+
 ## Queue Worker Management
 
 ### Development Environment (Laravel Sail)
 
-#### Starting Queue Worker
+#### Starting Horizon (Recommended)
 ```bash
-# Start queue worker (processes default queue)
-./vendor/bin/sail artisan queue:work
+# Horizon starts automatically with Sail
+./vendor/bin/sail up -d
 
-# Start with specific options
-./vendor/bin/sail artisan queue:work --sleep=3 --tries=3 --max-time=3600
-
-# Start all development services (recommended)
+# Start all development services (includes Horizon)
 ./vendor/bin/sail composer run dev
+
+# Manual Horizon commands (if needed)
+./vendor/bin/sail artisan horizon          # Start Horizon
+./vendor/bin/sail artisan horizon:terminate # Stop Horizon
 ```
 
 #### Stopping Queue Worker
@@ -261,3 +269,27 @@ The queue system integrates with the monitoring commands:
 ```
 
 For more information on monitoring commands, see [Artisan Commands](artisan-commands.md).
+
+## Laravel Horizon Features
+
+### Dashboard Overview
+Access the Horizon dashboard at **http://localhost/horizon** to monitor:
+- **Real-time Job Processing**: See jobs being processed live
+- **Queue Metrics**: Throughput, response times, and job counts
+- **Failed Jobs**: Easy retry and investigation of failed jobs
+- **Supervisor Status**: Monitor queue worker health
+- **Job Tags**: Track specific job types (SSL checks, uptime monitoring)
+
+### Key Metrics Available
+- **Jobs per Minute**: Current processing rate
+- **Average Wait Time**: How long jobs wait in queue
+- **Processes**: Number of active worker processes
+- **Recent Jobs**: Latest completed and failed jobs
+- **Failed Jobs**: Detailed error information and retry options
+
+### Production Benefits
+- **Performance Monitoring**: Track SSL check and uptime monitoring performance
+- **Auto-scaling**: Horizon can automatically scale workers based on queue size
+- **Job Tagging**: Organize jobs by type (ssl-monitoring, uptime-checks, notifications)
+- **Detailed Metrics**: Historical job performance data
+- **Failure Management**: Easy retry and debugging of failed checks

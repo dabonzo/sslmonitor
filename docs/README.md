@@ -63,7 +63,7 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Team Collaboration** - Share SSL monitoring with colleagues and teams
 - **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles
 - **In-app Email Configuration** - Configure SMTP settings without server access
-- **Background Processing** - Queue-based SSL and uptime checking for reliability
+- **Background Processing** - Queue-based SSL and uptime checking with Laravel Horizon dashboard
 - **Beautiful Interface** - Modern, responsive design with dark mode
 - **Comprehensive Testing** - 335+ tests ensuring reliability including uptime notifications ⭐ NEW
 
