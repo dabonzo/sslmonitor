@@ -31,7 +31,7 @@ class CheckWebsiteUptimeJob implements ShouldQueue
      */
     public function __construct(public Website $website)
     {
-        $this->onQueue('uptime-monitoring');
+        // Use default queue for simplicity and reliability
     }
 
     /**

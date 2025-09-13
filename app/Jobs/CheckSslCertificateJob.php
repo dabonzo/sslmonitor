@@ -23,7 +23,7 @@ class CheckSslCertificateJob implements ShouldQueue
     public function __construct(
         public Website $website
     ) {
-        $this->onQueue('ssl-monitoring');
+        // Use default queue for simplicity and reliability
     }
 
     public function handle(SslCertificateChecker $checker): void

@@ -82,7 +82,7 @@ Factory errors → `make:factory` → Add `HasFactory` trait
 ./vendor/bin/sail artisan test --filter=TestName
 ./vendor/bin/sail exec laravel.test ./vendor/bin/pint
 ./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan queue:listen --tries=1
+./vendor/bin/sail artisan queue:work --once
 ```
 
 ### Cache Management (When Things Break)

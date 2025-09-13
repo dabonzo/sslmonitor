@@ -22,7 +22,7 @@ class SendUptimeNotificationJob implements ShouldQueue
     {
         $this->uptimeCheck = $uptimeCheck;
         $this->notificationType = $notificationType;
-        $this->queue = 'notifications';
+        // Use default queue for simplicity and reliability
     }
 
     /**

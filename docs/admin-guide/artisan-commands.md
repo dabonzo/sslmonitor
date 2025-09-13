@@ -197,18 +197,20 @@ Best Performers:
 
 ### Standard Laravel Queue Commands
 
+All SSL Monitor jobs use the **default queue** for simplicity and reliability.
+
 ```bash
-# Start queue worker for SSL monitoring
-php artisan queue:work --queue=ssl-monitoring
+# Start queue worker (processes default queue)
+php artisan queue:work
 
 # Start worker with specific options
-php artisan queue:work --queue=ssl-monitoring --sleep=3 --tries=3 --timeout=60
+php artisan queue:work --sleep=3 --tries=3 --timeout=60
 
 # Monitor queue status
-php artisan queue:monitor ssl-monitoring
+php artisan queue:monitor
 
 # Clear failed jobs
-php artisan queue:clear ssl-monitoring
+php artisan queue:clear
 
 # Restart all queue workers
 php artisan queue:restart
@@ -221,7 +223,6 @@ php artisan queue:stats
 ```bash
 # Recommended production command
 php artisan queue:work redis \
-  --queue=ssl-monitoring \
   --sleep=3 \
   --tries=3 \
   --max-time=3600 \
@@ -454,7 +455,7 @@ php artisan db:show
 php artisan about
 
 # Check queue connection
-php artisan queue:monitor ssl-monitoring
+php artisan queue:monitor
 ```
 
 ### Log Commands

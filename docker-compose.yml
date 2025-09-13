@@ -48,7 +48,7 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
-        command: bash -c "sleep 10 && php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --queue=ssl-monitoring,default"
+        command: bash -c "sleep 10 && php artisan queue:work --sleep=3 --tries=3 --max-time=3600"
         restart: unless-stopped
     scheduler:
         build:

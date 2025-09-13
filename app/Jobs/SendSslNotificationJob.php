@@ -22,7 +22,7 @@ class SendSslNotificationJob implements ShouldQueue
     {
         $this->sslCheck = $sslCheck;
         $this->notificationType = $notificationType;
-        $this->queue = 'notifications';
+        // Use default queue for simplicity and reliability
     }
 
     /**
