@@ -87,7 +87,7 @@ class CheckWebsiteUptimeJob implements ShouldQueue
             // Dispatch real-time event if status changed
             if ($uptimeCheck->status !== $previousStatus) {
                 UptimeStatusChanged::dispatch($uptimeCheck, $previousStatus);
-                Log::info("Uptime status change broadcasted", [
+                Log::info('Uptime status change broadcasted', [
                     'website' => $this->website->url,
                     'from' => $previousStatus,
                     'to' => $uptimeCheck->status,
@@ -121,7 +121,7 @@ class CheckWebsiteUptimeJob implements ShouldQueue
             // Dispatch real-time event for error status
             if ($previousStatus !== 'down') {
                 UptimeStatusChanged::dispatch($uptimeCheck, $previousStatus);
-                Log::info("Uptime error status broadcasted", [
+                Log::info('Uptime error status broadcasted', [
                     'website' => $this->website->url,
                     'from' => $previousStatus,
                     'to' => 'down',

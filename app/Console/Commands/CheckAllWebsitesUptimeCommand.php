@@ -52,11 +52,11 @@ class CheckAllWebsitesUptimeCommand extends Command
             $query->where('user_id', $userId);
         }
 
-        // Add minimum check interval unless forced (15 minutes)
+        // Add minimum check interval unless forced (5 minutes)
         if (! $force) {
             $query->where(function ($q) {
                 $q->whereNull('last_uptime_check_at')
-                    ->orWhere('last_uptime_check_at', '<=', now()->subMinutes(15));
+                    ->orWhere('last_uptime_check_at', '<=', now()->subMinutes(5));
             });
         }
 

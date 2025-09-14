@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\UptimeCheck;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -23,7 +22,7 @@ class UptimeStatusChanged implements ShouldBroadcast
     {
         return [
             new PrivateChannel('uptime-monitoring'),
-            new PrivateChannel('uptime-monitoring.website.' . $this->uptimeCheck->website_id),
+            new PrivateChannel('uptime-monitoring.website.'.$this->uptimeCheck->website_id),
         ];
     }
 
@@ -41,11 +40,11 @@ class UptimeStatusChanged implements ShouldBroadcast
                 'website_url' => $this->uptimeCheck->website->url,
                 'status' => $this->uptimeCheck->status,
                 'previous_status' => $this->previousStatus,
-                'response_time' => $this->uptimeCheck->response_time,
-                'status_code' => $this->uptimeCheck->status_code,
+                'response_time' => $this->uptimeCheck->response_time_ms,
+                'status_code' => $this->uptimeCheck->http_status_code,
                 'checked_at' => $this->uptimeCheck->checked_at,
-                'failure_reason' => $this->uptimeCheck->failure_reason,
-                'uptime_percentage' => $this->uptimeCheck->uptime_percentage,
+                'failure_reason' => $this->uptimeCheck->error_message,
+                'content_check_passed' => $this->uptimeCheck->content_check_passed,
             ],
             'timestamp' => now()->toISOString(),
         ];

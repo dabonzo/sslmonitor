@@ -11,10 +11,27 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
+    // Authentication for private channels
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+        },
+    },
 });
 
 // SSL Monitoring Real-time Updates
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing WebSocket connections...');
+    
+    // Add connection status logging
+    window.Echo.connector.pusher.connection.bind('connected', () => {
+        console.log('✅ WebSocket connected successfully');
+    });
+    
+    window.Echo.connector.pusher.connection.bind('error', (err) => {
+        console.error('❌ WebSocket connection error:', err);
+    });
+
     // Listen for SSL status changes on the general SSL monitoring channel
     window.Echo.private('ssl-monitoring')
         .listen('.ssl.status.changed', (e) => {
@@ -33,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Listen for uptime status changes
     window.Echo.private('uptime-monitoring')
         .listen('.uptime.status.changed', (e) => {
-            console.log('Uptime Status Change:', e);
+            console.log('🔄 Uptime Status Change:', e);
             
             // Update uptime status indicators in the dashboard
             updateUptimeStatusIndicator(e.uptime_check);
@@ -43,7 +60,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Refresh uptime statistics if available
             refreshUptimeCounts();
+        })
+        .error((error) => {
+            console.error('❌ Error subscribing to uptime-monitoring channel:', error);
         });
+        
+    console.log('WebSocket listeners registered');
 });
 
 // Helper function to update SSL status indicators in the UI

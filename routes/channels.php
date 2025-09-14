@@ -16,11 +16,11 @@ Broadcast::channel('ssl-monitoring.website.{websiteId}', function ($user, $websi
     return \App\Models\Website::where('id', $websiteId)
         ->where(function ($query) use ($user) {
             $query->where('user_id', $user->id)
-                  ->orWhereHas('user.teams', function ($teamQuery) use ($user) {
-                      $teamQuery->whereHas('members', function ($memberQuery) use ($user) {
-                          $memberQuery->where('user_id', $user->id);
-                      });
-                  });
+                ->orWhereHas('user.teams', function ($teamQuery) use ($user) {
+                    $teamQuery->whereHas('members', function ($memberQuery) use ($user) {
+                        $memberQuery->where('user_id', $user->id);
+                    });
+                });
         })
         ->exists();
 });
@@ -35,11 +35,11 @@ Broadcast::channel('uptime-monitoring.website.{websiteId}', function ($user, $we
     return \App\Models\Website::where('id', $websiteId)
         ->where(function ($query) use ($user) {
             $query->where('user_id', $user->id)
-                  ->orWhereHas('user.teams', function ($teamQuery) use ($user) {
-                      $teamQuery->whereHas('members', function ($memberQuery) use ($user) {
-                          $memberQuery->where('user_id', $user->id);
-                      });
-                  });
+                ->orWhereHas('user.teams', function ($teamQuery) use ($user) {
+                    $teamQuery->whereHas('members', function ($memberQuery) use ($user) {
+                        $memberQuery->where('user_id', $user->id);
+                    });
+                });
         })
         ->exists();
 });

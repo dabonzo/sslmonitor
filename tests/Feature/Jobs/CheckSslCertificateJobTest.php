@@ -39,7 +39,7 @@ test('ssl certificate job runs successfully', function () {
         'status' => SslStatusCalculator::STATUS_VALID,
         'days_until_expiry' => 45,
     ]);
-    
+
     // Simulate what checkAndStoreCertificate would do - create and return the check
     $mockChecker = $this->mock(SslCertificateChecker::class);
     $mockChecker->shouldReceive('checkAndStoreCertificate')
@@ -48,6 +48,7 @@ test('ssl certificate job runs successfully', function () {
         ->andReturnUsing(function () use ($sslCheck) {
             // Persist the check when the service is called
             $sslCheck->save();
+
             return $sslCheck;
         });
 

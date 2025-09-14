@@ -11,6 +11,9 @@ Artisan::command('inspire', function () {
 // Schedule SSL certificate checks to run every 6 hours
 Schedule::command('ssl:check-all')->cron('0 */6 * * *');
 
+// Schedule uptime checks to run every 5 minutes
+Schedule::command('uptime:check-all')->everyFiveMinutes();
+
 // Schedule daily digest emails to run at 8:00 AM
 Schedule::command('ssl:send-digest')->dailyAt('08:00');
 

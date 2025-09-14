@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\SslCheck;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -23,7 +22,7 @@ class SslStatusChanged implements ShouldBroadcast
     {
         return [
             new PrivateChannel('ssl-monitoring'),
-            new PrivateChannel('ssl-monitoring.website.' . $this->sslCheck->website_id),
+            new PrivateChannel('ssl-monitoring.website.'.$this->sslCheck->website_id),
         ];
     }
 

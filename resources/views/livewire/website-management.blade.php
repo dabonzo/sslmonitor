@@ -103,6 +103,14 @@
                             <label class="text-sm font-medium text-zinc-900 dark:text-white">Follow Redirects</label>
                         </div>
 
+                        <div class="flex items-center space-x-2 mb-3">
+                            <flux:switch wire:model.live="javascript_enabled" />
+                            <label class="text-sm font-medium text-zinc-900 dark:text-white">
+                                JavaScript Rendering
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400 ml-1">(Enable for dynamic content)</span>
+                            </label>
+                        </div>
+
                         @if($follow_redirects)
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-zinc-900 dark:text-white">Max Redirects</label>

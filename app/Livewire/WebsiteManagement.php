@@ -22,6 +22,8 @@ class WebsiteManagement extends Component
 
     public $uptime_monitoring = false;
 
+    public $javascript_enabled = false;
+
     #[Validate('nullable|integer|min:100|max:599')]
     public $expected_status_code = 200;
 
@@ -92,6 +94,7 @@ class WebsiteManagement extends Component
             'name' => 'required|string|max:255',
             'url' => 'required|url|max:255',
             'uptime_monitoring' => 'boolean',
+            'javascript_enabled' => 'boolean',
         ];
 
         if ($this->uptime_monitoring) {
@@ -119,6 +122,7 @@ class WebsiteManagement extends Component
             'name' => $this->name,
             'url' => $this->url,
             'uptime_monitoring' => $this->uptime_monitoring,
+            'javascript_enabled' => $this->javascript_enabled,
             'expected_status_code' => $this->expected_status_code,
             'expected_content' => $this->expected_content,
             'forbidden_content' => $this->forbidden_content,
@@ -138,6 +142,12 @@ class WebsiteManagement extends Component
         // Queue SSL certificate check immediately for new website
         CheckSslCertificateJob::dispatch($website);
 
+        // Queue uptime check immediately for new website if uptime monitoring is enabled
+        if ($website->uptime_monitoring) {
+            CheckWebsiteUptimeJob::dispatch($website);
+            $this->dispatch('uptime-check-queued');
+        }
+
         $this->dispatch('website-added');
         $this->resetForm();
     }
@@ -147,10 +157,13 @@ class WebsiteManagement extends Component
         $website = Website::findOrFail($this->editingWebsiteId);
         $this->authorize('update', $website);
 
+        $previousUptimeMonitoring = $website->uptime_monitoring;
+
         $website->update([
             'name' => $this->name,
             'url' => $this->url,
             'uptime_monitoring' => $this->uptime_monitoring,
+            'javascript_enabled' => $this->javascript_enabled,
             'expected_status_code' => $this->expected_status_code,
             'expected_content' => $this->expected_content,
             'forbidden_content' => $this->forbidden_content,
@@ -158,6 +171,12 @@ class WebsiteManagement extends Component
             'follow_redirects' => $this->follow_redirects,
             'max_redirects' => $this->max_redirects,
         ]);
+
+        // Queue uptime check immediately if uptime monitoring was just enabled or settings changed
+        if ($this->uptime_monitoring && (! $previousUptimeMonitoring || $website->wasChanged(['javascript_enabled', 'expected_content', 'forbidden_content']))) {
+            CheckWebsiteUptimeJob::dispatch($website);
+            $this->dispatch('uptime-check-queued');
+        }
 
         $this->dispatch('website-updated');
         $this->resetForm();
@@ -172,6 +191,7 @@ class WebsiteManagement extends Component
         $this->name = $website->name;
         $this->url = $website->url;
         $this->uptime_monitoring = $website->uptime_monitoring;
+        $this->javascript_enabled = $website->javascript_enabled;
         $this->expected_status_code = $website->expected_status_code;
         $this->expected_content = $website->expected_content;
         $this->forbidden_content = $website->forbidden_content;

@@ -11,6 +11,14 @@ class UptimeChecker
 {
     public function checkWebsite(Website $website): UptimeCheckResult
     {
+        // Use JavaScript-enabled checker if enabled for this website
+        if ($website->javascript_enabled) {
+            $jsChecker = new JavaScriptUptimeChecker;
+
+            return $jsChecker->checkWebsite($website);
+        }
+
+        // Use standard HTTP checker for non-JavaScript websites
         $startTime = microtime(true);
 
         try {

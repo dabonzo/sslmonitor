@@ -378,6 +378,49 @@ sudo systemctl reload nginx
 
 ## 🔐 Security Configuration
 
+### ⚠️ CRITICAL: WebSocket Security
+
+**NEVER run Reverb with `--host=0.0.0.0` in production!**
+
+The WebSocket server must be properly secured:
+
+```bash
+# ✅ SECURE (localhost only)
+php artisan reverb:start --host=127.0.0.1 --port=8080
+
+# ❌ INSECURE (accepts connections from anywhere)  
+php artisan reverb:start --host=0.0.0.0 --port=8080
+```
+
+**Security measures for single-server deployment:**
+
+1. **Host Binding**: Reverb binds to `127.0.0.1` (localhost only)
+2. **Origin Restrictions**: Only your domain can connect (see `config/reverb.php`)
+3. **Firewall Rules**: Block external access to port 8080
+4. **Direct HTTPS/WSS**: Use SSL certificates for encrypted connections
+5. **Same-Server Benefits**: All communication stays internal
+
+**Production firewall setup:**
+```bash
+# Block external access to WebSocket port
+sudo ufw deny 8080
+# Allow internal localhost connections (automatic)
+```
+
+**Production environment variables:**
+```bash
+# Single-server WebSocket configuration
+REVERB_HOST=yourdomain.com
+REVERB_PORT=8080
+REVERB_SCHEME=https
+
+# Optional: Direct SSL/TLS for WSS
+SSL_CERT_PATH=/path/to/certificate.crt
+SSL_KEY_PATH=/path/to/private.key
+```
+
+### Additional Security
+
 ### Dashboard Access Control
 
 Update `app/Providers/AppServiceProvider.php` for production access control:

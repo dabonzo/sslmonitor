@@ -69,7 +69,7 @@ class CheckSslCertificateJob implements ShouldQueue
             // Dispatch real-time event if status changed
             if ($sslCheck->status !== $previousStatus) {
                 SslStatusChanged::dispatch($sslCheck, $previousStatus);
-                Log::info("SSL status change broadcasted", [
+                Log::info('SSL status change broadcasted', [
                     'website' => $this->website->url,
                     'from' => $previousStatus,
                     'to' => $sslCheck->status,
@@ -96,7 +96,7 @@ class CheckSslCertificateJob implements ShouldQueue
             // Dispatch real-time event for error status
             if ($previousStatus !== 'error') {
                 SslStatusChanged::dispatch($errorCheck, $previousStatus);
-                Log::info("SSL error status broadcasted", [
+                Log::info('SSL error status broadcasted', [
                     'website' => $this->website->url,
                     'from' => $previousStatus,
                     'to' => 'error',
