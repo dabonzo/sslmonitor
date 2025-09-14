@@ -79,7 +79,7 @@ test('command can force check websites recently checked', function () {
     $recentlyCheckedWebsite = Website::factory()->create([
         'user_id' => $this->user->id,
         'uptime_monitoring' => true,
-        'last_uptime_check_at' => now()->subMinutes(5), // Recently checked
+        'last_uptime_check_at' => now()->subMinutes(3), // Recently checked (within 5 min interval)
     ]);
 
     // Without --force, should skip recently checked
@@ -149,18 +149,18 @@ test('command shows verbose output when requested', function () {
 test('command respects minimum check interval without force', function () {
     Queue::fake();
 
-    // Website checked 5 minutes ago (within 15 minute interval)
+    // Website checked 3 minutes ago (within 5 minute interval)
     $recentWebsite = Website::factory()->create([
         'user_id' => $this->user->id,
         'uptime_monitoring' => true,
-        'last_uptime_check_at' => now()->subMinutes(5),
+        'last_uptime_check_at' => now()->subMinutes(3),
     ]);
 
-    // Website checked 20 minutes ago (outside 15 minute interval)
+    // Website checked 10 minutes ago (outside 5 minute interval)
     $oldWebsite = Website::factory()->create([
         'user_id' => $this->user->id,
         'uptime_monitoring' => true,
-        'last_uptime_check_at' => now()->subMinutes(20),
+        'last_uptime_check_at' => now()->subMinutes(10),
     ]);
 
     $this->artisan('uptime:check-all')
