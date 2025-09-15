@@ -322,13 +322,15 @@ class SslDashboard extends Component
 
     public function goToWebsiteDetails($websiteId): void
     {
-        $this->redirect(route('website.details', $websiteId), navigate: true);
+        $this->redirect(route('websites.show', $websiteId), navigate: true);
     }
 
     public function checkWebsite($websiteId): void
     {
+        $website = Website::findOrFail($websiteId);
+
         // Dispatch SSL check job for immediate check
-        \App\Jobs\CheckSslCertificateJob::dispatch($websiteId);
+        \App\Jobs\CheckSslCertificateJob::dispatch($website, true);
 
         session()->flash('info', 'SSL check queued. Results will appear shortly.');
         $this->refresh();
