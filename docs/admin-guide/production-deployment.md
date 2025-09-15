@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide provides complete instructions for deploying SSL Monitor to production with all services: Laravel Horizon, Laravel Pulse, Laravel Reverb, and background workers.
+This guide provides complete instructions for deploying SSL Monitor to production with all services: Laravel Horizon, Laravel Pulse, and background workers.
 
 ## 🏗️ Production Architecture
 
@@ -11,26 +11,20 @@ SSL Monitor in production consists of multiple interconnected services:
 │   Web Server    │    │  Laravel App     │    │     Redis       │
 │  (Nginx/Apache) │────│  (SSL Monitor)   │────│ (Cache/Queues)  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        │                       │                       │
-┌───────▼──────┐    ┌───────────▼──────┐    ┌─────────▼─────────┐
-│   Horizon    │    │     Reverb       │    │    Scheduler     │
-│ (Queue Mgmt) │    │  (WebSockets)    │    │   (Cron Jobs)    │
-└──────────────┘    └──────────────────┘    └───────────────────┘
-        │                       │
-        │               ┌───────▼──────┐
-        │               │     Pulse    │
-        └───────────────│ (Monitoring) │
-                        └──────────────┘
+                               │
+        ┌──────────────────────┼──────────────────────┐
+        │                      │                      │
+┌───────▼──────┐    ┌──────────▼──────┐    ┌─────────▼─────────┐
+│   Horizon    │    │     Pulse       │    │    Scheduler     │
+│ (Queue Mgmt) │    │  (Monitoring)   │    │   (Cron Jobs)    │
+└──────────────┘    └─────────────────┘    └───────────────────┘
 ```
 
 ### Service Overview
 
 - **Web Server**: Serves the main SSL Monitor application
 - **Laravel Horizon**: Queue management and monitoring (Port: varies by config)
-- **Laravel Pulse**: Application performance monitoring (Port: varies by config)  
-- **Laravel Reverb**: Real-time WebSocket server (Port: 8080)
+- **Laravel Pulse**: Application performance monitoring (Port: varies by config)
 - **Background Scheduler**: Runs scheduled SSL/uptime checks
 - **Redis**: Handles caching, queues, and session storage
 - **Database**: Stores SSL monitoring data (MySQL/MariaDB/PostgreSQL)
@@ -45,7 +39,6 @@ SSL Monitor in production consists of multiple interconnected services:
 - **Redis**: 6.0+
 - **Web Server**: Nginx 1.18+ or Apache 2.4+
 - **Process Manager**: Supervisor
-- **SSL Certificate**: For HTTPS/WSS connections
 
 ### 1. Application Deployment
 
@@ -102,19 +95,7 @@ REDIS_PORT=6379
 
 # Queue Configuration
 QUEUE_CONNECTION=redis
-BROADCAST_CONNECTION=reverb
-
-# Laravel Reverb (Real-time WebSockets)
-REVERB_APP_ID=ssl-monitor-prod
-REVERB_APP_KEY=your-secure-app-key-32-chars
-REVERB_APP_SECRET=your-secure-app-secret-32-chars
-REVERB_HOST=ssl-monitor.yourcompany.com
-REVERB_PORT=443
-REVERB_SCHEME=https
-
-# Internal service communication
-REVERB_SERVER_HOST=127.0.0.1
-REVERB_SERVER_PORT=8080
+BROADCAST_CONNECTION=null
 
 # Mail Configuration
 MAIL_MAILER=smtp
@@ -180,7 +161,7 @@ Create `/etc/supervisor/conf.d/ssl-monitor.conf`:
 
 ```ini
 [group:ssl-monitor]
-programs=ssl-monitor-horizon,ssl-monitor-reverb,ssl-monitor-scheduler
+programs=ssl-monitor-horizon,ssl-monitor-scheduler
 priority=999
 
 # Laravel Horizon (Queue Management)
@@ -194,18 +175,6 @@ user=www-data
 redirect_stderr=true
 stdout_logfile=/var/www/ssl-monitor/storage/logs/horizon.log
 stopwaitsecs=3600
-
-# Laravel Reverb (WebSocket Server)  
-[program:ssl-monitor-reverb]
-process_name=%(program_name)s
-command=php /var/www/ssl-monitor/artisan reverb:start --host=127.0.0.1 --port=8080
-directory=/var/www/ssl-monitor
-autostart=true
-autorestart=true
-user=www-data
-redirect_stderr=true
-stdout_logfile=/var/www/ssl-monitor/storage/logs/reverb.log
-stopwaitsecs=30
 
 # Laravel Scheduler
 [program:ssl-monitor-scheduler]
@@ -253,28 +222,28 @@ server {
     listen [::]:443 ssl http2;
     server_name ssl-monitor.yourcompany.com;
     root /var/www/ssl-monitor/public;
-    
+
     index index.php;
-    
+
     # SSL Configuration
     ssl_certificate /path/to/ssl-certificate.crt;
     ssl_certificate_key /path/to/ssl-private.key;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
-    
+
     # Security Headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' http: https: ws: wss: data: blob: 'unsafe-inline'; frame-ancestors 'self';" always;
-    
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'; frame-ancestors 'self';" always;
+
     # Laravel Application
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
-    
+
     # PHP-FPM
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
@@ -282,84 +251,22 @@ server {
         include fastcgi_params;
         fastcgi_hide_header X-Powered-By;
     }
-    
-    # WebSocket Proxy for Laravel Reverb
-    location /app/ {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_read_timeout 86400;
-    }
-    
+
     # Static Assets
     location ~* \.(css|js|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
         access_log off;
     }
-    
+
     # Security
     location ~ /\.(?!well-known).* {
         deny all;
     }
-    
+
     # Logging
     access_log /var/log/nginx/ssl-monitor_access.log;
     error_log /var/log/nginx/ssl-monitor_error.log;
-}
-
-# Laravel Horizon Dashboard (Optional: Restrict Access)
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name horizon.ssl-monitor.yourcompany.com;
-    
-    # SSL Configuration (same as above)
-    ssl_certificate /path/to/ssl-certificate.crt;
-    ssl_certificate_key /path/to/ssl-private.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    
-    # Basic Auth (Optional)
-    auth_basic "Laravel Horizon";
-    auth_basic_user_file /etc/nginx/.htpasswd-horizon;
-    
-    location / {
-        proxy_pass http://ssl-monitor.yourcompany.com/horizon/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-# Laravel Pulse Dashboard (Optional: Restrict Access)
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name pulse.ssl-monitor.yourcompany.com;
-    
-    # SSL Configuration (same as above)
-    ssl_certificate /path/to/ssl-certificate.crt;
-    ssl_certificate_key /path/to/ssl-private.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    
-    # Basic Auth (Optional)
-    auth_basic "Laravel Pulse";
-    auth_basic_user_file /etc/nginx/.htpasswd-pulse;
-    
-    location / {
-        proxy_pass http://ssl-monitor.yourcompany.com/pulse/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
 }
 ```
 
@@ -377,49 +284,6 @@ sudo systemctl reload nginx
 ```
 
 ## 🔐 Security Configuration
-
-### ⚠️ CRITICAL: WebSocket Security
-
-**NEVER run Reverb with `--host=0.0.0.0` in production!**
-
-The WebSocket server must be properly secured:
-
-```bash
-# ✅ SECURE (localhost only)
-php artisan reverb:start --host=127.0.0.1 --port=8080
-
-# ❌ INSECURE (accepts connections from anywhere)  
-php artisan reverb:start --host=0.0.0.0 --port=8080
-```
-
-**Security measures for single-server deployment:**
-
-1. **Host Binding**: Reverb binds to `127.0.0.1` (localhost only)
-2. **Origin Restrictions**: Only your domain can connect (see `config/reverb.php`)
-3. **Firewall Rules**: Block external access to port 8080
-4. **Direct HTTPS/WSS**: Use SSL certificates for encrypted connections
-5. **Same-Server Benefits**: All communication stays internal
-
-**Production firewall setup:**
-```bash
-# Block external access to WebSocket port
-sudo ufw deny 8080
-# Allow internal localhost connections (automatic)
-```
-
-**Production environment variables:**
-```bash
-# Single-server WebSocket configuration
-REVERB_HOST=yourdomain.com
-REVERB_PORT=8080
-REVERB_SCHEME=https
-
-# Optional: Direct SSL/TLS for WSS
-SSL_CERT_PATH=/path/to/certificate.crt
-SSL_KEY_PATH=/path/to/private.key
-```
-
-### Additional Security
 
 ### Dashboard Access Control
 
@@ -471,14 +335,12 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
 sudo ufw allow 22/tcp      # SSH
 sudo ufw allow 80/tcp      # HTTP
 sudo ufw allow 443/tcp     # HTTPS
-sudo ufw allow 8080/tcp    # Reverb (if not proxied)
 sudo ufw enable
 
 # CentOS/RHEL Firewalld
 sudo firewall-cmd --permanent --add-service=ssh
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --permanent --add-port=8080/tcp  # Reverb
 sudo firewall-cmd --reload
 ```
 
@@ -505,7 +367,7 @@ Create `/usr/local/bin/ssl-monitor-health.sh`:
 check_service() {
     local service_name="$1"
     local service_status=$(sudo supervisorctl status "ssl-monitor:$service_name")
-    
+
     if [[ $service_status == *"RUNNING"* ]]; then
         echo "✅ $service_name is running"
         return 0
@@ -519,7 +381,7 @@ echo "🔍 SSL Monitor Health Check - $(date)"
 echo "================================="
 
 # Check all services
-SERVICES=("ssl-monitor-horizon" "ssl-monitor-reverb" "ssl-monitor-scheduler")
+SERVICES=("ssl-monitor-horizon" "ssl-monitor-scheduler")
 FAILED_SERVICES=0
 
 for service in "${SERVICES[@]}"; do
@@ -541,14 +403,6 @@ if php /var/www/ssl-monitor/artisan tinker --execute="DB::connection()->getPdo()
     echo "✅ Database is connected"
 else
     echo "❌ Database connection failed"
-    ((FAILED_SERVICES++))
-fi
-
-# Check WebSocket server
-if curl -f -s http://127.0.0.1:8080 > /dev/null 2>&1; then
-    echo "✅ Reverb WebSocket server is responding"
-else
-    echo "❌ Reverb WebSocket server is not responding"
     ((FAILED_SERVICES++))
 fi
 
@@ -633,32 +487,9 @@ For high-load environments:
 command=php /var/www/ssl-monitor/artisan horizon
 numprocs=1
 
-[program:ssl-monitor-horizon-2]  
+[program:ssl-monitor-horizon-2]
 command=php /var/www/ssl-monitor/artisan horizon
 numprocs=1
-
-# Multiple Reverb instances (with load balancer)
-[program:ssl-monitor-reverb-1]
-command=php /var/www/ssl-monitor/artisan reverb:start --host=127.0.0.1 --port=8080
-
-[program:ssl-monitor-reverb-2]
-command=php /var/www/ssl-monitor/artisan reverb:start --host=127.0.0.1 --port=8081
-```
-
-### Load Balancing WebSockets
-
-Use HAProxy or Nginx upstream for Reverb:
-
-```nginx
-upstream reverb_backend {
-    server 127.0.0.1:8080;
-    server 127.0.0.1:8081;
-}
-
-location /app/ {
-    proxy_pass http://reverb_backend;
-    # ... other WebSocket proxy settings
-}
 ```
 
 ## 🔄 Maintenance and Updates
@@ -719,7 +550,7 @@ echo "Backup completed: $DATE"
 After deployment, access your monitoring dashboards:
 
 - **SSL Monitor**: https://ssl-monitor.yourcompany.com
-- **Laravel Horizon**: https://ssl-monitor.yourcompany.com/horizon  
+- **Laravel Horizon**: https://ssl-monitor.yourcompany.com/horizon
 - **Laravel Pulse**: https://ssl-monitor.yourcompany.com/pulse
 
 ## 🆘 Troubleshooting
@@ -733,16 +564,6 @@ sudo supervisorctl restart ssl-monitor:ssl-monitor-horizon
 tail -f /var/www/ssl-monitor/storage/logs/horizon.log
 ```
 
-**Reverb WebSocket connection issues:**
-```bash
-# Check if Reverb is running
-sudo supervisorctl status ssl-monitor:ssl-monitor-reverb
-curl -I http://127.0.0.1:8080
-
-# Test WebSocket connection
-wscat -c ws://127.0.0.1:8080/app/ssl-monitor-prod
-```
-
 **Permission issues:**
 ```bash
 sudo chown -R www-data:www-data /var/www/ssl-monitor
@@ -754,7 +575,6 @@ sudo chmod -R 755 /var/www/ssl-monitor/bootstrap/cache
 
 - **Application**: `/var/www/ssl-monitor/storage/logs/laravel.log`
 - **Horizon**: `/var/www/ssl-monitor/storage/logs/horizon.log`
-- **Reverb**: `/var/www/ssl-monitor/storage/logs/reverb.log`
 - **Scheduler**: `/var/www/ssl-monitor/storage/logs/scheduler.log`
 - **Nginx**: `/var/log/nginx/ssl-monitor_*.log`
 - **PHP-FPM**: `/var/log/php8.2-fpm.log`

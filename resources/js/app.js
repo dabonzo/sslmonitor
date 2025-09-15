@@ -1,71 +1,12 @@
-import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
-
-window.Pusher = Pusher;
-
-window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    // Authentication for private channels
-    auth: {
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-        },
-    },
-});
-
-// SSL Monitoring Real-time Updates
+// SSL Monitoring without WebSockets - using periodic refresh
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing WebSocket connections...');
-    
-    // Add connection status logging
-    window.Echo.connector.pusher.connection.bind('connected', () => {
-        console.log('✅ WebSocket connected successfully');
-    });
-    
-    window.Echo.connector.pusher.connection.bind('error', (err) => {
-        console.error('❌ WebSocket connection error:', err);
-    });
+    console.log('Initializing periodic status checks...');
 
-    // Listen for SSL status changes on the general SSL monitoring channel
-    window.Echo.private('ssl-monitoring')
-        .listen('.ssl.status.changed', (e) => {
-            console.log('SSL Status Change:', e);
-            
-            // Update SSL status indicators in the dashboard
-            updateSSLStatusIndicator(e.ssl_check);
-            
-            // Show toast notification for status changes
-            showSSLStatusNotification(e.ssl_check);
-            
-            // Refresh SSL check counts if available
-            refreshSSLCounts();
-        });
-
-    // Listen for uptime status changes
-    window.Echo.private('uptime-monitoring')
-        .listen('.uptime.status.changed', (e) => {
-            console.log('🔄 Uptime Status Change:', e);
-            
-            // Update uptime status indicators in the dashboard
-            updateUptimeStatusIndicator(e.uptime_check);
-            
-            // Show toast notification for uptime changes
-            showUptimeStatusNotification(e.uptime_check);
-            
-            // Refresh uptime statistics if available
-            refreshUptimeCounts();
-        })
-        .error((error) => {
-            console.error('❌ Error subscribing to uptime-monitoring channel:', error);
-        });
-        
-    console.log('WebSocket listeners registered');
+    // Poll for updates every 30 seconds
+    setInterval(() => {
+        refreshSSLCounts();
+        refreshUptimeCounts();
+    }, 30000);
 });
 
 // Helper function to update SSL status indicators in the UI

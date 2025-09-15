@@ -99,10 +99,8 @@ Factory errors → `make:factory` → Add `HasFactory` trait
 # All services now run in main container for simplicity:
 ./vendor/bin/sail artisan horizon           # Start queue worker
 ./vendor/bin/sail artisan schedule:work     # Start scheduler  
-./vendor/bin/sail artisan reverb:start      # Start WebSocket server (port 8080)
 # All commands use ./vendor/bin/sail prefix (artisan, npm, composer)
 ```
-**⚠️ Production Security**: WebSocket server binds to `127.0.0.1` in production, `0.0.0.0` in development
 
 ## Stack & Dependencies
 **Core**: spatie/ssl-certificate, laravel/breeze, livewire/flux (requires license), livewire/volt, pestphp/pest, laravel/pint
@@ -142,7 +140,6 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 - php - 8.4.12
 - laravel/framework (LARAVEL) - v12
-- laravel/prompts (PROMPTS) - v0
 - laravel/telescope (TELESCOPE) - v5
 - livewire/flux (FLUXUI_FREE) - v2
 - livewire/livewire (LIVEWIRE) - v3
