@@ -27,6 +27,26 @@ All background jobs use Laravel's **default queue** with Horizon for advanced mo
 
 ## Queue Worker Management
 
+### ⭐ NEW: Auto-Starting Queue Worker
+
+**Horizon now starts automatically** when you boot the development environment:
+
+```bash
+./vendor/bin/sail up -d    # Horizon starts automatically!
+```
+
+**Technical Implementation:**
+- Custom supervisor configuration in `/docker/supervisord.conf`
+- Manages both web server and Horizon queue worker
+- Auto-restart if Horizon crashes
+- Logs to `/storage/logs/horizon.log`
+
+**Check Auto-Start Status:**
+```bash
+./vendor/bin/sail artisan horizon:status
+# Should show: "INFO Horizon is running."
+```
+
 ### Development Environment (Laravel Sail)
 
 #### Starting Horizon (Recommended)

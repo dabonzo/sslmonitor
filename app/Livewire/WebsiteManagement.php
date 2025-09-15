@@ -139,12 +139,12 @@ class WebsiteManagement extends Component
 
         $website = $user->websites()->create($websiteData);
 
-        // Queue SSL certificate check immediately for new website
-        CheckSslCertificateJob::dispatch($website);
+        // Queue SSL certificate check immediately for new website (force immediate execution)
+        CheckSslCertificateJob::dispatch($website, true);
 
         // Queue uptime check immediately for new website if uptime monitoring is enabled
         if ($website->uptime_monitoring) {
-            CheckWebsiteUptimeJob::dispatch($website);
+            CheckWebsiteUptimeJob::dispatch($website, true);
             $this->dispatch('uptime-check-queued');
         }
 
@@ -174,7 +174,7 @@ class WebsiteManagement extends Component
 
         // Queue uptime check immediately if uptime monitoring was just enabled or settings changed
         if ($this->uptime_monitoring && (! $previousUptimeMonitoring || $website->wasChanged(['javascript_enabled', 'expected_content', 'forbidden_content']))) {
-            CheckWebsiteUptimeJob::dispatch($website);
+            CheckWebsiteUptimeJob::dispatch($website, true);
             $this->dispatch('uptime-check-queued');
         }
 
@@ -246,8 +246,8 @@ class WebsiteManagement extends Component
             return;
         }
 
-        // Queue uptime check job
-        CheckWebsiteUptimeJob::dispatch($website);
+        // Queue uptime check job (force immediate execution)
+        CheckWebsiteUptimeJob::dispatch($website, true);
 
         $this->dispatch('uptime-check-queued');
     }

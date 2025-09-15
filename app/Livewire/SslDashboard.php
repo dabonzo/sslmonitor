@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class SslDashboard extends Component
 {
-    public int $recentChecksLimit = 10;
+    public int $recentChecksLimit = 5;
 
     public function getStatusCountsProperty(): array
     {
@@ -233,10 +233,105 @@ class SslDashboard extends Component
         ];
     }
 
+    public function getWebsiteCardsProperty(): Collection
+    {
+        $userWebsites = auth()->user()->accessibleWebsitesQuery()->get();
+
+        if ($userWebsites->isEmpty()) {
+            return collect();
+        }
+
+        // Get latest SSL checks for all websites
+        $latestSslChecks = SslCheck::whereIn('website_id', $userWebsites->pluck('id'))
+            ->whereIn('id', function ($query) use ($userWebsites) {
+                $query->selectRaw('MAX(id)')
+                    ->from('ssl_checks')
+                    ->whereIn('website_id', $userWebsites->pluck('id'))
+                    ->groupBy('website_id');
+            })
+            ->get()
+            ->keyBy('website_id');
+
+        // Prepare website cards with combined SSL and uptime status
+        return $userWebsites->map(function ($website) use ($latestSslChecks) {
+            $sslCheck = $latestSslChecks->get($website->id);
+
+            return (object) [
+                'id' => $website->id,
+                'name' => $website->name,
+                'url' => $website->url,
+                'ssl_status' => $sslCheck?->status ?? 'pending',
+                'ssl_checked_at' => $sslCheck?->checked_at,
+                'uptime_status' => $website->uptime_status,
+                'uptime_monitoring' => $website->uptime_monitoring,
+                'last_uptime_check_at' => $website->last_uptime_check_at,
+                'has_issues' => $this->websiteHasIssues($website, $sslCheck),
+                'priority' => $this->getWebsitePriority($website, $sslCheck),
+            ];
+        })->sortBy('priority')->take(8); // Show top 8 websites
+    }
+
+    private function websiteHasIssues($website, $sslCheck): bool
+    {
+        // Check for SSL issues
+        if ($sslCheck && in_array($sslCheck->status, ['expired', 'error', 'expiring_soon'])) {
+            return true;
+        }
+
+        // Check for uptime issues
+        if ($website->uptime_monitoring && in_array($website->uptime_status, ['down', 'content_mismatch'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function getWebsitePriority($website, $sslCheck): int
+    {
+        // Lower number = higher priority (shows first)
+
+        // Critical SSL issues get highest priority
+        if ($sslCheck && in_array($sslCheck->status, ['expired', 'error'])) {
+            return 1;
+        }
+
+        // Uptime down gets high priority
+        if ($website->uptime_monitoring && $website->uptime_status === 'down') {
+            return 2;
+        }
+
+        // Expiring soon SSL
+        if ($sslCheck && $sslCheck->status === 'expiring_soon') {
+            return 3;
+        }
+
+        // Content mismatch uptime
+        if ($website->uptime_monitoring && $website->uptime_status === 'content_mismatch') {
+            return 4;
+        }
+
+        // Valid/working websites
+        return 5;
+    }
+
     public function refresh(): void
     {
         // This will trigger a re-render and recalculate all computed properties
         $this->dispatch('ssl-status-refreshed');
+    }
+
+    public function goToWebsiteDetails($websiteId): void
+    {
+        $this->redirect(route('website.details', $websiteId), navigate: true);
+    }
+
+    public function checkWebsite($websiteId): void
+    {
+        // Dispatch SSL check job for immediate check
+        \App\Jobs\CheckSslCertificateJob::dispatch($websiteId);
+
+        session()->flash('info', 'SSL check queued. Results will appear shortly.');
+        $this->refresh();
     }
 
     public function render()
@@ -256,6 +351,7 @@ class SslDashboard extends Component
             'uptimeAvailability' => $this->uptimeAvailability,
             'uptimeCriticalIssues' => $this->uptimeCriticalIssues,
             'uptimeOverview' => $this->uptimeOverview,
+            'websiteCards' => $this->websiteCards,
         ]);
     }
 }

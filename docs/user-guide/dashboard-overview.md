@@ -18,8 +18,9 @@ The SSL Monitor dashboard is your central hub for monitoring website SSL certifi
 1. **Website Overview Summary** - Total counts and availability at a glance ⭐ NEW
 2. **SSL Certificate Status Cards** - SSL certificate statistics and health
 3. **Uptime Monitoring Section** - Website availability and performance metrics ⭐ NEW
-4. **Critical Issues** - Urgent SSL and uptime issues requiring attention
-5. **Recent SSL Checks** - Latest certificate verification results
+4. **Your Websites** - Website cards showing unified SSL + uptime status ✨ IMPROVED
+5. **Critical Issues** - Clickable urgent SSL and uptime issues requiring attention ✨ IMPROVED
+6. **Recent Activity** - Latest 5 significant SSL check events (formerly Recent SSL Checks) ✨ IMPROVED
 
 ## 🎯 Website Overview Summary ⭐ NEW
 
@@ -102,7 +103,16 @@ When uptime monitoring is enabled, you'll see a comprehensive 6-card grid:
 - **Section automatically hides** when all websites are SSL-only monitoring
 - **Real-time updates** reflect current uptime status across all monitored websites
 
-## 🚨 Critical Issues Section
+## 🚨 Critical Issues Section ✨ IMPROVED
+
+### Interactive Issue Management
+Critical issues are now clickable and actionable, making it easier to resolve problems quickly:
+
+#### Enhanced User Experience
+- **Clickable issues** - Click any critical issue to go directly to website details ✨ NEW
+- **Visual feedback** - Hover effects and navigation indicators
+- **Priority grouping** - SSL and uptime issues clearly separated
+- **Quick action paths** - Direct navigation to resolution pages
 
 ### When Issues Appear
 This section appears when you have:
@@ -119,11 +129,11 @@ This section appears when you have:
 - **Performance issues** - Slow response times exceeding thresholds
 
 ### Issue Information Displayed
-- **Website Name** - Friendly name or URL
+- **Website Name** - Clickable friendly name or URL
 - **Issue Type** - Specific problem description
 - **Days Until Expiry** - For expiring certificates
 - **Last Checked** - When issue was detected
-- **Action Required** - Recommended next steps
+- **Navigation arrow** - Visual indicator that items are clickable ✨ NEW
 
 ### Example Issues
 
@@ -138,27 +148,66 @@ This section appears when you have:
 - "**blog.example.com** - Content mismatch detected (Domain Parked page)"
 - "**api.example.com** - Slow response time (8.5s, threshold: 5s)"
 
-## ⏰ Recent SSL Checks
+## 🏠 Your Websites ✨ IMPROVED
 
-### Information Displayed
+### Unified Website Cards
+The dashboard now shows your websites as cards instead of a long list, providing a cleaner, more actionable interface:
+
+#### Card Information Display
+- **Website Name** - Friendly name of your website
+- **Website URL** - Domain being monitored
+- **SSL Status Badge** - Current certificate status (Valid, Expiring Soon, Expired, Error)
+- **Uptime Status Badge** - Website availability status (Up, Down, Slow, Content Issues) ⭐ NEW
+- **Last SSL Check** - When certificate was last verified
+- **Last Uptime Check** - When website availability was last checked (if enabled)
+
+#### Visual Indicators
+- **🔶 Orange border** - Website has issues requiring attention
+- **Status badges** - Color-coded status indicators
+- **Click to navigate** - Entire card is clickable to view detailed information
+
+#### Smart Card Display
+- **Priority sorting** - Critical issues shown first
+- **Limited display** - Shows top 8 websites for focused attention
+- **Unified status** - Both SSL and uptime information in one card
+- **Hover effects** - Visual feedback for interactive elements
+
+#### ⭐ NEW: Immediate Feedback
+When adding new websites, SSL and uptime checks run **instantly**:
+- **Immediate processing** - Jobs execute within 5-30 seconds of adding
+- **Auto-starting queue worker** - Horizon starts automatically with Docker
+- **Real-time updates** - Status changes from "unknown" to actual status
+- **Force flag** - New websites bypass recent check validation for instant results
+
+### Card Status Colors
+- **Green badges** - Healthy status (Valid SSL, Up website)
+- **Yellow badges** - Warning status (Expiring Soon, Slow response)
+- **Red badges** - Critical issues (Expired SSL, Down website)
+- **Orange badges** - Content validation issues (Content Mismatch)
+- **Gray badges** - Unknown or pending status
+
+## ⏰ Recent Activity ✨ IMPROVED
+
+### Streamlined Activity Feed
+The Recent Activity section (formerly "Recent SSL Checks") now provides a focused view of important events:
+
+#### What's Changed
+- **Reduced from 10 to 5 items** - Less overwhelming, more focused
+- **Significant events only** - Status changes and issues prioritized over routine valid checks
+- **Clickable entries** - Click any activity item to go to website details
+- **Simplified display** - Cleaner, more scannable interface
+
+#### Information Displayed
 - **Website Name** - Site that was checked
-- **Status Result** - Check outcome (Valid, Expiring, Invalid, etc.)
-- **Days Until Expiry** - Time remaining on certificate
-- **Check Time** - When verification was performed
-- **Certificate Issuer** - Who issued the SSL certificate
+- **Status Result** - Check outcome with visual icon
+- **Relative timestamps** - "2 hours ago" instead of full dates
+- **Click indicator** - Chevron arrow showing items are interactive
 
-### Status Icons and Colors
-- **✅ Green** - Valid certificate, no issues
-- **⚠️ Yellow** - Expiring soon (15-30 days)
-- **🔶 Orange** - Expiring very soon (8-14 days)  
-- **❌ Red** - Expired, invalid, or error
-- **🔧 Blue** - Recently added, first check pending
-
-### Understanding Check Results
-- **Recent checks show within 24 hours** by default
-- **Automatic checks run daily** at 6:00 AM
-- **Manual checks** triggered from website management
-- **Failed checks** indicate connectivity or certificate issues
+#### Activity Types Shown
+- **SSL status changes** - Certificate renewals, expirations, issues
+- **New SSL checks** - First-time monitoring results
+- **Error conditions** - Connection failures or certificate problems
+- **Critical events** - Expired certificates, validation failures
 
 ## 🌐 Website List Section
 

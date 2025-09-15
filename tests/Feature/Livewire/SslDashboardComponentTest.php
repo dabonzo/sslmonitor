@@ -74,7 +74,7 @@ test('dashboard shows recent ssl checks list', function () {
 
     Livewire::actingAs($this->user)
         ->test('ssl-dashboard')
-        ->assertSee('Recent SSL Checks')
+        ->assertSee('Recent Activity')
         ->assertSee('Example Site')
         ->assertSee('Test Site')
         ->assertViewHas('recentChecks', function ($checks) use ($check1, $check2) {
@@ -162,9 +162,9 @@ test('dashboard handles pagination for recent checks', function () {
 
     Livewire::actingAs($this->user)
         ->test('ssl-dashboard')
-        ->assertSet('recentChecksLimit', 10)
+        ->assertSet('recentChecksLimit', 5)
         ->assertViewHas('recentChecks', function ($checks) {
-            return $checks->count() === 10;
+            return $checks->count() === 5;
         });
 });
 

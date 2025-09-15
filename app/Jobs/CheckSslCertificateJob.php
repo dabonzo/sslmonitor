@@ -22,7 +22,8 @@ class CheckSslCertificateJob implements ShouldQueue
     public int $timeout = 60;
 
     public function __construct(
-        public Website $website
+        public Website $website,
+        public bool $forceCheck = false
     ) {
         // Use default queue for simplicity and reliability
     }
@@ -36,16 +37,19 @@ class CheckSslCertificateJob implements ShouldQueue
             return;
         }
 
-        // Skip if we've checked this website recently (within last hour)
-        $recentCheck = $this->website->sslChecks()
-            ->where('checked_at', '>', now()->subHour())
-            ->latest('checked_at')
-            ->first();
+        // Skip if we've checked this website recently (within last hour), unless forced
+        $forceCheck = isset($this->forceCheck) ? $this->forceCheck : false;
+        if (! $forceCheck) {
+            $recentCheck = $this->website->sslChecks()
+                ->where('checked_at', '>', now()->subHour())
+                ->latest('checked_at')
+                ->first();
 
-        if ($recentCheck) {
-            Log::info("Skipping SSL check for {$this->website->url} - checked recently at {$recentCheck->checked_at}");
+            if ($recentCheck) {
+                Log::info("Skipping SSL check for {$this->website->url} - checked recently at {$recentCheck->checked_at}");
 
-            return;
+                return;
+            }
         }
 
         // Get previous status for real-time event comparison
@@ -55,7 +59,10 @@ class CheckSslCertificateJob implements ShouldQueue
         $previousStatus = $previousCheck?->status ?? 'unknown';
 
         try {
-            Log::info("Starting SSL certificate check for: {$this->website->url}");
+            Log::info("Starting SSL certificate check for: {$this->website->url}", [
+                'force_check' => $forceCheck,
+                'website_id' => $this->website->id,
+            ]);
 
             $sslCheck = $checker->checkAndStoreCertificate($this->website);
 

@@ -93,12 +93,15 @@ Factory errors → `make:factory` → Add `HasFactory` trait
 ./vendor/bin/sail artisan config:clear      # After config changes
 ```
 
-### Docker (⭐ Simplified Single Container)
+### Docker (⭐ Auto-starting Services)
 ```bash
-./vendor/bin/sail up -d                      # Start simplified containers (main app + databases)
-# All services now run in main container for simplicity:
-./vendor/bin/sail artisan horizon           # Start queue worker
-./vendor/bin/sail artisan schedule:work     # Start scheduler  
+./vendor/bin/sail up -d                      # Start containers (auto-starts Horizon queue worker)
+# Services auto-start in main container:
+# - Laravel Horizon (queue worker) - starts automatically
+# - Apache web server - serves the application
+# Manual commands if needed:
+./vendor/bin/sail artisan schedule:work     # Start scheduler manually (if needed)
+./vendor/bin/sail artisan horizon:status    # Check Horizon status
 # All commands use ./vendor/bin/sail prefix (artisan, npm, composer)
 ```
 

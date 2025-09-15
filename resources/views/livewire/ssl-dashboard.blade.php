@@ -278,6 +278,31 @@
             </div>
         @endif
 
+        <!-- Website Overview Cards -->
+        @if($websiteCards->isNotEmpty())
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Your Websites</h2>
+                    <flux:button :href="route('websites')" variant="ghost" size="sm" icon="cog" wire:navigate>
+                        Manage All
+                    </flux:button>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    @foreach($websiteCards as $website)
+                        <x-website-card :website="$website" />
+                    @endforeach
+                </div>
+
+                @if($websiteCards->count() >= 8)
+                    <div class="mt-4 text-center">
+                        <flux:button :href="route('websites')" variant="ghost" size="sm" wire:navigate>
+                            View All Websites
+                        </flux:button>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Uptime Issues Section -->
         @if($uptimeCriticalIssues->isNotEmpty())
             <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
@@ -287,7 +312,8 @@
                 </div>
                 <div class="space-y-2">
                     @foreach($uptimeCriticalIssues as $website)
-                        <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center justify-between text-sm p-2 hover:bg-orange-100 dark:hover:bg-orange-900/20 rounded transition-colors cursor-pointer"
+                             wire:click="goToWebsiteDetails({{ $website->id }})">
                             <div class="flex items-center space-x-2">
                                 <span class="font-medium text-orange-700 dark:text-orange-300">{{ $website->name }}</span>
                                 <span class="text-orange-600 dark:text-orange-400">•</span>
@@ -295,9 +321,12 @@
                                     {{ $website->uptime_status === 'down' ? 'Website is down' : 'Content mismatch detected' }}
                                 </span>
                             </div>
-                            <span class="text-xs text-orange-500 dark:text-orange-400">
-                                {{ $website->last_uptime_check_at ? $website->last_uptime_check_at->diffForHumans() : 'Never checked' }}
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-orange-500 dark:text-orange-400">
+                                    {{ $website->last_uptime_check_at ? $website->last_uptime_check_at->diffForHumans() : 'Never checked' }}
+                                </span>
+                                <flux:icon name="chevron-right" class="h-3 w-3 text-orange-400" />
+                            </div>
                         </div>
                     @endforeach
                 </div>
@@ -313,7 +342,8 @@
                 </div>
                 <div class="space-y-2">
                     @foreach($criticalIssues as $check)
-                        <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center justify-between text-sm p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors cursor-pointer"
+                             wire:click="goToWebsiteDetails({{ $check->website->id }})">
                             <div class="flex items-center space-x-2">
                                 <span class="font-medium text-red-700 dark:text-red-300">{{ $check->website->name }}</span>
                                 <span class="text-red-600 dark:text-red-400">•</span>
@@ -321,76 +351,60 @@
                                     {{ $check->status === 'expired' ? 'SSL certificate expired' : 'SSL check failed' }}
                                 </span>
                             </div>
-                            <span class="text-xs text-red-500 dark:text-red-400">
-                                {{ $check->checked_at->diffForHumans() }}
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-red-500 dark:text-red-400">
+                                    {{ $check->checked_at->diffForHumans() }}
+                                </span>
+                                <flux:icon name="chevron-right" class="h-3 w-3 text-red-400" />
+                            </div>
                         </div>
                     @endforeach
                 </div>
             </div>
         @endif
 
-        <!-- Recent SSL Checks -->
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-sm">
-            <div class="p-4 border-b border-zinc-200 dark:border-zinc-700">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Recent SSL Checks</h2>
-                    <flux:button :href="route('websites')" variant="ghost" size="sm" icon="cog" wire:navigate>
-                        Manage Websites
-                    </flux:button>
+        <!-- Recent Activity -->
+        @if($recentChecks->isNotEmpty())
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-sm">
+                <div class="p-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Recent Activity</h2>
+                        <flux:button :href="route('websites')" variant="ghost" size="sm" icon="cog" wire:navigate>
+                            View All
+                        </flux:button>
+                    </div>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Latest SSL check results</p>
                 </div>
-            </div>
 
-            @if($recentChecks->isNotEmpty())
                 <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                     @foreach($recentChecks as $check)
-                        <div class="p-4 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors cursor-pointer">
-                            <div class="flex items-start justify-between">
-                                <div class="flex items-start space-x-4 flex-1">
-                                    <div class="flex-shrink-0 mt-1">
-                                        @if($check->status === 'valid')
-                                            <flux:icon name="shield-check" class="h-5 w-5 text-green-500" />
-                                        @elseif($check->status === 'expiring_soon')
-                                            <flux:icon name="exclamation-triangle" class="h-5 w-5 text-yellow-500" />
-                                        @elseif($check->status === 'expired')
-                                            <flux:icon name="shield-exclamation" class="h-5 w-5 text-red-500" />
-                                        @else
-                                            <flux:icon name="x-circle" class="h-5 w-5 text-red-500" />
-                                        @endif
-                                    </div>
+                        <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                             wire:click="goToWebsiteDetails({{ $check->website->id }})">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3 flex-1">
+                                    @if($check->status === 'valid')
+                                        <flux:icon name="shield-check" class="h-4 w-4 text-green-500" />
+                                    @elseif($check->status === 'expiring_soon')
+                                        <flux:icon name="exclamation-triangle" class="h-4 w-4 text-yellow-500" />
+                                    @elseif($check->status === 'expired')
+                                        <flux:icon name="shield-exclamation" class="h-4 w-4 text-red-500" />
+                                    @else
+                                        <flux:icon name="x-circle" class="h-4 w-4 text-red-500" />
+                                    @endif
+
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center space-x-3 mb-1">
-                                            <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $check->website->name }}</p>
-                                            <flux:badge 
-                                                :color="match($check->status) {
-                                                    'valid' => 'green',
-                                                    'expiring_soon' => 'yellow', 
-                                                    'expired' => 'red',
-                                                    'error' => 'red',
-                                                    default => 'gray'
-                                                }"
-                                                size="sm"
-                                            >
-                                                {{ ucwords(str_replace('_', ' ', $check->status)) }}
-                                            </flux:badge>
-                                        </div>
-                                        <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $check->website->url }}</p>
+                                        <p class="text-sm font-medium text-zinc-900 dark:text-white">{{ $check->website->name }}</p>
+                                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                                            {{ ucwords(str_replace('_', ' ', $check->status)) }} • {{ $check->checked_at->diffForHumans() }}
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="text-right flex-shrink-0 ml-6">
-                                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                                        {{ $check->checked_at->diffForHumans() }}
-                                    </p>
-                                </div>
+                                <flux:icon name="chevron-right" class="h-4 w-4 text-zinc-400" />
                             </div>
                         </div>
                     @endforeach
                 </div>
-            @else
-                <div class="p-4 text-center text-zinc-500 dark:text-zinc-400">
-                    <p>No SSL checks performed yet.</p>
-                </div>
-            @endif
-        </div>
+            </div>
+        @endif
     @endif
 </div>

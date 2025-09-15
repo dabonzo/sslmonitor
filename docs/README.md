@@ -59,8 +59,10 @@ Documentation for developers working on the SSL Monitor codebase.
 - **Content Validation** - Detect hosting company default pages and maintenance screens ⭐ NEW
 - **Comprehensive Notifications** - Professional email alerts for SSL and uptime issues ⭐ NEW
 - **Granular Alert Preferences** - Control exactly which notifications you receive ⭐ NEW
-- **Real-time Dashboard** - Comprehensive overview of SSL certificate and uptime status
-- **Live WebSocket Updates** - Real-time SSL and uptime status changes via Laravel Reverb 🚀 NEW
+- **Enhanced Dashboard** - Intuitive website cards with unified SSL and uptime status ✨ IMPROVED
+- **Actionable Alerts** - Clickable critical issues for immediate problem resolution ✨ IMPROVED
+- **Immediate Feedback** - SSL and uptime checks run instantly when adding new websites ⭐ NEW
+- **Auto-Starting Queue Worker** - Laravel Horizon starts automatically with Docker containers ⭐ NEW
 - **Team Collaboration** - Share SSL monitoring with colleagues and teams with real-time sync
 - **Role-based Permissions** - Owner, Admin, Manager, and Viewer roles
 - **In-app Email Configuration** - Configure SMTP settings without server access
@@ -75,7 +77,6 @@ Documentation for developers working on the SSL Monitor codebase.
 - **PHP 8.2+** - Latest PHP with performance improvements
 - **MySQL 8.0+ / MariaDB 10.3+** - Relational database
 - **Redis** - Caching and queue management
-- **Laravel Reverb** - Native WebSocket server for real-time updates 🚀 NEW
 
 ### Frontend
 - **Livewire 3** - Full-stack reactive components
@@ -101,15 +102,14 @@ Documentation for developers working on the SSL Monitor codebase.
 - **PHP**: 8.2+ with required extensions
 - **Laravel**: 12.x
 - **Database**: MySQL 8.0+ or MariaDB 10.3+ or PostgreSQL 13+
-- **Redis**: 6.0+ (for caching, queues, and real-time features)
+- **Redis**: 6.0+ (for caching and queues)
 - **Web Server**: Nginx 1.18+ or Apache 2.4+
 - **Process Manager**: Supervisor (for background services)
-- **SSL Certificate**: Required for HTTPS/WSS connections
+- **SSL Certificate**: Required for HTTPS connections
 
 ### Service Architecture
 - **Laravel Horizon**: Queue management and monitoring
-- **Laravel Pulse**: Performance monitoring dashboard  
-- **Laravel Reverb**: Real-time WebSocket server (Port 8080)
+- **Laravel Pulse**: Performance monitoring dashboard
 - **Background Scheduler**: Automated SSL/uptime checks
 
 ## 🆘 Support

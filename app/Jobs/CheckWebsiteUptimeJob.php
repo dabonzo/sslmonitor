@@ -31,8 +31,10 @@ class CheckWebsiteUptimeJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Website $website)
-    {
+    public function __construct(
+        public Website $website,
+        public bool $forceCheck = false
+    ) {
         // Use default queue for simplicity and reliability
     }
 
@@ -51,8 +53,30 @@ class CheckWebsiteUptimeJob implements ShouldQueue
     {
         // Skip if uptime monitoring is not enabled for this website
         if (! $this->website->uptime_monitoring) {
+            Log::info("Skipping uptime check for {$this->website->url} - uptime monitoring disabled");
+
             return;
         }
+
+        // Skip if we've checked this website recently (within last hour), unless forced
+        $forceCheck = isset($this->forceCheck) ? $this->forceCheck : false;
+        if (! $forceCheck) {
+            $recentCheck = $this->website->uptimeChecks()
+                ->where('checked_at', '>', now()->subHour())
+                ->latest('checked_at')
+                ->first();
+
+            if ($recentCheck) {
+                Log::info("Skipping uptime check for {$this->website->url} - checked recently at {$recentCheck->checked_at}");
+
+                return;
+            }
+        }
+
+        Log::info("Starting uptime check for {$this->website->url}", [
+            'force_check' => $forceCheck,
+            'website_id' => $this->website->id,
+        ]);
 
         // Get previous status for real-time event comparison
         $previousCheck = $this->website->uptimeChecks()
