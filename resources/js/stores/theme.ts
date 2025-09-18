@@ -2,15 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
-export type LayoutMode = 'full' | 'boxed-layout'
-export type MenuMode = 'horizontal' | 'vertical' | 'collapsible-vertical'
+export type LayoutMode = 'vertical' | 'horizontal' | 'collapsible'
+export type MenuMode = 'horizontal' | 'vertical'
 
 export const useThemeStore = defineStore('theme', () => {
   // Theme State
   const theme = ref<ThemeMode>('system')
-  const layout = ref<LayoutMode>('full')
+  const layout = ref<LayoutMode>('vertical')
   const menu = ref<MenuMode>('vertical')
-  const sidebarOpen = ref(false)
+  const sidebarOpen = ref(true)
   const semiDark = ref(false)
   const animation = ref('animate__fadeIn')
 
@@ -44,11 +44,24 @@ export const useThemeStore = defineStore('theme', () => {
     applyTheme()
   }
 
+  function setTheme(newTheme: ThemeMode) {
+    theme.value = newTheme
+    applyTheme()
+  }
+
   function toggleLayout(newLayout: LayoutMode) {
     layout.value = newLayout
   }
 
+  function setLayout(newLayout: LayoutMode) {
+    layout.value = newLayout
+  }
+
   function toggleMenu(newMenu: MenuMode) {
+    menu.value = newMenu
+  }
+
+  function setMenu(newMenu: MenuMode) {
     menu.value = newMenu
   }
 
@@ -103,6 +116,11 @@ export const useThemeStore = defineStore('theme', () => {
     }
 
     applyTheme()
+
+    // Set sidebar open on desktop by default
+    if (window.innerWidth >= 1024) {
+      sidebarOpen.value = true
+    }
   }
 
   // Persist to localStorage
@@ -130,6 +148,14 @@ export const useThemeStore = defineStore('theme', () => {
     }
   }
 
+  function resetToDefaults() {
+    theme.value = 'system'
+    layout.value = 'vertical'
+    menu.value = 'vertical'
+    semiDark.value = false
+    applyTheme()
+  }
+
   return {
     // State
     theme,
@@ -146,13 +172,17 @@ export const useThemeStore = defineStore('theme', () => {
 
     // Actions
     toggleTheme,
+    setTheme,
     toggleLayout,
+    setLayout,
     toggleMenu,
+    setMenu,
     toggleSidebar,
     setSidebarOpen,
     toggleSemiDark,
     setAnimation,
     initializeTheme,
     handleOutsideClick,
+    resetToDefaults,
   }
 })

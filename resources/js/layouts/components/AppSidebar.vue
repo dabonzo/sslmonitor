@@ -108,18 +108,18 @@ function isActiveRoute(href: string) {
 
 <template>
   <nav
-    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-white dark:bg-[#0e1726]"
+    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
     :class="{
       'ltr:-left-[260px] rtl:right-[260px]': !themeStore.sidebarOpen,
       'ltr:left-0 rtl:right-0': themeStore.sidebarOpen
     }"
   >
-    <div class="h-full bg-white dark:bg-[#0e1726]">
+    <div class="h-full bg-sidebar">
       <!-- Logo section -->
       <div class="flex items-center justify-between px-4 py-3">
         <Link href="/dashboard" class="main-logo flex shrink-0 items-center">
           <AppLogoIcon class="ml-[5px] h-8 w-8 flex-none fill-current text-primary" />
-          <span class="text-2xl font-semibold align-middle text-primary dark:text-white-light ltr:ml-1.5 rtl:mr-1.5">
+          <span class="text-2xl font-semibold align-middle text-sidebar-primary ltr:ml-1.5 rtl:mr-1.5">
             SSL Monitor
           </span>
         </Link>
@@ -140,7 +140,7 @@ function isActiveRoute(href: string) {
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span class="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                  <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
                     {{ item.title }}
                   </span>
                 </div>
@@ -179,7 +179,7 @@ function isActiveRoute(href: string) {
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span class="text-black dark:text-[#506690] dark:group-hover:text-white-dark ltr:pl-3 rtl:pr-3">
+                  <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
                     {{ item.title }}
                   </span>
                 </div>

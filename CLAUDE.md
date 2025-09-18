@@ -55,6 +55,10 @@ This condensed file serves as the central reference for AI-assisted development 
 
 # Code quality
 ./vendor/bin/sail exec laravel.test ./vendor/bin/pint
+
+# 🚨 CRITICAL: After ANY CSS changes - ALWAYS run:
+./vendor/bin/sail artisan cache:clear && ./vendor/bin/sail artisan config:clear && ./vendor/bin/sail artisan view:clear && ./vendor/bin/sail artisan route:clear
+# Then restart Vite: ./vendor/bin/sail npm run dev
 ```
 
 ### Critical Development Rules

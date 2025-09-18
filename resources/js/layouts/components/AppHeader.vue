@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
+import ThemeCustomizer from '@/components/ThemeCustomizer.vue'
 import {
   Menu,
   Search,
@@ -12,7 +13,8 @@ import {
   Sun,
   Moon,
   Monitor,
-  ChevronDown
+  ChevronDown,
+  Palette
 } from 'lucide-vue-next'
 
 interface Props {
@@ -27,6 +29,9 @@ const themeStore = useThemeStore()
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const showSearch = ref(false)
+
+// Theme customizer
+const themeCustomizer = ref<InstanceType<typeof ThemeCustomizer> | null>(null)
 
 // Mock notifications
 const notifications = ref([
@@ -61,6 +66,10 @@ function closeDropdowns() {
   showNotifications.value = false
   showUserMenu.value = false
   showSearch.value = false
+}
+
+function toggleCustomizer() {
+  themeCustomizer.value?.toggleCustomizer()
 }
 
 // Close dropdowns when clicking outside
@@ -135,6 +144,16 @@ document.addEventListener('click', handleDocumentClick)
         >
           <Sun v-if="themeStore.resolvedTheme === 'dark'" class="h-4 w-4" />
           <Moon v-else class="h-4 w-4" />
+        </button>
+
+        <!-- Theme customizer toggle -->
+        <button
+          type="button"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-white-light/40 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary"
+          data-test="theme-customizer-toggle"
+          @click="toggleCustomizer"
+        >
+          <Palette class="h-4 w-4" />
         </button>
 
         <!-- Notifications -->
@@ -243,6 +262,9 @@ document.addEventListener('click', handleDocumentClick)
 
       </div>
     </div>
+
+    <!-- Theme Customizer -->
+    <ThemeCustomizer ref="themeCustomizer" />
   </header>
 </template>
 

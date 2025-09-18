@@ -64,7 +64,7 @@ function scrollToTop() {
 
 <template>
   <div
-    class="relative overflow-x-hidden font-nunito text-sm font-normal antialiased text-black dark:text-white-dark"
+    class="relative overflow-x-hidden font-nunito text-sm font-normal antialiased bg-background text-foreground"
     :class="themeStore.appClasses"
   >
     <!-- Sidebar overlay for mobile -->

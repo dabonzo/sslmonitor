@@ -77,14 +77,14 @@ const recentActivity = [
             <div
                 v-for="stat in stats"
                 :key="stat.title"
-                class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]"
+                class="rounded-lg bg-card text-card-foreground p-6 shadow-sm"
             >
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <p class="text-sm font-medium text-muted-foreground">
                             {{ stat.title }}
                         </p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <p class="text-2xl font-bold text-foreground">
                             {{ stat.value }}
                         </p>
                         <p class="flex items-center text-sm" :class="{
@@ -96,7 +96,7 @@ const recentActivity = [
                             {{ stat.change }}
                         </p>
                     </div>
-                    <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-700">
+                    <div class="rounded-lg bg-muted p-3">
                         <component :is="stat.icon" class="h-6 w-6" :class="stat.color" />
                     </div>
                 </div>
@@ -107,9 +107,9 @@ const recentActivity = [
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
             <!-- SSL Status Chart -->
-            <div class="lg:col-span-2 rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+            <div class="lg:col-span-2 rounded-lg bg-card text-card-foreground p-6 shadow-sm">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 class="text-lg font-semibold text-foreground">
                         Certificate Status Overview
                     </h3>
                     <button class="text-sm text-primary hover:text-primary/80">
@@ -118,21 +118,21 @@ const recentActivity = [
                 </div>
 
                 <!-- Placeholder for chart -->
-                <div class="flex h-64 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-700">
+                <div class="flex h-64 items-center justify-center rounded-lg bg-muted">
                     <div class="text-center">
-                        <Shield class="mx-auto h-12 w-12 text-gray-400" />
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <Shield class="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p class="mt-2 text-sm text-muted-foreground">
                             SSL Certificate Status Chart
                         </p>
-                        <p class="text-xs text-gray-400">Chart visualization will be implemented</p>
+                        <p class="text-xs text-muted-foreground/80">Chart visualization will be implemented</p>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 class="text-lg font-semibold text-foreground">
                         Recent Activity
                     </h3>
                     <button class="text-sm text-primary hover:text-primary/80">
@@ -155,13 +155,13 @@ const recentActivity = [
                             }"
                         />
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            <p class="text-sm font-medium text-foreground">
                                 {{ activity.title }}
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <p class="text-sm text-muted-foreground">
                                 {{ activity.description }}
                             </p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500">
+                            <p class="text-xs text-muted-foreground/80">
                                 {{ activity.time }}
                             </p>
                         </div>
@@ -174,8 +174,8 @@ const recentActivity = [
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
             <!-- Critical Alerts -->
-            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
-                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
+                <h3 class="mb-4 text-lg font-semibold text-foreground">
                     Critical Alerts
                 </h3>
 
@@ -207,30 +207,30 @@ const recentActivity = [
             </div>
 
             <!-- Quick Actions -->
-            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
-                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
+                <h3 class="mb-4 text-lg font-semibold text-foreground">
                     Quick Actions
                 </h3>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted">
                         <Shield class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Add Certificate</p>
+                        <p class="mt-1 text-sm font-medium text-foreground">Add Certificate</p>
                     </button>
 
-                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted">
                         <Clock class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Create Monitor</p>
+                        <p class="mt-1 text-sm font-medium text-foreground">Create Monitor</p>
                     </button>
 
-                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted">
                         <TrendingUp class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">View Reports</p>
+                        <p class="mt-1 text-sm font-medium text-foreground">View Reports</p>
                     </button>
 
-                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted">
                         <AlertTriangle class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Alert Rules</p>
+                        <p class="mt-1 text-sm font-medium text-foreground">Alert Rules</p>
                     </button>
                 </div>
             </div>
