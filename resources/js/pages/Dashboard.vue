@@ -1,37 +1,240 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
+import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import {
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
+  TrendingDown
+} from 'lucide-vue-next';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard().url,
-    },
+// Mock dashboard data
+const stats = [
+  {
+    title: 'Total Certificates',
+    value: '24',
+    change: '+2',
+    trend: 'up',
+    icon: Shield,
+    color: 'text-blue-600'
+  },
+  {
+    title: 'Valid Certificates',
+    value: '22',
+    change: '91.7%',
+    trend: 'up',
+    icon: CheckCircle,
+    color: 'text-green-600'
+  },
+  {
+    title: 'Expiring Soon',
+    value: '2',
+    change: '8.3%',
+    trend: 'down',
+    icon: AlertTriangle,
+    color: 'text-yellow-600'
+  },
+  {
+    title: 'Avg Response Time',
+    value: '245ms',
+    change: '-12ms',
+    trend: 'up',
+    icon: Clock,
+    color: 'text-purple-600'
+  }
+];
+
+const recentActivity = [
+  {
+    title: 'SSL Certificate Renewed',
+    description: 'example.com certificate has been renewed',
+    time: '2 minutes ago',
+    type: 'success'
+  },
+  {
+    title: 'Monitor Added',
+    description: 'New monitor created for api.example.com',
+    time: '1 hour ago',
+    type: 'info'
+  },
+  {
+    title: 'Certificate Expiring',
+    description: 'shop.example.com expires in 7 days',
+    time: '3 hours ago',
+    type: 'warning'
+  }
 ];
 </script>
 
 <template>
     <Head title="Dashboard" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
+    <DashboardLayout title="Dashboard">
+        <!-- Stats Cards -->
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+                v-for="stat in stats"
+                :key="stat.title"
+                class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]"
+            >
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            {{ stat.title }}
+                        </p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            {{ stat.value }}
+                        </p>
+                        <p class="flex items-center text-sm" :class="{
+                            'text-green-600': stat.trend === 'up',
+                            'text-red-600': stat.trend === 'down'
+                        }">
+                            <TrendingUp v-if="stat.trend === 'up'" class="mr-1 h-4 w-4" />
+                            <TrendingDown v-else class="mr-1 h-4 w-4" />
+                            {{ stat.change }}
+                        </p>
+                    </div>
+                    <div class="rounded-lg bg-gray-50 p-3 dark:bg-gray-700">
+                        <component :is="stat.icon" class="h-6 w-6" :class="stat.color" />
+                    </div>
                 </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-            </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <PlaceholderPattern />
             </div>
         </div>
-    </AppLayout>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            <!-- SSL Status Chart -->
+            <div class="lg:col-span-2 rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Certificate Status Overview
+                    </h3>
+                    <button class="text-sm text-primary hover:text-primary/80">
+                        View All
+                    </button>
+                </div>
+
+                <!-- Placeholder for chart -->
+                <div class="flex h-64 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <div class="text-center">
+                        <Shield class="mx-auto h-12 w-12 text-gray-400" />
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            SSL Certificate Status Chart
+                        </p>
+                        <p class="text-xs text-gray-400">Chart visualization will be implemented</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Recent Activity
+                    </h3>
+                    <button class="text-sm text-primary hover:text-primary/80">
+                        View All
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div
+                        v-for="activity in recentActivity"
+                        :key="activity.title"
+                        class="flex items-start space-x-3"
+                    >
+                        <div
+                            class="mt-1 h-2 w-2 rounded-full"
+                            :class="{
+                                'bg-green-400': activity.type === 'success',
+                                'bg-blue-400': activity.type === 'info',
+                                'bg-yellow-400': activity.type === 'warning'
+                            }"
+                        />
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ activity.title }}
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ activity.description }}
+                            </p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">
+                                {{ activity.time }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Content Row -->
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+            <!-- Critical Alerts -->
+            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                    Critical Alerts
+                </h3>
+
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3 rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+                        <AlertTriangle class="h-5 w-5 text-red-600" />
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-red-800 dark:text-red-200">
+                                Certificate Expired
+                            </p>
+                            <p class="text-sm text-red-600 dark:text-red-300">
+                                old.example.com certificate expired 2 days ago
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+                        <Clock class="h-5 w-5 text-yellow-600" />
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                Monitor Timeout
+                            </p>
+                            <p class="text-sm text-yellow-600 dark:text-yellow-300">
+                                api.example.com taking longer than usual to respond
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-[#1b2e4b]">
+                <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                    Quick Actions
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <Shield class="mx-auto h-6 w-6 text-primary" />
+                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Add Certificate</p>
+                    </button>
+
+                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <Clock class="mx-auto h-6 w-6 text-primary" />
+                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Create Monitor</p>
+                    </button>
+
+                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <TrendingUp class="mx-auto h-6 w-6 text-primary" />
+                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">View Reports</p>
+                    </button>
+
+                    <button class="rounded-lg border border-gray-200 p-3 text-center hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">
+                        <AlertTriangle class="mx-auto h-6 w-6 text-primary" />
+                        <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">Alert Rules</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </DashboardLayout>
 </template>
