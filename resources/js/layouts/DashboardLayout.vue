@@ -144,13 +144,22 @@ function scrollToTop() {
   }
 }
 
-/* Toggle sidebar state */
+/* Sidebar open/closed states */
 .toggle-sidebar.vertical .main-container {
-  margin-left: 0;
+  margin-left: 260px;
 }
 
 .toggle-sidebar.collapsible-vertical .main-container {
-  margin-left: 260px;
+  margin-left: 70px;
+}
+
+/* When sidebar is closed (no toggle-sidebar class) */
+.vertical:not(.toggle-sidebar) .main-container {
+  margin-left: 0;
+}
+
+.collapsible-vertical:not(.toggle-sidebar) .main-container {
+  margin-left: 0;
 }
 
 /* Semi-dark mode */
