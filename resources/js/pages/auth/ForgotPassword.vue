@@ -5,10 +5,10 @@ import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/AuthLayout.vue';
+import CoverAuthLayout from '@/layouts/auth/CoverAuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle, Mail } from 'lucide-vue-next';
 
 defineProps<{
     status?: string;
@@ -16,33 +16,53 @@ defineProps<{
 </script>
 
 <template>
-    <AuthLayout title="Forgot password" description="Enter your email to receive a password reset link">
+    <CoverAuthLayout title="Forgot Password" description="Enter your email to receive a password reset link">
         <Head title="Forgot password" />
 
-        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+        <div v-if="status" class="mb-6 rounded-lg bg-green-100 p-3 text-center text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
             {{ status }}
         </div>
 
-        <div class="space-y-6">
-            <Form v-bind="PasswordResetLinkController.store.form()" v-slot="{ errors, processing }">
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input id="email" type="email" name="email" autocomplete="off" autofocus placeholder="email@example.com" />
-                    <InputError :message="errors.email" />
+        <Form v-bind="PasswordResetLinkController.store.form()" v-slot="{ errors, processing }" class="space-y-5 dark:text-white">
+            <!-- Email field -->
+            <div>
+                <Label for="email" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
+                <div class="relative text-slate-500 dark:text-slate-400">
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        required
+                        autofocus
+                        autocomplete="email"
+                        placeholder="Enter Email"
+                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    />
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Mail class="h-[18px] w-[18px]" />
+                    </span>
                 </div>
-
-                <div class="my-6 flex items-center justify-start">
-                    <Button class="w-full" :disabled="processing" data-test="email-password-reset-link-button">
-                        <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
-                        Email password reset link
-                    </Button>
-                </div>
-            </Form>
-
-            <div class="space-x-1 text-center text-sm text-muted-foreground">
-                <span>Or, return to</span>
-                <TextLink :href="login()">log in</TextLink>
+                <InputError :message="errors.email" class="mt-1" />
             </div>
-        </div>
-    </AuthLayout>
+
+            <!-- Reset button -->
+            <Button
+                type="submit"
+                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                :disabled="processing"
+                data-test="email-password-reset-link-button"
+            >
+                <LoaderCircle v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
+                Send Reset Link
+            </Button>
+
+            <!-- Back to login link -->
+            <div class="text-center text-slate-600 dark:text-slate-400">
+                Remember your password?
+                <TextLink :href="login()" class="font-semibold uppercase text-primary underline transition hover:text-black dark:hover:text-white">
+                    SIGN IN
+                </TextLink>
+            </div>
+        </Form>
+    </CoverAuthLayout>
 </template>

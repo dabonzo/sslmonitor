@@ -5,65 +5,126 @@ import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthBase from '@/layouts/AuthLayout.vue';
+import CoverAuthLayout from '@/layouts/auth/CoverAuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
 </script>
 
 <template>
-    <AuthBase title="Create an account" description="Enter your details below to create your account">
+    <CoverAuthLayout title="Sign up" description="Enter your details below to create your account">
         <Head title="Register" />
 
         <Form
             v-bind="RegisteredUserController.store.form()"
             :reset-on-success="['password', 'password_confirmation']"
             v-slot="{ errors, processing }"
-            class="flex flex-col gap-6"
+            class="space-y-5 dark:text-white"
         >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input id="name" type="text" required autofocus :tabindex="1" autocomplete="name" name="name" placeholder="Full name" />
-                    <InputError :message="errors.name" />
+            <!-- Name field -->
+            <div>
+                <Label for="name" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</Label>
+                <div class="relative text-slate-500 dark:text-slate-400">
+                    <Input
+                        id="name"
+                        type="text"
+                        name="name"
+                        required
+                        autofocus
+                        :tabindex="1"
+                        autocomplete="name"
+                        placeholder="Enter Full Name"
+                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    />
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                        <User class="h-[18px] w-[18px]" />
+                    </span>
                 </div>
+                <InputError :message="errors.name" class="mt-1" />
+            </div>
 
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input id="email" type="email" required :tabindex="2" autocomplete="email" name="email" placeholder="email@example.com" />
-                    <InputError :message="errors.email" />
+            <!-- Email field -->
+            <div>
+                <Label for="email" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
+                <div class="relative text-slate-500 dark:text-slate-400">
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        required
+                        :tabindex="2"
+                        autocomplete="email"
+                        placeholder="Enter Email"
+                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    />
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Mail class="h-[18px] w-[18px]" />
+                    </span>
                 </div>
+                <InputError :message="errors.email" class="mt-1" />
+            </div>
 
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input id="password" type="password" required :tabindex="3" autocomplete="new-password" name="password" placeholder="Password" />
-                    <InputError :message="errors.password" />
+            <!-- Password field -->
+            <div>
+                <Label for="password" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Password</Label>
+                <div class="relative text-slate-500 dark:text-slate-400">
+                    <Input
+                        id="password"
+                        type="password"
+                        name="password"
+                        required
+                        :tabindex="3"
+                        autocomplete="new-password"
+                        placeholder="Enter Password"
+                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    />
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Lock class="h-[18px] w-[18px]" />
+                    </span>
                 </div>
+                <InputError :message="errors.password" class="mt-1" />
+            </div>
 
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirm password</Label>
+            <!-- Confirm Password field -->
+            <div>
+                <Label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</Label>
+                <div class="relative text-slate-500 dark:text-slate-400">
                     <Input
                         id="password_confirmation"
                         type="password"
+                        name="password_confirmation"
                         required
                         :tabindex="4"
                         autocomplete="new-password"
-                        name="password_confirmation"
-                        placeholder="Confirm password"
+                        placeholder="Confirm Password"
+                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
-                    <InputError :message="errors.password_confirmation" />
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Lock class="h-[18px] w-[18px]" />
+                    </span>
                 </div>
-
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="processing" data-test="register-user-button">
-                    <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
-                    Create account
-                </Button>
+                <InputError :message="errors.password_confirmation" class="mt-1" />
             </div>
 
-            <div class="text-center text-sm text-muted-foreground">
+            <!-- Register button -->
+            <Button
+                type="submit"
+                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                :tabindex="5"
+                :disabled="processing"
+                data-test="register-user-button"
+            >
+                <LoaderCircle v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
+                Create Account
+            </Button>
+
+            <!-- Sign in link -->
+            <div class="text-center text-slate-600 dark:text-slate-400">
                 Already have an account?
-                <TextLink :href="login()" class="underline underline-offset-4" :tabindex="6">Log in</TextLink>
+                <TextLink :href="login()" class="font-semibold uppercase text-primary underline transition hover:text-black dark:hover:text-white" :tabindex="6">
+                    SIGN IN
+                </TextLink>
             </div>
         </Form>
-    </AuthBase>
+    </CoverAuthLayout>
 </template>
