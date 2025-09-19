@@ -165,3 +165,135 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* VRISTO Navigation Mode Patterns */
+
+/* Default: Vertical mode */
+.main-container .main-content {
+    @apply transition-all duration-300 lg:ml-[260px];
+}
+
+/* Horizontal mode: Hide sidebar, no margin */
+.horizontal .main-container .main-content {
+    @apply !ml-0;
+}
+
+.horizontal .sidebar {
+    @apply !-left-[260px] !hidden lg:!hidden;
+}
+
+.horizontal .horizontal-menu {
+    @apply hidden shadow-md lg:flex;
+}
+
+.horizontal .horizontal-logo {
+    @apply flex;
+}
+
+/* Collapsible vertical mode */
+.collapsible-vertical .sidebar {
+    @apply -left-[260px] lg:left-0;
+}
+
+/* Show text labels on hover in collapsible mode */
+.collapsible-vertical .sidebar:hover .text-sidebar-foreground {
+    @apply lg:inline;
+}
+
+.collapsible-vertical .sidebar .text-sidebar-foreground {
+    @apply lg:hidden;
+}
+
+.collapsible-vertical.toggle-sidebar .sidebar {
+    @apply !left-0 lg:!w-[260px];
+}
+
+.collapsible-vertical.toggle-sidebar .main-content {
+    @apply lg:!w-[calc(100%-260px)] lg:!ml-[260px];
+}
+
+/* Full layout: collapsible sidebar gets 70px margin */
+.collapsible-vertical:not(.boxed-layout) .main-content {
+    @apply lg:!ml-[70px];
+}
+
+.collapsible-vertical .sidebar .sub-menu {
+    @apply lg:hidden;
+}
+
+.collapsible-vertical .sidebar:hover .sub-menu,
+.collapsible-vertical.toggle-sidebar .sidebar .sub-menu {
+    @apply lg:block;
+}
+
+/* Layout Mode Styles */
+
+/* Boxed Layout */
+.boxed-layout {
+    @apply bg-[#f1f5f9] dark:bg-[#0e1726];
+}
+
+.boxed-layout .main-container {
+    @apply mx-auto max-w-[1200px] rounded-lg bg-white shadow-sm dark:bg-[#060818];
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Boxed layout navigation mode combinations */
+.boxed-layout.horizontal .main-container .main-content {
+    @apply !ml-0;
+}
+
+.boxed-layout.horizontal .sidebar {
+    @apply !-left-[260px] !hidden;
+}
+
+.boxed-layout.collapsible-vertical .main-container .main-content {
+    @apply !ml-0;
+}
+
+.boxed-layout.collapsible-vertical .sidebar {
+    @apply -left-[260px] lg:!w-[70px] lg:!left-0 rounded-l-lg;
+}
+
+.boxed-layout.collapsible-vertical .sidebar:hover {
+    @apply lg:!w-[260px];
+}
+
+.boxed-layout.vertical .main-container .main-content {
+    @apply !ml-0;
+}
+
+.boxed-layout.vertical .sidebar {
+    @apply rounded-l-lg;
+}
+
+.boxed-layout .horizontal-menu {
+    @apply rounded-t-lg;
+}
+
+.boxed-layout header {
+    @apply rounded-t-lg;
+}
+
+/* Mobile responsive */
+@media (max-width: 1023px) {
+    .main-container .main-content {
+        @apply !ml-0;
+    }
+
+    .sidebar {
+        @apply !-left-[260px];
+    }
+
+    .toggle-sidebar .sidebar {
+        @apply !left-0;
+    }
+
+    /* Boxed layout adjustments for mobile */
+    .boxed-layout .main-container {
+        @apply mx-2 rounded-lg;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}

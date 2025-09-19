@@ -33,11 +33,17 @@ const themeOptions = [
   { name: 'System', value: 'system', icon: Monitor }
 ]
 
-// Layout options
+// Navigation options (VRISTO pattern)
+const navigationOptions = [
+  { name: 'Vertical', value: 'vertical', description: 'Full sidebar on left' },
+  { name: 'Horizontal', value: 'horizontal', description: 'Header navigation menu' },
+  { name: 'Collapsible', value: 'collapsible-vertical', description: 'Narrow sidebar with hover' }
+]
+
+// Layout options (VRISTO pattern)
 const layoutOptions = [
-  { name: 'Vertical', value: 'vertical', description: 'Sidebar on left' },
-  { name: 'Horizontal', value: 'horizontal', description: 'Top navigation' },
-  { name: 'Collapsible', value: 'collapsible', description: 'Collapsible sidebar' }
+  { name: 'Full Screen', value: 'full', description: 'Full width layout' },
+  { name: 'Boxed', value: 'boxed-layout', description: 'Centered boxed layout' }
 ]
 
 function toggleCustomizer() {
@@ -120,11 +126,43 @@ defineExpose({
           </div>
         </div>
 
+        <!-- Navigation Mode -->
+        <div class="mb-6">
+          <div class="mb-3 flex items-center space-x-2">
+            <Layout class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <h4 class="font-medium text-gray-900 dark:text-white">Navigation Mode</h4>
+          </div>
+          <div class="grid grid-cols-1 gap-2">
+            <div
+              v-for="option in navigationOptions"
+              :key="option.value"
+              class="relative cursor-pointer rounded-lg border p-3 transition-colors"
+              :class="{
+                'border-primary bg-primary/5': themeStore.menu === option.value,
+                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.menu !== option.value
+              }"
+              :data-test="`navigation-${option.value}`"
+              @click="themeStore.setMenu(option.value)"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-medium">{{ option.name }}</div>
+                  <div class="text-sm text-gray-500">{{ option.description }}</div>
+                </div>
+                <Check
+                  v-if="themeStore.menu === option.value"
+                  class="h-4 w-4 text-primary"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Layout Mode -->
         <div class="mb-6">
           <div class="mb-3 flex items-center space-x-2">
             <Layout class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Layout</h4>
+            <h4 class="font-medium text-gray-900 dark:text-white">Layout Mode</h4>
           </div>
           <div class="grid grid-cols-1 gap-2">
             <div
@@ -148,48 +186,6 @@ defineExpose({
                   class="h-4 w-4 text-primary"
                 />
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Menu Position -->
-        <div class="mb-6">
-          <div class="mb-3 flex items-center space-x-2">
-            <Sidebar class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Menu Position</h4>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div
-              class="cursor-pointer rounded-lg border p-3 text-center transition-colors"
-              :class="{
-                'border-primary bg-primary/5': themeStore.menu === 'vertical',
-                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.menu !== 'vertical'
-              }"
-              data-test="menu-vertical"
-              @click="themeStore.setMenu('vertical')"
-            >
-              <div class="mb-2 flex justify-center">
-                <div class="h-8 w-12 rounded border-2 border-current opacity-60">
-                  <div class="h-full w-3 bg-current opacity-50"></div>
-                </div>
-              </div>
-              <div class="text-sm font-medium">Vertical</div>
-            </div>
-            <div
-              class="cursor-pointer rounded-lg border p-3 text-center transition-colors"
-              :class="{
-                'border-primary bg-primary/5': themeStore.menu === 'horizontal',
-                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.menu !== 'horizontal'
-              }"
-              data-test="menu-horizontal"
-              @click="themeStore.setMenu('horizontal')"
-            >
-              <div class="mb-2 flex justify-center">
-                <div class="h-8 w-12 rounded border-2 border-current opacity-60">
-                  <div class="h-2 w-full bg-current opacity-50"></div>
-                </div>
-              </div>
-              <div class="text-sm font-medium">Horizontal</div>
             </div>
           </div>
         </div>

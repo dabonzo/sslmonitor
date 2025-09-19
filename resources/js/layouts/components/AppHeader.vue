@@ -14,7 +14,11 @@ import {
   Moon,
   Monitor,
   ChevronDown,
-  Palette
+  Palette,
+  Shield,
+  BarChart3,
+  AlertTriangle,
+  Users
 } from 'lucide-vue-next'
 
 interface Props {
@@ -72,11 +76,73 @@ function toggleCustomizer() {
   themeCustomizer.value?.toggleCustomizer()
 }
 
+// Horizontal menu items (for horizontal navigation mode)
+const horizontalMenuItems = [
+  {
+    title: 'Dashboard',
+    icon: BarChart3,
+    href: '/dashboard',
+    children: [
+      { title: 'Overview', href: '/dashboard' },
+      { title: 'Analytics', href: '/analytics' },
+      { title: 'Reports', href: '/reports' }
+    ]
+  },
+  {
+    title: 'SSL Certificates',
+    icon: Shield,
+    href: '/certificates',
+    children: [
+      { title: 'All Certificates', href: '/certificates' },
+      { title: 'Expiring Soon', href: '/certificates/expiring' },
+      { title: 'Add Certificate', href: '/certificates/create' }
+    ]
+  },
+  {
+    title: 'Monitoring',
+    icon: Monitor,
+    href: '/monitors',
+    children: [
+      { title: 'All Monitors', href: '/monitors' },
+      { title: 'Uptime Checks', href: '/monitors/uptime' },
+      { title: 'Add Monitor', href: '/monitors/create' }
+    ]
+  },
+  {
+    title: 'Alerts',
+    icon: AlertTriangle,
+    href: '/alerts',
+    children: [
+      { title: 'Alert Rules', href: '/alerts' },
+      { title: 'Notifications', href: '/alerts/notifications' },
+      { title: 'History', href: '/alerts/history' }
+    ]
+  },
+  {
+    title: 'Team',
+    icon: Users,
+    href: '/team',
+    children: [
+      { title: 'Members', href: '/team' },
+      { title: 'Roles', href: '/team/roles' },
+      { title: 'Invitations', href: '/team/invitations' }
+    ]
+  }
+]
+
+// Active horizontal menu dropdown
+const activeHorizontalDropdown = ref<string | null>(null)
+
+function toggleHorizontalDropdown(itemTitle: string) {
+  activeHorizontalDropdown.value = activeHorizontalDropdown.value === itemTitle ? null : itemTitle
+}
+
 // Close dropdowns when clicking outside
 function handleDocumentClick(event: Event) {
   const target = event.target as HTMLElement
   if (!target.closest('.dropdown')) {
     closeDropdowns()
+    activeHorizontalDropdown.value = null
   }
 }
 
@@ -261,6 +327,51 @@ document.addEventListener('click', handleDocumentClick)
         </div>
 
       </div>
+    </div>
+
+    <!-- Horizontal Navigation Menu (shown only in horizontal mode) -->
+    <div
+      v-if="themeStore.menu === 'horizontal'"
+      class="horizontal-menu border-t border-[#ebedf2] bg-white px-6 py-1.5 font-semibold text-black dark:border-[#191e3a] dark:bg-[#0e1726] dark:text-white-light"
+    >
+      <nav class="flex space-x-8">
+        <div
+          v-for="item in horizontalMenuItems"
+          :key="item.title"
+          class="relative dropdown"
+        >
+          <Link
+            :href="item.href"
+            class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-primary"
+            @click="toggleHorizontalDropdown(item.title)"
+          >
+            <component :is="item.icon" class="h-4 w-4" />
+            <span>{{ item.title }}</span>
+            <ChevronDown
+              v-if="item.children"
+              class="h-3 w-3 transition-transform"
+              :class="{ 'rotate-180': activeHorizontalDropdown === item.title }"
+            />
+          </Link>
+
+          <!-- Dropdown menu -->
+          <div
+            v-if="item.children && activeHorizontalDropdown === item.title"
+            class="absolute top-full left-0 z-50 mt-1 w-48 rounded-md bg-white shadow-lg dark:bg-[#1b2e4b]"
+          >
+            <div class="py-1">
+              <Link
+                v-for="child in item.children"
+                :key="child.title"
+                :href="child.href"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                {{ child.title }}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
     </div>
 
     <!-- Theme Customizer -->

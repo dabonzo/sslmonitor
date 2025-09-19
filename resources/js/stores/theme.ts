@@ -2,14 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
-export type LayoutMode = 'vertical' | 'horizontal' | 'collapsible'
-export type MenuMode = 'horizontal' | 'vertical'
+export type MenuMode = 'vertical' | 'horizontal' | 'collapsible-vertical'
+export type LayoutMode = 'full' | 'boxed-layout'
 
 export const useThemeStore = defineStore('theme', () => {
   // Theme State
   const theme = ref<ThemeMode>('system')
-  const layout = ref<LayoutMode>('vertical')
   const menu = ref<MenuMode>('vertical')
+  const layout = ref<LayoutMode>('full')
   const sidebarOpen = ref(true)
   const semiDark = ref(false)
   const animation = ref('animate__fadeIn')
@@ -49,20 +49,20 @@ export const useThemeStore = defineStore('theme', () => {
     applyTheme()
   }
 
-  function toggleLayout(newLayout: LayoutMode) {
-    layout.value = newLayout
-  }
-
-  function setLayout(newLayout: LayoutMode) {
-    layout.value = newLayout
-  }
-
   function toggleMenu(newMenu: MenuMode) {
     menu.value = newMenu
   }
 
   function setMenu(newMenu: MenuMode) {
     menu.value = newMenu
+  }
+
+  function toggleLayout(newLayout: LayoutMode) {
+    layout.value = newLayout
+  }
+
+  function setLayout(newLayout: LayoutMode) {
+    layout.value = newLayout
   }
 
   function toggleSidebar() {
@@ -96,13 +96,13 @@ export const useThemeStore = defineStore('theme', () => {
   function initializeTheme() {
     // Load from localStorage
     const savedTheme = localStorage.getItem('ssl-monitor-theme') as ThemeMode
-    const savedLayout = localStorage.getItem('ssl-monitor-layout') as LayoutMode
     const savedMenu = localStorage.getItem('ssl-monitor-menu') as MenuMode
+    const savedLayout = localStorage.getItem('ssl-monitor-layout') as LayoutMode
     const savedSemiDark = localStorage.getItem('ssl-monitor-semi-dark')
 
     if (savedTheme) theme.value = savedTheme
-    if (savedLayout) layout.value = savedLayout
     if (savedMenu) menu.value = savedMenu
+    if (savedLayout) layout.value = savedLayout
     if (savedSemiDark) semiDark.value = savedSemiDark === 'true'
 
     // Detect system theme
@@ -150,8 +150,8 @@ export const useThemeStore = defineStore('theme', () => {
 
   function resetToDefaults() {
     theme.value = 'system'
-    layout.value = 'vertical'
     menu.value = 'vertical'
+    layout.value = 'full'
     semiDark.value = false
     applyTheme()
   }
@@ -159,8 +159,8 @@ export const useThemeStore = defineStore('theme', () => {
   return {
     // State
     theme,
-    layout,
     menu,
+    layout,
     sidebarOpen,
     semiDark,
     animation,
@@ -173,10 +173,10 @@ export const useThemeStore = defineStore('theme', () => {
     // Actions
     toggleTheme,
     setTheme,
-    toggleLayout,
-    setLayout,
     toggleMenu,
     setMenu,
+    toggleLayout,
+    setLayout,
     toggleSidebar,
     setSidebarOpen,
     toggleSemiDark,

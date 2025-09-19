@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
@@ -18,7 +18,20 @@ import {
 const themeStore = useThemeStore()
 
 // Active dropdown state
-const activeDropdown = ref<string>('dashboard')
+const activeDropdown = ref<string>('')
+
+// Hover state for collapsible mode
+const isHovered = ref<boolean>(false)
+
+// Computed property to determine if sub-menus should be visible
+const shouldShowSubMenus = computed(() => {
+  if (themeStore.menu === 'collapsible-vertical') {
+    // In collapsible mode, only show sub-menus when hovered (and dropdown is active)
+    return isHovered.value
+  }
+  // In other modes, always show sub-menus when dropdown is active
+  return true
+})
 
 // Navigation menu items
 const menuItems = [
@@ -108,18 +121,28 @@ function isActiveRoute(href: string) {
 
 <template>
   <nav
-    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
+    v-if="themeStore.menu !== 'horizontal'"
+    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
     :class="{
       'ltr:-left-[260px] rtl:right-[260px]': !themeStore.sidebarOpen,
-      'ltr:left-0 rtl:right-0': themeStore.sidebarOpen
+      'ltr:left-0 rtl:right-0': themeStore.sidebarOpen,
+      'w-[260px]': themeStore.menu !== 'collapsible-vertical',
+      '!w-[70px] lg:hover:!w-[260px]': themeStore.menu === 'collapsible-vertical'
     }"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
   >
     <div class="h-full bg-sidebar">
       <!-- Logo section -->
       <div class="flex items-center justify-between px-4 py-3">
         <Link href="/dashboard" class="main-logo flex shrink-0 items-center">
           <AppLogoIcon class="ml-[5px] h-8 w-8 flex-none fill-current text-primary" />
-          <span class="text-2xl font-semibold align-middle text-sidebar-primary ltr:ml-1.5 rtl:mr-1.5">
+          <span
+            class="text-2xl font-semibold align-middle text-sidebar-primary ltr:ml-1.5 rtl:mr-1.5 text-sidebar-foreground"
+            :class="{
+              'lg:hidden': themeStore.menu === 'collapsible-vertical'
+            }"
+          >
             SSL Monitor
           </span>
         </Link>
@@ -140,18 +163,29 @@ function isActiveRoute(href: string) {
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
+                  <span
+                    class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
+                    :class="{
+                      'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                    }"
+                  >
                     {{ item.title }}
                   </span>
                 </div>
 
-                <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === item.key }">
+                <div
+                  class="rtl:rotate-180"
+                  :class="{
+                    '!rotate-90': activeDropdown === item.key,
+                    'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                  }"
+                >
                   <ChevronDown class="h-4 w-4" />
                 </div>
               </button>
 
               <Transition name="slide-down">
-                <ul v-show="activeDropdown === item.key" class="sub-menu text-gray-500">
+                <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
                   <li v-for="child in item.children" :key="child.href">
                     <Link
                       :href="child.href"
@@ -179,18 +213,29 @@ function isActiveRoute(href: string) {
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
+                  <span
+                    class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
+                    :class="{
+                      'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                    }"
+                  >
                     {{ item.title }}
                   </span>
                 </div>
 
-                <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === item.key }">
+                <div
+                  class="rtl:rotate-180"
+                  :class="{
+                    '!rotate-90': activeDropdown === item.key,
+                    'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                  }"
+                >
                   <ChevronDown class="h-4 w-4" />
                 </div>
               </button>
 
               <Transition name="slide-down">
-                <ul v-show="activeDropdown === item.key" class="sub-menu text-gray-500">
+                <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
                   <li v-for="child in item.children" :key="child.href">
                     <Link
                       :href="child.href"
