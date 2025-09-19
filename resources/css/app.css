@@ -170,12 +170,12 @@
 
 /* Default: Vertical mode */
 .main-container .main-content {
-    @apply transition-all duration-300 lg:ml-[260px];
+    @apply transition-all duration-300 lg:ml-[260px] w-full;
 }
 
 /* Horizontal mode: Hide sidebar, no margin */
 .horizontal .main-container .main-content {
-    @apply !ml-0;
+    @apply !ml-0 w-full;
 }
 
 .horizontal .sidebar {
@@ -214,7 +214,7 @@
 
 /* Full layout: collapsible sidebar gets 70px margin */
 .collapsible-vertical:not(.boxed-layout) .main-content {
-    @apply lg:!ml-[70px];
+    @apply lg:!ml-[70px] w-full;
 }
 
 .collapsible-vertical .sidebar .sub-menu {
@@ -241,7 +241,7 @@
 
 /* Boxed layout navigation mode combinations */
 .boxed-layout.horizontal .main-container .main-content {
-    @apply !ml-0;
+    @apply !ml-0 w-full;
 }
 
 .boxed-layout.horizontal .sidebar {
@@ -249,7 +249,7 @@
 }
 
 .boxed-layout.collapsible-vertical .main-container .main-content {
-    @apply !ml-0;
+    @apply !ml-0 w-full;
 }
 
 .boxed-layout.collapsible-vertical .sidebar {
@@ -260,8 +260,26 @@
     @apply lg:!w-[260px];
 }
 
+/* Boxed + Collapsible specific icon centering */
+.boxed-layout.collapsible-vertical .nav-link {
+    @apply lg:justify-center lg:px-0;
+}
+
+.boxed-layout.collapsible-vertical .sidebar:hover .nav-link {
+    @apply lg:justify-between lg:px-2;
+}
+
+/* Boxed + Collapsible logo centering */
+.boxed-layout.collapsible-vertical .main-logo {
+    @apply lg:justify-center;
+}
+
+.boxed-layout.collapsible-vertical .sidebar:hover .main-logo {
+    @apply lg:justify-start;
+}
+
 .boxed-layout.vertical .main-container .main-content {
-    @apply !ml-0;
+    @apply !ml-0 w-full;
 }
 
 .boxed-layout.vertical .sidebar {
@@ -279,7 +297,7 @@
 /* Mobile responsive */
 @media (max-width: 1023px) {
     .main-container .main-content {
-        @apply !ml-0;
+        @apply !ml-0 w-full;
     }
 
     .sidebar {

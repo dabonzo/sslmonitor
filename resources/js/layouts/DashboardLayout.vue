@@ -120,48 +120,6 @@ function scrollToTop() {
 </template>
 
 <style scoped>
-/* Main container adjustments for sidebar */
-.main-container {
-  transition: margin-left 0.3s ease;
-}
-
-.vertical .main-container {
-  margin-left: 260px;
-}
-
-.collapsible-vertical .main-container {
-  margin-left: 70px;
-}
-
-.horizontal .main-container {
-  margin-left: 0;
-}
-
-/* Mobile responsive */
-@media (max-width: 1023px) {
-  .main-container {
-    margin-left: 0 !important;
-  }
-}
-
-/* Sidebar open/closed states */
-.toggle-sidebar.vertical .main-container {
-  margin-left: 260px;
-}
-
-.toggle-sidebar.collapsible-vertical .main-container {
-  margin-left: 70px;
-}
-
-/* When sidebar is closed (no toggle-sidebar class) */
-.vertical:not(.toggle-sidebar) .main-container {
-  margin-left: 0;
-}
-
-.collapsible-vertical:not(.toggle-sidebar) .main-container {
-  margin-left: 0;
-}
-
 /* Semi-dark mode */
 .semi-dark .sidebar {
   background: linear-gradient(135deg, #191e3a 0%, #0e1726 100%);
