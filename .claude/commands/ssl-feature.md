@@ -1,29 +1,30 @@
-# /ssl-feature - SSL Monitoring Feature Development
+# /ssl-feature - Complete SSL Feature Development Workflow
 
-**Purpose**: Implement a new SSL monitoring feature using TDD and VRISTO integration.
+**Purpose**: Implement SSL monitoring features using TDD on existing professional frontend foundation.
 
 **Usage**: `/ssl-feature [feature-name] [description]`
 
-## Development Workflow
+## Phase 2 Development Workflow
 
 Please implement the SSL monitoring feature: **$ARGUMENTS**.
+
+**Strategic Context**: Frontend is already professional with Vue 3 + TypeScript + shadcn/ui. Focus on connecting real SSL backend to existing UI components.
 
 Follow these steps:
 
 ### 1. Context Discovery & Planning
 ```bash
-# Get application context
+# Get current application state
 application-info
 database-schema
-list-routes --path=ssl
+list-routes
 
-# Research SSL monitoring patterns
-search-docs ["ssl certificate", "spatie ssl certificate", "laravel jobs"]
-use context7: "SSL certificate validation JavaScript browser APIs"
+# Research Laravel SSL patterns
+search-docs ["ssl certificate", "inertia controllers", "laravel jobs"]
 
-# Check existing SSL monitoring code
+# Check existing SSL backend services
 filesystem-mcp: read-directory app/Services/
-filesystem-mcp: grep-files app/ "SslCertificate"
+filesystem-mcp: read-file app/Services/SslCertificateChecker.php
 ```
 
 ### 2. Git Flow Setup
@@ -33,55 +34,56 @@ git-mcp: create-branch feature/ssl-$ARGUMENTS develop
 git-mcp: push origin feature/ssl-$ARGUMENTS --set-upstream
 ```
 
-### 3. TDD Implementation
+### 3. TDD Implementation (RED-GREEN-REFACTOR)
 ```bash
-# Create test file
-./vendor/bin/sail artisan make:test --pest Ssl${ARGUMENTS}Test
+# Create feature test file
+./vendor/bin/sail artisan make:test --pest Feature/Ssl${ARGUMENTS}Test
 
 # Write failing tests first (RED)
-# - Happy path: Valid SSL certificate
-# - Error cases: Expired, invalid, unreachable
-# - Edge cases: Wildcard certificates, chain validation
+# - Controller endpoints return correct Inertia responses
+# - SSL service integration works correctly
+# - Data validation and error handling
 
 # Run tests to confirm they fail
 ./vendor/bin/sail artisan test --filter=Ssl${ARGUMENTS}Test
 ```
 
-### 4. Core Implementation (GREEN)
+### 4. Inertia.js Controller Implementation (GREEN)
 ```bash
-# Create necessary classes
-./vendor/bin/sail artisan make:service SslCertificate${ARGUMENTS}Service
-./vendor/bin/sail artisan make:job CheckSsl${ARGUMENTS}Job
-./vendor/bin/sail artisan make:model Ssl${ARGUMENTS} -m
+# Create Inertia controller (not API controller)
+./vendor/bin/sail artisan make:controller Ssl${ARGUMENTS}Controller
+./vendor/bin/sail artisan make:request Ssl${ARGUMENTS}Request
 
-# Implement minimal code to pass tests
+# Implement controller methods returning Inertia::render()
+# Connect to existing SSL services (SslCertificateChecker, etc.)
+# Add routes to web.php (not api.php)
+
 # Run tests until they pass
 ./vendor/bin/sail artisan test --filter=Ssl${ARGUMENTS}Test
 ```
 
-### 5. VRISTO UI Integration
+### 5. Vue.js Page Integration
 ```bash
-# Extract relevant VRISTO templates
-filesystem-mcp: read-file vristo-html-main/forms.html
-filesystem-mcp: copy-file vristo-html-main/dashboard.html resources/views/ssl/dashboard.blade.php
+# Create Vue page using existing component patterns
+# Check existing pages for component structure
+filesystem-mcp: read-file resources/js/pages/Dashboard.vue
+filesystem-mcp: read-directory resources/js/components/ui/
 
-# Research Vue.js patterns for SSL monitoring UI
-use context7: "Vue 3 composition API form validation"
-use context7: "VRISTO dashboard cards SSL certificate status"
-
-# Create Vue components
-./vendor/bin/sail artisan make:volt ssl/certificate-status
-./vendor/bin/sail artisan make:volt ssl/certificate-form
+# Create SSL page following existing patterns
+# Use existing shadcn/ui components (Card, Button, Table, etc.)
+# Implement TypeScript interfaces for SSL data
+# Connect to Inertia controller endpoints
 ```
 
-### 6. API Integration
+### 6. Frontend Enhancement
 ```bash
-# Create API controllers and routes
-./vendor/bin/sail artisan make:controller Api/Ssl${ARGUMENTS}Controller --api
-./vendor/bin/sail artisan make:request Ssl${ARGUMENTS}Request
+# Research existing component patterns
+use context7: "Vue 3 composition API with TypeScript"
+use context7: "Inertia.js form handling best practices"
 
-# Add routes to api.php
-# Implement REST endpoints for SSL feature
+# Enhance Dashboard.vue or create new SSL pages
+# Use existing layout components (DashboardLayout)
+# Implement proper loading states and error handling
 ```
 
 ### 7. Browser Testing
@@ -136,32 +138,33 @@ git-mcp: push origin feature/ssl-$ARGUMENTS
 
 ## Key Requirements
 
-### SSL Feature Standards
-- ✅ **Spatie SSL Certificate** integration for validation
-- ✅ **Background job processing** for certificate checks
-- ✅ **VRISTO UI components** for professional interface
-- ✅ **Real-time notifications** for certificate issues
-- ✅ **Comprehensive testing** (Unit + Feature + Browser)
-- ✅ **Mobile responsive** design
-- ✅ **Error handling** for network and certificate issues
+### Phase 2 SSL Feature Standards
+- ✅ **Existing SSL backend** integration (SslCertificateChecker, Website model)
+- ✅ **Inertia.js controllers** returning structured data
+- ✅ **Professional Vue components** using existing shadcn/ui patterns
+- ✅ **Real-time SSL status** updates and notifications
+- ✅ **Comprehensive testing** (Feature + Browser tests)
+- ✅ **TypeScript interfaces** for SSL data structures
+- ✅ **Responsive design** using existing layout components
 
 ### Testing Requirements
-- **Unit Tests**: Service layer logic, validation rules
-- **Feature Tests**: HTTP endpoints, database operations
-- **Browser Tests**: User workflows, VRISTO interactions
-- **Error Scenarios**: Network failures, expired certificates
+- **Feature Tests**: Inertia.js responses, SSL service integration
+- **Browser Tests**: User workflows with existing UI components
+- **Error Scenarios**: SSL failures, network issues, validation errors
+- **Data Validation**: SSL certificate data structures and responses
 
-### Documentation Updates
-- Update API specification with new endpoints
-- Add feature documentation to project plan
-- Update VRISTO integration guide if new patterns used
+### Integration Standards
+- Use existing **DashboardLayout** and UI component patterns
+- Connect to proven **SslCertificateChecker** and **Website** model
+- Follow existing **TypeScript and Vue 3 Composition API** patterns
+- Maintain consistency with current **authentication and settings** pages
 
 ## Success Criteria
-1. All tests pass (unit, feature, browser)
-2. VRISTO UI integrates seamlessly
-3. SSL monitoring works reliably
-4. Code follows Laravel conventions
-5. Git Flow workflow completed
-6. Documentation updated
+1. All Pest tests pass (feature and browser)
+2. Real SSL data connects to professional frontend
+3. SSL monitoring integrates with existing UI patterns
+4. Code follows established Laravel + Vue patterns
+5. Git Flow workflow completed with proper commits
+6. No regression in existing functionality
 
-**Ready to build professional SSL monitoring features!** 🔐
+**Ready to build production-ready SSL features on solid foundation!** 🚀
