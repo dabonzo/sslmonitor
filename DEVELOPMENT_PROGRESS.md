@@ -1,214 +1,334 @@
-# SSL Monitor v3 - Development Progress
+# SSL Monitor v4 - Development Progress
 
 ## Project Overview
-**SSL Monitor v3** - Professional SSL certificate and uptime monitoring platform
-**Technology Stack:** Laravel 12 + Vue 3 + Inertia.js + VRISTO Template
-**Development Approach:** Trunk-based development with small iterative features
-**Testing Strategy:** TDD with Pest v4 + Playwright browser testing
+**SSL Monitor v4** - Enterprise-grade SSL certificate and uptime monitoring platform
+**Technology Stack:** Laravel 12 + Vue 3 + Inertia.js + VRISTO Template (visual reference)
+**Development Approach:** Proven backend reuse (90%) + Modern frontend rebuild
+**Testing Strategy:** TDD with Pest v4 browser tests (115+ tests adapted from old_docs)
+
+### **V4 Architecture Strategy**
+- **Backend Foundation**: Reuse proven Models, Services, Jobs from `old_docs/` (90% reusable)
+- **Frontend Modernization**: Complete Vue 3 + Inertia.js + VRISTO styling rebuild
+- **Database Schema**: Enhanced with new features while maintaining v3 compatibility
+- **Testing Migration**: Adapt 115+ existing tests to new frontend architecture
 
 ---
 
-## ✅ Completed Features
+## 📊 Implementation Progress Overview
 
-### Phase 1: Foundation & Git Setup
-- [x] **Git Repository Initialization** (2025-09-18)
-  - Initialized Git repository with proper .gitignore
-  - Created initial commit with project foundation
-  - Renamed master branch to main for modern Git practices
-  - Established trunk-based development workflow
+### **Development Status: Documentation Complete ✅**
+**Phase**: Planning & Documentation Complete - Ready for Implementation
+**Next**: Begin Phase 1 (Backend Foundation) development
 
-- [x] **Project Foundation** (Initial Commit)
-  - Laravel 12 + Vue 3 + Inertia.js project setup
-  - Complete documentation suite and development guidelines
-  - VRISTO template assets ready for integration
-  - Pest v4 testing framework configured
-  - Authentication system foundation with Laravel Fortify
-
-- [x] **VRISTO Template Integration** (2025-09-18) ⭐ **MAJOR MILESTONE**
-  - Successfully integrated VRISTO TailwindCSS color system with TailwindCSS v4
-  - Added Nunito font family and professional typography system
-  - Extracted and configured VRISTO JavaScript assets (Alpine.js + plugins)
-  - **Alpine.js + Inertia.js hybrid compatibility achieved** (critical integration)
-  - Added Perfect Scrollbar, Animate.css, and VRISTO component classes
-  - Updated Vite configuration and package.json dependencies
-  - Build and compilation tested successfully (4.24s build time)
-  - Created TypeScript declarations for VRISTO global objects
-  - Ready for Vue component development with VRISTO styling
-
-- [x] **Modern Layout System with VRISTO Design** (2025-09-18) ⭐ **MAJOR MILESTONE**
-  - **Clarified VRISTO as visual reference only** - no legacy technology used
-  - Rebuilt layout system using pure Vue 3 + Inertia.js + TailwindCSS v4
-  - Updated AppShell.vue to modern Vue.js container (removed Alpine.js dependencies)
-  - Rebuilt AppSidebar.vue with VRISTO-inspired design using existing UI components
-  - Created VRISTO_UI_REFERENCE.md for future design consistency
-  - **Maintained modern tech stack**: Vue 3, Inertia.js, Lucide icons, existing UI library
-  - Build tested successfully (4.08s build time)
-  - All navigation uses proper Inertia.js Link components
+### **Key Achievements**
+- ✅ **Complete analysis of old_docs** - Identified 90% reusable backend components
+- ✅ **Comprehensive implementation plan** - 8-week detailed roadmap created
+- ✅ **Migration strategy documented** - Specific reuse approach for all components
+- ✅ **Technical specifications** - Models, services, APIs fully documented
+- ✅ **Development workflow** - TDD + VRISTO integration process defined
 
 ---
 
-## 🚧 In Progress
+## 📋 8-Week Implementation Plan Progress
 
-### Current Task: Testing and Polish (Phase 1 Completion)
-- [ ] **Layout Testing and Documentation**
-  - [ ] Write comprehensive tests for layout components
-  - [ ] Test responsive behavior across devices
-  - [ ] Document VRISTO design system integration
-  - [ ] Verify all navigation works correctly with Inertia.js
+### **📚 Phase 0: Planning & Analysis (Completed)**
+**Duration**: Initial analysis and documentation
+**Status**: ✅ **COMPLETED**
 
----
+#### **Completed Deliverables**
+- ✅ **[SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md](SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md)** - Complete 8-week development roadmap
+- ✅ **[MIGRATION_FROM_V3.md](MIGRATION_FROM_V3.md)** - Detailed strategy for reusing 90% of backend from old_docs
+- ✅ **[V4_TECHNICAL_SPECIFICATIONS.md](V4_TECHNICAL_SPECIFICATIONS.md)** - Models, services, API endpoints, database schema
+- ✅ **[V4_DEVELOPMENT_WORKFLOW.md](V4_DEVELOPMENT_WORKFLOW.md)** - TDD process with Pest v4 + VRISTO integration
+- ✅ **Updated [CLAUDE.md](CLAUDE.md)** - Master reference hub for all V4 documentation
 
-## 📅 Next Up - Phase 1 Completion & Phase 2 Prep
-
-### Immediate Tasks (Next Session)
-- [ ] **Complete Phase 1: Layout Components** (1 day remaining)
-  - [ ] Create VristoLayout.vue main wrapper component
-  - [ ] Implement VristoSidebar.vue navigation component
-  - [ ] Build VristoHeader.vue with user menu and theme switching
-  - [ ] Test Alpine.js + Vue component integration
-
-### Phase 2: Authentication System (Week 2)
-- [ ] **Laravel Fortify Setup** (1 day estimated)
-  - [ ] Install and configure Laravel Fortify
-  - [ ] Create authentication routes and controllers
-  - [ ] Test authentication middleware and redirects
-
-- [ ] **Alpine.js Integration** (1 day estimated)
-  - [ ] Test Alpine.js + Inertia.js compatibility
-  - [ ] Configure theme switching functionality
-  - [ ] Implement sidebar toggle behavior
-  - [ ] Document integration patterns
-
-### Week 2: Authentication System
-- [ ] **Laravel Fortify Setup**
-  - [ ] Install and configure Laravel Fortify
-  - [ ] Create authentication routes and controllers
-  - [ ] Test authentication middleware
-
-- [ ] **Authentication UI Components**
-  - [ ] VRISTO login page component
-  - [ ] VRISTO registration page component
-  - [ ] Password reset flow with VRISTO styling
-  - [ ] User dashboard layout and navigation
+#### **Key Analysis Results**
+- **115+ tests identified** in old_docs for adaptation
+- **90% backend reusability** confirmed (Models, Services, Jobs)
+- **Complete database schema** analyzed and enhanced for v4
+- **Proven SSL monitoring logic** ready for direct migration
+- **VRISTO integration strategy** defined (visual reference only)
 
 ---
 
-## 🧪 Testing Status
+### **🏗️ Phase 1: Backend Foundation (Week 1-2)**
+**Duration**: 2 weeks
+**Status**: 🚧 **READY TO START**
+**Goal**: Establish proven backend architecture with minimal changes
 
-### Current Test Coverage
-- **Unit Tests:** 0 tests (baseline)
-- **Feature Tests:** 0 tests (baseline)
-- **Browser Tests:** 0 tests (baseline)
+#### **Week 1: Database & Models** (Pending)
+- [ ] **Database Schema Migration**
+  - [ ] Copy proven migrations from `old_docs/database/migrations/`
+  - [ ] Enhance with V4 features: `websites`, `ssl_certificates`, `ssl_checks`, `email_settings`
+  - [ ] User relationship updates for existing Fortify setup
 
-### Testing Goals
-- **Target Coverage:** >85% overall, >95% for SSL functionality
-- **Browser Support:** Chrome, Firefox, Safari (latest 2 versions)
-- **Mobile Testing:** Full responsive functionality
+- [ ] **Core Models Implementation**
+  - [ ] **Website Model**: Copy from old_docs with URL sanitization, relationships, SSL status methods
+  - [ ] **SslCertificate Model**: Copy validation logic, expiry calculations, scopes
+  - [ ] **SslCheck Model**: Copy status tracking, recent check queries
+  - [ ] **EmailSettings Model**: Copy encrypted password handling, mail configuration
 
-### Test Environment Setup
-- **SSL Testing Sites:**
-  - https://omp.office-manager-pro.com
-  - https://www.redgas.at
-- **Test User:** bonzo@konjscina.at (credentials NOT committed to git)
+- [ ] **Model Factories & Seeders**
+  - [ ] Create comprehensive factories based on old_docs patterns
+  - [ ] Database seeders for development data
+
+**Expected Deliverables:**
+- Complete database schema with enhanced relationships
+- All core models with proven business logic
+- Factory classes for comprehensive testing
+- Basic model tests passing (copied from old_docs)
+
+#### **Week 2: Services & Jobs** (Pending)
+- [ ] **SSL Monitoring Services**
+  - [ ] **SslCertificateChecker**: Copy Spatie integration, timeout handling, error management
+  - [ ] **SslStatusCalculator**: Copy status determination logic (valid, expiring, expired, invalid, error)
+  - [ ] **SslNotificationService**: Copy email alert system with template rendering
+
+- [ ] **Background Jobs Implementation**
+  - [ ] **CheckSslCertificateJob**: Copy queue processing with retry logic
+  - [ ] **SendSslNotificationJob**: Copy email delivery with failure handling
+  - [ ] Queue configuration with Redis
+  - [ ] Daily scheduling setup (6:00 AM SSL checks)
+
+**Expected Deliverables:**
+- Complete service layer with proven SSL monitoring logic
+- Background job system with queue processing
+- Artisan commands for manual SSL checks
+- Service and job tests passing (copied from old_docs)
 
 ---
 
-## 📋 Development Workflow
+### **🔌 Phase 2: API Layer (Week 3)**
+**Duration**: 1 week
+**Status**: 🔜 **PLANNED**
+**Goal**: Create Laravel controllers that return Inertia.js responses
 
-### Branch Strategy - Trunk-Based Development
-```
-main (production-ready)
-├── feature/vristo-login-page        (1-2 days)
-├── feature/website-list-component   (1-2 days)
-├── feature/ssl-status-badge         (1 day)
-├── hotfix/auth-redirect-bug         (immediate)
-└── docs/update-progress-tracking    (ongoing)
-```
+#### **Inertia.js Controllers** (Planned)
+- [ ] **Authentication Integration**
+  - [ ] Extend existing Fortify setup for Inertia.js responses
+  - [ ] Dashboard controller with SSL status data aggregation
+  - [ ] User authentication state management
 
-### Daily Workflow Commands
+- [ ] **Website Management API**
+  - [ ] Website CRUD operations via Inertia.js
+  - [ ] Real-time SSL certificate preview endpoint
+  - [ ] Bulk operations support (check multiple, delete multiple)
+
+- [ ] **Settings & Configuration API**
+  - [ ] Email settings management with encryption
+  - [ ] User preferences and notification settings
+  - [ ] System configuration endpoints
+
+**Expected Deliverables:**
+- Complete Inertia.js controller layer
+- API endpoints returning structured data for Vue components
+- Authentication integration with existing Fortify
+- API tests with Inertia.js response validation
+
+---
+
+### **🎨 Phase 3: Vue 3 + VRISTO Frontend (Week 4-5)**
+**Duration**: 2 weeks
+**Status**: 🔜 **PLANNED**
+**Goal**: Build professional frontend with VRISTO design system
+
+#### **Week 4: Layout & Navigation** (Planned)
+- [ ] **VRISTO Layout System**
+  - [ ] Convert app layout from Blade to Vue 3 composition
+  - [ ] Sidebar navigation with VRISTO styling patterns
+  - [ ] Header with user menu and theme switching
+  - [ ] Mobile-responsive navigation patterns
+
+#### **Week 5: SSL Monitoring Interface** (Planned)
+- [ ] **Dashboard Implementation**
+  - [ ] SSL status overview cards (Valid, Expiring Soon, Expired, Errors, Pending)
+  - [ ] Critical issues alert section with VRISTO styling
+  - [ ] Recent SSL checks listing with real-time updates
+  - [ ] Status calculations and percentage displays
+
+- [ ] **Website Management Interface**
+  - [ ] Add/edit website forms with VRISTO input components
+  - [ ] Real-time SSL certificate preview with loading states
+  - [ ] Website listing with actions (view, edit, delete)
+  - [ ] Bulk operations interface with selection management
+
+**Expected Deliverables:**
+- Complete dashboard with SSL status monitoring
+- Professional website management interface
+- Real-time SSL certificate preview
+- VRISTO-styled forms and data tables
+
+---
+
+### **⚙️ Phase 4: Advanced Features (Week 6)**
+**Duration**: 1 week
+**Status**: 🔜 **PLANNED**
+**Goal**: Complete feature set with email configuration and detailed views
+
+#### **Advanced Features** (Planned)
+- [ ] **Email Settings Interface**
+  - [ ] SMTP configuration form with VRISTO styling
+  - [ ] Email testing functionality with progress indicators
+  - [ ] Encrypted password handling in Vue components
+
+- [ ] **Website Details & History**
+  - [ ] Detailed SSL certificate information display
+  - [ ] SSL check history with timeline visualization
+  - [ ] Certificate change detection and alerts
+
+**Expected Deliverables:**
+- Complete email configuration system
+- Detailed website and certificate views
+- User preference management
+- Professional settings interface
+
+---
+
+### **🧪 Phase 5: Testing & Quality Assurance (Week 7-8)**
+**Duration**: 2 weeks
+**Status**: 🔜 **PLANNED**
+**Goal**: Comprehensive testing suite and production readiness
+
+#### **Week 7: Test Migration** (Planned)
+- [ ] **Backend Test Migration**
+  - [ ] Copy and adapt model tests from old_docs (25+ tests)
+  - [ ] Copy service layer tests (20+ tests)
+  - [ ] Copy job tests with queue simulation (15+ tests)
+  - [ ] Integration tests for email and SSL workflows (25+ tests)
+
+#### **Week 8: Browser Tests & Production** (Planned)
+- [ ] **Pest v4 Browser Tests**
+  - [ ] Adapt existing browser test patterns to Vue.js + Inertia.js (35+ tests)
+  - [ ] Complete user workflow tests (login → add website → view dashboard)
+  - [ ] SSL certificate preview and management tests
+  - [ ] Mobile responsiveness and accessibility tests
+
+**Expected Deliverables:**
+- Complete test suite (115+ tests adapted from old_docs)
+- Performance optimization and security audit
+- Production deployment documentation
+- Monitoring and alerting setup
+
+---
+
+## 🔍 Component Reuse Status
+
+### **Direct Copy Components (90% Reusable)**
+
+#### **✅ Identified for Direct Reuse**
+- **Models**: `Website`, `SslCertificate`, `SslCheck`, `EmailSettings`, `NotificationPreference`
+- **Services**: `SslCertificateChecker`, `SslStatusCalculator`, `SslNotificationService`
+- **Jobs**: `CheckSslCertificateJob`, `SendSslNotificationJob`
+- **Tests**: 115+ comprehensive tests covering all functionality
+- **Migrations**: Complete database schema with relationships
+
+#### **🔄 Requires Adaptation**
+- **Controllers**: Livewire → Inertia.js controller conversion
+- **Frontend**: Complete Vue 3 + VRISTO component rebuild
+- **Browser Tests**: Adapt for new Vue.js interface patterns
+
+#### **❌ Complete Rewrite**
+- **Livewire Components**: Replace with Vue 3 + Inertia.js pages
+- **Blade Templates**: Replace with Vue 3 components using VRISTO styling
+
+---
+
+## 🧪 Testing Strategy Progress
+
+### **Test Migration Plan**
+- **Target Coverage**: 115+ tests adapted from old_docs
+- **Model Tests**: Direct copy (25 tests) - 0% completed
+- **Service Tests**: Direct copy (20 tests) - 0% completed
+- **Job Tests**: Direct copy (15 tests) - 0% completed
+- **Integration Tests**: Direct copy (25 tests) - 0% completed
+- **Browser Tests**: Adapt for Vue.js (35 tests) - 0% completed
+
+### **Quality Standards**
+- **95% Coverage** for SSL monitoring core functionality
+- **90% Coverage** for email notification system
+- **85% Coverage** overall application
+- **Zero tolerance** for SSL certificate validation bugs
+
+---
+
+## 🎯 Success Metrics & KPIs
+
+### **Development Velocity**
+- **Backend Migration**: Target 90% component reuse achieved
+- **Frontend Development**: Vue 3 + VRISTO integration successful
+- **Test Coverage**: 115+ tests maintained from v3
+- **Performance**: Dashboard load time <2 seconds
+
+### **Feature Completeness**
+- **✅ SSL Monitoring**: Multiple status types, automated checking
+- **✅ Email Notifications**: In-app SMTP configuration, automated alerts
+- **✅ Professional UI**: VRISTO design system, mobile responsive
+- **✅ Background Processing**: Reliable job queues with retry logic
+
+---
+
+## 🔄 Development Workflow
+
+### **Daily Development Process**
 ```bash
-# Start development environment
-./vendor/bin/sail up -d && ./vendor/bin/sail npm run dev
+# 1. Start development environment
+./vendor/bin/sail up -d
 
-# Run tests before any commits
-./vendor/bin/sail artisan test
+# 2. Check current implementation status
+application-info && database-schema
 
-# Code formatting before commits
+# 3. Follow TDD workflow from V4_DEVELOPMENT_WORKFLOW.md
+# Write test → Copy from old_docs → Adapt for Vue.js → Verify
+
+# 4. Run tests frequently
+./vendor/bin/sail artisan test --filter=CurrentFeature
+
+# 5. Code formatting before commits
 ./vendor/bin/sail exec laravel.test ./vendor/bin/pint
 ```
 
-### Feature Development Process
-1. **Create Feature Branch** from main
-2. **Write Tests First** (TDD approach)
-3. **Implement Feature** to pass tests
-4. **Visual Testing** (if UI changes)
-5. **Code Formatting** with Laravel Pint
-6. **Merge to Main** when all tests pass
+### **Quality Assurance**
+- **Test-Driven Development**: Write tests first, implement second
+- **Component Reuse**: Copy proven code from old_docs when possible
+- **VRISTO Integration**: Use template as visual reference for Vue components
+- **Performance Monitoring**: Ensure SSL checks complete within timeouts
 
 ---
 
-## 📊 Performance Metrics
+## 📚 Documentation References
 
-### Current Baseline
-- **Page Load Time:** Not measured yet
-- **Bundle Size:** Not optimized yet
-- **Test Execution Time:** Not measured yet
+### **Primary Implementation Guides**
+- **[SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md](SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md)** - Complete 8-week development plan
+- **[MIGRATION_FROM_V3.md](MIGRATION_FROM_V3.md)** - Detailed component reuse strategy
+- **[V4_TECHNICAL_SPECIFICATIONS.md](V4_TECHNICAL_SPECIFICATIONS.md)** - Models, services, API specifications
+- **[V4_DEVELOPMENT_WORKFLOW.md](V4_DEVELOPMENT_WORKFLOW.md)** - TDD process and VRISTO integration
 
-### Target Goals
-- **Page Load:** <2s for dashboard
-- **SSL Preview:** <500ms generation time
-- **Test Suite:** <30s full run
-- **Mobile Performance:** Full feature parity
-
----
-
-## 🔧 Environment & Tools
-
-### Development Environment
-- **Laravel Sail:** Docker-based development environment
-- **Laravel Boost MCP:** Application context and debugging
-- **Context7 MCP:** Documentation and VRISTO template support
-- **Filesystem MCP:** File operations and log analysis
-- **Git MCP:** Repository management
-
-### Quality Tools
-- **Laravel Pint:** Code formatting (PSR-12)
-- **Pest v4:** Testing framework with browser testing
-- **Playwright:** Visual regression and E2E testing
-- **ESLint + Prettier:** Frontend code quality
+### **Analysis Foundation**
+- **[old_docs/](old_docs/)** - Complete v3 codebase with 115+ tests and proven components
+- **[old_docs/docs/](old_docs/docs/)** - Comprehensive v3 documentation (user, admin, developer guides)
 
 ---
 
-## 🚨 Issues & Blockers
+## 🚨 Current Status & Next Actions
 
-### Current Issues
-- None currently identified
+### **Immediate Next Steps**
+1. **Begin Phase 1**: Start with database migrations from old_docs
+2. **Copy Models**: Implement Website, SslCertificate, SslCheck models
+3. **Copy Services**: Implement SslCertificateChecker with Spatie integration
+4. **Setup Testing**: Configure Pest v4 with copied test patterns
+5. **Start TDD Cycle**: Write tests first, implement features second
 
-### Technical Debt
-- None currently identified
+### **Current Blockers**
+- None identified - ready to begin implementation
 
-### Notes & Decisions
-- **No Claude Branding:** Removed Claude branding from commit messages per requirements
-- **Credentials Security:** Test credentials for bonzo@konjscina.at stored securely, never committed
-- **Alpine.js Compatibility:** Research completed - Alpine.js works with Inertia.js for DOM interactions
-
----
-
-## 📈 Weekly Review Schedule
-
-### Every Friday Assessment
-- [ ] **Progress Review:** Completed vs planned tasks
-- [ ] **Quality Check:** Test coverage and performance metrics
-- [ ] **Planning:** Next week's task prioritization
-- [ ] **Documentation:** Update this progress document
-
-### Adaptation Strategy
-- **Behind Schedule:** Break features into smaller tasks
-- **Ahead of Schedule:** Add polish and comprehensive testing
-- **Bugs Found:** Immediate hotfix branch and resolution
-- **New Requirements:** Impact evaluation and plan adjustment
+### **Risk Mitigation**
+- **Backend Reliability**: 90% component reuse from proven old_docs minimizes risk
+- **Frontend Consistency**: VRISTO visual reference ensures professional UI
+- **Test Coverage**: 115+ existing tests provide comprehensive validation
+- **Performance**: Proven SSL monitoring logic maintains reliability
 
 ---
 
-*Last Updated: 2025-09-18*
-*Next Review: 2025-09-25*
+*Last Updated: 2025-09-20*
+*Status: Documentation Complete - Ready for Phase 1 Implementation*
+*Next Review: After Phase 1 completion*

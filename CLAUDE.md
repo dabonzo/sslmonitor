@@ -1,27 +1,27 @@
-# SSL Monitor v3 - AI Development Guidelines
+# SSL Monitor v4 - AI Development Guidelines
 
 ## 📖 Master Documentation Reference
 
-This condensed file serves as the central reference for AI-assisted development of SSL Monitor v3. For detailed guidance, reference the comprehensive documentation files below.
+This file serves as the central navigation hub for AI-assisted development of SSL Monitor v4. All comprehensive implementation guidance is organized below for optimal development workflow.
 
-### 📋 Complete Documentation Index
+### 📋 SSL Monitor v4 Documentation Index
 
-**Core Project Documentation:**
+**🚀 Core Implementation Documents:**
+- **[SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md](SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md)** - Complete 8-week development plan with proven backend reuse
+- **[MIGRATION_FROM_V3.md](MIGRATION_FROM_V3.md)** - Detailed strategy for reusing 90% of backend from old_docs
+- **[V4_TECHNICAL_SPECIFICATIONS.md](V4_TECHNICAL_SPECIFICATIONS.md)** - Models, services, API endpoints, and database schema
+- **[V4_DEVELOPMENT_WORKFLOW.md](V4_DEVELOPMENT_WORKFLOW.md)** - TDD process with Pest v4 + VRISTO integration
+- **[DEVELOPMENT_PROGRESS.md](DEVELOPMENT_PROGRESS.md)** - Real-time phase tracking and milestone completion
+
+**📚 Supporting Documentation:**
 - **[README.md](README.md)** - SSL Monitor application overview and features
-- **[PROJECT_PLAN.md](PROJECT_PLAN.md)** - Development phases, tasks, and milestones
+- **[PROJECT_PLAN.md](PROJECT_PLAN.md)** - Original development phases and milestones
 - **[TECH_STACK.md](TECH_STACK.md)** - Technology stack decisions and architecture
-- **[DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md)** - TDD methodology and workflows
 - **[GIT_WORKFLOW.md](GIT_WORKFLOW.md)** - Git Flow branching strategy
-- **[VRISTO_INTEGRATION.md](VRISTO_INTEGRATION.md)** - VRISTO template integration
-- **[TESTING_STRATEGY.md](TESTING_STRATEGY.md)** - Pest v4 + Playwright testing
-- **[API_SPECIFICATION.md](API_SPECIFICATION.md)** - Backend API design
-- **[UI_SPECIFICATIONS.md](UI_SPECIFICATIONS.md)** - Frontend requirements
 
-**AI Development Guides:**
-- **[docs/DEVELOPMENT_PRINCIPLES.md](docs/DEVELOPMENT_PRINCIPLES.md)** - Laravel/Vue.js principles and SSL Monitor specifics
-- **[docs/MCP_INTEGRATION.md](docs/MCP_INTEGRATION.md)** - Complete 4-server MCP integration strategy
-- **[docs/LARAVEL_BOOST_GUIDE.md](docs/LARAVEL_BOOST_GUIDE.md)** - Laravel Boost MCP detailed usage
-- **[docs/CLAUDE_CODE_INTEGRATION.md](docs/CLAUDE_CODE_INTEGRATION.md)** - Claude Code best practices
+**🔍 Analysis Foundation:**
+- **[old_docs/](old_docs/)** - Complete v3 codebase analysis source (115+ tests, proven models, services)
+- **[old_docs/docs/](old_docs/docs/)** - Comprehensive v3 documentation (user guide, admin guide, developer guide)
 
 ### ⚡ Claude Code Slash Commands
 - **[.claude/commands/](.claude/commands/)** - Professional development slash commands
@@ -32,17 +32,23 @@ This condensed file serves as the central reference for AI-assisted development 
 
 ---
 
-## 🎯 Quick Reference
+## 🎯 SSL Monitor v4 Overview
 
-### Project Overview
-**SSL Monitor v3** is a professional SSL certificate and uptime monitoring platform built with Laravel 12 + Vue 3 + Inertia.js + VRISTO Template.
+### Project Vision
+**SSL Monitor v4** combines the proven, battle-tested backend architecture from v3 (analyzed from `old_docs/`) with a modern Vue 3 + Inertia.js + VRISTO frontend. This approach ensures reliability while delivering superior user experience.
 
-**Core Mission**: Provide businesses with reliable, automated SSL certificate monitoring, advanced uptime checking, and team collaboration features.
+**Core Mission**: Enterprise-grade SSL certificate monitoring with automated checks, professional notifications, and team collaboration features.
+
+### Architecture Strategy
+- **Proven Backend (90% Reuse)**: Models, Services, Jobs, Tests from old_docs
+- **Modern Frontend (Complete Rebuild)**: Vue 3 + Inertia.js + VRISTO design system
+- **Enhanced Testing**: Pest v4 browser tests (no Playwright needed)
+- **SSL Monitoring**: Spatie SSL Certificate + Laravel Jobs (proven reliable)
 
 ### Technology Stack
-- **Backend**: Laravel 12 + PHP 8.4 + MariaDB + Redis
+- **Backend**: Laravel 12 + PHP 8.4 + MariaDB + Redis + Proven Services
 - **Frontend**: Vue 3 + Inertia.js + VRISTO Template + TailwindCSS v4
-- **Testing**: Pest v4 + Playwright browser testing
+- **Testing**: Pest v4 Browser Tests (115+ tests adapted from old_docs)
 - **Development**: Laravel Sail + Git Flow + Laravel Pint
 
 ### Essential Commands
@@ -109,21 +115,28 @@ git-mcp: create-branch feature/ssl-enhancement    # Git MCP
 
 ---
 
-## 🚀 Getting Started Workflow
+## 🚀 SSL Monitor v4 Getting Started Workflow
 
-1. **MCP Setup**: Configure all four MCP servers (see [docs/MCP_INTEGRATION.md](docs/MCP_INTEGRATION.md))
-2. **Context Discovery**: Run `application-info` and `database-schema`
-3. **Documentation Review**: Read project-specific docs for your task area
-4. **Development**: Follow TDD with comprehensive testing
-5. **UI Integration**: Use VRISTO template with Vue.js components
-6. **Quality Assurance**: Run tests and code formatting before commits
+1. **Read Implementation Plan**: Start with [SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md](SSL_MONITOR_V4_IMPLEMENTATION_PLAN.md) for complete 8-week roadmap
+2. **Study Migration Strategy**: Review [MIGRATION_FROM_V3.md](MIGRATION_FROM_V3.md) to understand 90% backend reuse approach
+3. **MCP Setup**: Configure all four MCP servers for comprehensive development support
+4. **Context Discovery**: Run `application-info` and `database-schema` to understand current state
+5. **Development Workflow**: Follow [V4_DEVELOPMENT_WORKFLOW.md](V4_DEVELOPMENT_WORKFLOW.md) for TDD + VRISTO integration
+6. **Technical Reference**: Use [V4_TECHNICAL_SPECIFICATIONS.md](V4_TECHNICAL_SPECIFICATIONS.md) for models, services, and API details
 
-### Next Steps
-- **Phase 1**: SSL monitoring models and VRISTO dashboard integration
-- **Phase 2**: Core SSL certificate checking and uptime monitoring
-- **Phase 3**: Team collaboration and advanced features
+### Current Development Phase
+- **Status**: Ready to begin Phase 1 - Backend Foundation
+- **Next Steps**: Database schema migration and model implementation from old_docs
+- **Approach**: Copy proven components from old_docs, adapt for Vue.js frontend
 
-**For comprehensive guidance, always reference the detailed documentation files listed above.**
+### Development Priorities
+1. **Phase 1 (Week 1-2)**: Database schema + Models + Services from old_docs (90% reusable)
+2. **Phase 2 (Week 3)**: Inertia.js API controllers replacing Livewire components
+3. **Phase 3 (Week 4-5)**: Vue 3 + VRISTO frontend with professional UI components
+4. **Phase 4 (Week 6)**: Email configuration and advanced features
+5. **Phase 5 (Week 7-8)**: Comprehensive testing and production preparation
+
+**For implementation details, always reference the detailed SSL Monitor v4 documentation above.**
 
 ---
 
