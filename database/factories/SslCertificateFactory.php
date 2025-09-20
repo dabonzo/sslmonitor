@@ -42,9 +42,7 @@ class SslCertificateFactory extends Factory
             ]),
             'certificate_hash' => fake()->sha256(),
             'is_valid' => true,
-            'is_expired' => false,
-            'is_self_signed' => false,
-            'days_until_expiry' => Carbon::now()->diffInDays($expiresAt, false),
+            'status' => 'valid',
             'certificate_chain' => [
                 'certificate' => '-----BEGIN CERTIFICATE-----' . "\n" . fake()->text(1000) . "\n" . '-----END CERTIFICATE-----',
                 'intermediate' => '-----BEGIN CERTIFICATE-----' . "\n" . fake()->text(800) . "\n" . '-----END CERTIFICATE-----',
@@ -74,8 +72,7 @@ class SslCertificateFactory extends Factory
         return $this->state([
             'expires_at' => $expiresAt,
             'is_valid' => false,
-            'is_expired' => true,
-            'days_until_expiry' => Carbon::now()->diffInDays($expiresAt, false),
+            'status' => 'expired',
         ]);
     }
 
@@ -86,8 +83,7 @@ class SslCertificateFactory extends Factory
         return $this->state([
             'expires_at' => $expiresAt,
             'is_valid' => true,
-            'is_expired' => false,
-            'days_until_expiry' => Carbon::now()->diffInDays($expiresAt, false),
+            'status' => 'expiring',
         ]);
     }
 
@@ -95,16 +91,16 @@ class SslCertificateFactory extends Factory
     {
         return $this->state([
             'is_valid' => false,
-            'is_expired' => false,
+            'status' => 'invalid',
         ]);
     }
 
     public function selfSigned(): static
     {
         return $this->state([
-            'is_self_signed' => true,
             'issuer' => fake()->domainName(),
             'is_valid' => false,
+            'status' => 'invalid',
         ]);
     }
 
@@ -113,7 +109,7 @@ class SslCertificateFactory extends Factory
         return $this->state([
             'issuer' => 'Let\'s Encrypt Authority X3',
             'expires_at' => Carbon::now()->addDays(90),
-            'days_until_expiry' => 90,
+            'status' => 'valid',
         ]);
     }
 
@@ -126,7 +122,7 @@ class SslCertificateFactory extends Factory
                 'GeoTrust RSA CA 2018',
             ]),
             'expires_at' => Carbon::now()->addDays(365),
-            'days_until_expiry' => 365,
+            'status' => 'valid',
         ]);
     }
 

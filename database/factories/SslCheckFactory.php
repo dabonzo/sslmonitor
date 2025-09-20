@@ -43,19 +43,23 @@ class SslCheckFactory extends Factory
             'is_valid' => true,
             'days_until_expiry' => (int) $daysUntilExpiry,
             'error_message' => null,
-            'response_time' => fake()->randomFloat(3, 0.1, 2.0),
+            'response_time' => fake()->numberBetween(100, 2000), // milliseconds as integer
             'check_source' => 'scheduled',
-            'certificate_chain_length' => fake()->numberBetween(2, 4),
-            'protocol_version' => fake()->randomElement(['TLSv1.2', 'TLSv1.3']),
-            'cipher_suite' => fake()->randomElement([
-                'TLS_AES_256_GCM_SHA384',
-                'TLS_CHACHA20_POLY1305_SHA256',
-                'ECDHE-RSA-AES256-GCM-SHA384',
-                'ECDHE-RSA-CHACHA20-POLY1305',
-            ]),
-            'key_size' => fake()->randomElement([2048, 3072, 4096]),
-            'ocsp_status' => fake()->randomElement(['good', 'revoked', 'unknown', null]),
-            'plugin_metrics' => [],
+            'check_metrics' => [
+                'protocol_version' => fake()->randomElement(['TLSv1.2', 'TLSv1.3']),
+                'cipher_suite' => fake()->randomElement([
+                    'TLS_AES_256_GCM_SHA384',
+                    'TLS_CHACHA20_POLY1305_SHA256',
+                    'ECDHE-RSA-AES256-GCM-SHA384',
+                    'ECDHE-RSA-CHACHA20-POLY1305',
+                ]),
+                'key_size' => fake()->randomElement([2048, 3072, 4096]),
+                'certificate_chain_length' => fake()->numberBetween(2, 4),
+            ],
+            'agent_data' => null,
+            'security_analysis' => [
+                'ocsp_status' => fake()->randomElement(['good', 'revoked', 'unknown']),
+            ],
         ];
     }
 
@@ -142,11 +146,9 @@ class SslCheckFactory extends Factory
                 'SSL protocol error',
             ]),
             'response_time' => null,
-            'certificate_chain_length' => null,
-            'protocol_version' => null,
-            'cipher_suite' => null,
-            'key_size' => null,
-            'ocsp_status' => null,
+            'check_metrics' => null,
+            'agent_data' => null,
+            'security_analysis' => null,
         ]);
     }
 
@@ -174,21 +176,21 @@ class SslCheckFactory extends Factory
     public function slowResponse(): static
     {
         return $this->state([
-            'response_time' => fake()->randomFloat(3, 3.0, 10.0),
+            'response_time' => fake()->numberBetween(3000, 10000), // milliseconds
         ]);
     }
 
     public function fastResponse(): static
     {
         return $this->state([
-            'response_time' => fake()->randomFloat(3, 0.1, 0.5),
+            'response_time' => fake()->numberBetween(100, 500), // milliseconds
         ]);
     }
 
-    public function withPluginMetrics(array $metrics): static
+    public function withCheckMetrics(array $metrics): static
     {
         return $this->state([
-            'plugin_metrics' => $metrics,
+            'check_metrics' => $metrics,
         ]);
     }
 
@@ -196,9 +198,11 @@ class SslCheckFactory extends Factory
     {
         return $this->state([
             'signature_algorithm' => 'SHA1withRSA',
-            'protocol_version' => 'TLSv1.0',
-            'cipher_suite' => 'TLS_RSA_WITH_AES_128_CBC_SHA',
-            'key_size' => 1024,
+            'check_metrics' => [
+                'protocol_version' => 'TLSv1.0',
+                'cipher_suite' => 'TLS_RSA_WITH_AES_128_CBC_SHA',
+                'key_size' => 1024,
+            ],
         ]);
     }
 
@@ -206,10 +210,14 @@ class SslCheckFactory extends Factory
     {
         return $this->state([
             'signature_algorithm' => 'ECDSA-SHA256',
-            'protocol_version' => 'TLSv1.3',
-            'cipher_suite' => 'TLS_AES_256_GCM_SHA384',
-            'key_size' => 4096,
-            'ocsp_status' => 'good',
+            'check_metrics' => [
+                'protocol_version' => 'TLSv1.3',
+                'cipher_suite' => 'TLS_AES_256_GCM_SHA384',
+                'key_size' => 4096,
+            ],
+            'security_analysis' => [
+                'ocsp_status' => 'good',
+            ],
         ]);
     }
 }
