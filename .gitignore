@@ -27,3 +27,7 @@ yarn-error.log
 /.vscode
 /.zed
 tests/Browser/Screenshots
+
+# VRISTO Template Files
+vristo-html-main/
+vristo-html-starter/
