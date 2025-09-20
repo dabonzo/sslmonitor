@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import {
   Shield,
   CheckCircle,
@@ -10,62 +11,95 @@ import {
   TrendingDown
 } from 'lucide-vue-next';
 
-// Mock dashboard data
-const stats = [
+// Define TypeScript interfaces for SSL data
+interface SslStatistics {
+  total_websites: number;
+  valid_certificates: number;
+  expiring_soon: number;
+  expired_certificates: number;
+  avg_response_time: number;
+}
+
+interface SslActivity {
+  id: number;
+  website_name: string;
+  status: string;
+  checked_at: string;
+  time_ago: string;
+}
+
+interface SslAlert {
+  type: string;
+  website_name: string;
+  message: string;
+  expires_at: string;
+}
+
+interface Props {
+  sslStatistics: SslStatistics;
+  recentSslActivity: SslActivity[];
+  criticalAlerts: SslAlert[];
+}
+
+const props = defineProps<Props>();
+
+// Transform real SSL data into stats cards
+const stats = computed(() => [
   {
-    title: 'Total Certificates',
-    value: '24',
-    change: '+2',
+    title: 'Total Websites',
+    value: props.sslStatistics.total_websites.toString(),
+    change: `${props.sslStatistics.total_websites} monitored`,
     trend: 'up',
     icon: Shield,
     color: 'text-blue-600'
   },
   {
     title: 'Valid Certificates',
-    value: '22',
-    change: '91.7%',
+    value: props.sslStatistics.valid_certificates.toString(),
+    change: props.sslStatistics.total_websites > 0
+      ? `${Math.round((props.sslStatistics.valid_certificates / props.sslStatistics.total_websites) * 100)}%`
+      : '0%',
     trend: 'up',
     icon: CheckCircle,
     color: 'text-green-600'
   },
   {
     title: 'Expiring Soon',
-    value: '2',
-    change: '8.3%',
-    trend: 'down',
+    value: props.sslStatistics.expiring_soon.toString(),
+    change: props.sslStatistics.total_websites > 0
+      ? `${Math.round((props.sslStatistics.expiring_soon / props.sslStatistics.total_websites) * 100)}%`
+      : '0%',
+    trend: props.sslStatistics.expiring_soon > 0 ? 'down' : 'up',
     icon: AlertTriangle,
     color: 'text-yellow-600'
   },
   {
     title: 'Avg Response Time',
-    value: '245ms',
-    change: '-12ms',
-    trend: 'up',
+    value: props.sslStatistics.avg_response_time > 0
+      ? `${props.sslStatistics.avg_response_time}ms`
+      : 'N/A',
+    change: props.sslStatistics.avg_response_time > 0
+      ? (props.sslStatistics.avg_response_time < 1000 ? 'Fast' : 'Slow')
+      : 'No data',
+    trend: props.sslStatistics.avg_response_time < 1000 ? 'up' : 'down',
     icon: Clock,
     color: 'text-purple-600'
   }
-];
+]);
 
-const recentActivity = [
-  {
-    title: 'SSL Certificate Renewed',
-    description: 'example.com certificate has been renewed',
-    time: '2 minutes ago',
-    type: 'success'
-  },
-  {
-    title: 'Monitor Added',
-    description: 'New monitor created for api.example.com',
-    time: '1 hour ago',
-    type: 'info'
-  },
-  {
-    title: 'Certificate Expiring',
-    description: 'shop.example.com expires in 7 days',
-    time: '3 hours ago',
-    type: 'warning'
-  }
-];
+// Use real SSL activity data
+const recentActivity = computed(() =>
+  props.recentSslActivity.map(activity => ({
+    title: `SSL Check: ${activity.status}`,
+    description: `${activity.website_name} - ${activity.status}`,
+    time: activity.time_ago,
+    type: activity.status === 'valid' ? 'success' :
+          activity.status === 'expired' ? 'error' : 'warning'
+  }))
+);
+
+// Use real critical alerts data
+const criticalAlerts = computed(() => props.criticalAlerts);
 </script>
 
 <template>
@@ -180,26 +214,30 @@ const recentActivity = [
                 </h3>
 
                 <div class="space-y-3">
-                    <div class="flex items-center space-x-3 rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+                    <div
+                        v-if="criticalAlerts.length === 0"
+                        class="text-center text-muted-foreground py-4"
+                    >
+                        <CheckCircle class="h-8 w-8 mx-auto mb-2 text-green-500" />
+                        <p>No critical SSL alerts</p>
+                        <p class="text-xs">All certificates are healthy</p>
+                    </div>
+
+                    <div
+                        v-for="alert in criticalAlerts"
+                        :key="alert.website_name"
+                        class="flex items-center space-x-3 rounded-lg bg-red-50 p-3 dark:bg-red-900/20"
+                    >
                         <AlertTriangle class="h-5 w-5 text-red-600" />
                         <div class="flex-1">
                             <p class="text-sm font-medium text-red-800 dark:text-red-200">
-                                Certificate Expired
+                                {{ alert.type === 'ssl_expired' ? 'Certificate Expired' : 'SSL Alert' }}
                             </p>
                             <p class="text-sm text-red-600 dark:text-red-300">
-                                old.example.com certificate expired 2 days ago
+                                {{ alert.message }}
                             </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
-                        <Clock class="h-5 w-5 text-yellow-600" />
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                Monitor Timeout
-                            </p>
-                            <p class="text-sm text-yellow-600 dark:text-yellow-300">
-                                api.example.com taking longer than usual to respond
+                            <p class="text-xs text-red-500 dark:text-red-400">
+                                Expired: {{ new Date(alert.expires_at).toLocaleDateString() }}
                             </p>
                         </div>
                     </div>
