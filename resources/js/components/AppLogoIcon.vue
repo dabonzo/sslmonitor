@@ -13,12 +13,62 @@ defineProps<Props>();
 </script>
 
 <template>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" :class="className" v-bind="$attrs">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" :class="className" v-bind="$attrs">
+        <!-- SSL Monitor Logo: Shield with Certificate and Monitoring Elements -->
+        <defs>
+            <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4F46E5" />
+                <stop offset="100%" style="stop-color:#7C3AED" />
+            </linearGradient>
+        </defs>
+
+        <!-- Main Shield -->
         <path
-            fill="currentColor"
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M17.2 5.633 8.6.855 0 5.633v26.51l16.2 9 16.2-9v-8.442l7.6-4.223V9.856l-8.6-4.777-8.6 4.777V18.3l-5.6 3.111V5.633ZM38 18.301l-5.6 3.11v-6.157l5.6-3.11V18.3Zm-1.06-7.856-5.54 3.078-5.54-3.079 5.54-3.078 5.54 3.079ZM24.8 18.3v-6.157l5.6 3.111v6.158L24.8 18.3Zm-1 1.732 5.54 3.078-13.14 7.302-5.54-3.078 13.14-7.3v-.002Zm-16.2 7.89 7.6 4.222V38.3L2 30.966V7.92l5.6 3.111v16.892ZM8.6 9.3 3.06 6.222 8.6 3.143l5.54 3.08L8.6 9.3Zm21.8 15.51-13.2 7.334V38.3l13.2-7.334v-6.156ZM9.6 11.034l5.6-3.11v14.6l-5.6 3.11v-14.6Z"
+            d="M16 2.5c-3.5 1.5-7 2.5-12 2.5v8c0 8 4.5 14.5 12 19 7.5-4.5 12-11 12-19v-8c-5 0-8.5-1-12-2.5z"
+            fill="url(#shieldGradient)"
+            stroke="currentColor"
+            stroke-width="0.5"
         />
+
+        <!-- Certificate Icon -->
+        <rect
+            x="10" y="8" width="12" height="10"
+            rx="1" ry="1"
+            fill="white"
+            opacity="0.9"
+        />
+
+        <!-- Certificate Lines -->
+        <line x1="12" y1="10.5" x2="20" y2="10.5" stroke="currentColor" stroke-width="0.8" opacity="0.7" />
+        <line x1="12" y1="12.5" x2="18" y2="12.5" stroke="currentColor" stroke-width="0.8" opacity="0.7" />
+        <line x1="12" y1="14.5" x2="19" y2="14.5" stroke="currentColor" stroke-width="0.8" opacity="0.7" />
+
+        <!-- SSL Lock Symbol -->
+        <rect
+            x="14.5" y="12" width="3" height="2.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="0.8"
+            rx="0.5"
+        />
+        <path
+            d="M15.2 12v-0.8c0-0.4 0.4-0.8 0.8-0.8s0.8 0.4 0.8 0.8V12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="0.8"
+        />
+
+        <!-- Monitoring Pulse -->
+        <path
+            d="M6 20 L8 20 L9 16 L11 24 L13 12 L14 20 L16 20"
+            fill="none"
+            stroke="white"
+            stroke-width="1.5"
+            opacity="0.8"
+        />
+
+        <!-- Status Indicator -->
+        <circle cx="25" cy="8" r="2.5" fill="#10B981" opacity="0.9" />
+        <path d="M23.8 8 L24.8 9 L26.2 7" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" />
     </svg>
 </template>
