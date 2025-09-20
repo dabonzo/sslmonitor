@@ -23,6 +23,7 @@ class SslCheck extends Model
         'is_valid',
         'days_until_expiry',
         'error_message',
+        'response_time',
         'check_metrics',
         'check_source',
         'agent_data',
@@ -45,6 +46,67 @@ class SslCheck extends Model
     public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class);
+    }
+
+    // Virtual attributes for test compatibility
+    public function getPluginMetricsAttribute(): ?array
+    {
+        return $this->check_metrics;
+    }
+
+    public function setPluginMetricsAttribute(array $value): void
+    {
+        $this->check_metrics = $value;
+    }
+
+    public function getProtocolVersionAttribute(): ?string
+    {
+        return $this->getCheckMetric('protocol_version');
+    }
+
+    public function setProtocolVersionAttribute(string $value): void
+    {
+        $this->setCheckMetric('protocol_version', $value);
+    }
+
+    public function getCipherSuiteAttribute(): ?string
+    {
+        return $this->getCheckMetric('cipher_suite');
+    }
+
+    public function setCipherSuiteAttribute(string $value): void
+    {
+        $this->setCheckMetric('cipher_suite', $value);
+    }
+
+    public function getKeySizeAttribute(): ?int
+    {
+        return $this->getCheckMetric('key_size');
+    }
+
+    public function setKeySizeAttribute(int $value): void
+    {
+        $this->setCheckMetric('key_size', $value);
+    }
+
+    public function getOcspStatusAttribute(): ?string
+    {
+        return $this->getSecurityAnalysis('ocsp_status');
+    }
+
+    public function setOcspStatusAttribute(string $value): void
+    {
+        $this->setSecurityAnalysis('ocsp_status', $value);
+    }
+
+    public function getCertificateChainLengthAttribute(): ?int
+    {
+        return $this->getCheckMetric('certificate_chain_length');
+    }
+
+    public function setCertificateChainLengthAttribute(int $value): void
+    {
+        $this->setCheckMetric('certificate_chain_length', $value);
     }
 
     // Query scopes from old_docs tests

@@ -71,7 +71,7 @@ class SslCertificateFactory extends Factory
 
         return $this->state([
             'expires_at' => $expiresAt,
-            'is_valid' => false,
+            'is_valid' => true, // Keep valid=true so getStatus() can check expiry
             'status' => 'expired',
         ]);
     }
@@ -83,7 +83,7 @@ class SslCertificateFactory extends Factory
         return $this->state([
             'expires_at' => $expiresAt,
             'is_valid' => true,
-            'status' => 'expiring',
+            'status' => 'expiring_soon',
         ]);
     }
 
@@ -97,8 +97,10 @@ class SslCertificateFactory extends Factory
 
     public function selfSigned(): static
     {
+        $domain = fake()->domainName();
         return $this->state([
-            'issuer' => fake()->domainName(),
+            'subject' => $domain,
+            'issuer' => $domain, // Self-signed: issuer = subject
             'is_valid' => false,
             'status' => 'invalid',
         ]);

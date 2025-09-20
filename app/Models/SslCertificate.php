@@ -20,6 +20,7 @@ class SslCertificate extends Model
         'serial_number',
         'signature_algorithm',
         'is_valid',
+        'status',
         'certificate_chain',
         'security_metrics',
         'certificate_hash',
@@ -72,6 +73,12 @@ class SslCertificate extends Model
         }
 
         return 'valid';
+    }
+
+    public function isSelfSigned(): bool
+    {
+        // A certificate is self-signed if the issuer equals the subject
+        return $this->issuer === $this->subject;
     }
 
     // Query scopes from old_docs

@@ -72,6 +72,11 @@ class PluginConfiguration extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeInactive(Builder $query): Builder
+    {
+        return $query->where('status', 'inactive');
+    }
+
     public function scopeByType(Builder $query, string $type): Builder
     {
         return $query->where('plugin_type', $type);
@@ -180,6 +185,29 @@ class PluginConfiguration extends Model
         $this->status = 'disabled';
         $this->is_enabled = false;
         $this->status_message = $reason;
+    }
+
+    public function markAsInactive(string $message = null): void
+    {
+        $this->status = 'inactive';
+        $this->status_message = $message;
+        $this->is_enabled = false;
+        $this->save();
+    }
+
+    public function updateLastContacted(): void
+    {
+        $this->last_contacted_at = now();
+        $this->save();
+    }
+
+    public function isRecentlyContacted(int $minutesThreshold = 60): bool
+    {
+        if (!$this->last_contacted_at) {
+            return false;
+        }
+
+        return $this->last_contacted_at->isAfter(now()->subMinutes($minutesThreshold));
     }
 
     public function isAgent(): bool

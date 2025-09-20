@@ -194,6 +194,13 @@ class SslCheckFactory extends Factory
         ]);
     }
 
+    public function withPluginMetrics(array $metrics): static
+    {
+        return $this->state([
+            'check_metrics' => $metrics,
+        ]);
+    }
+
     public function weakSecurity(): static
     {
         return $this->state([

@@ -19,6 +19,15 @@ class Website extends Model
         'ssl_monitoring_enabled',
         'uptime_monitoring_enabled',
         'plugin_data',
+        'is_active',
+        'check_interval',
+    ];
+
+    protected $attributes = [
+        'ssl_monitoring_enabled' => true,
+        'uptime_monitoring_enabled' => false,
+        'monitoring_config' => '{"is_active": true}',
+        'plugin_data' => '{}',
     ];
 
     protected function casts(): array
@@ -29,6 +38,27 @@ class Website extends Model
             'uptime_monitoring_enabled' => 'boolean',
             'plugin_data' => 'array',
         ];
+    }
+
+    // Virtual attributes for test compatibility
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->getMonitoringConfig('is_active') ?? true;
+    }
+
+    public function setIsActiveAttribute(bool $value): void
+    {
+        $this->setMonitoringConfig('is_active', $value);
+    }
+
+    public function getCheckIntervalAttribute(): ?int
+    {
+        return $this->getMonitoringConfig('check_interval');
+    }
+
+    public function setCheckIntervalAttribute(int $value): void
+    {
+        $this->setMonitoringConfig('check_interval', $value);
     }
 
     public function user(): BelongsTo
@@ -51,31 +81,46 @@ class Website extends Model
         // URL sanitization logic from old_docs
         $url = trim($value);
 
-        // Remove trailing slashes and normalize
+        // Remove trailing slashes
         $url = rtrim($url, '/');
 
-        // Add https if no protocol specified
-        if (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) {
+        // Add https if no protocol specified (case-insensitive check)
+        if (!str_starts_with(strtolower($url), 'http://') && !str_starts_with(strtolower($url), 'https://')) {
             $url = 'https://' . $url;
         }
 
-        // Convert http to https and normalize
-        $url = str_replace('http://', 'https://', $url);
-        $url = strtolower($url);
+        // Convert all URLs to https and normalize (case-insensitive)
+        $url = preg_replace('/^http:\/\//i', 'https://', $url);
 
-        // Parse and rebuild URL to normalize
+        // Parse URL to normalize it properly
         $parsed = parse_url($url);
-        if ($parsed) {
-            $normalized = ($parsed['scheme'] ?? 'https') . '://';
-            $normalized .= $parsed['host'] ?? '';
+        if ($parsed && isset($parsed['host'])) {
+            $normalized = 'https://';
+            $normalized .= strtolower($parsed['host']);
 
             if (isset($parsed['port']) && $parsed['port'] !== 443) {
                 $normalized .= ':' . $parsed['port'];
             }
 
-            // Normalize path
+            // Normalize path - remove .. and empty segments
             if (isset($parsed['path']) && $parsed['path'] !== '/') {
-                $normalized .= rtrim($parsed['path'], '/');
+                $pathParts = array_filter(explode('/', $parsed['path']), function($part) {
+                    return $part !== '' && $part !== '.';
+                });
+
+                // Remove .. references
+                $finalParts = [];
+                foreach ($pathParts as $part) {
+                    if ($part === '..') {
+                        array_pop($finalParts);
+                    } else {
+                        $finalParts[] = $part;
+                    }
+                }
+
+                if (!empty($finalParts)) {
+                    $normalized .= '/' . implode('/', $finalParts);
+                }
             }
 
             $url = $normalized;
@@ -118,10 +163,18 @@ class Website extends Model
         return $key ? ($data[$key] ?? null) : $data;
     }
 
-    public function setPluginData(string $pluginName, string $key, mixed $value): void
+    public function setPluginData(string $pluginName, string|array $key, mixed $value = null): void
     {
         $data = $this->plugin_data ?? [];
-        $data[$pluginName][$key] = $value;
+
+        if (is_array($key)) {
+            // If key is an array, set the entire plugin data
+            $data[$pluginName] = $key;
+        } else {
+            // If key is a string, set a specific key-value pair
+            $data[$pluginName][$key] = $value;
+        }
+
         $this->plugin_data = $data;
     }
 

@@ -220,6 +220,7 @@ test('plugin configuration scopes work correctly', function () {
     $user = User::factory()->create();
 
     PluginConfiguration::factory()->active()->create(['user_id' => $user->id]);
+    PluginConfiguration::factory()->active()->agent()->create(['user_id' => $user->id]);
     PluginConfiguration::factory()->inactive()->create(['user_id' => $user->id]);
     PluginConfiguration::factory()->error()->create(['user_id' => $user->id]);
     PluginConfiguration::factory()->agent()->create(['user_id' => $user->id]);

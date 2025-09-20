@@ -72,8 +72,8 @@ test('ssl check can track performance metrics', function () {
     $fastCheck = SslCheck::factory()->fastResponse()->create();
     $slowCheck = SslCheck::factory()->slowResponse()->create();
 
-    expect($fastCheck->response_time)->toBeLessThan(1.0)
-        ->and($slowCheck->response_time)->toBeGreaterThan(3.0);
+    expect($fastCheck->response_time)->toBeLessThan(1000) // milliseconds
+        ->and($slowCheck->response_time)->toBeGreaterThan(3000);
 });
 
 test('ssl check can have security strength variations', function () {
@@ -119,7 +119,9 @@ test('ssl check has proper fillable attributes', function () {
         ->and($fillable)->toContain('error_message')
         ->and($fillable)->toContain('response_time')
         ->and($fillable)->toContain('check_source')
-        ->and($fillable)->toContain('plugin_metrics');
+        ->and($fillable)->toContain('check_metrics')
+        ->and($fillable)->toContain('agent_data')
+        ->and($fillable)->toContain('security_analysis');
 });
 
 test('ssl check casts datetime fields correctly', function () {

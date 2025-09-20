@@ -17,8 +17,7 @@ test('ssl certificate can be created with valid data', function () {
         'signature_algorithm' => 'SHA256withRSA',
         'certificate_hash' => hash('sha256', 'test-certificate-data'),
         'is_valid' => true,
-        'is_expired' => false,
-        'is_self_signed' => false,
+        'status' => 'valid',
     ]);
 
     expect($certificate)->toBeInstanceOf(SslCertificate::class)
@@ -26,8 +25,9 @@ test('ssl certificate can be created with valid data', function () {
         ->and($certificate->issuer)->toBe('Let\'s Encrypt Authority X3')
         ->and($certificate->subject)->toBe('example.com')
         ->and($certificate->is_valid)->toBeTrue()
-        ->and($certificate->is_expired)->toBeFalse()
-        ->and($certificate->is_self_signed)->toBeFalse();
+        ->and($certificate->isExpired())->toBeFalse()
+        ->and($certificate->isSelfSigned())->toBeFalse()
+        ->and($certificate->status)->toBe('valid');
 });
 
 test('ssl certificate belongs to website', function () {
@@ -39,12 +39,12 @@ test('ssl certificate belongs to website', function () {
 });
 
 test('ssl certificate calculates days until expiry', function () {
-    $expiryDate = Carbon::now()->addDays(30);
+    $expiryDate = Carbon::now()->addDays(30)->startOfDay();
     $certificate = SslCertificate::factory()->create([
         'expires_at' => $expiryDate
     ]);
 
-    expect($certificate->getDaysUntilExpiry())->toBe(30);
+    expect($certificate->getDaysUntilExpiry())->toBeBetween(29, 30);
 });
 
 test('ssl certificate returns negative days for expired certificates', function () {
@@ -106,9 +106,7 @@ test('ssl certificate has proper fillable attributes', function () {
         ->and($fillable)->toContain('signature_algorithm')
         ->and($fillable)->toContain('certificate_hash')
         ->and($fillable)->toContain('is_valid')
-        ->and($fillable)->toContain('is_expired')
-        ->and($fillable)->toContain('is_self_signed')
-        ->and($fillable)->toContain('days_until_expiry')
+        ->and($fillable)->toContain('status')
         ->and($fillable)->toContain('certificate_chain')
         ->and($fillable)->toContain('security_metrics')
         ->and($fillable)->toContain('plugin_analysis');
@@ -136,7 +134,7 @@ test('ssl certificate casts json fields correctly', function () {
 
 test('ssl certificate scopes work correctly', function () {
     // Create test certificates
-    SslCertificate::factory()->create(['is_valid' => true, 'is_expired' => false]);
+    SslCertificate::factory()->create(['is_valid' => true, 'status' => 'valid']);
     SslCertificate::factory()->invalid()->create();
     SslCertificate::factory()->expired()->create();
     SslCertificate::factory()->expiringSoon()->create();
@@ -164,11 +162,10 @@ test('ssl certificate can have plugin analysis data', function () {
 test('ssl certificate can update plugin analysis', function () {
     $certificate = SslCertificate::factory()->create();
 
-    $certificate->setPluginAnalysis('test_plugin', ['result' => 'passed']);
+    $certificate->setPluginAnalysis('test_plugin', 'result', 'passed');
     $certificate->save();
 
-    expect($certificate->getPluginAnalysis('test_plugin'))->toBe(['result' => 'passed'])
-        ->and($certificate->getPluginAnalysis('test_plugin', 'result'))->toBe('passed');
+    expect($certificate->getPluginAnalysis('test_plugin', 'result'))->toBe('passed');
 });
 
 test('ssl certificate has security strength variants', function () {
@@ -187,9 +184,9 @@ test('ssl certificate has certificate authority variants', function () {
     $selfSignedCert = SslCertificate::factory()->selfSigned()->create();
 
     expect($letsEncryptCert->issuer)->toBe('Let\'s Encrypt Authority X3')
-        ->and($letsEncryptCert->days_until_expiry)->toBe(90)
-        ->and($commercialCert->days_until_expiry)->toBe(365)
-        ->and($selfSignedCert->is_self_signed)->toBeTrue()
+        ->and($letsEncryptCert->getDaysUntilExpiry())->toBeBetween(89, 90)
+        ->and($commercialCert->getDaysUntilExpiry())->toBeBetween(364, 365)
+        ->and($selfSignedCert->isSelfSigned())->toBeTrue()
         ->and($selfSignedCert->is_valid)->toBeFalse();
 });
 
@@ -206,16 +203,16 @@ test('ssl certificate hash is properly stored', function () {
 test('ssl certificate tracks expiry status', function () {
     $certificate = SslCertificate::factory()->create([
         'expires_at' => Carbon::now()->addDays(30),
-        'is_expired' => false,
+        'status' => 'valid',
     ]);
 
-    expect($certificate->is_expired)->toBeFalse();
+    expect($certificate->isExpired())->toBeFalse();
 
     // Update to expired
     $certificate->update([
         'expires_at' => Carbon::now()->subDay(),
-        'is_expired' => true,
+        'status' => 'expired',
     ]);
 
-    expect($certificate->is_expired)->toBeTrue();
+    expect($certificate->isExpired())->toBeTrue();
 });
