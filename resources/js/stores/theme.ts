@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
-export type MenuMode = 'vertical' | 'horizontal' | 'collapsible-vertical'
+export type MenuMode = 'vertical' | 'horizontal'
 export type LayoutMode = 'full' | 'boxed-layout'
 
 export const useThemeStore = defineStore('theme', () => {

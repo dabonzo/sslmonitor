@@ -20,16 +20,8 @@ const themeStore = useThemeStore()
 // Active dropdown state
 const activeDropdown = ref<string>('')
 
-// Hover state for collapsible mode
-const isHovered = ref<boolean>(false)
-
-// Computed property to determine if sub-menus should be visible
+// Sub-menus are always visible when dropdown is active
 const shouldShowSubMenus = computed(() => {
-  if (themeStore.menu === 'collapsible-vertical') {
-    // In collapsible mode, only show sub-menus when hovered (and dropdown is active)
-    return isHovered.value
-  }
-  // In other modes, always show sub-menus when dropdown is active
   return true
 })
 
@@ -122,15 +114,11 @@ function isActiveRoute(href: string) {
 <template>
   <nav
     v-if="themeStore.menu !== 'horizontal'"
-    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
+    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
     :class="{
       'ltr:-left-[260px] rtl:right-[260px]': !themeStore.sidebarOpen,
-      'ltr:left-0 rtl:right-0': themeStore.sidebarOpen,
-      'w-[260px]': themeStore.menu !== 'collapsible-vertical',
-      '!w-[70px] lg:hover:!w-[260px]': themeStore.menu === 'collapsible-vertical'
+      'ltr:left-0 rtl:right-0': themeStore.sidebarOpen
     }"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
   >
     <div class="h-full bg-sidebar">
       <!-- Logo section -->
@@ -139,9 +127,6 @@ function isActiveRoute(href: string) {
           <AppLogoIcon class="ml-[5px] h-8 w-8 flex-none fill-current text-primary" />
           <span
             class="text-2xl font-semibold align-middle text-sidebar-primary ltr:ml-1.5 rtl:mr-1.5 text-sidebar-foreground"
-            :class="{
-              'lg:hidden': themeStore.menu === 'collapsible-vertical'
-            }"
           >
             SSL Monitor
           </span>
@@ -165,9 +150,6 @@ function isActiveRoute(href: string) {
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
                   <span
                     class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
-                    :class="{
-                      'lg:hidden': themeStore.menu === 'collapsible-vertical'
-                    }"
                   >
                     {{ item.title }}
                   </span>
@@ -176,8 +158,7 @@ function isActiveRoute(href: string) {
                 <div
                   class="rtl:rotate-180"
                   :class="{
-                    '!rotate-90': activeDropdown === item.key,
-                    'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                    '!rotate-90': activeDropdown === item.key
                   }"
                 >
                   <ChevronDown class="h-4 w-4" />
@@ -215,9 +196,6 @@ function isActiveRoute(href: string) {
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
                   <span
                     class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
-                    :class="{
-                      'lg:hidden': themeStore.menu === 'collapsible-vertical'
-                    }"
                   >
                     {{ item.title }}
                   </span>
@@ -226,8 +204,7 @@ function isActiveRoute(href: string) {
                 <div
                   class="rtl:rotate-180"
                   :class="{
-                    '!rotate-90': activeDropdown === item.key,
-                    'lg:hidden': themeStore.menu === 'collapsible-vertical'
+                    '!rotate-90': activeDropdown === item.key
                   }"
                 >
                   <ChevronDown class="h-4 w-4" />

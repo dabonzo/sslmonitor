@@ -36,8 +36,7 @@ const themeOptions = [
 // Navigation options (VRISTO pattern)
 const navigationOptions = [
   { name: 'Vertical', value: 'vertical', description: 'Full sidebar on left' },
-  { name: 'Horizontal', value: 'horizontal', description: 'Header navigation menu' },
-  { name: 'Collapsible', value: 'collapsible-vertical', description: 'Narrow sidebar with hover' }
+  { name: 'Horizontal', value: 'horizontal', description: 'Header navigation menu' }
 ]
 
 // Layout options (VRISTO pattern)

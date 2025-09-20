@@ -170,7 +170,14 @@
 
 /* Default: Vertical mode */
 .main-container .main-content {
-    @apply transition-all duration-300 lg:ml-[260px] w-full;
+    @apply transition-all duration-300 lg:ml-[260px];
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .main-container .main-content {
+        width: calc(100% - 260px);
+    }
 }
 
 /* Horizontal mode: Hide sidebar, no margin */
@@ -190,41 +197,6 @@
     @apply flex;
 }
 
-/* Collapsible vertical mode */
-.collapsible-vertical .sidebar {
-    @apply -left-[260px] lg:left-0;
-}
-
-/* Show text labels on hover in collapsible mode */
-.collapsible-vertical .sidebar:hover .text-sidebar-foreground {
-    @apply lg:inline;
-}
-
-.collapsible-vertical .sidebar .text-sidebar-foreground {
-    @apply lg:hidden;
-}
-
-.collapsible-vertical.toggle-sidebar .sidebar {
-    @apply !left-0 lg:!w-[260px];
-}
-
-.collapsible-vertical.toggle-sidebar .main-content {
-    @apply lg:!w-[calc(100%-260px)] lg:!ml-[260px];
-}
-
-/* Full layout: collapsible sidebar gets 70px margin */
-.collapsible-vertical:not(.boxed-layout) .main-content {
-    @apply lg:!ml-[70px] w-full;
-}
-
-.collapsible-vertical .sidebar .sub-menu {
-    @apply lg:hidden;
-}
-
-.collapsible-vertical .sidebar:hover .sub-menu,
-.collapsible-vertical.toggle-sidebar .sidebar .sub-menu {
-    @apply lg:block;
-}
 
 /* Layout Mode Styles */
 
@@ -248,35 +220,6 @@
     @apply !-left-[260px] !hidden;
 }
 
-.boxed-layout.collapsible-vertical .main-container .main-content {
-    @apply !ml-0 w-full;
-}
-
-.boxed-layout.collapsible-vertical .sidebar {
-    @apply -left-[260px] lg:!w-[70px] lg:!left-0 rounded-l-lg;
-}
-
-.boxed-layout.collapsible-vertical .sidebar:hover {
-    @apply lg:!w-[260px];
-}
-
-/* Boxed + Collapsible specific icon centering */
-.boxed-layout.collapsible-vertical .nav-link {
-    @apply lg:justify-center lg:px-0;
-}
-
-.boxed-layout.collapsible-vertical .sidebar:hover .nav-link {
-    @apply lg:justify-between lg:px-2;
-}
-
-/* Boxed + Collapsible logo centering */
-.boxed-layout.collapsible-vertical .main-logo {
-    @apply lg:justify-center;
-}
-
-.boxed-layout.collapsible-vertical .sidebar:hover .main-logo {
-    @apply lg:justify-start;
-}
 
 .boxed-layout.vertical .main-container .main-content {
     @apply !ml-0 w-full;
@@ -293,6 +236,22 @@
 .boxed-layout header {
     @apply rounded-t-lg;
 }
+
+/* Ensure boxed layout content utilizes full container width - exclude theme customizer */
+.boxed-layout .main-content {
+    @apply w-full;
+}
+
+.boxed-layout .main-content > header,
+.boxed-layout .main-content > .animate__animated {
+    @apply w-full;
+}
+
+/* Boxed layout header internal content full width - specific to main header container */
+.boxed-layout .main-content header > .flex.items-center.justify-between {
+    @apply w-full max-w-none;
+}
+
 
 /* Mobile responsive */
 @media (max-width: 1023px) {
