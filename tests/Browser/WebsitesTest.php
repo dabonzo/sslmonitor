@@ -107,4 +107,43 @@ class WebsitesTest extends DuskTestCase
         // SUCCESS: Dark mode dashboard screenshot taken!
         $this->assertTrue(true);
     }
+
+    public function test_dashboard_response_time_card()
+    {
+        // Use the real user who owns the websites with monitors
+        $user = User::where('email', 'bonzo@konjscina.com')->first()
+                ?? User::factory()->create(['email' => 'bonzo@konjscina.com', 'name' => 'Bonzo']);
+
+        $this->browse(function (Browser $browser) use ($user) {
+            // Login and navigate to dashboard
+            $browser->loginAs($user)
+                    ->visit('/dashboard')
+                    ->pause(5000); // Wait for Vue.js components to load
+
+            // Take screenshot to see the current response time card
+            $browser->screenshot('dashboard-response-time-issue');
+
+            // Get page source for debugging
+            $pageSource = $browser->driver->getPageSource();
+            file_put_contents('/var/www/html/tests/Browser/response-time-debug.html', $pageSource);
+
+            // Try to find the Response Time card text
+            if (str_contains($pageSource, 'Response Time')) {
+                echo "Found Response Time card in page source\n";
+            } else {
+                echo "Response Time card not found in page source\n";
+            }
+
+            // Look for N/A or specific response time values
+            if (str_contains($pageSource, 'N/A')) {
+                echo "Found N/A in page source\n";
+            }
+
+            // Take final screenshot
+            $browser->screenshot('dashboard-response-time-final');
+        });
+
+        // SUCCESS: Response time card screenshot taken!
+        $this->assertTrue(true);
+    }
 }

@@ -95,13 +95,13 @@ const stats = computed(() => [
   },
   {
     title: 'Response Time',
-    value: props.sslStatistics.avg_response_time > 0
-      ? `${props.sslStatistics.avg_response_time}ms`
+    value: props.uptimeStatistics.avg_response_time > 0
+      ? `${props.uptimeStatistics.avg_response_time}ms`
       : 'N/A',
-    change: props.sslStatistics.avg_response_time > 0
-      ? (props.sslStatistics.avg_response_time < 1000 ? 'Fast SSL' : 'Slow SSL')
+    change: props.uptimeStatistics.avg_response_time > 0
+      ? (props.uptimeStatistics.avg_response_time < 1000 ? 'Fast' : 'Slow')
       : 'No data',
-    trend: props.sslStatistics.avg_response_time < 1000 ? 'up' : 'down',
+    trend: props.uptimeStatistics.avg_response_time < 1000 ? 'up' : 'down',
     icon: Activity,
     color: 'text-purple-600'
   }
