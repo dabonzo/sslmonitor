@@ -66,15 +66,6 @@ class Website extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function sslCertificates(): HasMany
-    {
-        return $this->hasMany(SslCertificate::class);
-    }
-
-    public function sslChecks(): HasMany
-    {
-        return $this->hasMany(SslCheck::class);
-    }
 
     protected function setUrlAttribute(string $value): void
     {
@@ -129,16 +120,21 @@ class Website extends Model
         $this->attributes['url'] = $url;
     }
 
-    public function getLatestSslCertificate(): ?SslCertificate
+    public function getSpatieMonitor(): ?\Spatie\UptimeMonitor\Models\Monitor
     {
-        return $this->sslCertificates()->latest()->first();
+        return \Spatie\UptimeMonitor\Models\Monitor::where('url', $this->url)->first();
     }
 
     public function getCurrentSslStatus(): string
     {
-        $latestCheck = $this->sslChecks()->latest('checked_at')->first();
+        $monitor = $this->getSpatieMonitor();
+        return $monitor?->certificate_status ?? 'not yet checked';
+    }
 
-        return $latestCheck?->status ?? 'unknown';
+    public function getCurrentUptimeStatus(): string
+    {
+        $monitor = $this->getSpatieMonitor();
+        return $monitor?->uptime_status ?? 'not yet checked';
     }
 
     // Plugin-ready: Methods for future agent integration

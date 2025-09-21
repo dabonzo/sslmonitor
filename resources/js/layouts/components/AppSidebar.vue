@@ -25,56 +25,50 @@ const shouldShowSubMenus = computed(() => {
   return true
 })
 
-// Navigation menu items
+// Navigation menu items - Clean, intuitive SSL monitoring workflow
 const menuItems = [
   {
     key: 'dashboard',
     title: 'Dashboard',
     icon: BarChart3,
-    children: [
-      { title: 'Overview', href: '/dashboard' },
-      { title: 'Analytics', href: '/analytics' },
-      { title: 'Reports', href: '/reports' }
-    ]
+    href: '/dashboard',
+    description: 'SSL & Uptime overview'
+  },
+  {
+    key: 'websites',
+    title: 'Websites',
+    icon: Monitor,
+    href: '/ssl/websites',
+    description: 'Manage monitored sites'
   },
   {
     key: 'certificates',
     title: 'SSL Certificates',
     icon: Shield,
     children: [
-      { title: 'All Certificates', href: '/certificates' },
-      { title: 'Expiring Soon', href: '/certificates/expiring' },
-      { title: 'Add Certificate', href: '/certificates/create' }
+      { title: 'All Certificates', href: '/ssl/certificates' },
+      { title: 'Expiring Soon', href: '/ssl/certificates/expiring' },
+      { title: 'Issues & Alerts', href: '/ssl/certificates/issues' }
     ]
   },
   {
-    key: 'monitors',
-    title: 'Monitoring',
-    icon: Monitor,
+    key: 'uptime',
+    title: 'Uptime Monitoring',
+    icon: Clock,
     children: [
-      { title: 'All Monitors', href: '/monitors' },
-      { title: 'Uptime Checks', href: '/monitors/uptime' },
-      { title: 'Add Monitor', href: '/monitors/create' }
+      { title: 'Status Overview', href: '/uptime/status' },
+      { title: 'Response Times', href: '/uptime/performance' },
+      { title: 'Incidents', href: '/uptime/incidents' }
     ]
   },
   {
-    key: 'alerts',
-    title: 'Alerts',
-    icon: AlertTriangle,
+    key: 'reports',
+    title: 'Reports',
+    icon: BarChart3,
     children: [
-      { title: 'Alert Rules', href: '/alerts' },
-      { title: 'Notifications', href: '/alerts/notifications' },
-      { title: 'History', href: '/alerts/history' }
-    ]
-  },
-  {
-    key: 'team',
-    title: 'Team',
-    icon: Users,
-    children: [
-      { title: 'Members', href: '/team' },
-      { title: 'Roles', href: '/team/roles' },
-      { title: 'Invitations', href: '/team/invitations' }
+      { title: 'SSL Reports', href: '/reports/ssl' },
+      { title: 'Uptime Reports', href: '/reports/uptime' },
+      { title: 'Performance', href: '/reports/performance' }
     ]
   }
 ]
@@ -84,21 +78,15 @@ const bottomMenuItems = [
     key: 'settings',
     title: 'Settings',
     icon: Settings,
-    children: [
-      { title: 'General', href: '/settings' },
-      { title: 'Notifications', href: '/settings/notifications' },
-      { title: 'Integrations', href: '/settings/integrations' }
-    ]
+    href: '/settings',
+    description: 'Account & preferences'
   },
   {
     key: 'help',
-    title: 'Help & Support',
+    title: 'Help',
     icon: HelpCircle,
-    children: [
-      { title: 'Documentation', href: '/help' },
-      { title: 'Contact Support', href: '/support' },
-      { title: 'API Reference', href: '/api-docs' }
-    ]
+    href: '/help',
+    description: 'Documentation & support'
   }
 ]
 
@@ -140,43 +128,62 @@ function isActiveRoute(href: string) {
           <!-- Main menu items -->
           <template v-for="item in menuItems" :key="item.key">
             <li class="menu nav-item">
-              <button
-                type="button"
+              <!-- Direct link items -->
+              <Link
+                v-if="item.href"
+                :href="item.href"
                 class="nav-link group w-full"
-                :class="{ 'active': activeDropdown === item.key }"
-                @click="toggleDropdown(item.key)"
+                :class="{ 'active': isActiveRoute(item.href) }"
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span
-                    class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
-                  >
-                    {{ item.title }}
-                  </span>
+                  <div class="ltr:pl-3 rtl:pr-3">
+                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary">
+                      {{ item.title }}
+                    </span>
+                    <div v-if="item.description" class="text-xs text-sidebar-muted">
+                      {{ item.description }}
+                    </div>
+                  </div>
                 </div>
+              </Link>
 
-                <div
-                  class="rtl:rotate-180"
-                  :class="{
-                    '!rotate-90': activeDropdown === item.key
-                  }"
+              <!-- Dropdown items -->
+              <template v-else>
+                <button
+                  type="button"
+                  class="nav-link group w-full"
+                  :class="{ 'active': activeDropdown === item.key }"
+                  @click="toggleDropdown(item.key)"
                 >
-                  <ChevronDown class="h-4 w-4" />
-                </div>
-              </button>
+                  <div class="flex items-center">
+                    <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
+                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
+                      {{ item.title }}
+                    </span>
+                  </div>
 
-              <Transition name="slide-down">
-                <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
-                  <li v-for="child in item.children" :key="child.href">
-                    <Link
-                      :href="child.href"
-                      :class="{ 'active': isActiveRoute(child.href) }"
-                    >
-                      {{ child.title }}
-                    </Link>
-                  </li>
-                </ul>
-              </Transition>
+                  <div
+                    class="rtl:rotate-180 transition-transform duration-200"
+                    :class="{ '!rotate-90': activeDropdown === item.key }"
+                  >
+                    <ChevronDown class="h-4 w-4" />
+                  </div>
+                </button>
+
+                <Transition name="slide-down">
+                  <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
+                    <li v-for="child in item.children" :key="child.href">
+                      <Link
+                        :href="child.href"
+                        :class="{ 'active': isActiveRoute(child.href) }"
+                      >
+                        {{ child.title }}
+                      </Link>
+                    </li>
+                  </ul>
+                </Transition>
+              </template>
             </li>
           </template>
 
@@ -186,43 +193,23 @@ function isActiveRoute(href: string) {
           <!-- Bottom menu items -->
           <template v-for="item in bottomMenuItems" :key="item.key">
             <li class="menu nav-item">
-              <button
-                type="button"
+              <Link
+                :href="item.href"
                 class="nav-link group w-full"
-                :class="{ 'active': activeDropdown === item.key }"
-                @click="toggleDropdown(item.key)"
+                :class="{ 'active': isActiveRoute(item.href) }"
               >
                 <div class="flex items-center">
                   <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <span
-                    class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3"
-                  >
-                    {{ item.title }}
-                  </span>
+                  <div class="ltr:pl-3 rtl:pr-3">
+                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary">
+                      {{ item.title }}
+                    </span>
+                    <div v-if="item.description" class="text-xs text-sidebar-muted">
+                      {{ item.description }}
+                    </div>
+                  </div>
                 </div>
-
-                <div
-                  class="rtl:rotate-180"
-                  :class="{
-                    '!rotate-90': activeDropdown === item.key
-                  }"
-                >
-                  <ChevronDown class="h-4 w-4" />
-                </div>
-              </button>
-
-              <Transition name="slide-down">
-                <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
-                  <li v-for="child in item.children" :key="child.href">
-                    <Link
-                      :href="child.href"
-                      :class="{ 'active': isActiveRoute(child.href) }"
-                    >
-                      {{ child.title }}
-                    </Link>
-                  </li>
-                </ul>
-              </Transition>
+              </Link>
             </li>
           </template>
 
