@@ -87,8 +87,17 @@ function createUserWithSslData(): \App\Models\User
     $user = \App\Models\User::factory()->create();
 
     $website = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCertificate::factory()->create(['website_id' => $website->id]);
-    \App\Models\SslCheck::factory()->valid()->create(['website_id' => $website->id]);
+
+    // Create Spatie monitor for SSL monitoring
+    $timestamp = time() . '-' . rand(1000, 9999);
+    $testUrl = 'https://test-user-' . $timestamp . '.example.com';
+    $website->update(['url' => $testUrl]);
+
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $testUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+    ]);
 
     return $user;
 }
@@ -101,8 +110,16 @@ function createWebsiteWithSslData(\App\Models\User $user = null): \App\Models\We
     $user = $user ?? \App\Models\User::factory()->create();
     $website = \App\Models\Website::factory()->create(['user_id' => $user->id]);
 
-    \App\Models\SslCertificate::factory()->create(['website_id' => $website->id]);
-    \App\Models\SslCheck::factory()->valid()->create(['website_id' => $website->id]);
+    // Create Spatie monitor for SSL monitoring
+    $timestamp = time() . '-' . rand(1000, 9999);
+    $testUrl = 'https://test-website-' . $timestamp . '.example.com';
+    $website->update(['url' => $testUrl]);
+
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $testUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+    ]);
 
     return $website;
 }
@@ -177,34 +194,64 @@ function mockSslCheckResult(string $status = 'valid', array $overrides = []): ar
 function createSslTestScenarios(\App\Models\User $user): array
 {
     $scenarios = [];
+    $timestamp = time() . '-' . rand(1000, 9999);
 
     // Valid certificate
     $validWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCertificate::factory()->create(['website_id' => $validWebsite->id]);
-    \App\Models\SslCheck::factory()->valid()->create(['website_id' => $validWebsite->id]);
+    $validUrl = 'https://test-valid-' . $timestamp . '.example.com';
+    $validWebsite->update(['url' => $validUrl]);
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $validUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'certificate_expiration_date' => now()->addDays(90),
+    ]);
     $scenarios['valid'] = $validWebsite;
 
     // Expiring soon certificate
     $expiringSoonWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCertificate::factory()->expiringSoon()->create(['website_id' => $expiringSoonWebsite->id]);
-    \App\Models\SslCheck::factory()->expiringSoon()->create(['website_id' => $expiringSoonWebsite->id]);
+    $expiringSoonUrl = 'https://test-expiring-' . $timestamp . '.example.com';
+    $expiringSoonWebsite->update(['url' => $expiringSoonUrl]);
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $expiringSoonUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'certificate_expiration_date' => now()->addDays(7),
+    ]);
     $scenarios['expiring_soon'] = $expiringSoonWebsite;
 
     // Expired certificate
     $expiredWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCertificate::factory()->expired()->create(['website_id' => $expiredWebsite->id]);
-    \App\Models\SslCheck::factory()->expired()->create(['website_id' => $expiredWebsite->id]);
+    $expiredUrl = 'https://test-expired-' . $timestamp . '.example.com';
+    $expiredWebsite->update(['url' => $expiredUrl]);
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $expiredUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'invalid',
+        'certificate_expiration_date' => now()->subDays(1),
+    ]);
     $scenarios['expired'] = $expiredWebsite;
 
     // Invalid certificate
     $invalidWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCertificate::factory()->invalid()->create(['website_id' => $invalidWebsite->id]);
-    \App\Models\SslCheck::factory()->invalid()->create(['website_id' => $invalidWebsite->id]);
+    $invalidUrl = 'https://test-invalid-' . $timestamp . '.example.com';
+    $invalidWebsite->update(['url' => $invalidUrl]);
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $invalidUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'invalid',
+    ]);
     $scenarios['invalid'] = $invalidWebsite;
 
     // Error case
     $errorWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    \App\Models\SslCheck::factory()->error()->create(['website_id' => $errorWebsite->id]);
+    $errorUrl = 'https://test-error-' . $timestamp . '.example.com';
+    $errorWebsite->update(['url' => $errorUrl]);
+    \Spatie\UptimeMonitor\Models\Monitor::create([
+        'url' => $errorUrl,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'not yet checked',
+    ]);
     $scenarios['error'] = $errorWebsite;
 
     return $scenarios;

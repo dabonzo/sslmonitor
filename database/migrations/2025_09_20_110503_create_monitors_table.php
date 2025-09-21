@@ -31,6 +31,7 @@ class CreateMonitorsTable extends Migration
             $table->text('uptime_check_payload')->nullable();
             $table->text('uptime_check_additional_headers')->nullable();
             $table->string('uptime_check_response_checker')->nullable();
+            $table->integer('uptime_check_response_time_in_ms')->nullable();
 
             $table->boolean('certificate_check_enabled')->default(false);
             $table->string('certificate_status')->default(CertificateStatus::NOT_YET_CHECKED);

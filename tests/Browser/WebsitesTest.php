@@ -10,12 +10,9 @@ class WebsitesTest extends DuskTestCase
 {
     public function test_websites_page_loads_without_sslCertificates_error()
     {
-        // Use the existing real user bonzo@konjscina.com (ID: 52)
-        $user = User::where('email', 'bonzo@konjscina.com')->first();
-
-        if (!$user) {
-            $this->fail('Real user bonzo@konjscina.com not found in database');
-        }
+        // Create a test user or use existing one
+        $user = User::where('email', 'test@example.com')->first()
+                ?? User::factory()->create(['email' => 'test@example.com']);
 
         $this->browse(function (Browser $browser) use ($user) {
             // Use Dusk's built-in loginAs method which handles authentication properly
@@ -48,12 +45,9 @@ class WebsitesTest extends DuskTestCase
 
     public function test_dashboard_loads_and_take_screenshot()
     {
-        // Use the existing real user bonzo@konjscina.com (ID: 52)
-        $user = User::where('email', 'bonzo@konjscina.com')->first();
-
-        if (!$user) {
-            $this->fail('Real user bonzo@konjscina.com not found in database');
-        }
+        // Create a test user or use existing one
+        $user = User::where('email', 'test@example.com')->first()
+                ?? User::factory()->create(['email' => 'test@example.com']);
 
         $this->browse(function (Browser $browser) use ($user) {
             // Login and navigate to dashboard
@@ -80,12 +74,9 @@ class WebsitesTest extends DuskTestCase
 
     public function test_dashboard_dark_mode_screenshot()
     {
-        // Use the existing real user bonzo@konjscina.com (ID: 52)
-        $user = User::where('email', 'bonzo@konjscina.com')->first();
-
-        if (!$user) {
-            $this->fail('Real user bonzo@konjscina.com not found in database');
-        }
+        // Create a test user or use existing one
+        $user = User::where('email', 'test@example.com')->first()
+                ?? User::factory()->create(['email' => 'test@example.com']);
 
         $this->browse(function (Browser $browser) use ($user) {
             // Login and navigate to dashboard

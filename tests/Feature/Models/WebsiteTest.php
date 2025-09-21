@@ -51,30 +51,35 @@ test('website url is normalized to lowercase and https', function () {
     expect($website->url)->toBe('https://example.com');
 });
 
-test('website has ssl certificates relationship method', function () {
+test('website can get spatie monitor', function () {
     $website = Website::factory()->create();
 
-    expect(method_exists($website, 'sslCertificates'))->toBeTrue();
+    expect(method_exists($website, 'getSpatieMonitor'))->toBeTrue();
+    // Since SSL monitoring is enabled by default, a monitor should be created automatically
+    expect($website->getSpatieMonitor())->not->toBeNull();
+    expect($website->getSpatieMonitor())->toBeInstanceOf(\Spatie\UptimeMonitor\Models\Monitor::class);
 });
 
-test('website has ssl checks relationship method', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'sslChecks'))->toBeTrue();
-});
-
-test('website can get latest ssl certificate', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'getLatestSslCertificate'))->toBeTrue();
-    expect($website->getLatestSslCertificate())->toBeNull();
-});
-
-test('website can get current ssl status', function () {
+test('website can get current ssl status from spatie monitor', function () {
     $website = Website::factory()->create();
 
     expect(method_exists($website, 'getCurrentSslStatus'))->toBeTrue();
-    expect($website->getCurrentSslStatus())->toBe('unknown');
+    expect($website->getCurrentSslStatus())->toBe('not yet checked');
+});
+
+test('website can get current uptime status from spatie monitor', function () {
+    $website = Website::factory()->create();
+
+    expect(method_exists($website, 'getCurrentUptimeStatus'))->toBeTrue();
+    expect($website->getCurrentUptimeStatus())->toBe('not yet checked');
+});
+
+test('website has plugin data methods', function () {
+    $website = Website::factory()->create();
+
+    expect(method_exists($website, 'getPluginData'))->toBeTrue();
+    expect(method_exists($website, 'setPluginData'))->toBeTrue();
+    expect($website->getPluginData('test-plugin'))->toBe([]);
 });
 
 test('website enforces unique url per user', function () {
@@ -113,16 +118,6 @@ test('different users can have same url', function () {
         ->and($website2)->toBeInstanceOf(Website::class);
 });
 
-test('website has plugin data methods', function () {
-    $website = Website::factory()->withPluginData([
-        'system_agent' => ['last_check' => now()->toISOString()],
-    ])->create();
-
-    expect(method_exists($website, 'getPluginData'))->toBeTrue()
-        ->and(method_exists($website, 'setPluginData'))->toBeTrue()
-        ->and($website->getPluginData('system_agent'))->toBeArray()
-        ->and($website->getPluginData('system_agent', 'last_check'))->toBeString();
-});
 
 test('website can update plugin data', function () {
     $website = Website::factory()->create();

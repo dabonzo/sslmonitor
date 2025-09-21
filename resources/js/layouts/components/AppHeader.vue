@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import ThemeCustomizer from '@/components/ThemeCustomizer.vue'
 import {
@@ -26,6 +26,10 @@ interface Props {
 }
 
 defineProps<Props>()
+
+// Get authenticated user data
+const page = usePage()
+const user = page.props.auth.user
 
 const themeStore = useThemeStore()
 
@@ -292,7 +296,7 @@ document.addEventListener('click', handleDocumentClick)
             <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
               <User class="h-4 w-4 text-primary" />
             </div>
-            <span class="hidden sm:block text-sm font-medium">John Doe</span>
+            <span class="hidden sm:block text-sm font-medium">{{ user?.name }}</span>
             <ChevronDown class="h-4 w-4" />
           </button>
 
@@ -301,8 +305,8 @@ document.addEventListener('click', handleDocumentClick)
             class="absolute top-12 right-0 z-50 w-48 rounded-md bg-white shadow-lg dark:bg-[#1b2e4b]"
           >
             <div class="border-b border-gray-200 p-4 dark:border-gray-600">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">John Doe</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">john@example.com</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user?.name }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ user?.email }}</p>
             </div>
 
             <div class="py-2">

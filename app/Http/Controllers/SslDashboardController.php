@@ -68,7 +68,8 @@ class SslDashboardController extends Controller
         $expiringSoon = $monitors->filter(function ($monitor) {
             if ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
                 $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                return $expirationDate->diffInDays(now()) <= 10;
+                $daysUntilExpiry = now()->diffInDays($expirationDate, false);
+                return $daysUntilExpiry <= 10 && $daysUntilExpiry > 0;
             }
             return false;
         })->count();
@@ -205,7 +206,7 @@ class SslDashboardController extends Controller
                 'status' => $monitor->uptime_status,
                 'checked_at' => $monitor->uptime_last_check_date,
                 'time_ago' => $monitor->uptime_last_check_date->diffForHumans(),
-                'response_time' => null, // Spatie doesn't store response time by default
+                'response_time' => $monitor->uptime_check_response_time_in_ms,
             ];
         })->toArray();
     }

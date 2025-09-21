@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Run the TestUserSeeder first
+        $this->call(TestUserSeeder::class);
+
         // Create test users
         $testUser = User::factory()->create([
             'name' => 'Test User',

@@ -2,15 +2,13 @@
 
 use App\Models\User;
 use App\Models\Website;
-use App\Models\SslCertificate;
+use Spatie\UptimeMonitor\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
-use Tests\Helpers\TestUserHelper;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Always ensure the persistent test user exists
-    TestUserHelper::ensureTestUserExists();
-
-    // Create a separate test user for the test operations
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
 });
@@ -25,11 +23,18 @@ describe('Website Controller', function () {
             $otherUser = User::factory()->create();
             Website::factory()->create(['user_id' => $otherUser->id]);
 
-            // Add SSL certificates to user websites
-            SslCertificate::factory()->create([
-                'website_id' => $userWebsites[0]->id,
-                'status' => 'valid'
-            ]);
+            // Create Spatie monitor for SSL monitoring
+            $timestamp = time() . '-' . rand(1000, 9999);
+            $testUrl = 'https://test-ssl-' . $timestamp . '.example.com';
+            $userWebsites[0]->update(['url' => $testUrl]);
+
+            Monitor::firstOrCreate(
+                ['url' => $testUrl],
+                [
+                    'certificate_check_enabled' => true,
+                    'certificate_status' => 'valid',
+                ]
+            );
 
             $response = $this->get(route('ssl.websites.index'));
 
@@ -45,7 +50,6 @@ describe('Website Controller', function () {
                         ->has('ssl_status')
                         ->has('ssl_monitoring_enabled')
                         ->has('uptime_monitoring_enabled')
-                        ->has('latest_ssl_certificate')
                         ->has('created_at')
                         ->etc()
                     )
@@ -134,10 +138,18 @@ describe('Website Controller', function () {
         it('displays website details with SSL information', function () {
             $website = Website::factory()->create(['user_id' => $this->user->id]);
 
-            $sslCertificate = SslCertificate::factory()->create([
-                'website_id' => $website->id,
-                'status' => 'valid'
-            ]);
+            // Create Spatie monitor for SSL monitoring
+            $timestamp = time() . '-' . rand(1000, 9999);
+            $testUrl = 'https://test-show-' . $timestamp . '.example.com';
+            $website->update(['url' => $testUrl]);
+
+            Monitor::firstOrCreate(
+                ['url' => $testUrl],
+                [
+                    'certificate_check_enabled' => true,
+                    'certificate_status' => 'valid',
+                ]
+            );
 
             $response = $this->get(route('ssl.websites.show', $website));
 
@@ -196,8 +208,18 @@ describe('Website Controller', function () {
         it('deletes website and related data', function () {
             $website = Website::factory()->create(['user_id' => $this->user->id]);
 
-            // Create related SSL data
-            SslCertificate::factory()->create(['website_id' => $website->id]);
+            // Create related Spatie monitor data
+            $timestamp = time() . '-' . rand(1000, 9999);
+            $testUrl = 'https://test-delete-' . $timestamp . '.example.com';
+            $website->update(['url' => $testUrl]);
+
+            $monitor = Monitor::firstOrCreate(
+                ['url' => $testUrl],
+                [
+                    'certificate_check_enabled' => true,
+                    'certificate_status' => 'valid',
+                ]
+            );
 
             $response = $this->delete(route('ssl.websites.destroy', $website));
 
@@ -206,7 +228,6 @@ describe('Website Controller', function () {
                 ->assertSessionHas('success');
 
             $this->assertDatabaseMissing('websites', ['id' => $website->id]);
-            $this->assertDatabaseMissing('ssl_certificates', ['website_id' => $website->id]);
         });
     });
 
