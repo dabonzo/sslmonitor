@@ -12,14 +12,13 @@ import {
   LogOut,
   Sun,
   Moon,
-  Monitor,
   ChevronDown,
   Palette,
   Shield,
   BarChart3,
-  AlertTriangle,
   Users
 } from 'lucide-vue-next'
+import { horizontalMenuItems } from '@/config/navigation'
 
 interface Props {
   title?: string
@@ -80,65 +79,13 @@ function toggleCustomizer() {
   themeCustomizer.value?.toggleCustomizer()
 }
 
-// Horizontal menu items (for horizontal navigation mode)
-const horizontalMenuItems = [
-  {
-    title: 'Dashboard',
-    icon: BarChart3,
-    href: '/dashboard',
-    children: [
-      { title: 'Overview', href: '/dashboard' },
-      { title: 'Analytics', href: '/analytics' },
-      { title: 'Reports', href: '/reports' }
-    ]
-  },
-  {
-    title: 'SSL Certificates',
-    icon: Shield,
-    href: '/certificates',
-    children: [
-      { title: 'All Certificates', href: '/certificates' },
-      { title: 'Expiring Soon', href: '/certificates/expiring' },
-      { title: 'Add Certificate', href: '/certificates/create' }
-    ]
-  },
-  {
-    title: 'Monitoring',
-    icon: Monitor,
-    href: '/monitors',
-    children: [
-      { title: 'All Monitors', href: '/monitors' },
-      { title: 'Uptime Checks', href: '/monitors/uptime' },
-      { title: 'Add Monitor', href: '/monitors/create' }
-    ]
-  },
-  {
-    title: 'Alerts',
-    icon: AlertTriangle,
-    href: '/alerts',
-    children: [
-      { title: 'Alert Rules', href: '/alerts' },
-      { title: 'Notifications', href: '/alerts/notifications' },
-      { title: 'History', href: '/alerts/history' }
-    ]
-  },
-  {
-    title: 'Team',
-    icon: Users,
-    href: '/team',
-    children: [
-      { title: 'Members', href: '/team' },
-      { title: 'Roles', href: '/team/roles' },
-      { title: 'Invitations', href: '/team/invitations' }
-    ]
-  }
-]
+// No need for hardcoded menu items anymore - using centralized config
 
 // Active horizontal menu dropdown
 const activeHorizontalDropdown = ref<string | null>(null)
 
-function toggleHorizontalDropdown(itemTitle: string) {
-  activeHorizontalDropdown.value = activeHorizontalDropdown.value === itemTitle ? null : itemTitle
+function toggleHorizontalDropdown(itemKey: string) {
+  activeHorizontalDropdown.value = activeHorizontalDropdown.value === itemKey ? null : itemKey
 }
 
 // Close dropdowns when clicking outside
@@ -155,7 +102,7 @@ document.addEventListener('click', handleDocumentClick)
 </script>
 
 <template>
-  <header class="z-40 bg-white shadow-sm dark:bg-[#0e1726]">
+  <header class="z-40 bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900/30 dark:to-indigo-900/30 shadow-lg border-b border-blue-100 dark:border-blue-800">
     <div class="flex items-center justify-between p-4">
 
       <!-- Left side: Sidebar toggle + Title -->
@@ -163,7 +110,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Sidebar toggle button -->
         <button
           type="button"
-          class="block rounded-full bg-white-light/40 p-2 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary lg:hidden"
+          class="block rounded-xl bg-white/60 backdrop-blur-sm p-2.5 hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 lg:hidden transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
           data-sidebar-toggle
           @click="themeStore.toggleSidebar()"
         >
@@ -172,20 +119,38 @@ document.addEventListener('click', handleDocumentClick)
 
         <!-- Page title/breadcrumb -->
         <div class="hidden sm:block">
-          <h1 class="text-xl font-semibold text-[#3b3f5c] dark:text-white-light">
-            {{ title || 'Dashboard' }}
-          </h1>
+          <div class="flex items-center space-x-3">
+            <div class="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 shadow-lg">
+              <BarChart3 v-if="title === 'Dashboard'" class="h-6 w-6 text-white" />
+              <Shield v-else-if="title?.includes('SSL')" class="h-6 w-6 text-white" />
+              <Users v-else-if="title?.includes('Team')" class="h-6 w-6 text-white" />
+              <Settings v-else-if="title?.includes('Settings')" class="h-6 w-6 text-white" />
+              <BarChart3 v-else class="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+                {{ title || 'Dashboard' }}
+              </h1>
+              <p class="text-sm text-blue-600 dark:text-blue-300 font-medium">
+                SSL Monitor v4
+                <span v-if="title === 'Dashboard'">• Overview</span>
+                <span v-else-if="title?.includes('SSL')">• Certificate Management</span>
+                <span v-else-if="title?.includes('Team')">• Team Management</span>
+                <span v-else-if="title?.includes('Settings')">• Application Settings</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Right side: Search, Theme, Notifications, User menu -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-3">
 
         <!-- Search -->
         <div class="dropdown relative">
           <button
             type="button"
-            class="flex h-9 w-9 items-center justify-center rounded-full bg-white-light/40 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary"
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
             @click="showSearch = !showSearch"
           >
             <Search class="h-4 w-4" />
@@ -193,14 +158,14 @@ document.addEventListener('click', handleDocumentClick)
 
           <div
             v-show="showSearch"
-            class="absolute top-12 right-0 z-50 w-80 rounded-md bg-white p-4 shadow-lg dark:bg-[#1b2e4b]"
+            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg p-4 shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
           >
             <div class="relative">
-              <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" />
               <input
                 type="text"
                 placeholder="Search certificates, monitors..."
-                class="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                class="w-full rounded-xl border border-blue-200 dark:border-blue-700 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-800 dark:text-white bg-white/80"
               />
             </div>
           </div>
@@ -209,7 +174,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Theme toggle -->
         <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full bg-white-light/40 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-amber-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-amber-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
           @click="themeStore.toggleTheme(themeStore.theme === 'dark' ? 'light' : 'dark')"
         >
           <Sun v-if="themeStore.resolvedTheme === 'dark'" class="h-4 w-4" />
@@ -219,7 +184,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Theme customizer toggle -->
         <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full bg-white-light/40 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-purple-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-purple-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
           data-test="theme-customizer-toggle"
           @click="toggleCustomizer"
         >
@@ -230,47 +195,47 @@ document.addEventListener('click', handleDocumentClick)
         <div class="dropdown relative">
           <button
             type="button"
-            class="relative flex h-9 w-9 items-center justify-center rounded-full bg-white-light/40 hover:bg-white-light hover:text-primary dark:bg-dark/40 dark:hover:bg-dark dark:hover:text-primary"
+            class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-red-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-red-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
             @click="showNotifications = !showNotifications"
           >
             <Bell class="h-4 w-4" />
             <!-- Notification badge -->
-            <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] text-white">
+            <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-[10px] text-white font-bold shadow-lg">
               {{ notifications.length }}
             </span>
           </button>
 
           <div
             v-show="showNotifications"
-            class="absolute top-12 right-0 z-50 w-80 rounded-md bg-white shadow-lg dark:bg-[#1b2e4b]"
+            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
           >
-            <div class="border-b border-gray-200 p-4 dark:border-gray-600">
-              <h3 class="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+            <div class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl">
+              <h3 class="font-bold text-blue-900 dark:text-blue-100">Notifications</h3>
             </div>
 
             <div class="max-h-64 overflow-y-auto">
               <div
                 v-for="notification in notifications"
                 :key="notification.id"
-                class="border-b border-gray-100 p-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                class="border-b border-gray-100/60 dark:border-gray-700/60 p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300"
               >
                 <div class="flex items-start space-x-3">
                   <div
-                    class="mt-1 h-2 w-2 rounded-full"
+                    class="mt-1 h-3 w-3 rounded-full shadow-sm"
                     :class="{
-                      'bg-yellow-400': notification.type === 'warning',
-                      'bg-red-400': notification.type === 'error',
-                      'bg-green-400': notification.type === 'success'
+                      'bg-gradient-to-r from-amber-400 to-orange-500': notification.type === 'warning',
+                      'bg-gradient-to-r from-red-400 to-pink-500': notification.type === 'error',
+                      'bg-gradient-to-r from-emerald-400 to-green-500': notification.type === 'success'
                     }"
                   />
                   <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
                       {{ notification.title }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       {{ notification.message }}
                     </p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">
                       {{ notification.time }}
                     </p>
                   </div>
@@ -278,9 +243,9 @@ document.addEventListener('click', handleDocumentClick)
               </div>
             </div>
 
-            <div class="p-4">
-              <Link href="/notifications" class="text-sm text-primary hover:text-primary/80">
-                View all notifications
+            <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-b-xl">
+              <Link href="/notifications" class="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                View all notifications →
               </Link>
             </div>
           </div>
@@ -290,40 +255,54 @@ document.addEventListener('click', handleDocumentClick)
         <div class="dropdown relative">
           <button
             type="button"
-            class="flex items-center space-x-2 rounded-lg p-2 hover:bg-white-light hover:text-primary dark:hover:bg-dark dark:hover:text-primary"
+            class="flex items-center space-x-3 rounded-xl p-2.5 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/20"
             @click="showUserMenu = !showUserMenu"
           >
-            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <User class="h-4 w-4 text-primary" />
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <User class="h-5 w-5 text-white" />
             </div>
-            <span class="hidden sm:block text-sm font-medium">{{ user?.name }}</span>
-            <ChevronDown class="h-4 w-4" />
+            <div class="hidden sm:block text-left">
+              <p class="text-sm font-bold text-gray-900 dark:text-white">{{ user?.name }}</p>
+              <p class="text-xs text-blue-600 dark:text-blue-300">Admin</p>
+            </div>
+            <ChevronDown class="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </button>
 
           <div
             v-show="showUserMenu"
-            class="absolute top-12 right-0 z-50 w-48 rounded-md bg-white shadow-lg dark:bg-[#1b2e4b]"
+            class="absolute top-12 right-0 z-50 w-64 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
           >
-            <div class="border-b border-gray-200 p-4 dark:border-gray-600">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user?.name }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ user?.email }}</p>
+            <div class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl">
+              <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                  <User class="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-blue-900 dark:text-blue-100">{{ user?.name }}</p>
+                  <p class="text-xs text-blue-600 dark:text-blue-300">{{ user?.email }}</p>
+                </div>
+              </div>
             </div>
 
             <div class="py-2">
               <Link
                 href="/settings/profile"
-                class="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                class="flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
               >
-                <Settings class="h-4 w-4" />
-                <span>Settings</span>
+                <div class="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
+                  <Settings class="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span>Profile Settings</span>
               </Link>
 
               <button
                 type="button"
-                class="flex w-full items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                class="flex w-full items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
                 @click="logout"
               >
-                <LogOut class="h-4 w-4" />
+                <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
+                  <LogOut class="h-4 w-4 text-red-600 dark:text-red-400" />
+                </div>
                 <span>Sign out</span>
               </button>
             </div>
@@ -336,39 +315,50 @@ document.addEventListener('click', handleDocumentClick)
     <!-- Horizontal Navigation Menu (shown only in horizontal mode) -->
     <div
       v-if="themeStore.menu === 'horizontal'"
-      class="horizontal-menu border-t border-[#ebedf2] bg-white px-6 py-1.5 font-semibold text-black dark:border-[#191e3a] dark:bg-[#0e1726] dark:text-white-light"
+      class="horizontal-menu border-t border-blue-200 dark:border-blue-800 bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20 px-6 py-2 backdrop-blur-sm"
     >
-      <nav class="flex space-x-8">
+      <nav class="flex space-x-6">
         <div
           v-for="item in horizontalMenuItems"
-          :key="item.title"
+          :key="item.key"
           class="relative dropdown"
         >
-          <Link
-            :href="item.href"
-            class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:text-primary dark:text-gray-300 dark:hover:text-primary"
-            @click="toggleHorizontalDropdown(item.title)"
+          <!-- Items with children use button to toggle dropdown -->
+          <button
+            v-if="item.children"
+            type="button"
+            class="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 rounded-xl hover:bg-white/60 dark:hover:bg-white/10"
+            @click="toggleHorizontalDropdown(item.key)"
           >
             <component :is="item.icon" class="h-4 w-4" />
             <span>{{ item.title }}</span>
             <ChevronDown
-              v-if="item.children"
-              class="h-3 w-3 transition-transform"
-              :class="{ 'rotate-180': activeHorizontalDropdown === item.title }"
+              class="h-3 w-3 transition-transform duration-300"
+              :class="{ 'rotate-180': activeHorizontalDropdown === item.key }"
             />
+          </button>
+
+          <!-- Items without children use Link for direct navigation -->
+          <Link
+            v-else
+            :href="item.href || '#'"
+            class="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 rounded-xl hover:bg-white/60 dark:hover:bg-white/10"
+          >
+            <component :is="item.icon" class="h-4 w-4" />
+            <span>{{ item.title }}</span>
           </Link>
 
           <!-- Dropdown menu -->
           <div
-            v-if="item.children && activeHorizontalDropdown === item.title"
-            class="absolute top-full left-0 z-50 mt-1 w-48 rounded-md bg-white shadow-lg dark:bg-[#1b2e4b]"
+            v-if="item.children && activeHorizontalDropdown === item.key"
+            class="absolute top-full left-0 z-50 mt-2 w-56 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
           >
-            <div class="py-1">
+            <div class="py-2">
               <Link
                 v-for="child in item.children"
                 :key="child.title"
                 :href="child.href"
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
               >
                 {{ child.title }}
               </Link>

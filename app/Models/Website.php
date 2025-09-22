@@ -15,6 +15,9 @@ class Website extends Model
         'name',
         'url',
         'user_id',
+        'team_id',
+        'assigned_by_user_id',
+        'assigned_at',
         'monitoring_config',
         'ssl_monitoring_enabled',
         'uptime_monitoring_enabled',
@@ -37,6 +40,7 @@ class Website extends Model
             'ssl_monitoring_enabled' => 'boolean',
             'uptime_monitoring_enabled' => 'boolean',
             'plugin_data' => 'array',
+            'assigned_at' => 'datetime',
         ];
     }
 
@@ -64,6 +68,16 @@ class Website extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by_user_id');
     }
 
 
@@ -182,5 +196,65 @@ class Website extends Model
     public function isUptimeMonitoringEnabled(): bool
     {
         return $this->uptime_monitoring_enabled;
+    }
+
+    /**
+     * Check if website is personal (not assigned to a team)
+     */
+    public function isPersonal(): bool
+    {
+        return $this->team_id === null;
+    }
+
+    /**
+     * Check if website is assigned to a team
+     */
+    public function isTeam(): bool
+    {
+        return $this->team_id !== null;
+    }
+
+    /**
+     * Transfer website to a team
+     */
+    public function transferToTeam(Team $team, User $assignedBy): void
+    {
+        $this->update([
+            'team_id' => $team->id,
+            'assigned_by_user_id' => $assignedBy->id,
+            'assigned_at' => now(),
+        ]);
+    }
+
+    /**
+     * Transfer website back to personal ownership
+     */
+    public function transferToPersonal(): void
+    {
+        $this->update([
+            'team_id' => null,
+            'assigned_by_user_id' => null,
+            'assigned_at' => null,
+        ]);
+    }
+
+    /**
+     * Get badge type for UI display
+     */
+    public function getBadgeType(): string
+    {
+        return $this->isTeam() ? 'team' : 'personal';
+    }
+
+    /**
+     * Get display name with team context
+     */
+    public function getDisplayNameWithContext(): string
+    {
+        if ($this->isTeam()) {
+            return $this->name . ' (Team: ' . $this->team->name . ')';
+        }
+
+        return $this->name . ' (Personal)';
     }
 }

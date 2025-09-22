@@ -511,6 +511,107 @@ class WebsiteController extends Controller
     }
 
     /**
+     * Transfer website to team
+     */
+    public function transferToTeam(Request $request, Website $website): RedirectResponse
+    {
+        $this->authorize('update', $website);
+
+        $request->validate([
+            'team_id' => 'required|exists:teams,id',
+        ]);
+
+        $user = $request->user();
+        $team = \App\Models\Team::findOrFail($request->team_id);
+
+        // Check if user is a member of the team with appropriate permissions
+        if (!$user->isMemberOf($team)) {
+            abort(403, 'You are not a member of this team.');
+        }
+
+        $userRole = $user->getRoleInTeam($team);
+        if (!in_array($userRole, ['OWNER', 'ADMIN', 'MANAGER'])) {
+            abort(403, 'You do not have permission to transfer websites to this team.');
+        }
+
+        try {
+            $website->transferToTeam($team, $user);
+
+            return redirect()->back()->with('success', "Website transferred to {$team->name} successfully!");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to transfer website: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Transfer website back to personal ownership
+     */
+    public function transferToPersonal(Request $request, Website $website): RedirectResponse
+    {
+        // Check if user has permission to transfer from team
+        if ($website->team_id) {
+            $team = $website->team;
+            $user = $request->user();
+
+            if (!$user->isMemberOf($team)) {
+                abort(403, 'You are not a member of this team.');
+            }
+
+            $userRole = $user->getRoleInTeam($team);
+            if (!in_array($userRole, ['OWNER', 'ADMIN'])) {
+                abort(403, 'You do not have permission to transfer team websites.');
+            }
+        } else {
+            $this->authorize('update', $website);
+        }
+
+        try {
+            $website->transferToPersonal();
+
+            return redirect()->back()->with('success', 'Website transferred to personal ownership successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to transfer website: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get available teams for website transfer
+     */
+    public function getTransferOptions(Request $request, Website $website): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $user = $request->user();
+
+        // Get teams where user can manage websites
+        $availableTeams = $user->teams()
+            ->whereIn('team_members.role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->get()
+            ->map(function ($team) {
+                return [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'description' => $team->description,
+                ];
+            });
+
+        return response()->json([
+            'teams' => $availableTeams,
+            'current_owner' => $website->team_id ? [
+                'type' => 'team',
+                'id' => $website->team_id,
+                'name' => $website->team->name,
+            ] : [
+                'type' => 'personal',
+                'id' => $website->user_id,
+                'name' => $website->user->name,
+            ],
+        ]);
+    }
+
+    /**
      * Calculate filter statistics for the filter bar
      */
     private function calculateFilterStatistics($websites): array

@@ -3,17 +3,8 @@ import { ref, computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
-import {
-  Shield,
-  BarChart3,
-  Settings,
-  AlertTriangle,
-  Monitor,
-  Clock,
-  Users,
-  HelpCircle,
-  ChevronDown
-} from 'lucide-vue-next'
+import { ChevronDown } from 'lucide-vue-next'
+import { mainMenuItems, bottomMenuItems, isActiveRoute } from '@/config/navigation'
 
 const themeStore = useThemeStore()
 
@@ -25,77 +16,8 @@ const shouldShowSubMenus = computed(() => {
   return true
 })
 
-// Navigation menu items - Clean, intuitive SSL monitoring workflow
-const menuItems = [
-  {
-    key: 'dashboard',
-    title: 'Dashboard',
-    icon: BarChart3,
-    href: '/dashboard',
-    description: 'SSL & Uptime overview'
-  },
-  {
-    key: 'websites',
-    title: 'Websites',
-    icon: Monitor,
-    href: '/ssl/websites',
-    description: 'Manage monitored sites'
-  },
-  {
-    key: 'certificates',
-    title: 'SSL Certificates',
-    icon: Shield,
-    children: [
-      { title: 'All Certificates', href: '/ssl/certificates' },
-      { title: 'Expiring Soon', href: '/ssl/certificates/expiring' },
-      { title: 'Issues & Alerts', href: '/ssl/certificates/issues' }
-    ]
-  },
-  {
-    key: 'uptime',
-    title: 'Uptime Monitoring',
-    icon: Clock,
-    children: [
-      { title: 'Status Overview', href: '/uptime/status' },
-      { title: 'Response Times', href: '/uptime/performance' },
-      { title: 'Incidents', href: '/uptime/incidents' }
-    ]
-  },
-  {
-    key: 'reports',
-    title: 'Reports',
-    icon: BarChart3,
-    children: [
-      { title: 'SSL Reports', href: '/reports/ssl' },
-      { title: 'Uptime Reports', href: '/reports/uptime' },
-      { title: 'Performance', href: '/reports/performance' }
-    ]
-  }
-]
-
-const bottomMenuItems = [
-  {
-    key: 'settings',
-    title: 'Settings',
-    icon: Settings,
-    href: '/settings',
-    description: 'Account & preferences'
-  },
-  {
-    key: 'help',
-    title: 'Help',
-    icon: HelpCircle,
-    href: '/help',
-    description: 'Documentation & support'
-  }
-]
-
 function toggleDropdown(key: string) {
   activeDropdown.value = activeDropdown.value === key ? '' : key
-}
-
-function isActiveRoute(href: string) {
-  return window.location.pathname === href
 }
 </script>
 
@@ -126,7 +48,7 @@ function isActiveRoute(href: string) {
         <ul class="relative space-y-0.5 p-4 py-0 font-semibold">
 
           <!-- Main menu items -->
-          <template v-for="item in menuItems" :key="item.key">
+          <template v-for="item in mainMenuItems" :key="item.key">
             <li class="menu nav-item">
               <!-- Direct link items -->
               <Link

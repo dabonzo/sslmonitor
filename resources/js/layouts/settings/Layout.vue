@@ -7,6 +7,7 @@ import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
 import { edit as editProfile } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
+// Note: team routes are managed by auto-generation, using direct URL
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 
@@ -22,6 +23,10 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Two-Factor Auth',
         href: show(),
+    },
+    {
+        title: 'Team',
+        href: '/settings/team',
     },
     {
         title: 'Appearance',

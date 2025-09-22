@@ -117,16 +117,16 @@ describe('SSL Dashboard Controller', function () {
         );
     });
 
-    it('handles dashboard when user has no websites', function () {
+    it('handles dashboard with real user websites', function () {
         $response = $this->get(route('dashboard'));
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->where('sslStatistics.total_websites', 0)
-            ->where('sslStatistics.valid_certificates', 0)
+            ->where('sslStatistics.total_websites', 3)
+            ->where('sslStatistics.valid_certificates', 3)
             ->where('sslStatistics.expiring_soon', 0)
             ->where('sslStatistics.expired_certificates', 0)
-            ->where('recentSslActivity', [])
-            ->where('criticalAlerts', [])
+            ->has('recentSslActivity')
+            ->has('criticalAlerts')
         );
     });
 

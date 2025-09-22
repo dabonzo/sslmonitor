@@ -7,11 +7,13 @@ use App\Models\Website;
 use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AlertConfigurationController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -53,10 +55,26 @@ class AlertConfigurationController extends Controller
             ];
         }
 
-        return Inertia::render('AlertConfigurations/Index', [
+        // Get all alert configurations for the user (flat list for test compatibility)
+        $alertConfigurations = AlertConfiguration::with('website')
+            ->where('user_id', $user->id)
+            ->orderBy('website_id')
+            ->orderBy('alert_type')
+            ->get();
+
+        return Inertia::render('Settings/Alerts', [
+            'alertConfigurations' => $alertConfigurations,
             'alertsByWebsite' => $alertsByWebsite,
             'websites' => $websites,
-            'availableChannels' => [
+            'defaultConfigurations' => AlertConfiguration::getDefaultConfigurations(),
+            'alertTypes' => [
+                AlertConfiguration::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
+                AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL => 'Let\'s Encrypt Renewal',
+                AlertConfiguration::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
+                AlertConfiguration::ALERT_UPTIME_DOWN => 'Website Down',
+                AlertConfiguration::ALERT_RESPONSE_TIME => 'Slow Response Time',
+            ],
+            'notificationChannels' => [
                 AlertConfiguration::CHANNEL_EMAIL => 'Email',
                 AlertConfiguration::CHANNEL_DASHBOARD => 'Dashboard',
                 AlertConfiguration::CHANNEL_SLACK => 'Slack (Coming Soon)',

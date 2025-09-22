@@ -19,6 +19,11 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     Route::post('websites/bulk-check', [App\Http\Controllers\WebsiteController::class, 'bulkCheck'])->name('websites.bulk-check');
     Route::get('websites/{website}/details', [App\Http\Controllers\WebsiteController::class, 'details'])->name('websites.details');
     Route::get('websites/{website}/certificate-analysis', [App\Http\Controllers\WebsiteController::class, 'certificateAnalysis'])->name('websites.certificate-analysis');
+
+    // Website transfer routes
+    Route::post('websites/{website}/transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'transferToTeam'])->name('websites.transfer-to-team');
+    Route::post('websites/{website}/transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'transferToPersonal'])->name('websites.transfer-to-personal');
+    Route::get('websites/{website}/transfer-options', [App\Http\Controllers\WebsiteController::class, 'getTransferOptions'])->name('websites.transfer-options');
 });
 
 // Alert Configuration Routes
@@ -26,6 +31,28 @@ Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->grou
     Route::get('/', [App\Http\Controllers\AlertConfigurationController::class, 'index'])->name('index');
     Route::put('/{alertConfiguration}', [App\Http\Controllers\AlertConfigurationController::class, 'update'])->name('update');
     Route::post('/{alertConfiguration}/test', [App\Http\Controllers\AlertConfigurationController::class, 'testAlert'])->name('test');
+});
+
+// Team Management Routes
+Route::middleware(['auth', 'verified'])->prefix('settings')->name('settings.')->group(function () {
+    Route::get('/team', [App\Http\Controllers\TeamController::class, 'index'])->name('team');
+    Route::post('/team', [App\Http\Controllers\TeamController::class, 'store'])->name('team.store');
+    Route::get('/team/{team}', [App\Http\Controllers\TeamController::class, 'show'])->name('team.show');
+    Route::put('/team/{team}', [App\Http\Controllers\TeamController::class, 'update'])->name('team.update');
+    Route::delete('/team/{team}', [App\Http\Controllers\TeamController::class, 'destroy'])->name('team.destroy');
+    Route::post('/team/{team}/invite', [App\Http\Controllers\TeamController::class, 'inviteMember'])->name('team.invite');
+    Route::delete('/team/{team}/members/{user}', [App\Http\Controllers\TeamController::class, 'removeMember'])->name('team.members.remove');
+    Route::patch('/team/{team}/members/{user}/role', [App\Http\Controllers\TeamController::class, 'updateMemberRole'])->name('team.members.role');
+    Route::delete('/team/{team}/invitations/{invitation}', [App\Http\Controllers\TeamController::class, 'cancelInvitation'])->name('team.invitations.cancel');
+    Route::post('/team/{team}/invitations/{invitation}/resend', [App\Http\Controllers\TeamController::class, 'resendInvitation'])->name('team.invitations.resend');
+});
+
+// Team invitation routes (public access)
+Route::prefix('team/invitations')->name('team.invitations.')->group(function () {
+    Route::get('/{token}', [App\Http\Controllers\TeamInvitationController::class, 'show'])->name('accept');
+    Route::post('/{token}/accept', [App\Http\Controllers\TeamInvitationController::class, 'accept'])->name('accept.existing');
+    Route::post('/{token}/register', [App\Http\Controllers\TeamInvitationController::class, 'acceptWithRegistration'])->name('accept.new');
+    Route::post('/{token}/decline', [App\Http\Controllers\TeamInvitationController::class, 'decline'])->name('decline');
 });
 
 require __DIR__.'/settings.php';

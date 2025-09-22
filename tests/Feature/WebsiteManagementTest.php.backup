@@ -1,0 +1,534 @@
+<?php
+
+use App\Models\User;
+use App\Models\Website;
+use App\Models\AlertConfiguration;
+use Spatie\UptimeMonitor\Models\Monitor;
+
+// Website List/Index Tests
+test('user can view their websites list', function () {
+    $user = $this->testUser;
+
+    $response = $this->actingAs($user)->get('/ssl/websites');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Ssl/Websites/Index')
+        ->where('websites.meta.total', 3)
+        ->has('filters')
+        ->has('filterStats')
+        ->has('current_filter')
+        ->has('current_team_filter')
+    );
+});
+
+test('website list shows only user websites', function () {
+    $user = $this->testUser;
+
+    // Create another user with their own websites to test isolation
+    $otherUser = User::factory()->create();
+    Website::factory()->count(2)->create(['user_id' => $otherUser->id]);
+
+    $response = $this->actingAs($user)->get('/ssl/websites');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('websites.meta.total', 3) // Our real user should only see their 3 websites
+    );
+});
+
+test('website list includes ssl and uptime status', function () {
+    $user = $this->testUser;
+
+    $response = $this->actingAs($user)->get('/ssl/websites');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->has('websites.data.0.ssl_status')
+        ->has('websites.data.0.uptime_status')
+        ->where('websites.data.0.ssl_status', 'valid')
+        ->where('websites.data.0.uptime_status', 'up')
+    );
+});
+
+test('website list can be filtered', function () {
+    $user = $this->testUser;
+
+    // Test filtering functionality with real data (all our real websites are valid)
+    $response = $this->actingAs($user)
+        ->get('/ssl/websites?filter=all');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('websites.meta.total', 3)
+        ->has('filterStats')
+        ->has('current_filter')
+    );
+});
+
+// Website Creation Tests
+test('user can create a new website', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites', [
+            'name' => 'Test Website',
+            'url' => 'https://example.com',
+            'ssl_monitoring_enabled' => true,
+            'uptime_monitoring_enabled' => false,
+        ]);
+
+    $response->assertRedirect('/ssl/websites');
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('websites', [
+        'name' => 'Test Website',
+        'url' => 'https://example.com',
+        'user_id' => $user->id,
+        'ssl_monitoring_enabled' => true,
+        'uptime_monitoring_enabled' => false,
+    ]);
+});
+
+test('website creation normalizes url', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites', [
+            'name' => 'Test Website',
+            'url' => 'example.com/', // Should be normalized
+            'ssl_monitoring_enabled' => true,
+        ]);
+
+    $response->assertRedirect('/ssl/websites');
+
+    $website = Website::where('user_id', $user->id)->first();
+    expect($website->url)->toBe('https://example.com');
+});
+
+test('website creation validates required fields', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites', [
+            'name' => '',
+            'url' => '',
+        ]);
+
+    $response->assertSessionHasErrors(['name', 'url']);
+});
+
+test('website creation validates url format', function () {
+    $user = $this->testUser;
+
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites', [
+            'name' => 'Test Website',
+            'url' => 'invalid://not..a..valid..url..with..dots',
+        ]);
+
+    $response->assertSessionHasErrors(['url']);
+});
+
+test('user cannot create duplicate websites', function () {
+    $user = User::factory()->create();
+
+    // Create first website
+    Website::factory()->create([
+        'user_id' => $user->id,
+        'url' => 'https://example.com',
+    ]);
+
+    // Try to create duplicate
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites', [
+            'name' => 'Duplicate Website',
+            'url' => 'https://example.com',
+        ]);
+
+    $response->assertSessionHasErrors(['url']);
+});
+
+// Website Update Tests
+test('user can update their website', function () {
+    $user = $this->testUser;
+    $website = $this->realWebsites->first();
+
+    $originalName = $website->name;
+    $originalUrl = $website->url;
+
+    $response = $this->actingAs($user)
+        ->put("/ssl/websites/{$website->id}", [
+            'name' => 'Updated Website Name',
+            'url' => $originalUrl, // Keep the same URL to avoid Monitor conflicts
+            'ssl_monitoring_enabled' => false,
+            'uptime_monitoring_enabled' => true,
+        ]);
+
+    $response->assertRedirect("/ssl/websites/{$website->id}");
+    $response->assertSessionHas('success');
+
+    $website->refresh();
+    expect($website->name)->toBe('Updated Website Name');
+    expect($website->ssl_monitoring_enabled)->toBeFalse();
+    expect($website->uptime_monitoring_enabled)->toBeTrue();
+
+    // Restore original name for other tests
+    $website->update(['name' => $originalName]);
+});
+
+test('user cannot update other users websites', function () {
+    $user = $this->testUser;
+    $otherUser = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+
+    $response = $this->actingAs($user)
+        ->put("/ssl/websites/{$website->id}", [
+            'name' => 'Hacked Website',
+        ]);
+
+    $response->assertForbidden();
+});
+
+// Website Deletion Tests
+test('user can delete their website', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)
+        ->delete("/ssl/websites/{$website->id}");
+
+    $response->assertRedirect('/ssl/websites');
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('websites', [
+        'id' => $website->id,
+    ]);
+});
+
+test('user cannot delete other users websites', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($user1)
+        ->delete("/ssl/websites/{$website->id}");
+
+    $response->assertForbidden();
+});
+
+test('deleting website also deletes related alert configurations', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    // Create alert configurations for the website
+    AlertConfiguration::factory()->count(2)->create([
+        'user_id' => $user->id,
+        'website_id' => $website->id,
+    ]);
+
+    expect(AlertConfiguration::where('website_id', $website->id)->count())->toBe(2);
+
+    $this->actingAs($user)->delete("/ssl/websites/{$website->id}");
+
+    expect(AlertConfiguration::where('website_id', $website->id)->count())->toBe(0);
+});
+
+// Bulk Operations Tests
+test('user can bulk delete websites', function () {
+    $user = User::factory()->create();
+    $websites = Website::factory()->count(3)->create(['user_id' => $user->id]);
+
+    $websiteIds = $websites->pluck('id')->toArray();
+
+    $response = $this->actingAs($user)
+        ->delete('/ssl/websites/bulk-destroy', [
+            'website_ids' => $websiteIds,
+        ]);
+
+    $response->assertRedirect('/ssl/websites');
+    $response->assertSessionHas('success');
+
+    foreach ($websiteIds as $id) {
+        $this->assertDatabaseMissing('websites', ['id' => $id]);
+    }
+});
+
+test('user cannot bulk delete other users websites', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+
+    $user1Website = Website::factory()->create(['user_id' => $user1->id]);
+    $user2Website = Website::factory()->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($user1)
+        ->delete('/ssl/websites/bulk-destroy', [
+            'website_ids' => [$user1Website->id, $user2Website->id],
+        ]);
+
+    // Should only delete user1's website
+    $this->assertDatabaseMissing('websites', ['id' => $user1Website->id]);
+    $this->assertDatabaseHas('websites', ['id' => $user2Website->id]);
+});
+
+test('user can bulk check websites', function () {
+    $user = User::factory()->create();
+    $websites = Website::factory()->count(2)->create(['user_id' => $user->id]);
+
+    $websiteIds = $websites->pluck('id')->toArray();
+
+    $response = $this->actingAs($user)
+        ->post('/ssl/websites/bulk-check', [
+            'website_ids' => $websiteIds,
+        ]);
+
+    $response->assertSuccessful();
+    $response->assertJson(['success' => true]);
+});
+
+// Manual Check Tests
+test('user can manually check a website', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)
+        ->post("/ssl/websites/{$website->id}/check");
+
+    $response->assertSuccessful();
+    $response->assertJson(['success' => true]);
+});
+
+test('user cannot manually check other users websites', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($user1)
+        ->post("/ssl/websites/{$website->id}/check");
+
+    $response->assertForbidden();
+});
+
+// Website Details Tests
+test('user can view website details', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    // Create Spatie monitor
+    Monitor::updateOrCreate(
+        ['url' => $website->url,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'uptime_check_enabled' => true,
+        'uptime_status' => 'up',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get("/ssl/websites/{$website->id}/details");
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Ssl/Websites/Details')
+        ->has('website')
+        ->has('sslData')
+        ->has('uptimeData')
+    );
+});
+
+test('user cannot view other users website details', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($user1)
+        ->get("/ssl/websites/{$website->id}/details");
+
+    $response->assertForbidden();
+});
+
+// Certificate Analysis Tests
+test('user can view certificate analysis', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)
+        ->get("/ssl/websites/{$website->id}/certificate-analysis");
+
+    $response->assertSuccessful();
+    $response->assertJson([
+        'certificate_info' => [],
+        'security_analysis' => [],
+        'recommendations' => [],
+        'lets_encrypt_info' => [],
+    ]);
+});
+
+test('user cannot view other users certificate analysis', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user2->id]);
+
+    $response = $this->actingAs($user1)
+        ->get("/ssl/websites/{$website->id}/certificate-analysis");
+
+    $response->assertForbidden();
+});
+
+// Website Model Tests
+test('website model has correct relationships', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    expect($website->user)->toBeInstanceOf(User::class);
+    expect($website->user->id)->toBe($user->id);
+});
+
+test('website model url normalization works', function () {
+    $user = User::factory()->create();
+
+    $testCases = [
+        'example.com' => 'https://example.com',
+        'http://example.com' => 'https://example.com',
+        'https://example.com/' => 'https://example.com',
+        'EXAMPLE.COM' => 'https://example.com',
+    ];
+
+    foreach ($testCases as $input => $expected) {
+        $website = Website::factory()->make([
+            'user_id' => $user->id,
+            'url' => $input,
+        ]);
+
+        expect($website->url)->toBe($expected);
+    }
+});
+
+test('website model ssl and uptime status methods work', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    // Without monitor
+    expect($website->getCurrentSslStatus())->toBe('not yet checked');
+    expect($website->getCurrentUptimeStatus())->toBe('not yet checked');
+
+    // With monitor
+    Monitor::updateOrCreate(
+        ['url' => $website->url,
+        'certificate_status' => 'valid',
+        'uptime_status' => 'up',
+    ]);
+
+    expect($website->getCurrentSslStatus())->toBe('valid');
+    expect($website->getCurrentUptimeStatus())->toBe('up');
+});
+
+test('website model monitoring enabled methods work', function () {
+    $user = User::factory()->create();
+
+    $website = Website::factory()->create([
+        'user_id' => $user->id,
+        'ssl_monitoring_enabled' => true,
+        'uptime_monitoring_enabled' => false,
+    ]);
+
+    expect($website->isSslMonitoringEnabled())->toBeTrue();
+    expect($website->isUptimeMonitoringEnabled())->toBeFalse();
+});
+
+// Search and Filter Tests
+test('website list can be searched by name', function () {
+    $user = User::factory()->create();
+
+    Website::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Test Website',
+    ]);
+
+    Website::factory()->create([
+        'user_id' => $user->id,
+        'name' => 'Another Site',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get('/ssl/websites?search=Test');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('websites', fn ($websites) => count($websites) === 1)
+        ->where('websites.0.name', 'Test Website')
+    );
+});
+
+test('website list can be searched by url', function () {
+    $user = User::factory()->create();
+
+    Website::factory()->create([
+        'user_id' => $user->id,
+        'url' => 'https://example.com',
+    ]);
+
+    Website::factory()->create([
+        'user_id' => $user->id,
+        'url' => 'https://test.com',
+    ]);
+
+    $response = $this->actingAs($user)
+        ->get('/ssl/websites?search=example');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('websites', fn ($websites) => count($websites) === 1)
+        ->where('websites.0.url', 'https://example.com')
+    );
+});
+
+// Statistics and Urgency Tests
+test('website urgency levels are calculated correctly', function () {
+    $user = User::factory()->create();
+    $website = Website::factory()->create(['user_id' => $user->id]);
+
+    // Create monitor with certificate expiring in 2 days (critical)
+    Monitor::updateOrCreate(
+        ['url' => $website->url,
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'certificate_expiration_date' => now()->addDays(2),
+        'certificate_issuer' => "Let's Encrypt Authority X3",
+    ]);
+
+    $response = $this->actingAs($user)->get('/ssl/websites');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('websites.0.urgency_level', 'critical')
+        ->where('websites.0.days_remaining', 2)
+    );
+});
+
+test('website list shows correct statistics', function () {
+    $user = User::factory()->create();
+    $websites = Website::factory()->count(5)->create(['user_id' => $user->id]);
+
+    // Create monitors with different statuses
+    foreach ($websites as $index => $website) {
+        Monitor::updateOrCreate(
+            ['url' => $website->url],
+            [
+                'certificate_status' => $index < 3 ? 'valid' : 'invalid',
+                'uptime_status' => $index < 4 ? 'up' : 'down',
+            ]
+        );
+    }
+
+    $response = $this->actingAs($user)->get('/ssl/websites');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->has('statistics')
+        ->where('statistics.total', 5)
+        ->where('statistics.ssl_valid', 3)
+        ->where('statistics.ssl_issues', 2)
+        ->where('statistics.uptime_up', 4)
+        ->where('statistics.uptime_down', 1)
+    );
+});

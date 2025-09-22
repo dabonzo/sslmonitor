@@ -13,6 +13,7 @@ class AlertConfiguration extends Model
     protected $fillable = [
         'user_id',
         'website_id',
+        'team_id',
         'alert_type',
         'enabled',
         'threshold_days',
@@ -59,6 +60,11 @@ class AlertConfiguration extends Model
         return $this->belongsTo(Website::class);
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
     public static function getDefaultConfigurations(): array
     {
         return [
@@ -93,6 +99,7 @@ class AlertConfiguration extends Model
             [
                 'alert_type' => self::ALERT_RESPONSE_TIME,
                 'enabled' => true,
+                'threshold_days' => null,
                 'threshold_response_time' => 5000, // 5 seconds
                 'alert_level' => self::LEVEL_WARNING,
                 'notification_channels' => [self::CHANNEL_DASHBOARD],
@@ -106,8 +113,8 @@ class AlertConfiguration extends Model
             return false;
         }
 
-        // Cooldown check - don't spam alerts (1 hour minimum)
-        if ($this->last_triggered_at && $this->last_triggered_at->diffInMinutes(now()) < 60) {
+        // Cooldown check - don't spam alerts (24 hour minimum)
+        if ($this->last_triggered_at && $this->last_triggered_at->diffInHours(now()) < 24) {
             return false;
         }
 

@@ -1,0 +1,15 @@
+Error accessing Mailpit: Call to undefined method [seeInSource].
+#0 /var/www/html/tests/Browser/TeamNavigationTest.php(102): Laravel\Dusk\Browser->__call()
+#1 /var/www/html/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php(70): Tests\Browser\TeamNavigationTest->{closure:Tests\Browser\TeamNavigationTest::test_team_invitation_sends_email_to_mailpit():68}()
+#2 /var/www/html/tests/Browser/TeamNavigationTest.php(68): Laravel\Dusk\TestCase->browse()
+#3 /var/www/html/vendor/phpunit/phpunit/src/Framework/TestCase.php(1316): Tests\Browser\TeamNavigationTest->test_team_invitation_sends_email_to_mailpit()
+#4 /var/www/html/vendor/phpunit/phpunit/src/Framework/TestCase.php(516): PHPUnit\Framework\TestCase->runTest()
+#5 /var/www/html/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(99): PHPUnit\Framework\TestCase->runBare()
+#6 /var/www/html/vendor/phpunit/phpunit/src/Framework/TestCase.php(357): PHPUnit\Framework\TestRunner->run()
+#7 /var/www/html/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit\Framework\TestCase->run()
+#8 /var/www/html/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit\Framework\TestSuite->run()
+#9 /var/www/html/vendor/phpunit/phpunit/src/TextUI/Application.php(229): PHPUnit\TextUI\TestRunner->run()
+#10 /var/www/html/vendor/pestphp/pest/src/Kernel.php(103): PHPUnit\TextUI\Application->run()
+#11 /var/www/html/vendor/pestphp/pest/bin/pest(184): Pest\Kernel->handle()
+#12 /var/www/html/vendor/pestphp/pest/bin/pest(192): {closure:/var/www/html/vendor/pestphp/pest/bin/pest:18}()
+#13 {main}

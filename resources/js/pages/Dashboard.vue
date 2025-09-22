@@ -11,7 +11,11 @@ import {
   TrendingUp,
   TrendingDown,
   Wifi,
-  Activity
+  Activity,
+  Zap,
+  Globe,
+  BarChart3,
+  Eye
 } from 'lucide-vue-next';
 
 // Define TypeScript interfaces for SSL and Uptime data
@@ -72,8 +76,10 @@ const stats = computed(() => [
     value: props.sslStatistics.total_websites.toString(),
     change: `${props.sslStatistics.total_websites} monitored`,
     trend: 'up',
-    icon: Shield,
-    color: 'text-blue-600'
+    icon: Globe,
+    color: 'text-white',
+    bgGradient: 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700',
+    iconBg: 'bg-white/20 backdrop-blur-sm'
   },
   {
     title: 'SSL Certificates',
@@ -82,16 +88,20 @@ const stats = computed(() => [
       ? `${Math.round((props.sslStatistics.valid_certificates / props.sslStatistics.total_websites) * 100)}% valid`
       : '0% valid',
     trend: 'up',
-    icon: CheckCircle,
-    color: 'text-green-600'
+    icon: Shield,
+    color: 'text-white',
+    bgGradient: 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700',
+    iconBg: 'bg-white/20 backdrop-blur-sm'
   },
   {
     title: 'Uptime Status',
     value: props.uptimeStatistics.uptime_percentage.toString() + '%',
     change: `${props.uptimeStatistics.healthy_monitors}/${props.uptimeStatistics.total_monitors} healthy`,
     trend: props.uptimeStatistics.uptime_percentage >= 95 ? 'up' : 'down',
-    icon: Wifi,
-    color: 'text-emerald-600'
+    icon: Zap,
+    color: 'text-white',
+    bgGradient: 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600',
+    iconBg: 'bg-white/20 backdrop-blur-sm'
   },
   {
     title: 'Response Time',
@@ -102,8 +112,10 @@ const stats = computed(() => [
       ? (props.uptimeStatistics.avg_response_time < 1000 ? 'Fast' : 'Slow')
       : 'No data',
     trend: props.uptimeStatistics.avg_response_time < 1000 ? 'up' : 'down',
-    icon: Activity,
-    color: 'text-purple-600'
+    icon: BarChart3,
+    color: 'text-white',
+    bgGradient: 'bg-gradient-to-br from-purple-500 via-violet-600 to-indigo-700',
+    iconBg: 'bg-white/20 backdrop-blur-sm'
   }
 ]);
 
@@ -141,32 +153,34 @@ const criticalAlerts = computed(() => props.criticalAlerts);
     <Head title="Dashboard" />
 
     <DashboardLayout title="Dashboard">
-        <!-- Stats Cards -->
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Modern Stats Cards -->
+        <div class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div
                 v-for="stat in stats"
                 :key="stat.title"
-                class="rounded-lg bg-card text-card-foreground p-6 shadow-sm"
+                :class="stat.bgGradient"
+                class="group relative overflow-hidden rounded-2xl p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer"
             >
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-muted-foreground">
+                <!-- Subtle animated background pattern -->
+                <div class="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors duration-300"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+
+                <div class="relative flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="text-white/80 text-sm font-medium mb-2">
                             {{ stat.title }}
                         </p>
-                        <p class="text-2xl font-bold text-foreground">
+                        <p class="text-white text-3xl font-bold mb-1 tracking-tight">
                             {{ stat.value }}
                         </p>
-                        <p class="flex items-center text-sm" :class="{
-                            'text-green-600': stat.trend === 'up',
-                            'text-red-600': stat.trend === 'down'
-                        }">
-                            <TrendingUp v-if="stat.trend === 'up'" class="mr-1 h-4 w-4" />
-                            <TrendingDown v-else class="mr-1 h-4 w-4" />
+                        <p class="flex items-center text-white/90 text-sm font-medium">
+                            <TrendingUp v-if="stat.trend === 'up'" class="mr-1.5 h-4 w-4" />
+                            <TrendingDown v-else class="mr-1.5 h-4 w-4" />
                             {{ stat.change }}
                         </p>
                     </div>
-                    <div class="rounded-lg bg-muted p-3">
-                        <component :is="stat.icon" class="h-6 w-6" :class="stat.color" />
+                    <div :class="stat.iconBg" class="rounded-xl p-3 group-hover:scale-110 transition-transform duration-300">
+                        <component :is="stat.icon" class="h-7 w-7 text-white drop-shadow-sm" />
                     </div>
                 </div>
             </div>
@@ -176,93 +190,108 @@ const criticalAlerts = computed(() => props.criticalAlerts);
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
             <!-- SSL & Uptime Status Chart -->
-            <div class="lg:col-span-2 rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-                <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-foreground">
-                        SSL & Uptime Monitoring Overview
-                    </h3>
-                    <button class="text-sm text-primary hover:text-primary/80">
+            <div class="lg:col-span-2 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 p-2.5">
+                            <Activity class="h-6 w-6 text-white" />
+                        </div>
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                            SSL & Uptime Monitoring Overview
+                        </h3>
+                    </div>
+                    <button class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
                         View All
                     </button>
                 </div>
 
                 <!-- Enhanced status grid -->
-                <div class="grid grid-cols-2 gap-4 h-64">
+                <div class="grid grid-cols-2 gap-6 h-80">
                     <!-- SSL Status -->
-                    <div class="rounded-lg bg-muted p-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-medium text-foreground">SSL Certificates</h4>
-                            <Shield class="h-5 w-5 text-blue-500" />
+                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900/30 dark:via-green-900/30 dark:to-teal-900/30 p-6 border border-emerald-100 dark:border-emerald-800 hover:shadow-lg transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+
+                        <div class="relative flex items-center justify-between mb-6">
+                            <h4 class="text-lg font-bold text-emerald-900 dark:text-emerald-100">SSL Certificates</h4>
+                            <div class="rounded-xl bg-emerald-500/10 p-3 group-hover:scale-110 transition-transform duration-300">
+                                <Shield class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                            </div>
                         </div>
-                        <div class="space-y-3">
+
+                        <div class="relative space-y-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Valid</span>
+                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Valid</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-green-500 h-2 rounded-full"
+                                    <div class="w-16 bg-emerald-200 dark:bg-emerald-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-emerald-500 to-green-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.valid_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.sslStatistics.valid_certificates }}</span>
+                                    <span class="text-sm font-bold text-emerald-900 dark:text-emerald-100 min-w-[2rem]">{{ props.sslStatistics.valid_certificates }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Expiring</span>
+                                <span class="text-sm font-medium text-amber-700 dark:text-amber-300">Expiring</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-yellow-500 h-2 rounded-full"
+                                    <div class="w-16 bg-amber-200 dark:bg-amber-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expiring_soon / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.sslStatistics.expiring_soon }}</span>
+                                    <span class="text-sm font-bold text-amber-900 dark:text-amber-100 min-w-[2rem]">{{ props.sslStatistics.expiring_soon }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Expired</span>
+                                <span class="text-sm font-medium text-red-700 dark:text-red-300">Expired</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-red-500 h-2 rounded-full"
+                                    <div class="w-16 bg-red-200 dark:bg-red-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-red-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expired_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.sslStatistics.expired_certificates }}</span>
+                                    <span class="text-sm font-bold text-red-900 dark:text-red-100 min-w-[2rem]">{{ props.sslStatistics.expired_certificates }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Uptime Status -->
-                    <div class="rounded-lg bg-muted p-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-medium text-foreground">Uptime Monitors</h4>
-                            <Wifi class="h-5 w-5 text-emerald-500" />
+                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30 p-6 border border-blue-100 dark:border-blue-800 hover:shadow-lg transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+
+                        <div class="relative flex items-center justify-between mb-6">
+                            <h4 class="text-lg font-bold text-blue-900 dark:text-blue-100">Uptime Monitors</h4>
+                            <div class="rounded-xl bg-blue-500/10 p-3 group-hover:scale-110 transition-transform duration-300">
+                                <Wifi class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
                         </div>
-                        <div class="space-y-3">
+
+                        <div class="relative space-y-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Healthy</span>
+                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Healthy</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-green-500 h-2 rounded-full"
+                                    <div class="w-16 bg-emerald-200 dark:bg-emerald-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-emerald-500 to-green-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.healthy_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.uptimeStatistics.healthy_monitors }}</span>
+                                    <span class="text-sm font-bold text-emerald-900 dark:text-emerald-100 min-w-[2rem]">{{ props.uptimeStatistics.healthy_monitors }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Down</span>
+                                <span class="text-sm font-medium text-red-700 dark:text-red-300">Down</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-red-500 h-2 rounded-full"
+                                    <div class="w-16 bg-red-200 dark:bg-red-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-red-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.down_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.uptimeStatistics.down_monitors }}</span>
+                                    <span class="text-sm font-bold text-red-900 dark:text-red-100 min-w-[2rem]">{{ props.uptimeStatistics.down_monitors }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-muted-foreground">Uptime</span>
+                                <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Uptime</span>
                                 <div class="flex items-center">
-                                    <div class="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-emerald-500 h-2 rounded-full"
+                                    <div class="w-16 bg-blue-200 dark:bg-blue-800 rounded-full h-2.5 mr-3">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.uptime_percentage}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-medium">{{ props.uptimeStatistics.uptime_percentage }}%</span>
+                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-100 min-w-[2rem]">{{ props.uptimeStatistics.uptime_percentage }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -271,12 +300,17 @@ const criticalAlerts = computed(() => props.criticalAlerts);
             </div>
 
             <!-- Recent Activity -->
-            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-                <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-foreground">
-                        Recent Activity
-                    </h3>
-                    <button class="text-sm text-primary hover:text-primary/80">
+            <div class="rounded-2xl bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50 dark:from-violet-900/30 dark:via-purple-900/30 dark:to-indigo-900/30 p-6 shadow-xl border border-violet-100 dark:border-violet-800">
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 p-2.5">
+                            <Clock class="h-6 w-6 text-white" />
+                        </div>
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                            Recent Activity
+                        </h3>
+                    </div>
+                    <button class="text-sm font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20">
                         View All
                     </button>
                 </div>
@@ -285,30 +319,33 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                     <div
                         v-for="activity in recentActivity"
                         :key="activity.title + activity.time"
-                        class="flex items-start space-x-3"
+                        class="group flex items-start space-x-4 p-3 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 border border-white/60 dark:border-white/10"
                     >
-                        <div class="flex items-center mt-1">
+                        <div class="flex items-center mt-1 space-x-2">
                             <div
-                                class="h-2 w-2 rounded-full"
+                                class="h-3 w-3 rounded-full shadow-sm"
                                 :class="{
-                                    'bg-green-400': activity.type === 'success',
-                                    'bg-red-400': activity.type === 'error',
-                                    'bg-yellow-400': activity.type === 'warning'
+                                    'bg-gradient-to-r from-emerald-400 to-green-500 shadow-emerald-200': activity.type === 'success',
+                                    'bg-gradient-to-r from-red-400 to-pink-500 shadow-red-200': activity.type === 'error',
+                                    'bg-gradient-to-r from-amber-400 to-orange-500 shadow-amber-200': activity.type === 'warning'
                                 }"
                             />
-                            <div class="ml-2">
-                                <Shield v-if="activity.category === 'ssl'" class="h-3 w-3 text-blue-500" />
-                                <Wifi v-else class="h-3 w-3 text-emerald-500" />
+                            <div class="rounded-lg p-1.5" :class="{
+                                'bg-emerald-100 dark:bg-emerald-900/30': activity.category === 'ssl',
+                                'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
+                            }">
+                                <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-foreground">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-900 dark:group-hover:text-purple-100 transition-colors">
                                 {{ activity.title }}
                             </p>
-                            <p class="text-sm text-muted-foreground">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate">
                                 {{ activity.description }}
                             </p>
-                            <p class="text-xs text-muted-foreground/80">
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
                                 {{ activity.time }}
                             </p>
                         </div>
@@ -321,35 +358,44 @@ const criticalAlerts = computed(() => props.criticalAlerts);
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
             <!-- Critical Alerts -->
-            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-                <h3 class="mb-4 text-lg font-semibold text-foreground">
-                    Critical Alerts
-                </h3>
+            <div class="rounded-2xl bg-gradient-to-br from-rose-50 via-red-50 to-pink-50 dark:from-rose-900/30 dark:via-red-900/30 dark:to-pink-900/30 p-6 shadow-xl border border-rose-100 dark:border-rose-800">
+                <div class="mb-6 flex items-center space-x-3">
+                    <div class="rounded-xl bg-gradient-to-br from-red-500 to-pink-600 p-2.5">
+                        <AlertTriangle class="h-6 w-6 text-white" />
+                    </div>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        Critical Alerts
+                    </h3>
+                </div>
 
-                <div class="space-y-3">
+                <div class="space-y-4">
                     <div
                         v-if="criticalAlerts.length === 0"
-                        class="text-center text-muted-foreground py-4"
+                        class="text-center py-8"
                     >
-                        <CheckCircle class="h-8 w-8 mx-auto mb-2 text-green-500" />
-                        <p>No critical SSL alerts</p>
-                        <p class="text-xs">All certificates are healthy</p>
+                        <div class="rounded-2xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 p-6 inline-block">
+                            <CheckCircle class="h-12 w-12 mx-auto mb-3 text-emerald-600 dark:text-emerald-400" />
+                            <p class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">No critical SSL alerts</p>
+                            <p class="text-sm text-emerald-700 dark:text-emerald-300 mt-1">All certificates are healthy</p>
+                        </div>
                     </div>
 
                     <div
                         v-for="alert in criticalAlerts"
                         :key="alert.website_name"
-                        class="flex items-center space-x-3 rounded-lg bg-red-50 p-3 dark:bg-red-900/20"
+                        class="group flex items-start space-x-4 rounded-xl bg-gradient-to-r from-red-100 via-rose-100 to-pink-100 dark:from-red-900/40 dark:via-rose-900/40 dark:to-pink-900/40 p-4 border border-red-200 dark:border-red-700 hover:shadow-lg transition-all duration-300"
                     >
-                        <AlertTriangle class="h-5 w-5 text-red-600" />
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-red-800 dark:text-red-200">
+                        <div class="rounded-lg bg-red-500/10 p-2">
+                            <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-red-900 dark:text-red-100">
                                 {{ alert.type === 'ssl_expired' ? 'Certificate Expired' : 'SSL Alert' }}
                             </p>
-                            <p class="text-sm text-red-600 dark:text-red-300">
+                            <p class="text-sm text-red-700 dark:text-red-300 mt-1">
                                 {{ alert.message }}
                             </p>
-                            <p class="text-xs text-red-500 dark:text-red-400">
+                            <p class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
                                 Expired: {{ new Date(alert.expires_at).toLocaleDateString() }}
                             </p>
                         </div>
@@ -358,36 +404,61 @@ const criticalAlerts = computed(() => props.criticalAlerts);
             </div>
 
             <!-- Quick Actions -->
-            <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-                <h3 class="mb-4 text-lg font-semibold text-foreground">
-                    Quick Actions
-                </h3>
+            <div class="rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+                <div class="mb-6 flex items-center space-x-3">
+                    <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
+                        <Zap class="h-6 w-6 text-white" />
+                    </div>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        Quick Actions
+                    </h3>
+                </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <Link
                         :href="ssl.websites.create().url"
-                        class="rounded-lg border border-border p-3 text-center hover:bg-muted transition-colors"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 p-4 text-center hover:from-blue-100 hover:to-indigo-200 dark:hover:from-blue-900/50 dark:hover:to-indigo-900/50 transition-all duration-300 border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:scale-[1.02]"
                     >
-                        <Shield class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-foreground">Add Website</p>
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-blue-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Shield class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <p class="text-sm font-bold text-blue-900 dark:text-blue-100">Add Website</p>
+                        </div>
                     </Link>
 
                     <Link
                         :href="ssl.websites.index().url"
-                        class="rounded-lg border border-border p-3 text-center hover:bg-muted transition-colors"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 p-4 text-center hover:from-emerald-100 hover:to-green-200 dark:hover:from-emerald-900/50 dark:hover:to-green-900/50 transition-all duration-300 border border-emerald-200 dark:border-emerald-800 hover:shadow-lg hover:scale-[1.02]"
                     >
-                        <Wifi class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-foreground">View Websites</p>
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-emerald-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Eye class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <p class="text-sm font-bold text-emerald-900 dark:text-emerald-100">View Websites</p>
+                        </div>
                     </Link>
 
-                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted transition-colors">
-                        <TrendingUp class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-foreground">View Reports</p>
+                    <button class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 p-4 text-center hover:from-purple-100 hover:to-violet-200 dark:hover:from-purple-900/50 dark:hover:to-violet-900/50 transition-all duration-300 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-[1.02]">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-purple-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <BarChart3 class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <p class="text-sm font-bold text-purple-900 dark:text-purple-100">View Reports</p>
+                        </div>
                     </button>
 
-                    <button class="rounded-lg border border-border p-3 text-center hover:bg-muted transition-colors">
-                        <AlertTriangle class="mx-auto h-6 w-6 text-primary" />
-                        <p class="mt-1 text-sm font-medium text-foreground">Alert Rules</p>
+                    <button class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 p-4 text-center hover:from-orange-100 hover:to-amber-200 dark:hover:from-orange-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-[1.02]">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-orange-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-orange-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <AlertTriangle class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <p class="text-sm font-bold text-orange-900 dark:text-orange-100">Alert Rules</p>
+                        </div>
                     </button>
                 </div>
             </div>
