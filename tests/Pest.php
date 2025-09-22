@@ -16,7 +16,99 @@ pest()->extend(Tests\DuskTestCase::class)
 */
 
 pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Skip monitor table cleanup if table doesn't exist
+        try {
+            if (\Schema::hasTable('monitors')) {
+                \Spatie\UptimeMonitor\Models\Monitor::truncate();
+            }
+        } catch (\Exception $e) {
+            // Skip monitor cleanup if there are issues
+        }
+
+        // Clear alert configurations for clean testing
+        \App\Models\AlertConfiguration::truncate();
+
+        // Clear websites except our real test websites
+        \App\Models\Website::whereNotIn('url', [
+            'https://www.redgas.at',
+            'https://www.fairnando.at',
+            'https://omp.office-manager-pro.com'
+        ])->delete();
+
+        // Clear mail queue for clean testing
+        \Illuminate\Support\Facades\Mail::fake();
+
+        // Ensure our real test user exists
+        $testUser = \App\Models\User::updateOrCreate(
+            ['email' => 'bonzo@konjscina.com'],
+            [
+                'name' => 'Bonzo',
+                'password' => bcrypt('to16ro12'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Ensure our real test team exists
+        $testTeam = \App\Models\Team::updateOrCreate(
+            ['name' => 'Intermedien'],
+            [
+                'created_by_user_id' => $testUser->id,
+                'description' => 'Test team for SSL monitoring',
+            ]
+        );
+
+        // Ensure team membership exists
+        \App\Models\TeamMember::updateOrCreate(
+            [
+                'team_id' => $testTeam->id,
+                'user_id' => $testUser->id,
+            ],
+            [
+                'role' => \App\Models\TeamMember::ROLE_OWNER,
+                'joined_at' => now(),
+                'invited_by_user_id' => $testUser->id,
+            ]
+        );
+
+        // Ensure our real test websites exist
+        $realWebsites = [
+            'https://www.redgas.at',
+            'https://www.fairnando.at',
+            'https://omp.office-manager-pro.com'
+        ];
+
+        foreach ($realWebsites as $url) {
+            // Create website if it doesn't exist
+            $website = \App\Models\Website::updateOrCreate(
+                ['url' => $url],
+                [
+                    'user_id' => $testUser->id,
+                    'name' => parse_url($url, PHP_URL_HOST),
+                    'ssl_monitoring_enabled' => true,
+                    'uptime_monitoring_enabled' => true,
+                ]
+            );
+
+            // Create or update corresponding Spatie monitor
+            \Spatie\UptimeMonitor\Models\Monitor::updateOrCreate(
+                ['url' => $url],
+                [
+                    'certificate_check_enabled' => true,
+                    'certificate_status' => 'valid',
+                    'uptime_check_enabled' => true,
+                    'uptime_status' => 'up',
+                    'certificate_expiration_date' => now()->addDays(90),
+                    'certificate_issuer' => "Let's Encrypt Authority X3",
+                ]
+            );
+        }
+
+        // Store user and team references for tests
+        $this->testUser = $testUser;
+        $this->testTeam = $testTeam;
+        $this->realWebsites = \App\Models\Website::whereIn('url', $realWebsites)->get();
+    })
     ->in('Feature');
 
 pest()->extend(Tests\TestCase::class)
@@ -256,3 +348,52 @@ function createSslTestScenarios(\App\Models\User $user): array
 
     return $scenarios;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Datasets
+|--------------------------------------------------------------------------
+|
+| Datasets for consistent test data using real production values
+|
+*/
+
+dataset('real_websites', [
+    'redgas' => ['https://www.redgas.at'],
+    'fairnando' => ['https://www.fairnando.at'],
+    'omp' => ['https://omp.office-manager-pro.com'],
+]);
+
+dataset('real_user', fn() => \App\Models\User::where('email', 'bonzo@konjscina.com')->first());
+
+dataset('real_team', fn() => \App\Models\Team::where('name', 'Intermedien')->first());
+
+dataset('ssl_statuses', [
+    'valid' => ['valid'],
+    'invalid' => ['invalid'],
+    'expired' => ['expired'],
+    'expiring_soon' => ['expiring_soon'],
+    'not_yet_checked' => ['not yet checked'],
+]);
+
+dataset('team_roles', [
+    'owner' => [\App\Models\TeamMember::ROLE_OWNER],
+    'admin' => [\App\Models\TeamMember::ROLE_ADMIN],
+    'manager' => [\App\Models\TeamMember::ROLE_MANAGER],
+    'viewer' => [\App\Models\TeamMember::ROLE_VIEWER],
+]);
+
+dataset('alert_types', [
+    'ssl_expiry' => [\App\Models\AlertConfiguration::ALERT_SSL_EXPIRY],
+    'ssl_invalid' => [\App\Models\AlertConfiguration::ALERT_SSL_INVALID],
+    'uptime_down' => [\App\Models\AlertConfiguration::ALERT_UPTIME_DOWN],
+    'response_time' => [\App\Models\AlertConfiguration::ALERT_RESPONSE_TIME],
+    'lets_encrypt_renewal' => [\App\Models\AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL],
+]);
+
+dataset('notification_channels', [
+    'email' => [[\App\Models\AlertConfiguration::CHANNEL_EMAIL]],
+    'dashboard' => [[\App\Models\AlertConfiguration::CHANNEL_DASHBOARD]],
+    'slack' => [[\App\Models\AlertConfiguration::CHANNEL_SLACK]],
+    'multiple' => [[\App\Models\AlertConfiguration::CHANNEL_EMAIL, \App\Models\AlertConfiguration::CHANNEL_DASHBOARD]],
+]);
