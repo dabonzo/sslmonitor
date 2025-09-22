@@ -68,7 +68,7 @@ class SslDashboardController extends Controller
         $expiringSoon = $monitors->filter(function ($monitor) {
             if ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
                 $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                $daysUntilExpiry = now()->diffInDays($expirationDate, false);
+                $daysUntilExpiry = (int) now()->diffInDays($expirationDate, false);
                 return $daysUntilExpiry <= 10 && $daysUntilExpiry > 0;
             }
             return false;

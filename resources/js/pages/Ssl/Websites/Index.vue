@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
-import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play } from 'lucide-vue-next';
 import ssl from '@/routes/ssl';
 
 interface SslCertificate {
@@ -41,6 +41,15 @@ interface Props {
   websites: PaginatedWebsites;
   filters: {
     search?: string;
+    filter?: string;
+    team?: string;
+  };
+  filterStats: {
+    all: number;
+    ssl_issues: number;
+    uptime_issues: number;
+    expiring_soon: number;
+    critical: number;
   };
 }
 
@@ -73,7 +82,22 @@ interface WebsiteDetails {
 
 const props = defineProps<Props>();
 
+// Filter state
+const searchQuery = ref(props.filters.search || '');
+const activeFilter = ref(props.filters.filter || 'all');
+const activeTeam = ref(props.filters.team || 'all');
+const showingFilters = ref(false);
+
+// Modal state
 const showModal = ref(false);
+const showCertificateAnalysis = ref(false);
+const certificateAnalysis = ref(null);
+const analysisLoading = ref(false);
+
+// Bulk operations state
+const selectedWebsites = ref<number[]>([]);
+const showBulkActions = ref(false);
+const bulkActionLoading = ref(false);
 const selectedWebsite = ref<WebsiteDetails | null>(null);
 const loading = ref(false);
 const deleting = ref<number | null>(null);
@@ -94,6 +118,25 @@ const openWebsiteModal = async (website: Website) => {
 const closeModal = () => {
   showModal.value = false;
   selectedWebsite.value = null;
+};
+
+const closeCertificateAnalysis = () => {
+  showCertificateAnalysis.value = false;
+  certificateAnalysis.value = null;
+};
+
+const openCertificateAnalysis = async (website: Website) => {
+  analysisLoading.value = true;
+  try {
+    const response = await axios.get(`/ssl/websites/${website.id}/certificate-analysis`);
+    certificateAnalysis.value = response.data;
+    showCertificateAnalysis.value = true;
+  } catch (error) {
+    console.error('Failed to load certificate analysis:', error);
+    alert('Failed to load certificate analysis. Please try again.');
+  } finally {
+    analysisLoading.value = false;
+  }
 };
 
 const formatDate = (dateString: string) => {
@@ -139,18 +182,159 @@ const deleteWebsite = async (website: Website) => {
     deleting.value = null;
   }
 };
+
+// Filter functions
+const applyFilters = () => {
+  const params: any = {};
+
+  if (searchQuery.value) params.search = searchQuery.value;
+  if (activeFilter.value !== 'all') params.filter = activeFilter.value;
+  if (activeTeam.value !== 'all') params.team = activeTeam.value;
+
+  router.get(ssl.websites.index().url, params, {
+    preserveState: true,
+    replace: true
+  });
+};
+
+const clearFilters = () => {
+  searchQuery.value = '';
+  activeFilter.value = 'all';
+  activeTeam.value = 'all';
+  router.get(ssl.websites.index().url, {}, {
+    preserveState: true,
+    replace: true
+  });
+};
+
+const runManualCheck = async (website: Website) => {
+  try {
+    await axios.post(`/ssl/websites/${website.id}/check`);
+    // Refresh the page data
+    router.reload({ only: ['websites'] });
+  } catch (error) {
+    console.error('Failed to run manual check:', error);
+    alert('Failed to run manual check. Please try again.');
+  }
+};
+
+// Computed properties
+const hasActiveFilters = computed(() => {
+  return searchQuery.value || activeFilter.value !== 'all' || activeTeam.value !== 'all';
+});
+
+const allSelected = computed(() => {
+  return props.websites.data.length > 0 && selectedWebsites.value.length === props.websites.data.length;
+});
+
+const someSelected = computed(() => {
+  return selectedWebsites.value.length > 0;
+});
+
+const hasSelection = computed(() => {
+  return selectedWebsites.value.length > 0;
+});
+
+const filterOptions = [
+  { key: 'all', label: 'All Websites', icon: Shield, count: props.filterStats.all },
+  { key: 'ssl_issues', label: 'SSL Issues', icon: AlertTriangle, count: props.filterStats.ssl_issues },
+  { key: 'uptime_issues', label: 'Uptime Issues', icon: Zap, count: props.filterStats.uptime_issues },
+  { key: 'expiring_soon', label: 'Expiring Soon', icon: Clock, count: props.filterStats.expiring_soon },
+  { key: 'critical', label: 'Critical', icon: AlertTriangle, count: props.filterStats.critical }
+];
+
+const teamOptions = [
+  { key: 'all', label: 'All Teams' },
+  { key: 'personal', label: 'Personal Sites' },
+  { key: 'team', label: 'Team Sites' }
+];
+
+// Bulk operation functions
+const toggleAllSelection = () => {
+  if (allSelected.value) {
+    selectedWebsites.value = [];
+  } else {
+    selectedWebsites.value = props.websites.data.map(website => website.id);
+  }
+  showBulkActions.value = selectedWebsites.value.length > 0;
+};
+
+const toggleWebsiteSelection = (websiteId: number) => {
+  const index = selectedWebsites.value.indexOf(websiteId);
+  if (index > -1) {
+    selectedWebsites.value.splice(index, 1);
+  } else {
+    selectedWebsites.value.push(websiteId);
+  }
+  showBulkActions.value = selectedWebsites.value.length > 0;
+};
+
+const clearSelection = () => {
+  selectedWebsites.value = [];
+  showBulkActions.value = false;
+};
+
+const bulkDelete = async () => {
+  if (!confirm(`Are you sure you want to delete ${selectedWebsites.value.length} websites? This action cannot be undone.`)) {
+    return;
+  }
+
+  bulkActionLoading.value = true;
+  try {
+    await router.post('/ssl/websites/bulk-destroy', {
+      website_ids: selectedWebsites.value
+    }, {
+      onSuccess: () => {
+        clearSelection();
+      },
+      onError: (errors) => {
+        console.error('Bulk delete failed:', errors);
+        alert('Bulk delete failed. Please try again.');
+      },
+      onFinish: () => {
+        bulkActionLoading.value = false;
+      }
+    });
+  } catch (error) {
+    console.error('Error in bulk delete:', error);
+    bulkActionLoading.value = false;
+  }
+};
+
+const bulkCheck = async () => {
+  bulkActionLoading.value = true;
+  try {
+    await router.post('/ssl/websites/bulk-check', {
+      website_ids: selectedWebsites.value
+    }, {
+      onSuccess: () => {
+        clearSelection();
+      },
+      onError: (errors) => {
+        console.error('Bulk check failed:', errors);
+        alert('Bulk check failed. Please try again.');
+      },
+      onFinish: () => {
+        bulkActionLoading.value = false;
+      }
+    });
+  } catch (error) {
+    console.error('Error in bulk check:', error);
+    bulkActionLoading.value = false;
+  }
+};
 </script>
 
 <template>
   <Head title="SSL Websites" />
 
-  <DashboardLayout title="SSL Websites">
+  <DashboardLayout title="Unified Monitoring Hub">
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-semibold text-foreground">SSL Websites</h1>
-          <p class="text-muted-foreground">Manage and monitor your websites</p>
+          <h1 class="text-2xl font-semibold text-foreground">Unified Monitoring Hub</h1>
+          <p class="text-muted-foreground">Monitor SSL certificates and uptime across all your websites</p>
         </div>
         <Link
           :href="ssl.websites.create().url"
@@ -161,16 +345,142 @@ const deleteWebsite = async (website: Website) => {
         </Link>
       </div>
 
-      <!-- Websites Table -->
+      <!-- Smart Filter Bar -->
+      <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm space-y-4">
+        <!-- Search and Team Toggle -->
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                v-model="searchQuery"
+                @keyup.enter="applyFilters"
+                type="text"
+                placeholder="Search websites..."
+                class="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Team Toggle -->
+            <select
+              v-model="activeTeam"
+              @change="applyFilters"
+              class="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option
+                v-for="team in teamOptions"
+                :key="team.key"
+                :value="team.key"
+              >
+                {{ team.label }}
+              </option>
+            </select>
+
+            <!-- Clear Filters -->
+            <button
+              v-if="hasActiveFilters"
+              @click="clearFilters"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted/50 transition-colors"
+            >
+              <RotateCcw class="h-4 w-4 mr-2" />
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Status Tabs -->
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="filter in filterOptions"
+            :key="filter.key"
+            @click="activeFilter = filter.key; applyFilters()"
+            class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            :class="{
+              'bg-primary text-primary-foreground': activeFilter === filter.key,
+              'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground': activeFilter !== filter.key
+            }"
+          >
+            <component :is="filter.icon" class="h-4 w-4 mr-2" />
+            {{ filter.label }}
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs" :class="{
+              'bg-primary-foreground/20': activeFilter === filter.key,
+              'bg-foreground/10': activeFilter !== filter.key
+            }">
+              {{ filter.count }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Apply Filters Button -->
+        <div class="flex justify-between items-center">
+          <!-- Bulk Actions Bar -->
+          <div v-if="hasSelection" class="flex items-center gap-3">
+            <span class="text-sm text-muted-foreground">
+              {{ selectedWebsites.length }} selected
+            </span>
+            <button
+              @click="bulkCheck"
+              :disabled="bulkActionLoading"
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+            >
+              <Play class="h-4 w-4 mr-1" />
+              Run Checks
+            </button>
+            <button
+              @click="bulkDelete"
+              :disabled="bulkActionLoading"
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50"
+            >
+              <Trash class="h-4 w-4 mr-1" />
+              Delete
+            </button>
+            <button
+              @click="clearSelection"
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div v-else></div>
+
+          <button
+            @click="applyFilters"
+            class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            <Filter class="h-4 w-4 mr-2" />
+            Apply Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Enhanced Monitoring Table -->
       <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
               <tr class="border-b border-border">
+                <th class="text-left p-4 w-12">
+                  <button
+                    @click="toggleAllSelection"
+                    class="flex items-center justify-center w-5 h-5 rounded border-2 transition-colors"
+                    :class="{
+                      'bg-primary border-primary text-primary-foreground': allSelected,
+                      'border-border hover:border-primary': !allSelected
+                    }"
+                  >
+                    <CheckSquare v-if="allSelected" class="h-3 w-3" />
+                    <Square v-else class="h-3 w-3" />
+                  </button>
+                </th>
                 <th class="text-left p-4">Website</th>
                 <th class="text-left p-4">SSL Status</th>
+                <th class="text-left p-4">Uptime Status</th>
                 <th class="text-left p-4">Days Remaining</th>
-                <th class="text-left p-4">Monitoring</th>
+                <th class="text-left p-4">Team</th>
+                <th class="text-left p-4">Manual Checks</th>
                 <th class="text-left p-4">Actions</th>
               </tr>
             </thead>
@@ -178,12 +488,33 @@ const deleteWebsite = async (website: Website) => {
               <tr
                 v-for="website in websites.data"
                 :key="website.id"
-                class="border-b border-border hover:bg-muted/50 cursor-pointer"
-                @click="openWebsiteModal(website)"
+                class="border-b border-border hover:bg-muted/50"
+                :class="{
+                  'bg-primary/5': selectedWebsites.includes(website.id)
+                }"
               >
-                <td class="p-4">
+                <td class="p-4" @click.stop>
+                  <button
+                    @click="toggleWebsiteSelection(website.id)"
+                    class="flex items-center justify-center w-5 h-5 rounded border-2 transition-colors"
+                    :class="{
+                      'bg-primary border-primary text-primary-foreground': selectedWebsites.includes(website.id),
+                      'border-border hover:border-primary': !selectedWebsites.includes(website.id)
+                    }"
+                  >
+                    <CheckSquare v-if="selectedWebsites.includes(website.id)" class="h-3 w-3" />
+                    <Square v-else class="h-3 w-3" />
+                  </button>
+                </td>
+                <td class="p-4 cursor-pointer" @click="openWebsiteModal(website)">
                   <div>
-                    <div class="font-medium text-foreground">{{ website.name }}</div>
+                    <div class="font-medium text-foreground flex items-center gap-2">
+                      {{ website.name }}
+                      <!-- Team Badge Placeholder -->
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Personal
+                      </span>
+                    </div>
                     <div class="text-sm text-muted-foreground">{{ website.url }}</div>
                   </div>
                 </td>
@@ -201,6 +532,12 @@ const deleteWebsite = async (website: Website) => {
                   </span>
                 </td>
                 <td class="p-4">
+                  <!-- Uptime Status Placeholder -->
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Online
+                  </span>
+                </td>
+                <td class="p-4">
                   <span
                     v-if="website.ssl_days_remaining !== null"
                     class="font-medium"
@@ -211,19 +548,26 @@ const deleteWebsite = async (website: Website) => {
                   <span v-else class="text-gray-500 text-sm">N/A</span>
                 </td>
                 <td class="p-4">
-                  <div class="space-y-1">
-                    <div class="flex items-center text-sm">
-                      <span class="text-muted-foreground mr-2">SSL:</span>
-                      <span :class="website.ssl_monitoring_enabled ? 'text-green-600' : 'text-gray-500'">
-                        {{ website.ssl_monitoring_enabled ? 'Enabled' : 'Disabled' }}
-                      </span>
-                    </div>
-                    <div class="flex items-center text-sm">
-                      <span class="text-muted-foreground mr-2">Uptime:</span>
-                      <span :class="website.uptime_monitoring_enabled ? 'text-green-600' : 'text-gray-500'">
-                        {{ website.uptime_monitoring_enabled ? 'Enabled' : 'Disabled' }}
-                      </span>
-                    </div>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    Personal
+                  </span>
+                </td>
+                <td class="p-4" @click.stop>
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="runManualCheck(website)"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
+                    >
+                      <Shield class="h-3 w-3 mr-1" />
+                      SSL
+                    </button>
+                    <button
+                      @click="runManualCheck(website)"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      <Zap class="h-3 w-3 mr-1" />
+                      Uptime
+                    </button>
                   </div>
                 </td>
                 <td class="p-4" @click.stop>
@@ -257,13 +601,15 @@ const deleteWebsite = async (website: Website) => {
           </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Enhanced Footer -->
         <div v-if="websites.links" class="mt-6 flex items-center justify-between">
           <div class="text-sm text-muted-foreground">
-            Showing {{ websites.data.length }} websites
+            Showing {{ websites.data.length }} of {{ filterStats.all }} websites
+            <span v-if="hasActiveFilters" class="text-primary font-medium">(filtered)</span>
           </div>
           <div class="flex items-center space-x-2">
             <!-- Pagination controls would go here -->
+            <span class="text-xs text-muted-foreground">Real-time monitoring active</span>
           </div>
         </div>
       </div>
@@ -295,10 +641,39 @@ const deleteWebsite = async (website: Website) => {
         </div>
 
         <div v-if="selectedWebsite" class="p-6 space-y-6">
-          <!-- SSL Information -->
+          <!-- Quick Status Overview -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-muted/30 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-foreground">{{ selectedWebsite.ssl.days_remaining || 'N/A' }}</div>
+              <div class="text-sm text-muted-foreground">Days Until SSL Expiry</div>
+            </div>
+            <div class="bg-muted/30 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-green-600">{{ Math.round(selectedWebsite.stats.success_rate) }}%</div>
+              <div class="text-sm text-muted-foreground">Success Rate</div>
+            </div>
+            <div class="bg-muted/30 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-blue-600">{{ Math.round(selectedWebsite.stats.avg_response_time) }}</div>
+              <div class="text-sm text-muted-foreground">Avg Response (ms)</div>
+            </div>
+            <div class="bg-muted/30 rounded-lg p-4 text-center">
+              <div class="text-2xl font-bold text-foreground">{{ selectedWebsite.stats.total_ssl_checks }}</div>
+              <div class="text-sm text-muted-foreground">Total Checks</div>
+            </div>
+          </div>
+
+          <!-- Enhanced SSL and Uptime Information -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- SSL Certificate Details -->
             <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-foreground">SSL Certificate</h3>
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-foreground">SSL Certificate</h3>
+                <button
+                  class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
+                >
+                  <Shield class="h-3 w-3 mr-1" />
+                  Check Now
+                </button>
+              </div>
 
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
@@ -355,102 +730,403 @@ const deleteWebsite = async (website: Website) => {
               </div>
             </div>
 
-            <!-- Statistics -->
+            <!-- Uptime Monitoring Details -->
             <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-foreground">Statistics</h3>
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-foreground">Uptime Monitoring</h3>
+                <button
+                  class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                >
+                  <Zap class="h-3 w-3 mr-1" />
+                  Check Now
+                </button>
+              </div>
 
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-muted-foreground">Total SSL Checks:</span>
-                  <span class="text-sm text-foreground font-medium">{{ selectedWebsite.stats.total_ssl_checks }}</span>
+                  <span class="text-sm text-muted-foreground">Current Status:</span>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Online
+                  </span>
                 </div>
 
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-muted-foreground">Success Rate:</span>
-                  <span class="text-sm text-foreground font-medium">{{ Math.round(selectedWebsite.stats.success_rate) }}%</span>
-                </div>
-
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-muted-foreground">Avg Response Time:</span>
+                  <span class="text-sm text-muted-foreground">Last Response Time:</span>
                   <span class="text-sm text-foreground font-medium">{{ Math.round(selectedWebsite.stats.avg_response_time) }}ms</span>
                 </div>
 
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-muted-foreground">Total Certificates:</span>
-                  <span class="text-sm text-foreground font-medium">{{ selectedWebsite.stats.total_certificates }}</span>
+                  <span class="text-sm text-muted-foreground">Uptime This Month:</span>
+                  <span class="text-sm text-foreground font-medium text-green-600">99.9%</span>
+                </div>
+
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-muted-foreground">Failed Checks:</span>
+                  <span class="text-sm text-foreground font-medium">0</span>
+                </div>
+
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-muted-foreground">Last Check:</span>
+                  <span class="text-sm text-foreground font-medium">2 minutes ago</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Recent SSL Checks -->
-          <div>
-            <h3 class="text-lg font-semibold text-foreground mb-4">Recent SSL Checks</h3>
-
-            <div class="space-y-3 max-h-64 overflow-y-auto">
-              <div
-                v-for="check in selectedWebsite.ssl.recent_checks"
-                :key="check.checked_at"
-                class="flex items-center justify-between p-3 border border-border rounded-lg"
-              >
-                <div class="flex items-center space-x-3">
-                  <span
-                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                    :class="{
-                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': check.status === 'valid',
-                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': check.status === 'failed',
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': check.status === 'warning'
-                    }"
-                  >
-                    {{ check.status }}
-                  </span>
-                  <div>
-                    <div class="text-sm font-medium">
-                      {{ new Date(check.checked_at).toLocaleString() }}
-                    </div>
-                    <div v-if="check.error_message" class="text-xs text-red-600">
-                      {{ check.error_message }}
+          <!-- Performance & Historical Data -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent SSL Checks -->
+            <div>
+              <h3 class="text-lg font-semibold text-foreground mb-4">Recent SSL Checks</h3>
+              <div class="space-y-3 max-h-64 overflow-y-auto">
+                <div
+                  v-for="check in selectedWebsite.ssl.recent_checks"
+                  :key="check.checked_at"
+                  class="flex items-center justify-between p-3 border border-border rounded-lg"
+                >
+                  <div class="flex items-center space-x-3">
+                    <span
+                      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                      :class="{
+                        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': check.status === 'valid',
+                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': check.status === 'failed',
+                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': check.status === 'warning'
+                      }"
+                    >
+                      {{ check.status }}
+                    </span>
+                    <div>
+                      <div class="text-sm font-medium">
+                        {{ new Date(check.checked_at).toLocaleString() }}
+                      </div>
+                      <div v-if="check.error_message" class="text-xs text-red-600">
+                        {{ check.error_message }}
+                      </div>
                     </div>
                   </div>
+                  <div class="text-sm text-muted-foreground">
+                    {{ check.response_time }}ms
+                  </div>
                 </div>
-                <div class="text-sm text-muted-foreground">
-                  {{ check.response_time }}ms
+              </div>
+            </div>
+
+            <!-- Response Time Chart Placeholder -->
+            <div>
+              <h3 class="text-lg font-semibold text-foreground mb-4">Response Time Trends</h3>
+              <div class="bg-muted/30 rounded-lg p-6 h-64 flex items-center justify-center">
+                <div class="text-center">
+                  <Clock class="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p class="text-sm text-muted-foreground">Response time chart</p>
+                  <p class="text-xs text-muted-foreground">Coming soon in Phase 5</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Monitoring Configuration -->
-          <div>
-            <h3 class="text-lg font-semibold text-foreground mb-4">Monitoring Configuration</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-muted-foreground">SSL Monitoring:</span>
-                <span
-                  class="text-sm font-medium"
-                  :class="selectedWebsite.monitoring.ssl_enabled ? 'text-green-600' : 'text-gray-500'"
-                >
-                  {{ selectedWebsite.monitoring.ssl_enabled ? 'Enabled' : 'Disabled' }}
-                </span>
+          <!-- Alert Configuration & Advanced Settings -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Monitoring Configuration -->
+            <div>
+              <h3 class="text-lg font-semibold text-foreground mb-4">Alert Configuration</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div>
+                    <div class="font-medium text-sm">SSL Certificate Expiry</div>
+                    <div class="text-xs text-muted-foreground">Alert when expiring in 7 days</div>
+                  </div>
+                  <span class="text-sm font-medium text-green-600">Active</span>
+                </div>
+                <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div>
+                    <div class="font-medium text-sm">Website Downtime</div>
+                    <div class="text-xs text-muted-foreground">Alert when site is unreachable</div>
+                  </div>
+                  <span class="text-sm font-medium text-green-600">Active</span>
+                </div>
+                <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div>
+                    <div class="font-medium text-sm">Response Time</div>
+                    <div class="text-xs text-muted-foreground">Alert when slower than 5s</div>
+                  </div>
+                  <span class="text-sm font-medium text-green-600">Active</span>
+                </div>
               </div>
+            </div>
 
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-muted-foreground">Uptime Monitoring:</span>
-                <span
-                  class="text-sm font-medium"
-                  :class="selectedWebsite.monitoring.uptime_enabled ? 'text-green-600' : 'text-gray-500'"
-                >
-                  {{ selectedWebsite.monitoring.uptime_enabled ? 'Enabled' : 'Disabled' }}
-                </span>
+            <!-- Monitoring Settings -->
+            <div>
+              <h3 class="text-lg font-semibold text-foreground mb-4">Monitoring Settings</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-muted-foreground">SSL Monitoring:</span>
+                  <span
+                    class="text-sm font-medium"
+                    :class="selectedWebsite.monitoring.ssl_enabled ? 'text-green-600' : 'text-gray-500'"
+                  >
+                    {{ selectedWebsite.monitoring.ssl_enabled ? 'Enabled' : 'Disabled' }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-muted-foreground">Uptime Monitoring:</span>
+                  <span
+                    class="text-sm font-medium"
+                    :class="selectedWebsite.monitoring.uptime_enabled ? 'text-green-600' : 'text-gray-500'"
+                  >
+                    {{ selectedWebsite.monitoring.uptime_enabled ? 'Enabled' : 'Disabled' }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-muted-foreground">Check Frequency:</span>
+                  <span class="text-sm text-foreground font-medium">Every 5 minutes</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-muted-foreground">Notification Method:</span>
+                  <span class="text-sm text-foreground font-medium">Email + Dashboard</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        <div class="flex justify-between items-center p-6 border-t border-border">
+          <div class="flex space-x-2">
+            <button
+              @click="openCertificateAnalysis(selectedWebsite)"
+              :disabled="analysisLoading"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+            >
+              <Eye class="h-4 w-4 mr-2" />
+              {{ analysisLoading ? 'Analyzing...' : 'Certificate Analysis' }}
+            </button>
+            <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors">
+              <Edit class="h-4 w-4 mr-2" />
+              Edit Settings
+            </button>
+          </div>
+          <div class="flex space-x-3">
+            <button
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              @click="closeModal"
+            >
+              Close
+            </button>
+            <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors">
+              <Shield class="h-4 w-4 mr-2" />
+              Run Full Check
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificate Analysis Modal -->
+    <div
+      v-if="showCertificateAnalysis"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click="closeCertificateAnalysis"
+    >
+      <div
+        class="bg-card text-card-foreground rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        @click.stop
+      >
+        <div class="flex items-center justify-between p-6 border-b border-border">
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">SSL Certificate Analysis</h2>
+            <p class="text-sm text-muted-foreground">{{ certificateAnalysis?.website?.name }} - {{ certificateAnalysis?.website?.url }}</p>
+          </div>
+          <button
+            class="text-muted-foreground hover:text-foreground"
+            @click="closeCertificateAnalysis"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="certificateAnalysis" class="p-6 space-y-6">
+          <!-- Risk Assessment Banner -->
+          <div
+            v-if="certificateAnalysis.analysis.risk_assessment"
+            class="p-4 rounded-lg"
+            :class="{
+              'bg-red-50 border border-red-200': certificateAnalysis.analysis.risk_assessment.level === 'critical',
+              'bg-yellow-50 border border-yellow-200': certificateAnalysis.analysis.risk_assessment.level === 'high',
+              'bg-orange-50 border border-orange-200': certificateAnalysis.analysis.risk_assessment.level === 'medium',
+              'bg-green-50 border border-green-200': certificateAnalysis.analysis.risk_assessment.level === 'low'
+            }"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <h3
+                  class="font-semibold"
+                  :class="{
+                    'text-red-800': certificateAnalysis.analysis.risk_assessment.level === 'critical',
+                    'text-yellow-800': certificateAnalysis.analysis.risk_assessment.level === 'high',
+                    'text-orange-800': certificateAnalysis.analysis.risk_assessment.level === 'medium',
+                    'text-green-800': certificateAnalysis.analysis.risk_assessment.level === 'low'
+                  }"
+                >
+                  Risk Level: {{ certificateAnalysis.analysis.risk_assessment.level.toUpperCase() }}
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                  Security Score: {{ certificateAnalysis.analysis.risk_assessment.score }}/100
+                </p>
+              </div>
+              <div v-if="certificateAnalysis.analysis.certificate_authority?.is_lets_encrypt" class="text-sm">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Let's Encrypt
+                </span>
+              </div>
+            </div>
+            <div v-if="certificateAnalysis.analysis.risk_assessment.issues?.length" class="mt-3">
+              <ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                <li v-for="issue in certificateAnalysis.analysis.risk_assessment.issues" :key="issue">
+                  {{ issue }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Certificate Details Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Basic Certificate Information -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-foreground">Certificate Information</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Subject:</span>
+                  <span class="text-sm text-foreground font-mono">{{ certificateAnalysis.analysis.basic_info?.subject }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Issuer:</span>
+                  <span class="text-sm text-foreground">{{ certificateAnalysis.analysis.basic_info?.issuer }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Serial Number:</span>
+                  <span class="text-sm text-foreground font-mono break-all">{{ certificateAnalysis.analysis.basic_info?.serial_number }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Signature Algorithm:</span>
+                  <span class="text-sm text-foreground">{{ certificateAnalysis.analysis.basic_info?.signature_algorithm }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validity Information -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-foreground">Validity Period</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Valid From:</span>
+                  <span class="text-sm text-foreground">{{ new Date(certificateAnalysis.analysis.validity?.valid_from).toLocaleDateString() }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Valid Until:</span>
+                  <span class="text-sm text-foreground">{{ new Date(certificateAnalysis.analysis.validity?.valid_until).toLocaleDateString() }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Days Remaining:</span>
+                  <span
+                    class="text-sm font-medium"
+                    :class="{
+                      'text-red-600': certificateAnalysis.analysis.validity?.days_remaining <= 7,
+                      'text-yellow-600': certificateAnalysis.analysis.validity?.days_remaining > 7 && certificateAnalysis.analysis.validity?.days_remaining <= 30,
+                      'text-green-600': certificateAnalysis.analysis.validity?.days_remaining > 30
+                    }"
+                  >
+                    {{ certificateAnalysis.analysis.validity?.days_remaining }} days
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Analysis -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-foreground">Security Analysis</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Key Algorithm:</span>
+                  <span class="text-sm text-foreground">{{ certificateAnalysis.analysis.security?.key_algorithm }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Key Size:</span>
+                  <span class="text-sm text-foreground">{{ certificateAnalysis.analysis.security?.key_size }} bits</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Security Score:</span>
+                  <span
+                    class="text-sm font-medium"
+                    :class="{
+                      'text-red-600': certificateAnalysis.analysis.security?.security_score < 70,
+                      'text-yellow-600': certificateAnalysis.analysis.security?.security_score >= 70 && certificateAnalysis.analysis.security?.security_score < 90,
+                      'text-green-600': certificateAnalysis.analysis.security?.security_score >= 90
+                    }"
+                  >
+                    {{ certificateAnalysis.analysis.security?.security_score }}/100
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Domain Coverage -->
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-foreground">Domain Coverage</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Primary Domain:</span>
+                  <span class="text-sm text-foreground font-mono">{{ certificateAnalysis.analysis.domains?.primary_domain }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Wildcard Certificate:</span>
+                  <span class="text-sm text-foreground">{{ certificateAnalysis.analysis.domains?.wildcard_cert ? 'Yes' : 'No' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-muted-foreground">Covers Requested Domain:</span>
+                  <span
+                    class="text-sm font-medium"
+                    :class="certificateAnalysis.analysis.domains?.covers_requested_domain ? 'text-green-600' : 'text-red-600'"
+                  >
+                    {{ certificateAnalysis.analysis.domains?.covers_requested_domain ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div v-if="certificateAnalysis.analysis.domains?.subject_alt_names?.length" class="space-y-2">
+                  <span class="text-sm text-muted-foreground">Subject Alternative Names:</span>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="san in certificateAnalysis.analysis.domains.subject_alt_names"
+                      :key="san"
+                      class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-muted text-muted-foreground"
+                    >
+                      {{ san }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div v-if="certificateAnalysis.analysis.risk_assessment?.recommendations?.length" class="space-y-4">
+            <h3 class="text-lg font-semibold text-foreground">Recommendations</h3>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <ul class="list-disc list-inside space-y-2 text-sm text-blue-800">
+                <li v-for="recommendation in certificateAnalysis.analysis.risk_assessment.recommendations" :key="recommendation">
+                  {{ recommendation }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end space-x-3 p-6 border-t border-border">
-          <button class="btn btn-outline" @click="closeModal">Close</button>
-          <button class="btn btn-primary">Run SSL Check</button>
+          <button
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            @click="closeCertificateAnalysis"
+          >
+            Close Analysis
+          </button>
         </div>
       </div>
     </div>

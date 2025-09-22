@@ -8,6 +8,7 @@ use App\Models\Website;
 use App\Models\SslCertificate;
 use App\Models\SslCheck;
 use App\Services\MonitorIntegrationService;
+use App\Services\SslCertificateAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -34,47 +35,88 @@ class WebsiteController extends Controller
             });
         }
 
-        $websites = $query->paginate(15);
+        // Filter functionality for unified monitoring hub
+        $filter = $request->get('filter', 'all');
+        $teamFilter = $request->get('team_filter', 'all'); // all, personal, team
 
-        // Transform websites with real-time SSL and uptime status from Spatie monitors
+        // Apply team filtering (placeholder for future team implementation)
+        if ($teamFilter === 'personal') {
+            // Future: Add team relationship filter
+            // $query->whereDoesntHave('team');
+        } elseif ($teamFilter === 'team') {
+            // Future: Add team relationship filter
+            // $query->whereHas('team');
+        }
+
+        $websites = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Transform websites with enhanced SSL and uptime data for unified monitoring hub
         $websites->through(function ($website) use ($monitorService) {
-            // Get real-time status from Spatie monitor
-            $monitorStatus = $monitorService->getMonitoringStatusForWebsite($website);
-
             // Get Spatie monitor for this website
             $monitor = $website->getSpatieMonitor();
 
             $sslData = null;
             $daysRemaining = null;
+            $urgencyLevel = 'safe';
 
-            // Extract SSL data from Spatie monitor
+            // Extract enhanced SSL data from Spatie monitor
             if ($monitor && $monitor->certificate_status !== 'not yet checked') {
                 if ($monitor->certificate_expiration_date) {
                     $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                    $daysRemaining = $expirationDate->diffInDays(now(), false);
+                    $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
                     $daysRemaining = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
+
+                    // Calculate urgency level for Let's Encrypt focus
+                    if ($daysRemaining <= 0) {
+                        $urgencyLevel = 'expired';
+                    } elseif ($daysRemaining <= 3) {
+                        $urgencyLevel = 'critical';
+                    } elseif ($daysRemaining <= 7) {
+                        $urgencyLevel = 'urgent';
+                    } elseif ($daysRemaining <= 30) {
+                        $urgencyLevel = 'warning';
+                    } else {
+                        $urgencyLevel = 'safe';
+                    }
                 }
 
                 $sslData = [
                     'status' => $monitor->certificate_status,
                     'expires_at' => $monitor->certificate_expiration_date,
                     'days_remaining' => $daysRemaining ? (int)$daysRemaining : null,
+                    'urgency_level' => $urgencyLevel,
                     'issuer' => $monitor->certificate_issuer,
-                    'subject' => null, // Not stored in Spatie monitor by default
-                    'serial_number' => null, // Not stored in Spatie monitor by default
-                    'signature_algorithm' => null, // Not stored in Spatie monitor by default
                     'is_valid' => $monitor->certificate_status === 'valid',
                     'last_checked' => $monitor->updated_at,
-                    'response_time' => null, // SSL response time not tracked by Spatie
                 ];
             }
 
             // Use Spatie monitor status
             $sslStatus = $monitor?->certificate_status ?? 'not yet checked';
             $uptimeStatus = $monitor?->uptime_status ?? 'not yet checked';
+            $responseTime = $monitor?->uptime_check_response_time_in_ms;
+
+            // Enhanced uptime data
+            $uptimeData = [
+                'status' => $uptimeStatus,
+                'response_time' => $responseTime,
+                'response_time_display' => $responseTime ? $responseTime . 'ms' : null,
+                'last_checked' => $monitor?->uptime_last_check_date,
+                'failure_reason' => $monitor?->uptime_check_failure_reason,
+                'times_failed' => $monitor?->uptime_check_times_failed_in_a_row ?? 0,
+            ];
 
             // Calculate overall status for display
             $overallStatus = $this->calculateOverallStatus($sslStatus, $uptimeStatus, $website);
+
+            // Add filtering support flags
+            $filterFlags = [
+                'has_ssl_issues' => in_array($sslStatus, ['invalid', 'expired']) || $urgencyLevel === 'critical',
+                'has_uptime_issues' => in_array($uptimeStatus, ['down', 'slow']),
+                'is_expiring_soon' => in_array($urgencyLevel, ['warning', 'urgent', 'critical']),
+                'is_healthy' => $sslStatus === 'valid' && $uptimeStatus === 'up',
+                'is_team_website' => false, // Placeholder for team feature
+            ];
 
             return [
                 'id' => $website->id,
@@ -86,12 +128,18 @@ class WebsiteController extends Controller
                 'uptime_status' => $uptimeStatus,
                 'overall_status' => $overallStatus,
                 'ssl_days_remaining' => $daysRemaining ? (int)$daysRemaining : null,
-                'latest_ssl_certificate' => $sslData,
+                'ssl_urgency_level' => $urgencyLevel,
+                'ssl_data' => $sslData,
+                'uptime_data' => $uptimeData,
+                'filter_flags' => $filterFlags,
                 'monitor_sync_status' => $monitor !== null,
-                'last_ssl_check' => $monitor?->updated_at,
-                'last_uptime_check' => $monitor?->uptime_last_check_date,
-                'failure_reason' => $monitor?->uptime_check_failure_reason,
+                'team_badge' => [
+                    'type' => 'personal', // Placeholder for team feature
+                    'name' => null,
+                    'color' => 'blue',
+                ],
                 'created_at' => $website->created_at,
+                'updated_at' => $website->updated_at,
             ];
         });
 
@@ -107,9 +155,16 @@ class WebsiteController extends Controller
             'total' => $websites->total(),
         ];
 
+        // Calculate filter statistics for the filter bar
+        $allWebsites = Website::where('user_id', $user->id)->get();
+        $filterStats = $this->calculateFilterStatistics($allWebsites);
+
         return Inertia::render('Ssl/Websites/Index', [
             'websites' => $websitesArray,
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'filter', 'team']),
+            'filterStats' => $filterStats,
+            'current_filter' => $filter,
+            'current_team_filter' => $teamFilter,
         ]);
     }
 
@@ -376,7 +431,7 @@ class WebsiteController extends Controller
         $daysRemaining = null;
         if ($monitor && $monitor->certificate_expiration_date) {
             $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-            $daysRemaining = $expirationDate->diffInDays(now(), false);
+            $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
             $daysRemaining = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
         }
 
@@ -428,6 +483,88 @@ class WebsiteController extends Controller
         ];
 
         return response()->json($data);
+    }
+
+    public function certificateAnalysis(Website $website, SslCertificateAnalysisService $analysisService): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $website);
+
+        try {
+            $analysis = $analysisService->analyzeCertificate($website->url);
+
+            return response()->json([
+                'website' => [
+                    'id' => $website->id,
+                    'name' => $website->name,
+                    'url' => $website->url,
+                ],
+                'analysis' => $analysis,
+                'analyzed_at' => now()->toISOString(),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Certificate analysis failed',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate filter statistics for the filter bar
+     */
+    private function calculateFilterStatistics($websites): array
+    {
+        $stats = [
+            'all' => $websites->count(),
+            'ssl_issues' => 0,
+            'uptime_issues' => 0,
+            'expiring_soon' => 0,
+            'critical' => 0,
+        ];
+
+        foreach ($websites as $website) {
+            $monitor = $website->getSpatieMonitor();
+
+            if ($monitor) {
+                // SSL Issues
+                $sslStatus = $monitor->certificate_status;
+                if (in_array($sslStatus, ['invalid', 'expired'])) {
+                    $stats['ssl_issues']++;
+                }
+
+                // Uptime Issues
+                $uptimeStatus = $monitor->uptime_status;
+                if (in_array($uptimeStatus, ['down', 'slow'])) {
+                    $stats['uptime_issues']++;
+                }
+
+                // Calculate days remaining for SSL certificate
+                $daysRemaining = null;
+                if ($monitor->certificate_expiration_date) {
+                    $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
+                    $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
+                    $daysRemaining = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
+
+                    // Expiring Soon (within 30 days)
+                    if ($daysRemaining <= 30 && $daysRemaining >= 0) {
+                        $stats['expiring_soon']++;
+                    }
+
+                    // Critical (Let's Encrypt focus: 3 days or less)
+                    if ($daysRemaining <= 3) {
+                        $stats['critical']++;
+                    }
+                }
+
+                // Critical also includes expired certificates and down sites
+                if ($sslStatus === 'expired' || $uptimeStatus === 'down') {
+                    $stats['critical']++;
+                }
+            }
+        }
+
+        return $stats;
     }
 
     /**
