@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\AlertsController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
@@ -19,10 +20,11 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('password.update');
 
-    Route::get('settings/appearance', function () {
-        return Inertia::render('settings/Appearance');
-    })->name('appearance.edit');
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/alerts', [AlertsController::class, 'edit'])->name('alerts.edit');
+    Route::post('settings/alerts', [AlertsController::class, 'store'])->name('alerts.store');
+    Route::put('settings/alerts', [AlertsController::class, 'update'])->name('alerts.update');
 });

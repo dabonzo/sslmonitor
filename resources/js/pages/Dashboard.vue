@@ -15,7 +15,11 @@ import {
   Zap,
   Globe,
   BarChart3,
-  Eye
+  Eye,
+  ArrowRightLeft,
+  Users,
+  Settings,
+  Plus
 } from 'lucide-vue-next';
 
 // Define TypeScript interfaces for SSL and Uptime data
@@ -59,12 +63,24 @@ interface SslAlert {
   expires_at: string;
 }
 
+interface TransferSuggestions {
+  personal_websites_count: number;
+  available_teams_count: number;
+  quick_transfer_teams: Array<{
+    id: number;
+    name: string;
+    member_count: number;
+  }>;
+  should_show_suggestion: boolean;
+}
+
 interface Props {
   sslStatistics: SslStatistics;
   uptimeStatistics: UptimeStatistics;
   recentSslActivity: SslActivity[];
   recentUptimeActivity: UptimeActivity[];
   criticalAlerts: SslAlert[];
+  transferSuggestions: TransferSuggestions;
 }
 
 const props = defineProps<Props>();
@@ -406,18 +422,50 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- Enhanced Quick Actions -->
             <div class="rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
-                <div class="mb-6 flex items-center space-x-3">
-                    <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
-                        <Zap class="h-6 w-6 text-white" />
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
+                            <Zap class="h-6 w-6 text-white" />
+                        </div>
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                            Quick Actions
+                        </h3>
                     </div>
-                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                        Quick Actions
-                    </h3>
+                    <!-- Smart Transfer Suggestion -->
+                    <div v-if="transferSuggestions.should_show_suggestion" class="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        {{ transferSuggestions.personal_websites_count }} sites can be transferred
+                    </div>
+                </div>
+
+                <!-- Team Transfer Suggestion Banner -->
+                <div v-if="transferSuggestions.should_show_suggestion" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                                <ArrowRightLeft class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                                    Transfer {{ transferSuggestions.personal_websites_count }} personal site{{ transferSuggestions.personal_websites_count === 1 ? '' : 's' }} to team
+                                </p>
+                                <p class="text-xs text-blue-700 dark:text-blue-300">
+                                    Collaborate with {{ transferSuggestions.available_teams_count }} team{{ transferSuggestions.available_teams_count === 1 ? '' : 's' }}
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            :href="ssl.websites.index().url + '?team=personal'"
+                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-md transition-colors"
+                        >
+                            Manage
+                        </Link>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
+                    <!-- Add Website -->
                     <Link
                         :href="ssl.websites.create().url"
                         class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 p-4 text-center hover:from-blue-100 hover:to-indigo-200 dark:hover:from-blue-900/50 dark:hover:to-indigo-900/50 transition-all duration-300 border border-blue-200 dark:border-blue-800 hover:shadow-lg hover:scale-[1.02]"
@@ -425,12 +473,13 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
                             <div class="rounded-lg bg-blue-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <Shield class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                <Plus class="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <p class="text-sm font-bold text-blue-900 dark:text-blue-100">Add Website</p>
                         </div>
                     </Link>
 
+                    <!-- Manage Websites -->
                     <Link
                         :href="ssl.websites.index().url"
                         class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 p-4 text-center hover:from-emerald-100 hover:to-green-200 dark:hover:from-emerald-900/50 dark:hover:to-green-900/50 transition-all duration-300 border border-emerald-200 dark:border-emerald-800 hover:shadow-lg hover:scale-[1.02]"
@@ -440,29 +489,79 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                             <div class="rounded-lg bg-emerald-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
                                 <Eye class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
-                            <p class="text-sm font-bold text-emerald-900 dark:text-emerald-100">View Websites</p>
+                            <p class="text-sm font-bold text-emerald-900 dark:text-emerald-100">Manage Sites</p>
                         </div>
                     </Link>
 
-                    <button class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 p-4 text-center hover:from-purple-100 hover:to-violet-200 dark:hover:from-purple-900/50 dark:hover:to-violet-900/50 transition-all duration-300 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-[1.02]">
+                    <!-- Team Transfer (conditional display) -->
+                    <Link
+                        v-if="transferSuggestions.personal_websites_count > 0"
+                        :href="ssl.websites.index().url + '?team=personal'"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 p-4 text-center hover:from-purple-100 hover:to-violet-200 dark:hover:from-purple-900/50 dark:hover:to-violet-900/50 transition-all duration-300 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
                         <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
                             <div class="rounded-lg bg-purple-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <BarChart3 class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                <ArrowRightLeft class="h-6 w-6 text-purple-600 dark:text-purple-400" />
                             </div>
-                            <p class="text-sm font-bold text-purple-900 dark:text-purple-100">View Reports</p>
+                            <p class="text-sm font-bold text-purple-900 dark:text-purple-100">Transfer Sites</p>
+                            <p class="text-xs text-purple-700 dark:text-purple-300">{{ transferSuggestions.personal_websites_count }} personal</p>
                         </div>
-                    </button>
+                    </Link>
 
-                    <button class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 p-4 text-center hover:from-orange-100 hover:to-amber-200 dark:hover:from-orange-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-[1.02]">
+                    <!-- Team Management (always show if no transfers or fallback) -->
+                    <Link
+                        v-else
+                        href="/teams"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 p-4 text-center hover:from-purple-100 hover:to-violet-200 dark:hover:from-purple-900/50 dark:hover:to-violet-900/50 transition-all duration-300 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-purple-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Users class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <p class="text-sm font-bold text-purple-900 dark:text-purple-100">Manage Teams</p>
+                        </div>
+                    </Link>
+
+                    <!-- Settings/Alert Rules -->
+                    <Link
+                        href="/settings/alerts"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 p-4 text-center hover:from-orange-100 hover:to-amber-200 dark:hover:from-orange-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-orange-200 dark:border-orange-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
                         <div class="absolute top-0 right-0 w-16 h-16 bg-orange-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
                             <div class="rounded-lg bg-orange-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <AlertTriangle class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                                <Settings class="h-6 w-6 text-orange-600 dark:text-orange-400" />
                             </div>
-                            <p class="text-sm font-bold text-orange-900 dark:text-orange-100">Alert Rules</p>
+                            <p class="text-sm font-bold text-orange-900 dark:text-orange-100">Settings</p>
                         </div>
-                    </button>
+                    </Link>
+                </div>
+
+                <!-- Quick Team Access (when available) -->
+                <div v-if="transferSuggestions.quick_transfer_teams.length > 0" class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Team Access</h4>
+                        <Link
+                            href="/teams"
+                            class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                        >
+                            View All
+                        </Link>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <Link
+                            v-for="team in transferSuggestions.quick_transfer_teams"
+                            :key="team.id"
+                            :href="`/teams/${team.id}`"
+                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            <Users class="h-3 w-3 mr-1" />
+                            {{ team.name }}
+                            <span class="ml-1 text-gray-500 dark:text-gray-400">({{ team.member_count }})</span>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

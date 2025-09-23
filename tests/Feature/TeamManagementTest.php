@@ -699,7 +699,7 @@ test('user can access team settings page', function () {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('settings/Team')
+        ->component('Settings/Team')
         ->has('teams')
         ->has('roleDescriptions')
         ->has('availableRoles')
@@ -723,7 +723,7 @@ test('team member can view team details', function () {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('settings/TeamDetails')
+        ->component('Settings/Team')
         ->has('team')
         ->has('members')
         ->has('pendingInvitations')

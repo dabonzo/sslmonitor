@@ -23,7 +23,7 @@ test('user can view alert configurations', function () {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('Settings/Alerts')
+        ->component('Alerts/Index')
         ->has('alertConfigurations', 3)
     );
 });

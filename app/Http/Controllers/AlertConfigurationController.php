@@ -62,7 +62,7 @@ class AlertConfigurationController extends Controller
             ->orderBy('alert_type')
             ->get();
 
-        return Inertia::render('Settings/Alerts', [
+        return Inertia::render('Alerts/Index', [
             'alertConfigurations' => $alertConfigurations,
             'alertsByWebsite' => $alertsByWebsite,
             'websites' => $websites,
@@ -85,6 +85,40 @@ class AlertConfigurationController extends Controller
                 AlertConfiguration::LEVEL_URGENT => 'Urgent',
                 AlertConfiguration::LEVEL_CRITICAL => 'Critical',
             ],
+        ]);
+    }
+
+    public function notifications(Request $request): Response
+    {
+        $user = $request->user();
+
+        // Get recent notifications/alerts
+        $recentAlerts = []; // TODO: Implement alert history model
+
+        return Inertia::render('Alerts/Notifications', [
+            'recentAlerts' => $recentAlerts,
+            'notificationSettings' => [
+                'email_enabled' => true,
+                'slack_enabled' => false,
+                'webhook_enabled' => false,
+            ]
+        ]);
+    }
+
+    public function history(Request $request): Response
+    {
+        $user = $request->user();
+
+        // Get alert history
+        $alertHistory = []; // TODO: Implement alert history model
+
+        return Inertia::render('Alerts/History', [
+            'alertHistory' => $alertHistory,
+            'filters' => [
+                'type' => $request->get('type', 'all'),
+                'level' => $request->get('level', 'all'),
+                'date_range' => $request->get('date_range', '7_days'),
+            ]
         ]);
     }
 

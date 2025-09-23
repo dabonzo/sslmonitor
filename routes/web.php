@@ -24,11 +24,17 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     Route::post('websites/{website}/transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'transferToTeam'])->name('websites.transfer-to-team');
     Route::post('websites/{website}/transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'transferToPersonal'])->name('websites.transfer-to-personal');
     Route::get('websites/{website}/transfer-options', [App\Http\Controllers\WebsiteController::class, 'getTransferOptions'])->name('websites.transfer-options');
+
+    // Bulk transfer routes
+    Route::post('websites/bulk-transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToTeam'])->name('websites.bulk-transfer-to-team');
+    Route::post('websites/bulk-transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToPersonal'])->name('websites.bulk-transfer-to-personal');
 });
 
 // Alert Configuration Routes
 Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->group(function () {
     Route::get('/', [App\Http\Controllers\AlertConfigurationController::class, 'index'])->name('index');
+    Route::get('/notifications', [App\Http\Controllers\AlertConfigurationController::class, 'notifications'])->name('notifications');
+    Route::get('/history', [App\Http\Controllers\AlertConfigurationController::class, 'history'])->name('history');
     Route::put('/{alertConfiguration}', [App\Http\Controllers\AlertConfigurationController::class, 'update'])->name('update');
     Route::post('/{alertConfiguration}/test', [App\Http\Controllers\AlertConfigurationController::class, 'testAlert'])->name('test');
 });

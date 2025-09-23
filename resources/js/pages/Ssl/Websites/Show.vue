@@ -5,8 +5,8 @@ import { ref, onMounted } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Users, ArrowRightLeft, User, Shield, ChevronDown } from 'lucide-vue-next';
+import { Users, ArrowRightLeft, User, Shield } from 'lucide-vue-next';
+import SmartTeamPicker from '@/components/team/SmartTeamPicker.vue';
 
 interface SslCertificate {
   id: number;
@@ -64,6 +64,7 @@ const props = defineProps<Props>();
 
 const transferOptions = ref<TransferOptions | null>(null);
 const selectedTeam = ref<Team | null>(null);
+const selectedTeamId = ref<number | null>(null);
 const isTransferring = ref(false);
 const isLoadingTransferOptions = ref(false);
 
@@ -84,6 +85,12 @@ const loadTransferOptions = async () => {
   }
 };
 
+// Team selection handler
+const handleTeamSelected = (team: Team | null) => {
+  selectedTeam.value = team;
+  selectedTeamId.value = team?.id || null;
+};
+
 // Transfer to team
 const transferToTeam = () => {
   if (!selectedTeam.value || isTransferring.value) return;
@@ -95,6 +102,7 @@ const transferToTeam = () => {
     onFinish: () => {
       isTransferring.value = false;
       selectedTeam.value = null;
+      selectedTeamId.value = null;
       loadTransferOptions(); // Refresh transfer options
     }
   });
@@ -210,38 +218,46 @@ onMounted(() => {
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer to Team</h3>
               </div>
 
-              <div v-if="transferOptions && transferOptions.teams.length > 0" class="space-y-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="w-full justify-between">
-                      <span v-if="selectedTeam">{{ selectedTeam.name }}</span>
-                      <span v-else class="text-muted-foreground">Select a team...</span>
-                      <ChevronDown class="h-4 w-4 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent class="w-56">
-                    <DropdownMenuItem
-                      v-for="team in transferOptions.teams"
-                      :key="team.id"
-                      @click="selectedTeam = team"
-                      class="cursor-pointer"
-                    >
-                      <div class="flex flex-col">
-                        <span class="font-medium">{{ team.name }}</span>
-                        <span v-if="team.description" class="text-xs text-muted-foreground">{{ team.description }}</span>
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div v-if="transferOptions && transferOptions.teams.length > 0" class="space-y-4">
+                <!-- Enhanced Team Picker -->
+                <div class="space-y-3">
+                  <SmartTeamPicker
+                    :teams="transferOptions.teams"
+                    :selected-team-id="selectedTeamId"
+                    @team-selected="handleTeamSelected"
+                    placeholder="Select a team for this website..."
+                    search-placeholder="Search your teams..."
+                    :show-member-count="true"
+                    :show-user-role="true"
+                    :max-displayed-teams="50"
+                  />
 
-                <Button
-                  @click="transferToTeam"
-                  :disabled="!selectedTeam || isTransferring"
-                  class="w-full"
-                >
-                  <Users class="h-4 w-4 mr-2" />
-                  {{ isTransferring ? 'Transferring...' : 'Transfer to Team' }}
-                </Button>
+                  <!-- Transfer Preview -->
+                  <div v-if="selectedTeam" class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center space-x-3">
+                      <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                        <Users class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div class="flex-1">
+                        <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                          Ready to transfer to {{ selectedTeam.name }}
+                        </p>
+                        <p class="text-xs text-blue-700 dark:text-blue-300">
+                          Team members will gain access according to their roles
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    @click="transferToTeam"
+                    :disabled="!selectedTeam || isTransferring"
+                    class="w-full"
+                  >
+                    <Users class="h-4 w-4 mr-2" />
+                    {{ isTransferring ? 'Transferring...' : 'Transfer to Team' }}
+                  </Button>
+                </div>
               </div>
 
               <div v-else-if="transferOptions" class="text-center py-4">

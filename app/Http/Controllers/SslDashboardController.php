@@ -14,23 +14,32 @@ class SslDashboardController extends Controller
     {
         $user = $request->user();
 
-        // Get user's websites for SSL monitoring
-        $userWebsites = Website::where('user_id', $user->id)->get();
+        // Get user's team IDs for comprehensive website access
+        $userTeamIds = $user->teams()->pluck('teams.id');
+
+        // Get all websites accessible to user (personal + team websites)
+        $allUserWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
+            $q->where('user_id', $user->id) // Personal websites
+              ->orWhereIn('team_id', $userTeamIds); // Team websites
+        })->with('team')->get();
 
         // Calculate SSL statistics
-        $sslStatistics = $this->calculateSslStatistics($userWebsites);
+        $sslStatistics = $this->calculateSslStatistics($allUserWebsites);
 
         // Calculate uptime statistics
-        $uptimeStatistics = $this->calculateUptimeStatistics($userWebsites);
+        $uptimeStatistics = $this->calculateUptimeStatistics($allUserWebsites);
 
         // Get recent SSL activity from Spatie monitors
-        $recentSslActivity = $this->getRecentSslActivityFromSpatie($userWebsites);
+        $recentSslActivity = $this->getRecentSslActivityFromSpatie($allUserWebsites);
 
         // Get recent uptime activity
-        $recentUptimeActivity = $this->getRecentUptimeActivity($userWebsites);
+        $recentUptimeActivity = $this->getRecentUptimeActivity($allUserWebsites);
 
         // Get critical SSL alerts
-        $criticalAlerts = $this->getCriticalSslAlerts($userWebsites);
+        $criticalAlerts = $this->getCriticalSslAlerts($allUserWebsites);
+
+        // Get team transfer suggestions
+        $transferSuggestions = $this->getTeamTransferSuggestions($user, $allUserWebsites);
 
         return Inertia::render('Dashboard', [
             'sslStatistics' => $sslStatistics,
@@ -38,6 +47,7 @@ class SslDashboardController extends Controller
             'recentSslActivity' => $recentSslActivity,
             'recentUptimeActivity' => $recentUptimeActivity,
             'criticalAlerts' => $criticalAlerts,
+            'transferSuggestions' => $transferSuggestions,
         ]);
     }
 
@@ -240,5 +250,31 @@ class SslDashboardController extends Controller
                 'time_ago' => $monitor->updated_at->diffForHumans(),
             ];
         })->toArray();
+    }
+
+    private function getTeamTransferSuggestions($user, $allWebsites): array
+    {
+        // Get personal websites that can be transferred
+        $personalWebsites = $allWebsites->where('user_id', $user->id)->whereNull('team_id');
+
+        // Get user's teams where they can transfer websites (OWNER, ADMIN, MANAGER roles)
+        $availableTeams = $user->teams()
+            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->limit(5) // Show only top 5 for quick actions
+            ->get(['teams.id', 'teams.name']);
+
+        // Calculate suggestions
+        $suggestions = [
+            'personal_websites_count' => $personalWebsites->count(),
+            'available_teams_count' => $availableTeams->count(),
+            'quick_transfer_teams' => $availableTeams->map(fn($team) => [
+                'id' => $team->id,
+                'name' => $team->name,
+                'member_count' => $team->members()->count(),
+            ])->toArray(),
+            'should_show_suggestion' => $personalWebsites->count() > 0 && $availableTeams->count() > 0,
+        ];
+
+        return $suggestions;
     }
 }

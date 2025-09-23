@@ -27,7 +27,13 @@ pest()->extend(Tests\TestCase::class)
         }
 
         // Clear alert configurations for clean testing
-        \App\Models\AlertConfiguration::truncate();
+        try {
+            if (\Schema::hasTable('alert_configurations')) {
+                \App\Models\AlertConfiguration::truncate();
+            }
+        } catch (\Exception $e) {
+            // Skip alert configurations cleanup if there are issues
+        }
 
         // Clear websites except our real test websites
         \App\Models\Website::whereNotIn('url', [

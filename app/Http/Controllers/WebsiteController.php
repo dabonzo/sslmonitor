@@ -171,12 +171,27 @@ class WebsiteController extends Controller
         })->with('team')->get();
         $filterStats = $this->calculateFilterStatistics($allWebsites);
 
+        // Get available teams for transfer operations
+        $availableTeams = $user->teams()
+            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->get(['teams.id', 'teams.name', 'teams.description'])
+            ->map(function ($team) use ($user) {
+                return [
+                    'id' => $team->id,
+                    'name' => $team->name,
+                    'description' => $team->description,
+                    'member_count' => $team->members()->count(),
+                    'user_role' => $user->teams()->where('teams.id', $team->id)->first()->pivot->role ?? null,
+                ];
+            });
+
         return Inertia::render('Ssl/Websites/Index', [
             'websites' => $websitesArray,
             'filters' => $request->only(['search', 'filter', 'team']),
             'filterStats' => $filterStats,
             'current_filter' => $filter,
             'current_team_filter' => $teamFilter,
+            'availableTeams' => $availableTeams,
         ]);
     }
 
@@ -728,5 +743,87 @@ class WebsiteController extends Controller
             'ssl_enabled' => $website->ssl_monitoring_enabled,
             'uptime_enabled' => $website->uptime_monitoring_enabled,
         ];
+    }
+
+    /**
+     * Bulk transfer websites to team
+     */
+    public function bulkTransferToTeam(Request $request)
+    {
+        $request->validate([
+            'website_ids' => 'required|array',
+            'website_ids.*' => 'exists:websites,id',
+            'team_id' => 'required|exists:teams,id',
+        ]);
+
+        $user = $request->user();
+
+        // Verify user has permission to transfer to this team
+        $team = $user->teams()
+            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->where('teams.id', $request->team_id)
+            ->first();
+
+        if (!$team) {
+            return redirect()->back()->with('error', 'You do not have permission to transfer websites to this team.');
+        }
+
+        // Get websites that belong to the user and are personal (not already in a team)
+        $websites = Website::whereIn('id', $request->website_ids)
+            ->where('user_id', $user->id)
+            ->whereNull('team_id')
+            ->get();
+
+        if ($websites->isEmpty()) {
+            return redirect()->back()->with('error', 'No personal websites found to transfer.');
+        }
+
+        // Transfer websites to team
+        $websites->each(function ($website) use ($request) {
+            $website->update(['team_id' => $request->team_id]);
+        });
+
+        return redirect()->back()->with('success', "Successfully transferred {$websites->count()} websites to {$team->name}.");
+    }
+
+    /**
+     * Bulk transfer websites to personal
+     */
+    public function bulkTransferToPersonal(Request $request)
+    {
+        $request->validate([
+            'website_ids' => 'required|array',
+            'website_ids.*' => 'exists:websites,id',
+        ]);
+
+        $user = $request->user();
+
+        // Get user's team IDs where they have transfer permissions
+        $userTeamIds = $user->teams()
+            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->pluck('teams.id');
+
+        // Get websites that belong to the user's teams
+        $websites = Website::whereIn('id', $request->website_ids)
+            ->where(function ($q) use ($user, $userTeamIds) {
+                $q->where('user_id', $user->id) // User owns the website
+                  ->orWhereIn('team_id', $userTeamIds); // Or website is in user's team with permissions
+            })
+            ->whereNotNull('team_id')
+            ->get();
+
+        if ($websites->isEmpty()) {
+            return redirect()->back()->with('error', 'No team websites found to transfer.');
+        }
+
+        // Transfer websites to personal (remove team_id)
+        $websites->each(function ($website) use ($user) {
+            $website->update([
+                'team_id' => null,
+                'user_id' => $user->id, // Ensure ownership is set to current user
+            ]);
+        });
+
+        return redirect()->back()->with('success', "Successfully transferred {$websites->count()} websites to your personal account.");
     }
 }

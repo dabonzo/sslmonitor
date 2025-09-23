@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { type BreadcrumbItem } from '@/types';
+import ModernSettingsLayout from '@/layouts/ModernSettingsLayout.vue';
+import { Plus, Settings } from 'lucide-vue-next';
 
 interface AlertConfiguration {
     id: number;
@@ -54,12 +56,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Alert settings',
-        href: '/alerts',
-    },
-];
+// Component state
+const showAddAlertDialog = ref(false);
 
 // Get alert level color
 const getAlertLevelColor = (level: string) => {
@@ -76,15 +74,82 @@ const getAlertLevelColor = (level: string) => {
 <template>
     <Head title="Alert Settings" />
 
-    <AppLayout>
-        <SettingsLayout :breadcrumb-items="breadcrumbItems">
+    <ModernSettingsLayout title="Alert Settings">
             <div class="space-y-6">
                 <!-- Alert Configurations Overview -->
                 <Card class="p-6">
-                    <HeadingSmall title="Alert Configurations" />
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">
-                        Manage your SSL certificate and website monitoring alerts.
-                    </p>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <HeadingSmall title="Alert Configurations" />
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Manage your SSL certificate and website monitoring alerts.
+                            </p>
+                        </div>
+                        <Dialog v-model:open="showAddAlertDialog">
+                            <DialogTrigger as-child>
+                                <Button class="h-11 px-6">
+                                    <Plus class="h-4 w-4 mr-2" />
+                                    Add Alert
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent class="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Create New Alert</DialogTitle>
+                                </DialogHeader>
+                                <Form action="/settings/alerts" method="post" class="space-y-4" #default="{ errors, processing }">
+                                    <div class="space-y-2">
+                                        <Label for="alert_type">Alert Type</Label>
+                                        <select
+                                            id="alert_type"
+                                            name="alert_type"
+                                            required
+                                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                                        >
+                                            <option value="">Select alert type...</option>
+                                            <option v-for="(label, type) in alertTypes" :key="type" :value="type">
+                                                {{ label }}
+                                            </option>
+                                        </select>
+                                        <p v-if="errors.alert_type" class="text-sm text-red-600">{{ errors.alert_type }}</p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <Label for="alert_level">Alert Level</Label>
+                                        <select
+                                            id="alert_level"
+                                            name="alert_level"
+                                            required
+                                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                                        >
+                                            <option value="">Select alert level...</option>
+                                            <option v-for="(label, level) in alertLevels" :key="level" :value="level">
+                                                {{ label }}
+                                            </option>
+                                        </select>
+                                        <p v-if="errors.alert_level" class="text-sm text-red-600">{{ errors.alert_level }}</p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <Label for="threshold_days">Threshold Days (optional)</Label>
+                                        <Input
+                                            id="threshold_days"
+                                            name="threshold_days"
+                                            type="number"
+                                            placeholder="e.g., 7 days before expiry"
+                                            class="w-full"
+                                        />
+                                        <p v-if="errors.threshold_days" class="text-sm text-red-600">{{ errors.threshold_days }}</p>
+                                    </div>
+                                    <div class="flex justify-end gap-2">
+                                        <Button type="button" variant="outline" @click="showAddAlertDialog = false">
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit" :disabled="processing">
+                                            {{ processing ? 'Creating...' : 'Create Alert' }}
+                                        </Button>
+                                    </div>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
 
                     <!-- Alert Statistics -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -192,12 +257,12 @@ const getAlertLevelColor = (level: string) => {
                         <p class="text-gray-600 dark:text-gray-400 mb-4">
                             Start monitoring your websites by adding some alert configurations.
                         </p>
-                        <Button>
+                        <Button @click="showAddAlertDialog = true">
+                            <Plus class="h-4 w-4 mr-2" />
                             Add First Alert
                         </Button>
                     </div>
                 </Card>
             </div>
-        </SettingsLayout>
-    </AppLayout>
+    </ModernSettingsLayout>
 </template>

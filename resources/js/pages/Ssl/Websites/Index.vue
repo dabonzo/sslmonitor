@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft } from 'lucide-vue-next';
 import ssl from '@/routes/ssl';
+import BulkTransferModal from '@/components/team/BulkTransferModal.vue';
 
 interface SslCertificate {
   status: string;
@@ -42,6 +44,14 @@ interface PaginatedWebsites {
   meta: any;
 }
 
+interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  member_count?: number;
+  user_role?: string;
+}
+
 interface Props {
   websites: PaginatedWebsites;
   filters: {
@@ -56,6 +66,7 @@ interface Props {
     expiring_soon: number;
     critical: number;
   };
+  availableTeams?: Team[];
 }
 
 interface WebsiteDetails {
@@ -106,6 +117,12 @@ const bulkActionLoading = ref(false);
 const selectedWebsite = ref<WebsiteDetails | null>(null);
 const loading = ref(false);
 const deleting = ref<number | null>(null);
+
+// Bulk transfer modal state
+const showBulkTransferModal = ref(false);
+const selectedWebsitesForTransfer = computed(() =>
+  props.websites.data.filter(website => selectedWebsites.value.includes(website.id))
+);
 
 const openWebsiteModal = async (website: Website) => {
   loading.value = true;
@@ -328,6 +345,81 @@ const bulkCheck = async () => {
     bulkActionLoading.value = false;
   }
 };
+
+// Bulk transfer functions
+const openBulkTransferModal = () => {
+  if (selectedWebsites.value.length === 0) return;
+  showBulkTransferModal.value = true;
+};
+
+const closeBulkTransferModal = () => {
+  showBulkTransferModal.value = false;
+};
+
+const handleTransferCompleted = () => {
+  clearSelection();
+  // Refresh the page data
+  router.reload({ only: ['websites'] });
+};
+
+// Quick inline transfer function
+const quickTransferToFirstTeam = (website: Website) => {
+  if (!props.availableTeams || props.availableTeams.length === 0) return;
+
+  const firstTeam = props.availableTeams[0];
+
+  if (confirm(`Transfer "${website.name}" to ${firstTeam.name}?`)) {
+    router.post(`/ssl/websites/${website.id}/transfer-to-team`, {
+      team_id: firstTeam.id
+    }, {
+      onSuccess: () => {
+        // Refresh the page data
+        router.reload({ only: ['websites'] });
+      },
+      onError: (errors) => {
+        console.error('Quick transfer failed:', errors);
+        alert('Transfer failed. Please try again.');
+      }
+    });
+  }
+};
+
+// Reactive filtering with debounced search
+let searchTimeout: NodeJS.Timeout | null = null;
+
+const performFilterUpdate = () => {
+  const params: any = {};
+
+  if (searchQuery.value) params.search = searchQuery.value;
+  if (activeFilter.value !== 'all') params.filter = activeFilter.value;
+  if (activeTeam.value !== 'all') params.team = activeTeam.value;
+
+  router.get(ssl.websites.index().url, params, {
+    preserveState: true,
+    replace: true
+  });
+};
+
+// Watch for search query changes with debouncing
+watch(searchQuery, () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+
+  searchTimeout = setTimeout(() => {
+    performFilterUpdate();
+  }, 500); // 500ms debounce
+});
+
+// Watch for immediate filter changes
+watch(activeFilter, () => {
+  performFilterUpdate();
+});
+
+// Watch for immediate team changes
+watch(activeTeam, () => {
+  performFilterUpdate();
+});
 </script>
 
 <template>
@@ -359,7 +451,6 @@ const bulkCheck = async () => {
               <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 v-model="searchQuery"
-                @keyup.enter="applyFilters"
                 type="text"
                 placeholder="Search websites..."
                 class="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -371,7 +462,6 @@ const bulkCheck = async () => {
             <!-- Team Toggle -->
             <select
               v-model="activeTeam"
-              @change="applyFilters"
               class="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option
@@ -400,7 +490,7 @@ const bulkCheck = async () => {
           <button
             v-for="filter in filterOptions"
             :key="filter.key"
-            @click="activeFilter = filter.key; applyFilters()"
+            @click="activeFilter = filter.key"
             class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors"
             :class="{
               'bg-primary text-primary-foreground': activeFilter === filter.key,
@@ -418,13 +508,25 @@ const bulkCheck = async () => {
           </button>
         </div>
 
-        <!-- Apply Filters Button -->
+        <!-- Bulk Actions and Status -->
         <div class="flex justify-between items-center">
-          <!-- Bulk Actions Bar -->
+          <!-- Enhanced Bulk Actions Bar -->
           <div v-if="hasSelection" class="flex items-center gap-3">
             <span class="text-sm text-muted-foreground">
               {{ selectedWebsites.length }} selected
             </span>
+
+            <!-- Team Transfer Button -->
+            <button
+              @click="openBulkTransferModal"
+              :disabled="bulkActionLoading"
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors disabled:opacity-50"
+            >
+              <ArrowRightLeft class="h-4 w-4 mr-1" />
+              Transfer
+            </button>
+
+            <!-- Run Checks Button -->
             <button
               @click="bulkCheck"
               :disabled="bulkActionLoading"
@@ -433,6 +535,8 @@ const bulkCheck = async () => {
               <Play class="h-4 w-4 mr-1" />
               Run Checks
             </button>
+
+            <!-- Delete Button -->
             <button
               @click="bulkDelete"
               :disabled="bulkActionLoading"
@@ -441,6 +545,8 @@ const bulkCheck = async () => {
               <Trash class="h-4 w-4 mr-1" />
               Delete
             </button>
+
+            <!-- Clear Selection -->
             <button
               @click="clearSelection"
               class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -451,13 +557,11 @@ const bulkCheck = async () => {
 
           <div v-else></div>
 
-          <button
-            @click="applyFilters"
-            class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            <Filter class="h-4 w-4 mr-2" />
-            Apply Filters
-          </button>
+          <!-- Live Filter Status -->
+          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+            Live filtering enabled
+          </div>
         </div>
       </div>
 
@@ -592,6 +696,18 @@ const bulkCheck = async () => {
                       <Eye class="h-3 w-3 mr-1" />
                       View
                     </button>
+
+                    <!-- Inline Quick Transfer -->
+                    <button
+                      v-if="website.team_badge.type === 'personal' && availableTeams && availableTeams.length > 0"
+                      @click="quickTransferToFirstTeam(website)"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors"
+                      :title="`Quick transfer to ${availableTeams[0]?.name}`"
+                    >
+                      <ArrowRightLeft class="h-3 w-3 mr-1" />
+                      Team
+                    </button>
+
                     <button
                       @click="editWebsite(website)"
                       class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
@@ -1143,5 +1259,14 @@ const bulkCheck = async () => {
         </div>
       </div>
     </div>
+
+    <!-- Bulk Transfer Modal -->
+    <BulkTransferModal
+      :is-open="showBulkTransferModal"
+      :selected-websites="selectedWebsitesForTransfer"
+      :available-teams="availableTeams || []"
+      @close="closeBulkTransferModal"
+      @transfer-completed="handleTransferCompleted"
+    />
   </DashboardLayout>
 </template>

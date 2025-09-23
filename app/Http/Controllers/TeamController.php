@@ -27,7 +27,7 @@ class TeamController extends Controller
         // Get all teams for display (combine owned and member teams)
         $allTeams = $userTeams->merge($ownedTeams)->unique('id');
 
-        return Inertia::render('settings/Team', [
+        return Inertia::render('Settings/Team', [
             'teams' => $allTeams->map(function ($team) use ($user) {
                 return [
                     'id' => $team->id,
@@ -82,7 +82,7 @@ class TeamController extends Controller
 
         $team->load(['teamMembers.user', 'pendingInvitations.invitedBy', 'websites']);
 
-        return Inertia::render('settings/TeamDetails', [
+        return Inertia::render('Settings/Team', [
             'team' => [
                 'id' => $team->id,
                 'name' => $team->name,
