@@ -28,6 +28,11 @@ interface Website {
   ssl_status: string;
   ssl_days_remaining: number | null;
   latest_ssl_certificate: SslCertificate | null;
+  team_badge: {
+    type: 'team' | 'personal';
+    name: string | null;
+    color: string;
+  };
   created_at: string;
 }
 
@@ -244,7 +249,7 @@ const filterOptions = [
 ];
 
 const teamOptions = [
-  { key: 'all', label: 'All Teams' },
+  { key: 'all', label: 'All Websites' },
   { key: 'personal', label: 'Personal Sites' },
   { key: 'team', label: 'Team Sites' }
 ];
@@ -510,9 +515,13 @@ const bulkCheck = async () => {
                   <div>
                     <div class="font-medium text-foreground flex items-center gap-2">
                       {{ website.name }}
-                      <!-- Team Badge Placeholder -->
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        Personal
+                      <!-- Dynamic Team Badge -->
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                            :class="{
+                              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
+                              'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                            }">
+                        {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
                       </span>
                     </div>
                     <div class="text-sm text-muted-foreground">{{ website.url }}</div>
@@ -548,8 +557,12 @@ const bulkCheck = async () => {
                   <span v-else class="text-gray-500 text-sm">N/A</span>
                 </td>
                 <td class="p-4">
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    Personal
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                        :class="{
+                          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
+                          'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                        }">
+                    {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
                   </span>
                 </td>
                 <td class="p-4" @click.stop>

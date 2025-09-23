@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, usePage, Form, router } from '@inertiajs/vue3';
+import { Head, Form, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,12 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import HeadingSmall from '@/components/HeadingSmall.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
-// Note: using direct URL since team routes are auto-generated
-import { type BreadcrumbItem } from '@/types';
+import ModernSettingsLayout from '@/layouts/ModernSettingsLayout.vue';
+import { Users, UserPlus, Crown, Shield, Eye, Plus } from 'lucide-vue-next';
 
 interface Team {
     id: number;
@@ -33,13 +29,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Team settings',
-        href: '/settings/team',
-    },
-];
 
 // Component state
 const showCreateTeamDialog = ref(false);
@@ -68,26 +57,24 @@ const viewTeamDetails = (teamId: number) => {
 <template>
     <Head title="Team Settings" />
 
-    <AppLayout>
-        <SettingsLayout>
-            <template #header>
-                <HeadingSmall :breadcrumb-items="breadcrumbItems">
-                    Team Settings
-                </HeadingSmall>
-            </template>
-
-            <div class="space-y-6">
-                <!-- Header Section -->
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-medium">Your Teams</h3>
-                        <p class="text-sm text-muted-foreground">
-                            Manage your team memberships and create new teams for collaborative monitoring.
-                        </p>
+    <ModernSettingsLayout title="Team Settings">
+        <div class="space-y-8">
+            <!-- Team Management Section -->
+            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
+                            <Users class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Management</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Manage your team memberships and collaboration</p>
+                        </div>
                     </div>
                     <Dialog v-model:open="showCreateTeamDialog">
                         <DialogTrigger as-child>
-                            <Button>
+                            <Button class="h-11 px-6">
+                                <Plus class="h-4 w-4 mr-2" />
                                 Create Team
                             </Button>
                         </DialogTrigger>
@@ -132,12 +119,16 @@ const viewTeamDetails = (teamId: number) => {
 
                 <!-- Empty State -->
                 <div v-if="userTeams.length === 0" class="text-center py-12">
-                    <div class="mx-auto max-w-md">
-                        <h3 class="text-lg font-medium text-muted-foreground mb-2">No teams yet</h3>
-                        <p class="text-sm text-muted-foreground mb-6">
+                    <div class="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-8 mx-auto max-w-md">
+                        <div class="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 mx-auto mb-4">
+                            <Users class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No teams yet</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                             Create your first team to collaborate with others on SSL monitoring.
                         </p>
-                        <Button @click="showCreateTeamDialog = true">
+                        <Button @click="showCreateTeamDialog = true" class="h-11 px-6">
+                            <Plus class="h-4 w-4 mr-2" />
                             Create Your First Team
                         </Button>
                     </div>
@@ -145,7 +136,7 @@ const viewTeamDetails = (teamId: number) => {
 
                 <!-- Teams List -->
                 <div v-else class="space-y-4">
-                    <Card v-for="team in userTeams" :key="team.id" class="p-6">
+                    <div v-for="team in userTeams" :key="team.id" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -172,91 +163,105 @@ const viewTeamDetails = (teamId: number) => {
                                     <span>Created by {{ team.created_by }}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2">
+                            <div class="flex gap-3">
                                 <Button
                                     variant="outline"
-                                    size="sm"
+                                    class="h-10 px-4"
                                     @click="viewTeamDetails(team.id)"
                                 >
+                                    <Eye class="h-4 w-4 mr-2" />
                                     View Details
                                 </Button>
                                 <Button
                                     v-if="team.is_owner"
-                                    size="sm"
+                                    class="h-10 px-4"
                                     @click="selectedTeam = team; showInviteMemberDialog = true"
                                 >
+                                    <UserPlus class="h-4 w-4 mr-2" />
                                     Invite Member
                                 </Button>
                             </div>
                         </div>
-                    </Card>
-                </div>
-
-                <!-- Role Permissions Info -->
-                <Card v-if="userTeams.length > 0" class="p-6">
-                    <h4 class="text-lg font-medium mb-4">Team Role Permissions</h4>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div v-for="(description, role) in roleDescriptions" :key="role" class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <Badge :class="getRoleColor(role)">{{ role }}</Badge>
-                            </div>
-                            <p class="text-sm text-muted-foreground">{{ description }}</p>
-                        </div>
                     </div>
-                </Card>
-
-                <!-- Invite Member Dialog -->
-                <Dialog v-model:open="showInviteMemberDialog">
-                    <DialogContent class="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Invite Team Member</DialogTitle>
-                        </DialogHeader>
-                        <Form
-                            v-if="selectedTeam"
-                            :action="`/settings/team/${selectedTeam.id}/invite`"
-                            method="post"
-                            class="space-y-4"
-                            #default="{ errors, processing }"
-                        >
-                            <div class="space-y-2">
-                                <Label for="email">Email Address</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Enter email address"
-                                    required
-                                    class="w-full"
-                                />
-                                <p v-if="errors.email" class="text-sm text-red-600">{{ errors.email }}</p>
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="role">Role</Label>
-                                <select
-                                    id="role"
-                                    name="role"
-                                    required
-                                    class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                                >
-                                    <option value="">Select a role...</option>
-                                    <option v-for="role in availableRoles.filter(r => r !== 'OWNER')" :key="role" :value="role">
-                                        {{ role }}
-                                    </option>
-                                </select>
-                                <p v-if="errors.role" class="text-sm text-red-600">{{ errors.role }}</p>
-                            </div>
-                            <div class="flex justify-end gap-2">
-                                <Button type="button" variant="outline" @click="showInviteMemberDialog = false">
-                                    Cancel
-                                </Button>
-                                <Button type="submit" :disabled="processing">
-                                    {{ processing ? 'Sending...' : 'Send Invitation' }}
-                                </Button>
-                            </div>
-                        </Form>
-                    </DialogContent>
-                </Dialog>
+                </div>
             </div>
-        </SettingsLayout>
-    </AppLayout>
+
+            <!-- Role Permissions Info -->
+            <div v-if="userTeams.length > 0" class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
+                        <Shield class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Role Permissions</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Understanding team member capabilities</p>
+                    </div>
+                </div>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div v-for="(description, role) in roleDescriptions" :key="role" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <Crown v-if="role === 'OWNER'" class="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <Shield v-else-if="role === 'ADMIN'" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <Users v-else-if="role === 'MANAGER'" class="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <Eye v-else class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            <Badge :class="getRoleColor(role)">{{ role }}</Badge>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invite Member Dialog -->
+        <Dialog v-model:open="showInviteMemberDialog">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Invite Team Member</DialogTitle>
+                </DialogHeader>
+                <Form
+                    v-if="selectedTeam"
+                    :action="`/settings/team/${selectedTeam.id}/invite`"
+                    method="post"
+                    class="space-y-4"
+                    #default="{ errors, processing }"
+                >
+                    <div class="space-y-2">
+                        <Label for="email">Email Address</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="Enter email address"
+                            required
+                            class="w-full"
+                        />
+                        <p v-if="errors.email" class="text-sm text-red-600">{{ errors.email }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <Label for="role">Role</Label>
+                        <select
+                            id="role"
+                            name="role"
+                            required
+                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                        >
+                            <option value="">Select a role...</option>
+                            <option v-for="role in availableRoles.filter(r => r !== 'OWNER')" :key="role" :value="role">
+                                {{ role }}
+                            </option>
+                        </select>
+                        <p v-if="errors.role" class="text-sm text-red-600">{{ errors.role }}</p>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <Button type="button" variant="outline" @click="showInviteMemberDialog = false">
+                            Cancel
+                        </Button>
+                        <Button type="submit" :disabled="processing">
+                            {{ processing ? 'Sending...' : 'Send Invitation' }}
+                        </Button>
+                    </div>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    </ModernSettingsLayout>
 </template>

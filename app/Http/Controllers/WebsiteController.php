@@ -24,7 +24,14 @@ class WebsiteController extends Controller
     {
         $user = $request->user();
 
-        $query = Website::where('user_id', $user->id);
+        // Get user's team IDs
+        $userTeamIds = $user->teams()->pluck('teams.id');
+
+        // Query websites owned personally OR assigned to user's teams
+        $query = Website::where(function ($q) use ($user, $userTeamIds) {
+            $q->where('user_id', $user->id) // Personal websites
+              ->orWhereIn('team_id', $userTeamIds); // Team websites
+        });
 
         // Search functionality
         if ($request->filled('search')) {
@@ -37,18 +44,16 @@ class WebsiteController extends Controller
 
         // Filter functionality for unified monitoring hub
         $filter = $request->get('filter', 'all');
-        $teamFilter = $request->get('team_filter', 'all'); // all, personal, team
+        $teamFilter = $request->get('team', 'all'); // all, personal, team
 
-        // Apply team filtering (placeholder for future team implementation)
+        // Apply team filtering
         if ($teamFilter === 'personal') {
-            // Future: Add team relationship filter
-            // $query->whereDoesntHave('team');
+            $query->whereNull('team_id');
         } elseif ($teamFilter === 'team') {
-            // Future: Add team relationship filter
-            // $query->whereHas('team');
+            $query->whereNotNull('team_id');
         }
 
-        $websites = $query->orderBy('created_at', 'desc')->paginate(15);
+        $websites = $query->with('team')->orderBy('created_at', 'desc')->paginate(15);
 
         // Transform websites with enhanced SSL and uptime data for unified monitoring hub
         $websites->through(function ($website) use ($monitorService) {
@@ -133,10 +138,14 @@ class WebsiteController extends Controller
                 'uptime_data' => $uptimeData,
                 'filter_flags' => $filterFlags,
                 'monitor_sync_status' => $monitor !== null,
-                'team_badge' => [
-                    'type' => 'personal', // Placeholder for team feature
+                'team_badge' => $website->team_id ? [
+                    'type' => 'team',
+                    'name' => $website->team->name,
+                    'color' => 'green',
+                ] : [
+                    'type' => 'personal',
                     'name' => null,
-                    'color' => 'blue',
+                    'color' => 'gray',
                 ],
                 'created_at' => $website->created_at,
                 'updated_at' => $website->updated_at,
@@ -156,7 +165,10 @@ class WebsiteController extends Controller
         ];
 
         // Calculate filter statistics for the filter bar
-        $allWebsites = Website::where('user_id', $user->id)->get();
+        $allWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
+            $q->where('user_id', $user->id) // Personal websites
+              ->orWhereIn('team_id', $userTeamIds); // Team websites
+        })->with('team')->get();
         $filterStats = $this->calculateFilterStatistics($allWebsites);
 
         return Inertia::render('Ssl/Websites/Index', [

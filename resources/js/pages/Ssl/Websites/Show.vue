@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Users, ArrowRightLeft, User, Shield, ChevronDown } from 'lucide-vue-next';
 
 interface SslCertificate {
   id: number;
@@ -20,6 +26,23 @@ interface SslCheck {
   error_message: string | null;
 }
 
+interface Team {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface CurrentOwner {
+  type: 'team' | 'personal';
+  id: number;
+  name: string;
+}
+
+interface TransferOptions {
+  teams: Team[];
+  current_owner: CurrentOwner;
+}
+
 interface Website {
   id: number;
   name: string;
@@ -37,7 +60,62 @@ interface Props {
   website: Website;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const transferOptions = ref<TransferOptions | null>(null);
+const selectedTeam = ref<Team | null>(null);
+const isTransferring = ref(false);
+const isLoadingTransferOptions = ref(false);
+
+// Load transfer options
+const loadTransferOptions = async () => {
+  if (isLoadingTransferOptions.value) return;
+
+  isLoadingTransferOptions.value = true;
+  try {
+    const response = await fetch(`/ssl/websites/${props.website.id}/transfer-options`);
+    if (response.ok) {
+      transferOptions.value = await response.json();
+    }
+  } catch (error) {
+    console.error('Failed to load transfer options:', error);
+  } finally {
+    isLoadingTransferOptions.value = false;
+  }
+};
+
+// Transfer to team
+const transferToTeam = () => {
+  if (!selectedTeam.value || isTransferring.value) return;
+
+  isTransferring.value = true;
+  router.post(`/ssl/websites/${props.website.id}/transfer-to-team`, {
+    team_id: selectedTeam.value.id
+  }, {
+    onFinish: () => {
+      isTransferring.value = false;
+      selectedTeam.value = null;
+      loadTransferOptions(); // Refresh transfer options
+    }
+  });
+};
+
+// Transfer to personal
+const transferToPersonal = () => {
+  if (isTransferring.value) return;
+
+  isTransferring.value = true;
+  router.post(`/ssl/websites/${props.website.id}/transfer-to-personal`, {}, {
+    onFinish: () => {
+      isTransferring.value = false;
+      loadTransferOptions(); // Refresh transfer options
+    }
+  });
+};
+
+onMounted(() => {
+  loadTransferOptions();
+});
 </script>
 
 <template>
@@ -88,6 +166,129 @@ defineProps<Props>();
           </span>
         </div>
       </div>
+
+      <!-- Team Management Section -->
+      <Card class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 border border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <div class="flex items-center space-x-3">
+            <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
+              <Users class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </div>
+            <div>
+              <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Management</CardTitle>
+              <CardDescription>Transfer website ownership between personal and team accounts</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent class="space-y-6">
+          <!-- Current Owner Display -->
+          <div v-if="transferOptions" class="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center space-x-3">
+              <div class="rounded-lg p-2" :class="transferOptions.current_owner.type === 'team' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-700'">
+                <Users v-if="transferOptions.current_owner.type === 'team'" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <User v-else class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Current Owner</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ transferOptions.current_owner.name }}</p>
+              </div>
+            </div>
+            <Badge
+              :variant="transferOptions.current_owner.type === 'team' ? 'default' : 'secondary'"
+              class="capitalize"
+            >
+              {{ transferOptions.current_owner.type }}
+            </Badge>
+          </div>
+
+          <!-- Transfer Actions -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Transfer to Team -->
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2">
+                <ArrowRightLeft class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer to Team</h3>
+              </div>
+
+              <div v-if="transferOptions && transferOptions.teams.length > 0" class="space-y-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <Button variant="outline" class="w-full justify-between">
+                      <span v-if="selectedTeam">{{ selectedTeam.name }}</span>
+                      <span v-else class="text-muted-foreground">Select a team...</span>
+                      <ChevronDown class="h-4 w-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent class="w-56">
+                    <DropdownMenuItem
+                      v-for="team in transferOptions.teams"
+                      :key="team.id"
+                      @click="selectedTeam = team"
+                      class="cursor-pointer"
+                    >
+                      <div class="flex flex-col">
+                        <span class="font-medium">{{ team.name }}</span>
+                        <span v-if="team.description" class="text-xs text-muted-foreground">{{ team.description }}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button
+                  @click="transferToTeam"
+                  :disabled="!selectedTeam || isTransferring"
+                  class="w-full"
+                >
+                  <Users class="h-4 w-4 mr-2" />
+                  {{ isTransferring ? 'Transferring...' : 'Transfer to Team' }}
+                </Button>
+              </div>
+
+              <div v-else-if="transferOptions" class="text-center py-4">
+                <div class="rounded-lg bg-gray-100 dark:bg-gray-700 p-4">
+                  <Shield class="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p class="text-sm text-gray-600 dark:text-gray-400">No teams available for transfer</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">You need OWNER, ADMIN, or MANAGER role in a team</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transfer to Personal -->
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2">
+                <ArrowRightLeft class="h-4 w-4 text-green-600 dark:text-green-400" />
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer to Personal</h3>
+              </div>
+
+              <div class="space-y-3">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Move this website back to your personal account
+                </p>
+
+                <Button
+                  @click="transferToPersonal"
+                  :disabled="isTransferring || (transferOptions && transferOptions.current_owner.type === 'personal')"
+                  variant="outline"
+                  class="w-full"
+                >
+                  <User class="h-4 w-4 mr-2" />
+                  {{ isTransferring ? 'Transferring...' : 'Transfer to Personal' }}
+                </Button>
+
+                <p v-if="transferOptions && transferOptions.current_owner.type === 'personal'" class="text-xs text-gray-500 dark:text-gray-500 text-center">
+                  Already owned personally
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="isLoadingTransferOptions" class="text-center py-4">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading transfer options...</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <!-- SSL Certificates -->
       <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">

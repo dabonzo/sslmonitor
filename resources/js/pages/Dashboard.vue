@@ -77,9 +77,10 @@ const stats = computed(() => [
     change: `${props.sslStatistics.total_websites} monitored`,
     trend: 'up',
     icon: Globe,
-    color: 'text-white',
-    bgGradient: 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700',
-    iconBg: 'bg-white/20 backdrop-blur-sm'
+    color: 'text-gray-700 dark:text-gray-200',
+    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    iconBg: 'bg-gray-100 dark:bg-gray-700',
+    iconColor: 'text-gray-600 dark:text-gray-400'
   },
   {
     title: 'SSL Certificates',
@@ -89,9 +90,10 @@ const stats = computed(() => [
       : '0% valid',
     trend: 'up',
     icon: Shield,
-    color: 'text-white',
-    bgGradient: 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700',
-    iconBg: 'bg-white/20 backdrop-blur-sm'
+    color: 'text-gray-700 dark:text-gray-200',
+    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    iconBg: 'bg-green-100 dark:bg-green-900/30',
+    iconColor: 'text-green-600 dark:text-green-400'
   },
   {
     title: 'Uptime Status',
@@ -99,9 +101,10 @@ const stats = computed(() => [
     change: `${props.uptimeStatistics.healthy_monitors}/${props.uptimeStatistics.total_monitors} healthy`,
     trend: props.uptimeStatistics.uptime_percentage >= 95 ? 'up' : 'down',
     icon: Zap,
-    color: 'text-white',
-    bgGradient: 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600',
-    iconBg: 'bg-white/20 backdrop-blur-sm'
+    color: 'text-gray-700 dark:text-gray-200',
+    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    iconBg: props.uptimeStatistics.uptime_percentage >= 95 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30',
+    iconColor: props.uptimeStatistics.uptime_percentage >= 95 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
   },
   {
     title: 'Response Time',
@@ -113,9 +116,10 @@ const stats = computed(() => [
       : 'No data',
     trend: props.uptimeStatistics.avg_response_time < 1000 ? 'up' : 'down',
     icon: BarChart3,
-    color: 'text-white',
-    bgGradient: 'bg-gradient-to-br from-purple-500 via-violet-600 to-indigo-700',
-    iconBg: 'bg-white/20 backdrop-blur-sm'
+    color: 'text-gray-700 dark:text-gray-200',
+    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+    iconColor: 'text-blue-600 dark:text-blue-400'
   }
 ]);
 
@@ -159,28 +163,27 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                 v-for="stat in stats"
                 :key="stat.title"
                 :class="stat.bgGradient"
-                class="group relative overflow-hidden rounded-2xl p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer"
+                class="group relative overflow-hidden rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl cursor-pointer"
             >
-                <!-- Subtle animated background pattern -->
-                <div class="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors duration-300"></div>
-                <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+                <!-- Subtle hover effect -->
+                <div class="absolute inset-0 bg-gray-50/50 dark:bg-gray-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div class="relative flex items-center justify-between">
                     <div class="flex-1">
-                        <p class="text-white/80 text-sm font-medium mb-2">
+                        <p :class="stat.color" class="text-sm font-medium mb-2 opacity-70">
                             {{ stat.title }}
                         </p>
-                        <p class="text-white text-3xl font-bold mb-1 tracking-tight">
+                        <p :class="stat.color" class="text-3xl font-bold mb-1 tracking-tight">
                             {{ stat.value }}
                         </p>
-                        <p class="flex items-center text-white/90 text-sm font-medium">
-                            <TrendingUp v-if="stat.trend === 'up'" class="mr-1.5 h-4 w-4" />
-                            <TrendingDown v-else class="mr-1.5 h-4 w-4" />
+                        <p :class="stat.color" class="flex items-center text-sm font-medium opacity-80">
+                            <TrendingUp v-if="stat.trend === 'up'" class="mr-1.5 h-4 w-4 text-green-500" />
+                            <TrendingDown v-else class="mr-1.5 h-4 w-4 text-red-500" />
                             {{ stat.change }}
                         </p>
                     </div>
                     <div :class="stat.iconBg" class="rounded-xl p-3 group-hover:scale-110 transition-transform duration-300">
-                        <component :is="stat.icon" class="h-7 w-7 text-white drop-shadow-sm" />
+                        <component :is="stat.icon" :class="stat.iconColor" class="h-7 w-7" />
                     </div>
                 </div>
             </div>
@@ -193,14 +196,14 @@ const criticalAlerts = computed(() => props.criticalAlerts);
             <div class="lg:col-span-2 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 p-2.5">
-                            <Activity class="h-6 w-6 text-white" />
+                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
+                            <Activity class="h-6 w-6 text-gray-600 dark:text-gray-400" />
                         </div>
-                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                             SSL & Uptime Monitoring Overview
                         </h3>
                     </div>
-                    <button class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <button class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                         View All
                     </button>
                 </div>
@@ -208,90 +211,90 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                 <!-- Enhanced status grid -->
                 <div class="grid grid-cols-2 gap-6 h-80">
                     <!-- SSL Status -->
-                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900/30 dark:via-green-900/30 dark:to-teal-900/30 p-6 border border-emerald-100 dark:border-emerald-800 hover:shadow-lg transition-all duration-300">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100/20 dark:bg-gray-700/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
 
                         <div class="relative flex items-center justify-between mb-6">
-                            <h4 class="text-lg font-bold text-emerald-900 dark:text-emerald-100">SSL Certificates</h4>
-                            <div class="rounded-xl bg-emerald-500/10 p-3 group-hover:scale-110 transition-transform duration-300">
-                                <Shield class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">SSL Certificates</h4>
+                            <div class="rounded-xl bg-green-100 dark:bg-green-900/30 p-3 group-hover:scale-110 transition-transform duration-300">
+                                <Shield class="h-6 w-6 text-green-600 dark:text-green-400" />
                             </div>
                         </div>
 
                         <div class="relative space-y-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Valid</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Valid</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-emerald-200 dark:bg-emerald-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-emerald-500 to-green-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.valid_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-emerald-900 dark:text-emerald-100 min-w-[2rem]">{{ props.sslStatistics.valid_certificates }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.valid_certificates }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-amber-700 dark:text-amber-300">Expiring</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Expiring</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-amber-200 dark:bg-amber-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expiring_soon / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-amber-900 dark:text-amber-100 min-w-[2rem]">{{ props.sslStatistics.expiring_soon }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.expiring_soon }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-red-700 dark:text-red-300">Expired</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Expired</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-red-200 dark:bg-red-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-red-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expired_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-red-900 dark:text-red-100 min-w-[2rem]">{{ props.sslStatistics.expired_certificates }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.expired_certificates }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Uptime Status -->
-                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30 p-6 border border-blue-100 dark:border-blue-800 hover:shadow-lg transition-all duration-300">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100/20 dark:bg-gray-700/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
 
                         <div class="relative flex items-center justify-between mb-6">
-                            <h4 class="text-lg font-bold text-blue-900 dark:text-blue-100">Uptime Monitors</h4>
-                            <div class="rounded-xl bg-blue-500/10 p-3 group-hover:scale-110 transition-transform duration-300">
+                            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Uptime Monitors</h4>
+                            <div class="rounded-xl bg-blue-100 dark:bg-blue-900/30 p-3 group-hover:scale-110 transition-transform duration-300">
                                 <Wifi class="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
 
                         <div class="relative space-y-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Healthy</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Healthy</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-emerald-200 dark:bg-emerald-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-emerald-500 to-green-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.healthy_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-emerald-900 dark:text-emerald-100 min-w-[2rem]">{{ props.uptimeStatistics.healthy_monitors }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.healthy_monitors }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-red-700 dark:text-red-300">Down</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Down</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-red-200 dark:bg-red-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-red-500 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.down_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-red-900 dark:text-red-100 min-w-[2rem]">{{ props.uptimeStatistics.down_monitors }}</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.down_monitors }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Uptime</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Uptime</span>
                                 <div class="flex items-center">
-                                    <div class="w-16 bg-blue-200 dark:bg-blue-800 rounded-full h-2.5 mr-3">
-                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full transition-all duration-500"
+                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
+                                        <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
                                              :style="{ width: `${props.uptimeStatistics.uptime_percentage}%` }"></div>
                                     </div>
-                                    <span class="text-sm font-bold text-blue-900 dark:text-blue-100 min-w-[2rem]">{{ props.uptimeStatistics.uptime_percentage }}%</span>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.uptime_percentage }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -300,17 +303,17 @@ const criticalAlerts = computed(() => props.criticalAlerts);
             </div>
 
             <!-- Recent Activity -->
-            <div class="rounded-2xl bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50 dark:from-violet-900/30 dark:via-purple-900/30 dark:to-indigo-900/30 p-6 shadow-xl border border-violet-100 dark:border-violet-800">
+            <div class="rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 p-2.5">
-                            <Clock class="h-6 w-6 text-white" />
+                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
+                            <Clock class="h-6 w-6 text-gray-600 dark:text-gray-400" />
                         </div>
-                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                             Recent Activity
                         </h3>
                     </div>
-                    <button class="text-sm font-medium text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                    <button class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                         View All
                     </button>
                 </div>
@@ -323,23 +326,23 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                     >
                         <div class="flex items-center mt-1 space-x-2">
                             <div
-                                class="h-3 w-3 rounded-full shadow-sm"
+                                class="h-3 w-3 rounded-full"
                                 :class="{
-                                    'bg-gradient-to-r from-emerald-400 to-green-500 shadow-emerald-200': activity.type === 'success',
-                                    'bg-gradient-to-r from-red-400 to-pink-500 shadow-red-200': activity.type === 'error',
-                                    'bg-gradient-to-r from-amber-400 to-orange-500 shadow-amber-200': activity.type === 'warning'
+                                    'bg-green-500': activity.type === 'success',
+                                    'bg-red-500': activity.type === 'error',
+                                    'bg-amber-500': activity.type === 'warning'
                                 }"
                             />
                             <div class="rounded-lg p-1.5" :class="{
-                                'bg-emerald-100 dark:bg-emerald-900/30': activity.category === 'ssl',
+                                'bg-green-100 dark:bg-green-900/30': activity.category === 'ssl',
                                 'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
                             }">
-                                <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
                                 <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-900 dark:group-hover:text-purple-100 transition-colors">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
                                 {{ activity.title }}
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate">
