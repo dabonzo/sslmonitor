@@ -1,0 +1,234 @@
+Configure Button Test Debug
+
+Page source:
+<html lang="en" class=""><head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        
+        <script>
+            (function() {
+                const appearance = 'system';
+
+                if (appearance === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    if (prefersDark) {
+                        document.documentElement.classList.add('dark');
+                    }
+                }
+            })();
+        </script>
+
+        
+        <style>
+            html {
+                background-color: oklch(1 0 0);
+            }
+
+            html.dark {
+                background-color: oklch(0.145 0 0);
+            }
+        </style>
+
+        <title inertia="">Laravel</title>
+
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet">
+
+        <script type="module" src="http://localhost:5173/@vite/client"></script><script type="module" src="http://localhost:5173/resources/js/app.ts"></script><script type="module" src="http://localhost:5173/resources/js/pages/Settings/Alerts.vue"></script>            <script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://laravel.test/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+    <body class="font-sans antialiased">
+        <div id="app" data-page="{&quot;component&quot;:&quot;Settings\/Alerts&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;name&quot;:&quot;Laravel&quot;,&quot;quote&quot;:{&quot;message&quot;:&quot;He who is contented is rich.&quot;,&quot;author&quot;:&quot;Laozi&quot;},&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:1,&quot;name&quot;:&quot;Bonzo&quot;,&quot;email&quot;:&quot;bonzo@konjscina.com&quot;,&quot;email_verified_at&quot;:&quot;2025-09-23T22:09:33.000000Z&quot;,&quot;two_factor_secret&quot;:null,&quot;two_factor_recovery_codes&quot;:null,&quot;two_factor_confirmed_at&quot;:null,&quot;created_at&quot;:&quot;2025-09-23T20:45:14.000000Z&quot;,&quot;updated_at&quot;:&quot;2025-09-23T22:09:33.000000Z&quot;}},&quot;sidebarOpen&quot;:true,&quot;alertConfigurations&quot;:[{&quot;id&quot;:1,&quot;alert_type&quot;:&quot;ssl_expiry&quot;,&quot;alert_type_label&quot;:&quot;SSL Certificate Expiry&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;urgent&quot;,&quot;alert_level_color&quot;:&quot;bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200&quot;,&quot;threshold_days&quot;:7,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;SSL certificate for {website} expires in {days} days!&quot;,&quot;last_triggered_at&quot;:null},{&quot;id&quot;:2,&quot;alert_type&quot;:&quot;uptime_down&quot;,&quot;alert_type_label&quot;:&quot;Website Down&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;critical&quot;,&quot;alert_level_color&quot;:&quot;bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200&quot;,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;Website {website} is down!&quot;,&quot;last_triggered_at&quot;:null}],&quot;alertsByWebsite&quot;:[{&quot;website&quot;:{&quot;id&quot;:1,&quot;name&quot;:&quot;Office Manager Pro&quot;,&quot;url&quot;:&quot;https:\/\/omp.office-manager-pro.com&quot;},&quot;alerts&quot;:[{&quot;id&quot;:1,&quot;alert_type&quot;:&quot;ssl_expiry&quot;,&quot;alert_type_label&quot;:&quot;SSL Certificate Expiry&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;urgent&quot;,&quot;alert_level_color&quot;:&quot;bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200&quot;,&quot;threshold_days&quot;:7,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;SSL certificate for {website} expires in {days} days!&quot;,&quot;last_triggered_at&quot;:null},{&quot;id&quot;:2,&quot;alert_type&quot;:&quot;uptime_down&quot;,&quot;alert_type_label&quot;:&quot;Website Down&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;critical&quot;,&quot;alert_level_color&quot;:&quot;bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200&quot;,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;Website {website} is down!&quot;,&quot;last_triggered_at&quot;:null}]},{&quot;website&quot;:{&quot;id&quot;:2,&quot;name&quot;:&quot;RedGas Austria&quot;,&quot;url&quot;:&quot;https:\/\/www.redgas.at&quot;},&quot;alerts&quot;:[{&quot;id&quot;:1,&quot;alert_type&quot;:&quot;ssl_expiry&quot;,&quot;alert_type_label&quot;:&quot;SSL Certificate Expiry&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;urgent&quot;,&quot;alert_level_color&quot;:&quot;bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200&quot;,&quot;threshold_days&quot;:7,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;SSL certificate for {website} expires in {days} days!&quot;,&quot;last_triggered_at&quot;:null},{&quot;id&quot;:2,&quot;alert_type&quot;:&quot;uptime_down&quot;,&quot;alert_type_label&quot;:&quot;Website Down&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;critical&quot;,&quot;alert_level_color&quot;:&quot;bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200&quot;,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;Website {website} is down!&quot;,&quot;last_triggered_at&quot;:null}]},{&quot;website&quot;:{&quot;id&quot;:3,&quot;name&quot;:&quot;Fairnando&quot;,&quot;url&quot;:&quot;https:\/\/www.fairnando.at&quot;},&quot;alerts&quot;:[{&quot;id&quot;:1,&quot;alert_type&quot;:&quot;ssl_expiry&quot;,&quot;alert_type_label&quot;:&quot;SSL Certificate Expiry&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;urgent&quot;,&quot;alert_level_color&quot;:&quot;bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200&quot;,&quot;threshold_days&quot;:7,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;SSL certificate for {website} expires in {days} days!&quot;,&quot;last_triggered_at&quot;:null},{&quot;id&quot;:2,&quot;alert_type&quot;:&quot;uptime_down&quot;,&quot;alert_type_label&quot;:&quot;Website Down&quot;,&quot;enabled&quot;:true,&quot;alert_level&quot;:&quot;critical&quot;,&quot;alert_level_color&quot;:&quot;bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200&quot;,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:null,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;],&quot;custom_message&quot;:&quot;Website {website} is down!&quot;,&quot;last_triggered_at&quot;:null}]}],&quot;websites&quot;:[{&quot;id&quot;:1,&quot;name&quot;:&quot;Office Manager Pro&quot;,&quot;url&quot;:&quot;https:\/\/omp.office-manager-pro.com&quot;},{&quot;id&quot;:2,&quot;name&quot;:&quot;RedGas Austria&quot;,&quot;url&quot;:&quot;https:\/\/www.redgas.at&quot;},{&quot;id&quot;:3,&quot;name&quot;:&quot;Fairnando&quot;,&quot;url&quot;:&quot;https:\/\/www.fairnando.at&quot;}],&quot;defaultConfigurations&quot;:[{&quot;alert_type&quot;:&quot;lets_encrypt_renewal&quot;,&quot;alert_type_label&quot;:&quot;Let's Encrypt Renewal&quot;,&quot;enabled&quot;:true,&quot;threshold_days&quot;:3,&quot;threshold_response_time&quot;:null,&quot;alert_level&quot;:&quot;critical&quot;,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;]},{&quot;alert_type&quot;:&quot;ssl_invalid&quot;,&quot;alert_type_label&quot;:&quot;SSL Certificate Invalid&quot;,&quot;enabled&quot;:true,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:null,&quot;alert_level&quot;:&quot;critical&quot;,&quot;notification_channels&quot;:[&quot;email&quot;,&quot;dashboard&quot;]},{&quot;alert_type&quot;:&quot;response_time&quot;,&quot;alert_type_label&quot;:&quot;Response Time Monitoring&quot;,&quot;enabled&quot;:true,&quot;threshold_days&quot;:null,&quot;threshold_response_time&quot;:5000,&quot;alert_level&quot;:&quot;warning&quot;,&quot;notification_channels&quot;:[&quot;dashboard&quot;]}],&quot;alertTypes&quot;:{&quot;ssl_expiry&quot;:&quot;SSL Certificate Expiry&quot;,&quot;lets_encrypt_renewal&quot;:&quot;Let's Encrypt Renewal&quot;,&quot;ssl_invalid&quot;:&quot;SSL Certificate Invalid&quot;,&quot;uptime_down&quot;:&quot;Website Down&quot;,&quot;response_time&quot;:&quot;Response Time Monitoring&quot;},&quot;notificationChannels&quot;:{&quot;email&quot;:&quot;Email&quot;,&quot;slack&quot;:&quot;Slack&quot;,&quot;dashboard&quot;:&quot;Dashboard&quot;},&quot;alertLevels&quot;:{&quot;critical&quot;:&quot;Critical&quot;,&quot;urgent&quot;:&quot;Urgent&quot;,&quot;warning&quot;:&quot;Warning&quot;,&quot;info&quot;:&quot;Info&quot;}},&quot;url&quot;:&quot;\/settings\/alerts&quot;,&quot;version&quot;:&quot;fff2ea7fe2bae684d8ee23ff937fd8ef&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false}"></div>    
+
+</body></html>

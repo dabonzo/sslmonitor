@@ -54,7 +54,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => explode(',', env('LOG_STACK', 'single,queue,immediate-checks')),
             'ignore_exceptions' => false,
         ],
 
@@ -70,6 +70,55 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        // Enhanced logging channels for production automation
+        'queue' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/queue.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_QUEUE_DAYS', 7),
+            'replace_placeholders' => true,
+        ],
+
+        'immediate-checks' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/immediate-checks.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_IMMEDIATE_CHECKS_DAYS', 7),
+            'replace_placeholders' => true,
+        ],
+
+        'scheduler' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/scheduler.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_SCHEDULER_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        'ssl-monitoring' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ssl-monitoring.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_SSL_MONITORING_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        'uptime-monitoring' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/uptime-monitoring.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_UPTIME_MONITORING_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => 'error',
+            'days' => env('LOG_ERRORS_DAYS', 30),
             'replace_placeholders' => true,
         ],
 

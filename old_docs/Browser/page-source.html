@@ -1,0 +1,295 @@
+<html lang="en" class=""><head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        
+        <script>
+            (function() {
+                const appearance = 'system';
+
+                if (appearance === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    if (prefersDark) {
+                        document.documentElement.classList.add('dark');
+                    }
+                }
+            })();
+        </script>
+
+        
+        <style>
+            html {
+                background-color: oklch(1 0 0);
+            }
+
+            html.dark {
+                background-color: oklch(0.145 0 0);
+            }
+        </style>
+
+        <title inertia="">SSL Websites - Laravel</title>
+
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet">
+
+        <link rel="preload" as="style" href="http://laravel.test/build/assets/app-itDm3vpU.css"><link rel="preload" as="style" href="http://laravel.test/build/assets/DashboardLayout-CZIDDVgx.css"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/app-CicuVcg_.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/vendor-vue-Av8taua5.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/Index-2aWZoX0b.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/DashboardLayout-CAGKSzgr.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/index-BMnsp_rq.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/SmartTeamPicker.vue_vue_type_script_setup_true_lang-DqdMRbxm.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/vendor-ui-BsZXCrYv.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/AppLogoIcon.vue_vue_type_script_setup_true_lang-MmcL3DE4.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/_plugin-vue_export-helper-DlAUqK2U.js"><link rel="modulepreload" as="script" href="http://laravel.test/build/assets/index-CMWG4mbA.js"><link rel="stylesheet" href="http://laravel.test/build/assets/app-itDm3vpU.css"><link rel="stylesheet" href="http://laravel.test/build/assets/DashboardLayout-CZIDDVgx.css"><script type="module" src="http://laravel.test/build/assets/app-CicuVcg_.js"></script><script type="module" src="http://laravel.test/build/assets/Index-2aWZoX0b.js"></script>            <script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://laravel.test/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+<link rel="modulepreload" as="script" crossorigin="" href="/build/assets/Index-2aWZoX0b.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/vendor-vue-Av8taua5.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/DashboardLayout-CAGKSzgr.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/AppLogoIcon.vue_vue_type_script_setup_true_lang-MmcL3DE4.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/vendor-ui-BsZXCrYv.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/_plugin-vue_export-helper-DlAUqK2U.js"><link rel="stylesheet" crossorigin="" href="/build/assets/DashboardLayout-CZIDDVgx.css"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/index-BMnsp_rq.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/index-CMWG4mbA.js"><link rel="modulepreload" as="script" crossorigin="" href="/build/assets/SmartTeamPicker.vue_vue_type_script_setup_true_lang-DqdMRbxm.js"><style>
+    #nprogress {
+      pointer-events: none;
+    }
+
+    #nprogress .bar {
+      background: #4361ee;
+
+      position: fixed;
+      z-index: 1031;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 2px;
+    }
+
+    #nprogress .peg {
+      display: block;
+      position: absolute;
+      right: 0px;
+      width: 100px;
+      height: 100%;
+      box-shadow: 0 0 10px #4361ee, 0 0 5px #4361ee;
+      opacity: 1.0;
+
+      transform: rotate(3deg) translate(0px, -4px);
+    }
+
+    #nprogress .spinner {
+      display: block;
+      position: fixed;
+      z-index: 1031;
+      top: 15px;
+      right: 15px;
+    }
+
+    #nprogress .spinner-icon {
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+
+      border: solid 2px transparent;
+      border-top-color: #4361ee;
+      border-left-color: #4361ee;
+      border-radius: 50%;
+
+      animation: nprogress-spinner 400ms linear infinite;
+    }
+
+    .nprogress-custom-parent {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .nprogress-custom-parent #nprogress .spinner,
+    .nprogress-custom-parent #nprogress .bar {
+      position: absolute;
+    }
+
+    @keyframes nprogress-spinner {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style></head>
+    <body class="font-sans antialiased">
+        <div id="app" data-page="{&quot;component&quot;:&quot;Ssl\/Websites\/Index&quot;,&quot;props&quot;:{&quot;errors&quot;:{},&quot;name&quot;:&quot;Laravel&quot;,&quot;quote&quot;:{&quot;message&quot;:&quot;Simplicity is the ultimate sophistication.&quot;,&quot;author&quot;:&quot;Leonardo da Vinci&quot;},&quot;auth&quot;:{&quot;user&quot;:{&quot;id&quot;:2,&quot;name&quot;:&quot;Brenna Hoppe&quot;,&quot;email&quot;:&quot;test@example.com&quot;,&quot;email_verified_at&quot;:&quot;2025-09-23T20:45:20.000000Z&quot;,&quot;two_factor_secret&quot;:null,&quot;two_factor_recovery_codes&quot;:null,&quot;two_factor_confirmed_at&quot;:null,&quot;created_at&quot;:&quot;2025-09-23T20:45:20.000000Z&quot;,&quot;updated_at&quot;:&quot;2025-09-23T20:45:20.000000Z&quot;}},&quot;sidebarOpen&quot;:true,&quot;websites&quot;:{&quot;current_page&quot;:1,&quot;data&quot;:[],&quot;first_page_url&quot;:&quot;http:\/\/laravel.test\/ssl\/websites?page=1&quot;,&quot;from&quot;:null,&quot;last_page&quot;:1,&quot;last_page_url&quot;:&quot;http:\/\/laravel.test\/ssl\/websites?page=1&quot;,&quot;links&quot;:[{&quot;url&quot;:null,&quot;label&quot;:&quot;&amp;laquo; Previous&quot;,&quot;page&quot;:null,&quot;active&quot;:false},{&quot;url&quot;:&quot;http:\/\/laravel.test\/ssl\/websites?page=1&quot;,&quot;label&quot;:&quot;1&quot;,&quot;page&quot;:1,&quot;active&quot;:true},{&quot;url&quot;:null,&quot;label&quot;:&quot;Next &amp;raquo;&quot;,&quot;page&quot;:null,&quot;active&quot;:false}],&quot;next_page_url&quot;:null,&quot;path&quot;:&quot;http:\/\/laravel.test\/ssl\/websites&quot;,&quot;per_page&quot;:15,&quot;prev_page_url&quot;:null,&quot;to&quot;:null,&quot;total&quot;:0,&quot;meta&quot;:{&quot;current_page&quot;:1,&quot;from&quot;:null,&quot;last_page&quot;:1,&quot;path&quot;:&quot;http:\/\/laravel.test\/ssl\/websites&quot;,&quot;per_page&quot;:15,&quot;to&quot;:null,&quot;total&quot;:0}},&quot;filters&quot;:[],&quot;filterStats&quot;:{&quot;all&quot;:0,&quot;ssl_issues&quot;:0,&quot;uptime_issues&quot;:0,&quot;expiring_soon&quot;:0,&quot;critical&quot;:0},&quot;current_filter&quot;:&quot;all&quot;,&quot;current_team_filter&quot;:&quot;all&quot;,&quot;availableTeams&quot;:[]},&quot;url&quot;:&quot;\/ssl\/websites&quot;,&quot;version&quot;:&quot;4b4d9e136b279f3ea8a31bf95c92e135&quot;,&quot;clearHistory&quot;:false,&quot;encryptHistory&quot;:false}" data-v-app=""><!----><div data-v-59b38a35="" class="relative overflow-x-hidden font-nunito text-sm font-normal antialiased bg-background text-foreground toggle-sidebar vertical full"><div data-v-59b38a35="" class="fixed inset-0 z-50 bg-black/60 lg:hidden"></div><nav data-v-f2d76669="" data-v-59b38a35="" class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground ltr:left-0 rtl:right-0"><div data-v-f2d76669="" class="h-full bg-sidebar"><div data-v-f2d76669="" class="flex items-center justify-between px-4 py-3"><a data-v-f2d76669="" class="main-logo flex shrink-0 items-center" href="/dashboard"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="ml-[5px] h-8 w-8 flex-none fill-current text-primary"><defs><linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4F46E5;"></stop><stop offset="100%" style="stop-color:#7C3AED;"></stop></linearGradient></defs><path d="M16 2.5c-3.5 1.5-7 2.5-12 2.5v8c0 8 4.5 14.5 12 19 7.5-4.5 12-11 12-19v-8c-5 0-8.5-1-12-2.5z" fill="url(#shieldGradient)" stroke="currentColor" stroke-width="0.5"></path><rect x="10" y="8" width="12" height="10" rx="1" ry="1" fill="white" opacity="0.9"></rect><line x1="12" y1="10.5" x2="20" y2="10.5" stroke="currentColor" stroke-width="0.8" opacity="0.7"></line><line x1="12" y1="12.5" x2="18" y2="12.5" stroke="currentColor" stroke-width="0.8" opacity="0.7"></line><line x1="12" y1="14.5" x2="19" y2="14.5" stroke="currentColor" stroke-width="0.8" opacity="0.7"></line><rect x="14.5" y="12" width="3" height="2.5" fill="none" stroke="currentColor" stroke-width="0.8" rx="0.5"></rect><path d="M15.2 12v-0.8c0-0.4 0.4-0.8 0.8-0.8s0.8 0.4 0.8 0.8V12" fill="none" stroke="currentColor" stroke-width="0.8"></path><path d="M6 20 L8 20 L9 16 L11 24 L13 12 L14 20 L16 20" fill="none" stroke="white" stroke-width="1.5" opacity="0.8"></path><circle cx="25" cy="8" r="2.5" fill="#10B981" opacity="0.9"></circle><path d="M23.8 8 L24.8 9 L26.2 7" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round"></path></svg><span data-v-f2d76669="" class="text-2xl font-semibold align-middle text-sidebar-primary ltr:ml-1.5 rtl:mr-1.5 text-sidebar-foreground"> SSL Monitor </span></a></div><div data-v-f2d76669="" class="perfect-scrollbar relative h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden p-4 py-0"><ul data-v-f2d76669="" class="relative space-y-0.5 p-4 py-0 font-semibold"><li data-v-f2d76669="" class="menu nav-item"><a data-v-f2d76669="" class="nav-link group w-full" href="/dashboard"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-icon shrink-0 group-hover:!text-primary"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg><div data-v-f2d76669="" class="ltr:pl-3 rtl:pr-3"><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary">Dashboard</span><div data-v-f2d76669="" class="text-xs text-sidebar-muted">SSL &amp; Uptime overview</div></div></div></a></li><li data-v-f2d76669="" class="menu nav-item"><a data-v-f2d76669="" class="nav-link group w-full active" href="/ssl/websites"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor-icon shrink-0 group-hover:!text-primary"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><div data-v-f2d76669="" class="ltr:pl-3 rtl:pr-3"><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary">Websites</span><div data-v-f2d76669="" class="text-xs text-sidebar-muted">Manage monitored sites</div></div></div></a></li><li data-v-f2d76669="" class="menu nav-item"><button data-v-f2d76669="" type="button" class="nav-link group w-full"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-icon shrink-0 group-hover:!text-primary"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">SSL Certificates</span></div><div data-v-f2d76669="" class="rtl:rotate-180 transition-transform duration-200"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></div></button><ul data-v-f2d76669="" class="sub-menu text-gray-500" style="display: none;"><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/ssl/certificates">All Certificates</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/ssl/certificates/expiring">Expiring Soon</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/ssl/certificates/issues">Issues &amp; Alerts</a></li></ul></li><li data-v-f2d76669="" class="menu nav-item"><button data-v-f2d76669="" type="button" class="nav-link group w-full"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon shrink-0 group-hover:!text-primary"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">Uptime Monitoring</span></div><div data-v-f2d76669="" class="rtl:rotate-180 transition-transform duration-200"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></div></button><ul data-v-f2d76669="" class="sub-menu text-gray-500" style="display: none;"><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/uptime/status">Status Overview</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/uptime/performance">Response Times</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/uptime/incidents">Incidents</a></li></ul></li><li data-v-f2d76669="" class="menu nav-item"><button data-v-f2d76669="" type="button" class="nav-link group w-full"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-icon shrink-0 group-hover:!text-primary"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">Reports</span></div><div data-v-f2d76669="" class="rtl:rotate-180 transition-transform duration-200"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></div></button><ul data-v-f2d76669="" class="sub-menu text-gray-500" style="display: none;"><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/reports/ssl">SSL Reports</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/reports/uptime">Uptime Reports</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/reports/performance">Performance</a></li></ul></li><li data-v-f2d76669="" class="menu nav-item"><button data-v-f2d76669="" type="button" class="nav-link group w-full"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon shrink-0 group-hover:!text-primary"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">Alerts</span></div><div data-v-f2d76669="" class="rtl:rotate-180 transition-transform duration-200"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon h-4 w-4"><path d="m6 9 6 6 6-6"></path></svg></div></button><ul data-v-f2d76669="" class="sub-menu text-gray-500" style="display: none;"><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/alerts">Alert Rules</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/alerts/notifications">Notifications</a></li><li data-v-f2d76669=""><a data-v-f2d76669="" class="" href="/alerts/history">History</a></li></ul></li><li data-v-f2d76669="" class="menu nav-item"><a data-v-f2d76669="" class="nav-link group w-full" href="/settings/team"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon shrink-0 group-hover:!text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><div data-v-f2d76669="" class="ltr:pl-3 rtl:pr-3"><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary">Team</span><div data-v-f2d76669="" class="text-xs text-sidebar-muted">Team management</div></div></div></a></li><li data-v-f2d76669="" class="h-px w-full bg-white-light dark:bg-[#1b2e4b] my-4"></li><li data-v-f2d76669="" class="menu nav-item"><a data-v-f2d76669="" class="nav-link group w-full" href="/settings"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon shrink-0 group-hover:!text-primary"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg><div data-v-f2d76669="" class="ltr:pl-3 rtl:pr-3"><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary">Settings</span><div data-v-f2d76669="" class="text-xs text-sidebar-muted">Account &amp; preferences</div></div></div></a></li><li data-v-f2d76669="" class="menu nav-item"><a data-v-f2d76669="" class="nav-link group w-full" href="/help"><div data-v-f2d76669="" class="flex items-center"><svg data-v-f2d76669="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help-icon shrink-0 group-hover:!text-primary"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg><div data-v-f2d76669="" class="ltr:pl-3 rtl:pr-3"><span data-v-f2d76669="" class="text-sidebar-foreground group-hover:text-sidebar-primary">Help</span><div data-v-f2d76669="" class="text-xs text-sidebar-muted">Documentation &amp; support</div></div></div></a></li></ul></div></div></nav><div data-v-59b38a35="" class="main-container min-h-screen"><div data-v-59b38a35="" class="main-content flex min-h-screen flex-col"><header data-v-230ac461="" data-v-59b38a35="" class="z-40 bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900/30 dark:to-indigo-900/30 shadow-lg border-b border-blue-100 dark:border-blue-800"><div data-v-230ac461="" class="flex items-center justify-between p-4"><div data-v-230ac461="" class="flex items-center space-x-4"><button data-v-230ac461="" type="button" class="block rounded-xl bg-white/60 backdrop-blur-sm p-2.5 hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 lg:hidden transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10" data-sidebar-toggle=""><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu-icon h-5 w-5"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg></button><div data-v-230ac461="" class="hidden sm:block"><div data-v-230ac461="" class="flex items-center space-x-3"><div data-v-230ac461="" class="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 shadow-lg"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-icon h-6 w-6 text-white"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg></div><div data-v-230ac461=""><h1 data-v-230ac461="" class="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">Unified Monitoring Hub</h1><p data-v-230ac461="" class="text-sm text-blue-600 dark:text-blue-300 font-medium"> SSL Monitor v4 <!----></p></div></div></div></div><div data-v-230ac461="" class="flex items-center space-x-3"><div data-v-230ac461="" class="dropdown relative"><button data-v-230ac461="" type="button" class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon h-4 w-4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></button><div data-v-230ac461="" class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg p-4 shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700" style="display: none;"><div data-v-230ac461="" class="relative"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input data-v-230ac461="" type="text" placeholder="Search certificates, monitors..." class="w-full rounded-xl border border-blue-200 dark:border-blue-700 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-800 dark:text-white bg-white/80"></div></div></div><button data-v-230ac461="" type="button" class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-amber-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-amber-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon h-4 w-4"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button><button data-v-230ac461="" type="button" class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-purple-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-purple-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10" data-test="theme-customizer-toggle"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette-icon h-4 w-4"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></button><div data-v-230ac461="" class="dropdown relative"><button data-v-230ac461="" type="button" class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-red-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-red-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon h-4 w-4"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><span data-v-230ac461="" class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-[10px] text-white font-bold shadow-lg">3</span></button><div data-v-230ac461="" class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700" style="display: none;"><div data-v-230ac461="" class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl"><h3 data-v-230ac461="" class="font-bold text-blue-900 dark:text-blue-100">Notifications</h3></div><div data-v-230ac461="" class="max-h-64 overflow-y-auto"><div data-v-230ac461="" class="border-b border-gray-100/60 dark:border-gray-700/60 p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300"><div data-v-230ac461="" class="flex items-start space-x-3"><div data-v-230ac461="" class="mt-1 h-3 w-3 rounded-full shadow-sm bg-gradient-to-r from-amber-400 to-orange-500"></div><div data-v-230ac461="" class="flex-1"><p data-v-230ac461="" class="text-sm font-semibold text-gray-900 dark:text-white">SSL Certificate Expiring</p><p data-v-230ac461="" class="text-sm text-gray-600 dark:text-gray-300 mt-1">example.com certificate expires in 7 days</p><p data-v-230ac461="" class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">5 min ago</p></div></div></div><div data-v-230ac461="" class="border-b border-gray-100/60 dark:border-gray-700/60 p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300"><div data-v-230ac461="" class="flex items-start space-x-3"><div data-v-230ac461="" class="mt-1 h-3 w-3 rounded-full shadow-sm bg-gradient-to-r from-red-400 to-pink-500"></div><div data-v-230ac461="" class="flex-1"><p data-v-230ac461="" class="text-sm font-semibold text-gray-900 dark:text-white">Monitor Down</p><p data-v-230ac461="" class="text-sm text-gray-600 dark:text-gray-300 mt-1">api.example.com is unreachable</p><p data-v-230ac461="" class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">15 min ago</p></div></div></div><div data-v-230ac461="" class="border-b border-gray-100/60 dark:border-gray-700/60 p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300"><div data-v-230ac461="" class="flex items-start space-x-3"><div data-v-230ac461="" class="mt-1 h-3 w-3 rounded-full shadow-sm bg-gradient-to-r from-emerald-400 to-green-500"></div><div data-v-230ac461="" class="flex-1"><p data-v-230ac461="" class="text-sm font-semibold text-gray-900 dark:text-white">New Certificate Added</p><p data-v-230ac461="" class="text-sm text-gray-600 dark:text-gray-300 mt-1">shop.example.com has been added to monitoring</p><p data-v-230ac461="" class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">1 hour ago</p></div></div></div></div><div data-v-230ac461="" class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-b-xl"><a data-v-230ac461="" class="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors" href="/notifications"> View all notifications → </a></div></div></div><div data-v-230ac461="" class="dropdown relative"><button data-v-230ac461="" type="button" class="flex items-center space-x-3 rounded-xl p-2.5 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/20"><div data-v-230ac461="" class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon h-5 w-5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><div data-v-230ac461="" class="hidden sm:block text-left"><p data-v-230ac461="" class="text-sm font-bold text-gray-900 dark:text-white">Brenna Hoppe</p><p data-v-230ac461="" class="text-xs text-blue-600 dark:text-blue-300">Admin</p></div><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down-icon h-4 w-4 text-gray-600 dark:text-gray-300"><path d="m6 9 6 6 6-6"></path></svg></button><div data-v-230ac461="" class="absolute top-12 right-0 z-50 w-64 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700" style="display: none;"><div data-v-230ac461="" class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl"><div data-v-230ac461="" class="flex items-center space-x-3"><div data-v-230ac461="" class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon h-5 w-5 text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><div data-v-230ac461=""><p data-v-230ac461="" class="text-sm font-bold text-blue-900 dark:text-blue-100">Brenna Hoppe</p><p data-v-230ac461="" class="text-xs text-blue-600 dark:text-blue-300">test@example.com</p></div></div></div><div data-v-230ac461="" class="py-2"><a data-v-230ac461="" class="flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300" href="/settings/profile"><div data-v-230ac461="" class="rounded-lg bg-green-100 dark:bg-green-900/30 p-2"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon h-4 w-4 text-green-600 dark:text-green-400"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></div><span data-v-230ac461="">Profile Settings</span></a><button data-v-230ac461="" type="button" class="flex w-full items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"><div data-v-230ac461="" class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2"><svg data-v-230ac461="" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon h-4 w-4 text-red-600 dark:text-red-400"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg></div><span data-v-230ac461="">Sign out</span></button></div></div></div></div></div><!----><!----><!----></header><div data-v-59b38a35="" class="animate__animated p-6 animate__fadeIn"><div class="space-y-6"><div class="flex items-center justify-between"><div><h1 class="text-2xl font-semibold text-foreground">Unified Monitoring Hub</h1><p class="text-muted-foreground">Monitor SSL certificates and uptime across all your websites</p></div><a class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors" href="/ssl/websites/create"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon h-4 w-4 mr-2"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add Website </a></div><div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm space-y-4"><div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"><div class="flex-1 max-w-md"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="text" placeholder="Search websites..." class="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></div></div><div class="flex items-center gap-3"><select class="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"><option value="all">All Websites</option><option value="personal">Personal Sites</option><option value="team">Team Sites</option></select><button class="inline-flex items-center px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted/50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-icon h-4 w-4 mr-2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg> Clear </button></div></div><div class="flex flex-wrap gap-2"><button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-icon h-4 w-4 mr-2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg> All Websites <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-foreground/10">0</span></button><button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon h-4 w-4 mr-2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg> SSL Issues <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-foreground/10">0</span></button><button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap-icon h-4 w-4 mr-2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg> Uptime Issues <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-foreground/10">0</span></button><button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock-icon h-4 w-4 mr-2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Expiring Soon <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-foreground/10">0</span></button><button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon h-4 w-4 mr-2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg> Critical <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-foreground/10">0</span></button></div><div class="flex justify-between items-center"><div></div><div class="flex items-center gap-2 text-sm text-muted-foreground"><div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div> Live filtering enabled </div></div></div><div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm"><div class="overflow-x-auto"><table class="w-full"><thead><tr class="border-b border-border"><th class="text-left p-4 w-12"><button class="flex items-center justify-center w-5 h-5 rounded border-2 transition-colors border-border hover:border-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-icon h-3 w-3"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg></button></th><th class="text-left p-4">Website</th><th class="text-left p-4">SSL Status</th><th class="text-left p-4">Uptime Status</th><th class="text-left p-4">Days Remaining</th><th class="text-left p-4">Team</th><th class="text-left p-4">Manual Checks</th><th class="text-left p-4">Actions</th></tr></thead><tbody></tbody></table></div><div class="mt-6 flex items-center justify-between"><div class="text-sm text-muted-foreground"> Showing 0 of 0 websites <span class="text-primary font-medium">(filtered)</span></div><div class="flex items-center space-x-2"><span class="text-xs text-muted-foreground">Real-time monitoring active</span></div></div></div></div><!----><!----><!----></div><footer data-v-59b38a35="" class="mt-auto p-6 text-center text-sm text-gray-500 dark:text-gray-400 sm:text-left"><div class="flex flex-col items-center justify-between sm:flex-row"><div> © 2025 SSL Monitor. All rights reserved. </div><div class="mt-2 flex space-x-4 sm:mt-0"><a href="/help" class="hover:text-primary transition-colors">Help</a><a href="/privacy" class="hover:text-primary transition-colors">Privacy</a><a href="/terms" class="hover:text-primary transition-colors">Terms</a></div></div></footer></div></div><div data-v-59b38a35="" class="fixed bottom-6 right-6 z-50"><button data-v-59b38a35="" type="button" class="btn btn-outline-primary animate-pulse rounded-full bg-white p-2 shadow-lg hover:bg-primary hover:text-white dark:bg-gray-800 dark:hover:bg-primary"><svg data-v-59b38a35="" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path data-v-59b38a35="" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg></button></div></div></div>    
+
+</body></html>

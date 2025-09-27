@@ -41,6 +41,8 @@ class Website extends Model
             'uptime_monitoring_enabled' => 'boolean',
             'plugin_data' => 'array',
             'assigned_at' => 'datetime',
+            'created_at' => 'datetime:Y-m-d H:i:s.u',
+            'updated_at' => 'datetime:Y-m-d H:i:s.u',
         ];
     }
 
