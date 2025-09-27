@@ -4,9 +4,12 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft, Loader2 } from 'lucide-vue-next';
 import ssl from '@/routes/ssl';
 import BulkTransferModal from '@/components/team/BulkTransferModal.vue';
+import WebsiteSkeleton from '@/components/ui/WebsiteSkeleton.vue';
+import CertificateDetailsModal from '@/components/ssl/CertificateDetailsModal.vue';
+import BulkCertificateActions from '@/components/ssl/BulkCertificateActions.vue';
 
 interface SslCertificate {
   status: string;
@@ -109,6 +112,8 @@ const showModal = ref(false);
 const showCertificateAnalysis = ref(false);
 const certificateAnalysis = ref(null);
 const analysisLoading = ref(false);
+const showCertificateDetails = ref(false);
+const selectedWebsiteForCertificate = ref<Website | null>(null);
 
 // Bulk operations state
 const selectedWebsites = ref<number[]>([]);
@@ -117,6 +122,10 @@ const bulkActionLoading = ref(false);
 const selectedWebsite = ref<WebsiteDetails | null>(null);
 const loading = ref(false);
 const deleting = ref<number | null>(null);
+
+// Page loading states
+const isFilterLoading = ref(false);
+const isPageLoading = ref(false);
 
 // Bulk transfer modal state
 const showBulkTransferModal = ref(false);
@@ -145,6 +154,16 @@ const closeModal = () => {
 const closeCertificateAnalysis = () => {
   showCertificateAnalysis.value = false;
   certificateAnalysis.value = null;
+};
+
+const openCertificateDetails = (website: Website) => {
+  selectedWebsiteForCertificate.value = website;
+  showCertificateDetails.value = true;
+};
+
+const closeCertificateDetails = () => {
+  showCertificateDetails.value = false;
+  selectedWebsiteForCertificate.value = null;
 };
 
 const openCertificateAnalysis = async (website: Website) => {
@@ -388,6 +407,8 @@ const quickTransferToFirstTeam = (website: Website) => {
 let searchTimeout: NodeJS.Timeout | null = null;
 
 const performFilterUpdate = () => {
+  isFilterLoading.value = true;
+
   const params: any = {};
 
   if (searchQuery.value) params.search = searchQuery.value;
@@ -396,7 +417,10 @@ const performFilterUpdate = () => {
 
   router.get(ssl.websites.index().url, params, {
     preserveState: true,
-    replace: true
+    replace: true,
+    onFinish: () => {
+      isFilterLoading.value = false;
+    }
   });
 };
 
@@ -448,12 +472,14 @@ watch(activeTeam, () => {
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div class="flex-1 max-w-md">
             <div class="relative">
-              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search v-if="!isFilterLoading" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Loader2 v-if="isFilterLoading" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search websites..."
-                class="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                :disabled="isFilterLoading"
+                class="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -565,10 +591,17 @@ watch(activeTeam, () => {
         </div>
       </div>
 
-      <!-- Enhanced Monitoring Table -->
+      <!-- Enhanced Monitoring Table/Cards -->
       <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-        <div class="overflow-x-auto">
-          <table class="w-full">
+        <!-- Loading State -->
+        <WebsiteSkeleton v-if="isFilterLoading" :count="3" />
+
+        <!-- Content -->
+        <div v-else>
+          <!-- Desktop Table -->
+          <div class="hidden lg:block">
+            <div class="overflow-x-auto">
+              <table class="w-full">
             <thead>
               <tr class="border-b border-border">
                 <th class="text-left p-4 w-12">
@@ -728,6 +761,183 @@ watch(activeTeam, () => {
               </tr>
             </tbody>
           </table>
+          </div>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="block lg:hidden space-y-4">
+          <!-- Mobile Select All -->
+          <div class="flex items-center justify-between pb-4 border-b border-border">
+            <button
+              @click="toggleAllSelection"
+              class="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
+            >
+              <div class="flex items-center justify-center w-5 h-5 rounded border-2 transition-colors"
+                :class="{
+                  'bg-primary border-primary text-primary-foreground': allSelected,
+                  'border-border': !allSelected
+                }">
+                <CheckSquare v-if="allSelected" class="h-3 w-3" />
+                <Square v-else class="h-3 w-3" />
+              </div>
+              <span class="text-sm font-medium">Select All</span>
+            </button>
+            <span v-if="selectedWebsites.length > 0" class="text-sm text-muted-foreground">
+              {{ selectedWebsites.length }} selected
+            </span>
+          </div>
+
+          <!-- Website Cards -->
+          <div
+            v-for="website in websites.data"
+            :key="website.id"
+            class="bg-background rounded-lg border border-border p-4 shadow-sm transition-all duration-200"
+            :class="{
+              'ring-2 ring-primary bg-primary/5': selectedWebsites.includes(website.id),
+              'hover:shadow-md': !selectedWebsites.includes(website.id)
+            }"
+          >
+            <!-- Card Header -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-start gap-3 flex-1 min-w-0">
+                <button
+                  @click="toggleWebsiteSelection(website.id)"
+                  class="flex items-center justify-center w-5 h-5 rounded border-2 transition-colors mt-1 flex-shrink-0"
+                  :class="{
+                    'bg-primary border-primary text-primary-foreground': selectedWebsites.includes(website.id),
+                    'border-border hover:border-primary': !selectedWebsites.includes(website.id)
+                  }"
+                >
+                  <CheckSquare v-if="selectedWebsites.includes(website.id)" class="h-3 w-3" />
+                  <Square v-else class="h-3 w-3" />
+                </button>
+
+                <div class="flex-1 min-w-0" @click="openWebsiteModal(website)">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="font-semibold text-foreground truncate">{{ website.name }}</h3>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0"
+                      :class="{
+                        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
+                        'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                      }">
+                      {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
+                    </span>
+                  </div>
+                  <p class="text-sm text-muted-foreground truncate">{{ website.url }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Row -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <div class="text-xs text-muted-foreground mb-1">SSL Status</div>
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.ssl_status === 'valid',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.ssl_status === 'expired',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.ssl_status === 'expiring',
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': !website.ssl_status || website.ssl_status === 'unknown'
+                  }">
+                  {{ website.ssl_status }}
+                </span>
+              </div>
+              <div>
+                <div class="text-xs text-muted-foreground mb-1">Uptime Status</div>
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  Online
+                </span>
+              </div>
+            </div>
+
+            <!-- Days Remaining -->
+            <div class="mb-4">
+              <div class="text-xs text-muted-foreground mb-1">Days Remaining</div>
+              <span v-if="website.ssl_days_remaining !== null"
+                class="text-sm font-medium"
+                :class="getDaysRemainingColor(website.ssl_days_remaining)">
+                {{ website.ssl_days_remaining }} days
+              </span>
+              <span v-else class="text-sm text-muted-foreground">N/A</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2">
+              <!-- Certificate Details -->
+              <button
+                @click="openCertificateDetails(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                :disabled="!website.ssl_monitoring_enabled"
+                :title="website.ssl_monitoring_enabled ? 'View detailed certificate analysis' : 'SSL monitoring is disabled'"
+              >
+                <Shield class="h-4 w-4 mr-1.5" />
+                Certificate
+              </button>
+
+              <!-- Manual Checks -->
+              <button
+                @click="runManualCheck(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
+              >
+                <Shield class="h-4 w-4 mr-1.5" />
+                SSL Check
+              </button>
+              <button
+                @click="runManualCheck(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+              >
+                <Zap class="h-4 w-4 mr-1.5" />
+                Uptime Check
+              </button>
+
+              <!-- Actions -->
+              <button
+                @click="viewWebsite(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <Eye class="h-4 w-4 mr-1.5" />
+                View
+              </button>
+
+              <button
+                @click="openCertificateDetails(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                :disabled="!website.ssl_monitoring_enabled"
+                :title="website.ssl_monitoring_enabled ? 'View detailed certificate analysis' : 'SSL monitoring is disabled'"
+              >
+                <Shield class="h-4 w-4 mr-1.5" />
+                Certificate
+              </button>
+
+              <button
+                v-if="website.team_badge.type === 'personal' && availableTeams && availableTeams.length > 0"
+                @click="quickTransferToFirstTeam(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors"
+                :title="`Quick transfer to ${availableTeams[0]?.name}`"
+              >
+                <ArrowRightLeft class="h-4 w-4 mr-1.5" />
+                Transfer
+              </button>
+
+              <button
+                @click="editWebsite(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+              >
+                <Edit class="h-4 w-4 mr-1.5" />
+                Edit
+              </button>
+
+              <button
+                @click="deleteWebsite(website)"
+                :disabled="deleting === website.id"
+                class="flex items-center px-3 py-2 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 class="h-4 w-4 mr-1.5" />
+                {{ deleting === website.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
+          </div>
+        </div>
         </div>
 
         <!-- Enhanced Footer -->
@@ -1259,6 +1469,27 @@ watch(activeTeam, () => {
         </div>
       </div>
     </div>
+
+    <!-- Advanced Certificate Management Components -->
+
+    <!-- Certificate Details Modal -->
+    <CertificateDetailsModal
+      :is-open="showCertificateDetails"
+      :website-id="selectedWebsiteForCertificate?.id"
+      :website-name="selectedWebsiteForCertificate?.name"
+      :website-url="selectedWebsiteForCertificate?.url"
+      @close="closeCertificateDetails"
+    />
+
+    <!-- Bulk Certificate Actions -->
+    <BulkCertificateActions
+      v-if="selectedWebsites.length > 0"
+      :selected-websites="websites.data.filter(w => selectedWebsites.includes(w.id))"
+      :available-teams="availableTeams || []"
+      @clear-selection="selectedWebsites = []"
+      @refresh-websites="() => router.reload()"
+      @show-toast="(message, type) => console.log(type + ': ' + message)"
+    />
 
     <!-- Bulk Transfer Modal -->
     <BulkTransferModal

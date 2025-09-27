@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { Search, Users, User, ChevronDown, Check } from 'lucide-vue-next';
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
+import { Search, Users, User, ChevronDown, Check, X } from 'lucide-vue-next';
 
 interface Team {
   id: number;
@@ -35,9 +35,51 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
+// Constants
+const MESSAGES = {
+  NO_TEAMS_SEARCH: 'No teams found matching your search',
+  NO_TEAMS_AVAILABLE: 'No teams available',
+  MEMBERS_LABEL: 'members'
+} as const;
+
+// Reactive state
 const searchQuery = ref('');
 const isOpen = ref(false);
 const selectedTeam = ref<Team | null>(null);
+const searchInputRef = ref<HTMLInputElement>();
+
+// Search cache for performance
+const searchCache = new Map<string, Team[]>();
+
+/**
+ * Cleanup on unmount
+ */
+onUnmounted(() => {
+  searchCache.clear();
+});
+
+// Clear cache when teams list reference changes (e.g., refetch)
+watch(() => props.teams, () => {
+  searchCache.clear();
+});
+
+// Computed properties
+const hasFilteredResults = computed(() => filteredTeams.value.length > 0);
+const showMemberInfo = computed(() => props.showMemberCount || props.showUserRole);
+const emptyStateMessage = computed(() => 
+  searchQuery.value ? MESSAGES.NO_TEAMS_SEARCH : MESSAGES.NO_TEAMS_AVAILABLE
+);
+
+const triggerClasses = computed(() => ({
+  'w-full flex items-center justify-between px-4 py-3': true,
+  'bg-white dark:bg-gray-800': true,
+  'border border-gray-300 dark:border-gray-600': true,
+  'rounded-lg shadow-sm': true,
+  'hover:border-gray-400 dark:hover:border-gray-500': true,
+  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500': true,
+  'transition-colors': true,
+  'ring-2 ring-blue-500 border-blue-500': isOpen.value
+}));
 
 // Initialize selected team from props
 watch(() => props.selectedTeamId, (newId) => {
@@ -47,22 +89,36 @@ watch(() => props.selectedTeamId, (newId) => {
   } else {
     selectedTeam.value = null;
   }
-}, { immediate: true });
+}, { immediate: true, flush: 'post' });
 
+// Optimized filtering with caching
 const filteredTeams = computed(() => {
-  if (!searchQuery.value) {
-    return props.teams.slice(0, props.maxDisplayedTeams);
+  const cacheKey = `${searchQuery.value}-${props.maxDisplayedTeams}-${props.teams.length}`;
+  
+  if (searchCache.has(cacheKey)) {
+    return searchCache.get(cacheKey)!;
   }
 
-  const query = searchQuery.value.toLowerCase();
-  return props.teams
-    .filter(team =>
-      team.name.toLowerCase().includes(query) ||
-      (team.description && team.description.toLowerCase().includes(query))
-    )
-    .slice(0, props.maxDisplayedTeams);
+  let result: Team[];
+  
+  if (!searchQuery.value) {
+    result = props.teams.slice(0, props.maxDisplayedTeams);
+  } else {
+    const query = searchQuery.value.toLowerCase();
+    result = props.teams
+      .filter(team =>
+        team.name.toLowerCase().includes(query) ||
+        (team.description && team.description.toLowerCase().includes(query))
+      )
+      .slice(0, props.maxDisplayedTeams);
+  }
+  
+  searchCache.set(cacheKey, result);
+  return result;
 });
 
+
+// Event handlers
 const selectTeam = (team: Team) => {
   selectedTeam.value = team;
   isOpen.value = false;
@@ -79,23 +135,47 @@ const clearSelection = () => {
   emit('teamSelected', null);
 };
 
-const toggleDropdown = () => {
+const toggleDropdown = async () => {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     searchQuery.value = '';
+    searchCache.clear(); // Clear cache when opening
+    await nextTick();
+    searchInputRef.value?.focus();
+  }
+};
+
+// Keyboard navigation
+const handleKeydown = (event: KeyboardEvent) => {
+  switch (event.key) {
+    case 'Escape':
+      isOpen.value = false;
+      event.preventDefault();
+      break;
+    case 'Enter':
+      if (!isOpen.value) {
+        toggleDropdown();
+        event.preventDefault();
+      }
+      break;
   }
 };
 </script>
 
 <template>
-  <div class="relative">
+  <div 
+    class="relative"
+    role="combobox"
+    :aria-expanded="isOpen"
+    aria-haspopup="listbox"
+    :aria-activedescendant="selectedTeam?.id ? `team-${selectedTeam.id}` : undefined"
+    @keydown="handleKeydown"
+  >
     <!-- Selected Team Display / Dropdown Trigger -->
     <button
       @click="toggleDropdown"
-      class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-      :class="{
-        'ring-2 ring-blue-500 border-blue-500': isOpen
-      }"
+      :class="triggerClasses"
+      :aria-label="selectedTeam ? `Selected team: ${selectedTeam.name}` : placeholder"
     >
       <div class="flex items-center space-x-3 flex-1 text-left">
         <div v-if="selectedTeam" class="flex items-center space-x-3">
@@ -132,10 +212,9 @@ const toggleDropdown = () => {
           v-if="selectedTeam"
           @click.stop="clearSelection"
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          aria-label="Clear selection"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X class="h-4 w-4" />
         </button>
         <ChevronDown
           class="h-4 w-4 text-gray-400 transition-transform duration-200"
@@ -154,10 +233,14 @@ const toggleDropdown = () => {
         <div class="relative">
           <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
+            ref="searchInputRef"
             v-model="searchQuery"
             type="text"
             :placeholder="searchPlaceholder"
             class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            role="searchbox"
+            aria-label="Search teams"
+            :aria-controls="isOpen ? 'teams-listbox' : undefined"
           />
         </div>
       </div>

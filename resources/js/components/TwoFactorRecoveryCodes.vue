@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
-import { regenerateRecoveryCodes } from '@/routes/two-factor';
 import { Form } from '@inertiajs/vue3';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-vue-next';
 import { nextTick, onMounted, ref } from 'vue';
@@ -46,16 +45,15 @@ onMounted(async () => {
                     {{ isRecoveryCodesVisible ? 'Hide' : 'View' }} Recovery Codes
                 </Button>
 
-                <Form
+                <Button
                     v-if="isRecoveryCodesVisible"
-                    v-bind="regenerateRecoveryCodes.form()"
-                    method="post"
-                    :options="{ preserveScroll: true }"
-                    @success="fetchRecoveryCodes"
-                    #default="{ processing }"
+                    variant="secondary"
+                    @click="fetchRecoveryCodes"
+                    class="w-fit"
                 >
-                    <Button variant="secondary" type="submit" :disabled="processing"> <RefreshCw /> Regenerate Codes </Button>
-                </Form>
+                    <RefreshCw class="size-4" />
+                    Regenerate Codes
+                </Button>
             </div>
             <div :class="['relative overflow-hidden transition-all duration-300', isRecoveryCodesVisible ? 'h-auto opacity-100' : 'h-0 opacity-0']">
                 <div class="mt-3 space-y-3">

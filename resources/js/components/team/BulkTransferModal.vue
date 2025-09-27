@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { X, ArrowRightLeft, Users, AlertTriangle, CheckCircle } from 'lucide-vue-next';
 import SmartTeamPicker from './SmartTeamPicker.vue';
@@ -38,7 +38,10 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const selectedTeamId = ref<number | null>(null);
-const selectedTeam = ref<Team | null>(null);
+const selectedTeam = computed<Team | null>(() => {
+  if (selectedTeamId.value == null) return null;
+  return props.availableTeams.find(t => t.id === selectedTeamId.value) || null;
+});
 const isTransferring = ref(false);
 const transferMode = ref<'to-team' | 'to-personal'>('to-team');
 const confirmationStep = ref(false);
@@ -82,10 +85,34 @@ const transferSummary = computed(() => {
   return null;
 });
 
-const handleTeamSelected = (team: Team | null) => {
-  selectedTeam.value = team;
-  selectedTeamId.value = team?.id || null;
+// Derived counts and modal a11y helpers
+const selectedCount = computed(() =>
+  transferMode.value === 'to-team' ? personalWebsites.value.length : teamWebsites.value.length
+);
+
+const modalRef = ref<HTMLElement | null>(null);
+const handleEsc = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.isOpen) {
+    e.preventDefault();
+    closeModal();
+  }
 };
+
+// Manage focus and keyboard when modal opens/closes
+watch(() => props.isOpen, async (open) => {
+  if (open) {
+    await nextTick();
+    modalRef.value?.focus();
+    window.addEventListener('keydown', handleEsc);
+  } else {
+    window.removeEventListener('keydown', handleEsc);
+  }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleEsc);
+});
+
 
 const proceedToConfirmation = () => {
   if (!isValid.value) return;
@@ -139,7 +166,6 @@ const executeTransfer = () => {
 
 const closeModal = () => {
   selectedTeamId.value = null;
-  selectedTeam.value = null;
   confirmationStep.value = false;
   transferMode.value = 'to-team';
   emit('close');
@@ -153,6 +179,11 @@ const closeModal = () => {
     @click="closeModal"
   >
     <div
+      ref="modalRef"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      :aria-labelledby="'bulk-transfer-title'"
       class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       @click.stop
     >
@@ -163,7 +194,7 @@ const closeModal = () => {
             <ArrowRightLeft class="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h2 id="bulk-transfer-title" class="text-xl font-semibold text-gray-900 dark:text-gray-100">
               {{ confirmationStep ? 'Confirm Transfer' : 'Bulk Website Transfer' }}
             </h2>
             <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -194,9 +225,11 @@ const closeModal = () => {
                 class="p-4 rounded-lg border-2 transition-all duration-200"
                 :class="{
                   'border-blue-500 bg-blue-50 dark:bg-blue-900/20': transferMode === 'to-team',
-                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-team'
+                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-team',
+                  'opacity-50 cursor-not-allowed pointer-events-none': personalWebsites.length === 0
                 }"
                 :disabled="personalWebsites.length === 0"
+                :aria-disabled="personalWebsites.length === 0"
               >
                 <div class="flex items-center space-x-3">
                   <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
@@ -217,9 +250,11 @@ const closeModal = () => {
                 class="p-4 rounded-lg border-2 transition-all duration-200"
                 :class="{
                   'border-green-500 bg-green-50 dark:bg-green-900/20': transferMode === 'to-personal',
-                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-personal'
+                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-personal',
+                  'opacity-50 cursor-not-allowed pointer-events-none': teamWebsites.length === 0
                 }"
                 :disabled="teamWebsites.length === 0"
+                :aria-disabled="teamWebsites.length === 0"
               >
                 <div class="flex items-center space-x-3">
                   <div class="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
@@ -241,8 +276,7 @@ const closeModal = () => {
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Select Target Team</h3>
             <SmartTeamPicker
               :teams="availableTeams"
-              :selected-team-id="selectedTeamId"
-              @team-selected="handleTeamSelected"
+              v-model:selectedTeamId="selectedTeamId"
               placeholder="Choose a team for your websites..."
               :show-member-count="true"
               :show-user-role="true"
@@ -254,7 +288,7 @@ const closeModal = () => {
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Websites to Transfer
               <span class="text-sm font-normal text-gray-600 dark:text-gray-400">
-                ({{ transferMode === 'to-team' ? personalWebsites.length : teamWebsites.length }} selected)
+                ({{ selectedCount }} selected)
               </span>
             </h3>
 

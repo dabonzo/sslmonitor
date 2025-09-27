@@ -6,10 +6,7 @@ use App\Models\TeamInvitation;
 use App\Models\User;
 use App\Models\Website;
 use App\Mail\TeamInvitationMail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-
-uses(RefreshDatabase::class);
 
 // Team Creation Tests
 test('user can create a new team', function () {

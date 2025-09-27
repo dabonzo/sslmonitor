@@ -24,7 +24,20 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 
+    Route::post('settings/two-factor', [TwoFactorAuthenticationController::class, 'store'])
+        ->name('two-factor.store');
+
+    Route::post('settings/two-factor/confirm', [TwoFactorAuthenticationController::class, 'confirm'])
+        ->name('two-factor.confirm');
+
+    Route::delete('settings/two-factor', [TwoFactorAuthenticationController::class, 'destroy'])
+        ->name('two-factor.destroy');
+
+    Route::get('settings/two-factor/recovery-codes', [TwoFactorAuthenticationController::class, 'recoveryCodes'])
+        ->name('two-factor.recovery-codes');
+
     Route::get('settings/alerts', [AlertsController::class, 'edit'])->name('alerts.edit');
     Route::post('settings/alerts', [AlertsController::class, 'store'])->name('alerts.store');
-    Route::put('settings/alerts', [AlertsController::class, 'update'])->name('alerts.update');
+    Route::put('settings/alerts/{alertConfiguration}', [AlertsController::class, 'update'])->name('alerts.update');
+    Route::delete('settings/alerts/{alertConfiguration}', [AlertsController::class, 'destroy'])->name('alerts.destroy');
 });

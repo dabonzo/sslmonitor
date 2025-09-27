@@ -17,8 +17,19 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     Route::post('websites/{website}/check', [App\Http\Controllers\WebsiteController::class, 'check'])->name('websites.check');
     Route::delete('websites/bulk-destroy', [App\Http\Controllers\WebsiteController::class, 'bulkDestroy'])->name('websites.bulk-destroy');
     Route::post('websites/bulk-check', [App\Http\Controllers\WebsiteController::class, 'bulkCheck'])->name('websites.bulk-check');
-    Route::get('websites/{website}/details', [App\Http\Controllers\WebsiteController::class, 'details'])->name('websites.details');
-    Route::get('websites/{website}/certificate-analysis', [App\Http\Controllers\WebsiteController::class, 'certificateAnalysis'])->name('websites.certificate-analysis');
+
+    // Bulk Operations
+    Route::get('bulk-operations', function () {
+        return Inertia::render('Ssl/BulkOperations/Index');
+    })->name('bulk-operations');
+
+    // Cache API endpoints that return JSON data
+    Route::get('websites/{website}/details', [App\Http\Controllers\WebsiteController::class, 'details'])
+        ->middleware('cache.api:180')
+        ->name('websites.details');
+    Route::get('websites/{website}/certificate-analysis', [App\Http\Controllers\WebsiteController::class, 'certificateAnalysis'])
+        ->middleware('cache.api:600')
+        ->name('websites.certificate-analysis');
 
     // Website transfer routes
     Route::post('websites/{website}/transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'transferToTeam'])->name('websites.transfer-to-team');
@@ -29,6 +40,16 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     Route::post('websites/bulk-transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToTeam'])->name('websites.bulk-transfer-to-team');
     Route::post('websites/bulk-transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToPersonal'])->name('websites.bulk-transfer-to-personal');
 });
+
+// Analytics Routes
+Route::get('/analytics', function () {
+    return Inertia::render('Analytics/Index');
+})->middleware(['auth', 'verified'])->name('analytics');
+
+// Reports Routes
+Route::get('/reports', function () {
+    return Inertia::render('Reports/Index');
+})->middleware(['auth', 'verified'])->name('reports');
 
 // Alert Configuration Routes
 Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->group(function () {

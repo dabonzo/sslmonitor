@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Website;
+use App\Services\SslMonitoringCacheService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -10,30 +11,36 @@ use Spatie\UptimeMonitor\Models\Monitor;
 
 class SslDashboardController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, SslMonitoringCacheService $cacheService): Response
     {
         $user = $request->user();
 
-        // Get user's team IDs for comprehensive website access
-        $userTeamIds = $user->teams()->pluck('teams.id');
+        // Cache user's team IDs to avoid repeated queries
+        $userTeamIds = $cacheService->cacheUserTeamIds(
+            $user->id,
+            fn() => $user->teams()->pluck('teams.id')
+        );
 
-        // Get all websites accessible to user (personal + team websites)
+        // Get all websites accessible to user with optimized eager loading
         $allUserWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
             $q->where('user_id', $user->id) // Personal websites
               ->orWhereIn('team_id', $userTeamIds); // Team websites
-        })->with('team')->get();
+        })
+        ->with(['team', 'user']) // Eager load relationships
+        ->orderBy('updated_at', 'desc') // Most recently updated first
+        ->get();
 
-        // Calculate SSL statistics
-        $sslStatistics = $this->calculateSslStatistics($allUserWebsites);
+        // Calculate SSL statistics with caching
+        $sslStatistics = $this->calculateSslStatistics($allUserWebsites, $cacheService);
 
-        // Calculate uptime statistics
-        $uptimeStatistics = $this->calculateUptimeStatistics($allUserWebsites);
+        // Calculate uptime statistics with caching
+        $uptimeStatistics = $this->calculateUptimeStatistics($allUserWebsites, $cacheService);
 
-        // Get recent SSL activity from Spatie monitors
-        $recentSslActivity = $this->getRecentSslActivityFromSpatie($allUserWebsites);
+        // Get recent SSL activity from Spatie monitors with caching
+        $recentSslActivity = $this->getRecentSslActivityFromSpatie($allUserWebsites, $cacheService);
 
-        // Get recent uptime activity
-        $recentUptimeActivity = $this->getRecentUptimeActivity($allUserWebsites);
+        // Get recent uptime activity with caching
+        $recentUptimeActivity = $this->getRecentUptimeActivity($allUserWebsites, $cacheService);
 
         // Get critical SSL alerts
         $criticalAlerts = $this->getCriticalSslAlerts($allUserWebsites);
@@ -51,7 +58,7 @@ class SslDashboardController extends Controller
         ]);
     }
 
-    private function calculateSslStatistics($websites): array
+    private function calculateSslStatistics($websites, SslMonitoringCacheService $cacheService): array
     {
         $totalWebsites = $websites->count();
         $websiteUrls = $websites->pluck('url')->toArray();
@@ -66,31 +73,34 @@ class SslDashboardController extends Controller
             ];
         }
 
-        // Get SSL statistics from Spatie monitors
-        $monitors = Monitor::whereIn('url', $websiteUrls)
-            ->where('certificate_check_enabled', true)
-            ->get();
+        return $cacheService->cacheSslStatistics($websiteUrls, function () use ($websiteUrls) {
+            // Get SSL statistics from Spatie monitors with optimized query
+            $monitors = Monitor::whereIn('url', $websiteUrls)
+                ->where('certificate_check_enabled', true)
+                ->select(['url', 'certificate_status', 'certificate_expiration_date', 'uptime_check_response_time_in_ms'])
+                ->get();
 
-        $validCertificates = $monitors->where('certificate_status', 'valid')->count();
-        $expiredCertificates = $monitors->where('certificate_status', 'invalid')->count();
+            $validCertificates = $monitors->where('certificate_status', 'valid')->count();
+            $expiredCertificates = $monitors->where('certificate_status', 'invalid')->count();
 
-        // Check for certificates expiring soon (within 10 days)
-        $expiringSoon = $monitors->filter(function ($monitor) {
-            if ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
-                $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                $daysUntilExpiry = (int) now()->diffInDays($expirationDate, false);
-                return $daysUntilExpiry <= 10 && $daysUntilExpiry > 0;
-            }
-            return false;
-        })->count();
+            // Check for certificates expiring soon (within 10 days)
+            $expiringSoon = $monitors->filter(function ($monitor) {
+                if ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
+                    $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
+                    $daysUntilExpiry = (int) now()->diffInDays($expirationDate, false);
+                    return $daysUntilExpiry <= 10 && $daysUntilExpiry > 0;
+                }
+                return false;
+            })->count();
 
-        return [
-            'total_websites' => $totalWebsites,
-            'valid_certificates' => $validCertificates,
-            'expiring_soon' => $expiringSoon,
-            'expired_certificates' => $expiredCertificates,
-            'avg_response_time' => 0, // Spatie doesn't store SSL response time by default
-        ];
+            return [
+                'total_websites' => count($websiteUrls),
+                'valid_certificates' => $validCertificates,
+                'expiring_soon' => $expiringSoon,
+                'expired_certificates' => $expiredCertificates,
+                'avg_response_time' => 0, // Spatie doesn't store SSL response time by default
+            ];
+        });
     }
 
 

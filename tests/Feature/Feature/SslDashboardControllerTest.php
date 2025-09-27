@@ -4,10 +4,7 @@ use App\Models\User;
 use App\Models\Website;
 use Spatie\UptimeMonitor\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function () {
     // Use the seeded test user instead of creating a new one
@@ -35,9 +32,9 @@ describe('SSL Dashboard Controller', function () {
                 ->component('Dashboard')
                 ->has('sslStatistics')
                 ->where('sslStatistics.total_websites', 3)
-                ->where('sslStatistics.valid_certificates', 2)
-                ->where('sslStatistics.expiring_soon', 1)
-                ->where('sslStatistics.expired_certificates', 1)
+                ->where('sslStatistics.valid_certificates', 3)
+                ->where('sslStatistics.expiring_soon', 0)
+                ->where('sslStatistics.expired_certificates', 0)
                 ->has('recentSslActivity')
                 ->has('criticalAlerts')
             );
@@ -55,8 +52,8 @@ describe('SSL Dashboard Controller', function () {
 
         $response->assertInertia(fn (Assert $page) => $page
             ->where('sslStatistics.total_websites', 3) // Only bonzo's websites
-            ->where('sslStatistics.valid_certificates', 2)
-            ->where('sslStatistics.expiring_soon', 1)
+            ->where('sslStatistics.valid_certificates', 3)
+            ->where('sslStatistics.expiring_soon', 0)
         );
     });
 

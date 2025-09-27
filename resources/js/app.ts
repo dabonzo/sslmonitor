@@ -36,7 +36,8 @@ createInertiaApp({
     resolve: (name) => {
         console.log('🔍 Resolving page component:', name);
         try {
-            const component = resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue'));
+            // Use lazy loading for better code splitting
+            const component = resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue', { eager: false }));
             console.log('✅ Component resolved successfully:', name);
             return component;
         } catch (error) {

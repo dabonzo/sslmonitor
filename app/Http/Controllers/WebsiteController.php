@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\UptimeMonitor\Models\Monitor;
 
 class WebsiteController extends Controller
 {
@@ -24,8 +25,12 @@ class WebsiteController extends Controller
     {
         $user = $request->user();
 
-        // Get user's team IDs
-        $userTeamIds = $user->teams()->pluck('teams.id');
+        // Cache user's team IDs to avoid repeated queries
+        $userTeamIds = cache()->remember(
+            "user_team_ids_{$user->id}",
+            now()->addMinutes(10),
+            fn() => $user->teams()->pluck('teams.id')
+        );
 
         // Query websites owned personally OR assigned to user's teams
         $query = Website::where(function ($q) use ($user, $userTeamIds) {
@@ -53,12 +58,21 @@ class WebsiteController extends Controller
             $query->whereNotNull('team_id');
         }
 
-        $websites = $query->with('team')->orderBy('created_at', 'desc')->paginate(15);
+        $websites = $query->with(['team', 'user'])->orderBy('created_at', 'desc')->paginate(15);
+
+        // Bulk fetch all monitors in a single query to avoid N+1
+        $websiteUrls = $websites->pluck('url')->toArray();
+        $monitors = Monitor::whereIn('url', $websiteUrls)
+            ->select(['url', 'certificate_status', 'certificate_expiration_date', 'certificate_issuer',
+                     'uptime_status', 'uptime_last_check_date', 'uptime_check_failure_reason',
+                     'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at'])
+            ->get()
+            ->keyBy('url');
 
         // Transform websites with enhanced SSL and uptime data for unified monitoring hub
-        $websites->through(function ($website) use ($monitorService) {
-            // Get Spatie monitor for this website
-            $monitor = $website->getSpatieMonitor();
+        $websites->through(function ($website) use ($monitors) {
+            // Get monitor from our bulk collection instead of individual queries
+            $monitor = $monitors->get($website->url);
 
             $sslData = null;
             $daysRemaining = null;
@@ -164,12 +178,16 @@ class WebsiteController extends Controller
             'total' => $websites->total(),
         ];
 
-        // Calculate filter statistics for the filter bar
-        $allWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
-            $q->where('user_id', $user->id) // Personal websites
-              ->orWhereIn('team_id', $userTeamIds); // Team websites
-        })->with('team')->get();
-        $filterStats = $this->calculateFilterStatistics($allWebsites);
+        // Calculate filter statistics with caching for better performance
+        $cacheKey = "filter_stats_user_{$user->id}_" . md5(implode(',', $userTeamIds->toArray()));
+        $filterStats = cache()->remember($cacheKey, now()->addMinutes(5), function () use ($user, $userTeamIds) {
+            $allWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
+                $q->where('user_id', $user->id) // Personal websites
+                  ->orWhereIn('team_id', $userTeamIds); // Team websites
+            })->select(['id', 'url'])->get(); // Only select needed columns
+
+            return $this->calculateFilterStatistics($allWebsites);
+        });
 
         // Get available teams for transfer operations
         $availableTeams = $user->teams()
@@ -639,7 +657,7 @@ class WebsiteController extends Controller
     }
 
     /**
-     * Calculate filter statistics for the filter bar
+     * Calculate filter statistics for the filter bar with optimized bulk queries
      */
     private function calculateFilterStatistics($websites): array
     {
@@ -651,44 +669,49 @@ class WebsiteController extends Controller
             'critical' => 0,
         ];
 
-        foreach ($websites as $website) {
-            $monitor = $website->getSpatieMonitor();
+        if ($websites->isEmpty()) {
+            return $stats;
+        }
 
-            if ($monitor) {
-                // SSL Issues
-                $sslStatus = $monitor->certificate_status;
-                if (in_array($sslStatus, ['invalid', 'expired'])) {
-                    $stats['ssl_issues']++;
+        // Bulk fetch all monitors in a single query
+        $websiteUrls = $websites->pluck('url')->toArray();
+        $monitors = Monitor::whereIn('url', $websiteUrls)
+            ->select(['url', 'certificate_status', 'certificate_expiration_date', 'uptime_status'])
+            ->get();
+
+        foreach ($monitors as $monitor) {
+            // SSL Issues
+            $sslStatus = $monitor->certificate_status;
+            if (in_array($sslStatus, ['invalid', 'expired'])) {
+                $stats['ssl_issues']++;
+            }
+
+            // Uptime Issues
+            $uptimeStatus = $monitor->uptime_status;
+            if (in_array($uptimeStatus, ['down', 'slow'])) {
+                $stats['uptime_issues']++;
+            }
+
+            // Calculate days remaining for SSL certificate
+            if ($monitor->certificate_expiration_date) {
+                $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
+                $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
+                $daysRemaining = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
+
+                // Expiring Soon (within 30 days)
+                if ($daysRemaining <= 30 && $daysRemaining >= 0) {
+                    $stats['expiring_soon']++;
                 }
 
-                // Uptime Issues
-                $uptimeStatus = $monitor->uptime_status;
-                if (in_array($uptimeStatus, ['down', 'slow'])) {
-                    $stats['uptime_issues']++;
-                }
-
-                // Calculate days remaining for SSL certificate
-                $daysRemaining = null;
-                if ($monitor->certificate_expiration_date) {
-                    $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                    $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
-                    $daysRemaining = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
-
-                    // Expiring Soon (within 30 days)
-                    if ($daysRemaining <= 30 && $daysRemaining >= 0) {
-                        $stats['expiring_soon']++;
-                    }
-
-                    // Critical (Let's Encrypt focus: 3 days or less)
-                    if ($daysRemaining <= 3) {
-                        $stats['critical']++;
-                    }
-                }
-
-                // Critical also includes expired certificates and down sites
-                if ($sslStatus === 'expired' || $uptimeStatus === 'down') {
+                // Critical (Let's Encrypt focus: 3 days or less)
+                if ($daysRemaining <= 3) {
                     $stats['critical']++;
                 }
+            }
+
+            // Critical also includes expired certificates and down sites
+            if ($sslStatus === 'expired' || $uptimeStatus === 'down') {
+                $stats['critical']++;
             }
         }
 

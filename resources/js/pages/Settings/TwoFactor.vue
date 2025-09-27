@@ -5,19 +5,21 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import ModernSettingsLayout from '@/layouts/ModernSettingsLayout.vue';
-import { disable, enable } from '@/routes/two-factor';
+import { destroy as disable, store as enable } from '@/routes/two-factor';
 import { Form, Head } from '@inertiajs/vue3';
 import { Shield, ShieldBan, ShieldCheck, Smartphone, Lock } from 'lucide-vue-next';
 import { onUnmounted, ref } from 'vue';
 
 interface Props {
-    requiresConfirmation?: boolean;
     twoFactorEnabled?: boolean;
+    recoveryCodes?: number;
+    qrCodeSvg?: string | null;
 }
 
-withDefaults(defineProps<Props>(), {
-    requiresConfirmation: false,
+const props = withDefaults(defineProps<Props>(), {
     twoFactorEnabled: false,
+    recoveryCodes: 0,
+    qrCodeSvg: null,
 });
 
 const { hasSetupData, clearTwoFactorAuthData } = useTwoFactorAuth();
@@ -71,7 +73,7 @@ onUnmounted(() => {
                     </div>
 
                     <div class="flex items-center space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <Button v-if="hasSetupData" @click="showSetupModal = true" class="h-11 px-6">
+                        <Button v-if="props.qrCodeSvg" @click="showSetupModal = true" class="h-11 px-6">
                             <ShieldCheck class="h-4 w-4 mr-2" />
                             Continue Setup
                         </Button>
@@ -125,7 +127,7 @@ onUnmounted(() => {
 
         <TwoFactorSetupModal
             v-model:isOpen="showSetupModal"
-            :requiresConfirmation="requiresConfirmation"
+            :requiresConfirmation="true"
             :twoFactorEnabled="twoFactorEnabled"
         />
     </ModernSettingsLayout>

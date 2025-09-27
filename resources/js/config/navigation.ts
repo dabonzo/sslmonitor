@@ -7,6 +7,7 @@ import {
   Clock,
   Users,
   HelpCircle,
+  TrendingUp,
 } from 'lucide-vue-next'
 
 export interface MenuItem {
@@ -44,7 +45,8 @@ export const mainMenuItems: MenuItem[] = [
     children: [
       { title: 'All Certificates', href: '/ssl/certificates' },
       { title: 'Expiring Soon', href: '/ssl/certificates/expiring' },
-      { title: 'Issues & Alerts', href: '/ssl/certificates/issues' }
+      { title: 'Issues & Alerts', href: '/ssl/certificates/issues' },
+      { title: 'Bulk Operations', href: '/ssl/bulk-operations' }
     ]
   },
   {
@@ -56,6 +58,13 @@ export const mainMenuItems: MenuItem[] = [
       { title: 'Response Times', href: '/uptime/performance' },
       { title: 'Incidents', href: '/uptime/incidents' }
     ]
+  },
+  {
+    key: 'analytics',
+    title: 'Analytics',
+    icon: TrendingUp,
+    href: '/analytics',
+    description: 'Performance insights & trends'
   },
   {
     key: 'reports',

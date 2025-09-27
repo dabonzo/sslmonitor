@@ -512,7 +512,7 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                     <!-- Team Management (always show if no transfers or fallback) -->
                     <Link
                         v-else
-                        href="/teams"
+                        href="/settings/team"
                         class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 p-4 text-center hover:from-purple-100 hover:to-violet-200 dark:hover:from-purple-900/50 dark:hover:to-violet-900/50 transition-all duration-300 border border-purple-200 dark:border-purple-800 hover:shadow-lg hover:scale-[1.02]"
                     >
                         <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
@@ -544,7 +544,7 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Team Access</h4>
                         <Link
-                            href="/teams"
+                            href="/settings/team"
                             class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                         >
                             View All
@@ -554,7 +554,7 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                         <Link
                             v-for="team in transferSuggestions.quick_transfer_teams"
                             :key="team.id"
-                            :href="`/teams/${team.id}`"
+                            :href="`/settings/team/${team.id}`"
                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                         >
                             <Users class="h-3 w-3 mr-1" />

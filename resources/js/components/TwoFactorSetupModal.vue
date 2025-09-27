@@ -19,7 +19,7 @@ const props = defineProps<Props>();
 const isOpen = defineModel<boolean>('isOpen');
 
 const { copy, copied } = useClipboard();
-const { qrCodeSvg, manualSetupKey, clearSetupData, fetchSetupData } = useTwoFactorAuth();
+const { qrCodeSvg, clearSetupData, getQrCodeFromProps } = useTwoFactorAuth();
 
 const showVerificationStep = ref(false);
 const code = ref<number[]>([]);
@@ -52,18 +52,12 @@ const modalConfig = computed<{ title: string; description: string; buttonText: s
 });
 
 const handleModalNextStep = () => {
-    if (props.requiresConfirmation) {
-        showVerificationStep.value = true;
+    // Always require confirmation in our implementation
+    showVerificationStep.value = true;
 
-        nextTick(() => {
-            pinInputContainerRef.value?.querySelector('input')?.focus();
-        });
-
-        return;
-    }
-
-    clearSetupData();
-    isOpen.value = false;
+    nextTick(() => {
+        pinInputContainerRef.value?.querySelector('input')?.focus();
+    });
 };
 
 const resetModalState = () => {
@@ -77,14 +71,14 @@ const resetModalState = () => {
 
 watch(
     () => isOpen.value,
-    async (isOpen) => {
+    (isOpen) => {
         if (!isOpen) {
             resetModalState();
             return;
         }
 
         if (!qrCodeSvg.value) {
-            await fetchSetupData();
+            getQrCodeFromProps();
         }
     },
 );
@@ -133,24 +127,8 @@ watch(
                         </Button>
                     </div>
 
-                    <div class="relative flex w-full items-center justify-center">
-                        <div class="absolute inset-0 top-1/2 h-px w-full bg-border" />
-                        <span class="relative bg-card px-2 py-1">or, enter the code manually</span>
-                    </div>
-
-                    <div class="flex w-full items-center justify-center space-x-2">
-                        <div class="flex w-full items-stretch overflow-hidden rounded-xl border border-border">
-                            <div v-if="!manualSetupKey" class="flex h-full w-full items-center justify-center bg-muted p-3">
-                                <Loader2 class="size-4 animate-spin" />
-                            </div>
-                            <template v-else>
-                                <input type="text" readonly :value="manualSetupKey" class="h-full w-full bg-background p-3 text-foreground" />
-                                <button @click="copy(manualSetupKey || '')" class="relative block h-auto border-l border-border px-3 hover:bg-muted">
-                                    <Check v-if="copied" class="w-4 text-green-500" />
-                                    <Copy v-else class="w-4" />
-                                </button>
-                            </template>
-                        </div>
+                    <div class="text-center text-sm text-muted-foreground">
+                        Scan the QR code with your authenticator app to continue
                     </div>
                 </template>
 
@@ -164,7 +142,7 @@ watch(
                                         <PinInputSlot autofocus v-for="(id, index) in 6" :key="id" :index="index" :disabled="processing" />
                                     </PinInputGroup>
                                 </PinInput>
-                                <InputError :message="errors?.confirmTwoFactorAuthentication?.code" />
+                                <InputError :message="errors?.code" />
                             </div>
 
                             <div class="flex w-full items-center space-x-5">

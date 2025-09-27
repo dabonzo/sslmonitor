@@ -22,8 +22,50 @@ interface Team {
     created_at: string;
 }
 
+interface TeamMember {
+    id: number;
+    user_id: number;
+    name: string;
+    email: string;
+    role: string;
+    joined_at: string;
+    invited_by: string;
+}
+
+interface TeamInvitation {
+    id: number;
+    email: string;
+    role: string;
+    expires_at: string;
+    invited_by: string;
+    created_at: string;
+}
+
+interface TeamWebsite {
+    id: number;
+    name: string;
+    url: string;
+    assigned_at: string;
+    assigned_by: string;
+}
+
+interface SingleTeam {
+    id: number;
+    name: string;
+    description: string;
+    created_by: string;
+    user_role: string;
+    is_owner: boolean;
+    created_at: string;
+}
+
 interface Props {
-    teams: Team[];
+    teams?: Team[];
+    team?: SingleTeam;
+    members?: TeamMember[];
+    pendingInvitations?: TeamInvitation[];
+    websites?: TeamWebsite[];
+    userRole?: string;
     roleDescriptions: Record<string, string>;
     availableRoles: string[];
 }
@@ -48,17 +90,110 @@ const getRoleColor = (role: string) => {
 
 const userTeams = computed(() => props.teams || []);
 
+// Determine if we're in team details view or team list view
+const isTeamDetailsView = computed(() => !!props.team);
+const isTeamListView = computed(() => !props.team);
+
 // Navigation function
 const viewTeamDetails = (teamId: number) => {
     router.visit(`/settings/team/${teamId}`);
+};
+
+const backToTeamList = () => {
+    router.visit('/settings/team');
 };
 </script>
 
 <template>
     <Head title="Team Settings" />
 
-    <ModernSettingsLayout title="Team Settings">
-        <div class="space-y-8">
+    <ModernSettingsLayout :title="isTeamDetailsView ? props.team?.name + ' Details' : 'Team Settings'">
+        <!-- Team Details View -->
+        <div v-if="isTeamDetailsView" class="space-y-8">
+            <!-- Back Navigation -->
+            <div class="flex items-center space-x-4 mb-6">
+                <button
+                    @click="backToTeamList"
+                    class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Teams
+                </button>
+            </div>
+
+            <!-- Team Header -->
+            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ props.team?.name }}</h1>
+                        <p v-if="props.team?.description" class="text-gray-600 dark:text-gray-400 mt-1">{{ props.team?.description }}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <Badge :class="getRoleColor(props.team?.user_role || '')">
+                            {{ props.team?.user_role }}
+                        </Badge>
+                        <Badge v-if="props.team?.is_owner" variant="outline">
+                            Owner
+                        </Badge>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Created by {{ props.team?.created_by }} • {{ members?.length || 0 }} members • {{ websites?.length || 0 }} websites
+                </div>
+            </div>
+
+            <!-- Team Members -->
+            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Members</h3>
+                    <Button
+                        v-if="props.team?.is_owner"
+                        @click="selectedTeam = props.team; showInviteMemberDialog = true"
+                        class="h-10 px-4"
+                    >
+                        <UserPlus class="h-4 w-4 mr-2" />
+                        Invite Member
+                    </Button>
+                </div>
+
+                <div class="space-y-3">
+                    <div v-for="member in members" :key="member.id" class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center space-x-4">
+                            <div class="rounded-full bg-gray-100 dark:bg-gray-700 p-2">
+                                <Users class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ member.name }}</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ member.email }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-500">Joined {{ member.joined_at }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <Badge :class="getRoleColor(member.role)">{{ member.role }}</Badge>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Websites -->
+            <div v-if="websites && websites.length > 0" class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Team Websites</h3>
+                <div class="space-y-3">
+                    <div v-for="website in websites" :key="website.id" class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div>
+                            <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ website.name }}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ website.url }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500">Assigned {{ website.assigned_at }} by {{ website.assigned_by }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team List View -->
+        <div v-else class="space-y-8">
             <!-- Team Management Section -->
             <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-6">
