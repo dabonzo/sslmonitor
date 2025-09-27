@@ -31,6 +31,12 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
         ->middleware('cache.api:600')
         ->name('websites.certificate-analysis');
 
+    // Immediate check API endpoints (for real-time UI feedback)
+    Route::post('websites/{website}/immediate-check', [App\Http\Controllers\WebsiteController::class, 'immediateCheck'])
+        ->name('websites.immediate-check');
+    Route::get('websites/{website}/check-status', [App\Http\Controllers\WebsiteController::class, 'checkStatus'])
+        ->name('websites.check-status');
+
     // Website transfer routes
     Route::post('websites/{website}/transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'transferToTeam'])->name('websites.transfer-to-team');
     Route::post('websites/{website}/transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'transferToPersonal'])->name('websites.transfer-to-personal');

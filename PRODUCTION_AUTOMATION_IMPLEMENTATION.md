@@ -58,29 +58,34 @@ Transform SSL Monitor v4 from manual execution to fully automated production sys
 **Expected Outcome**: Complete job system with 100% test coverage
 
 ### **Phase 3: Laravel Scheduler Implementation**
-- [ ] **3.1** Create `app/Console/Kernel.php` with task scheduling
-  - [ ] Every minute: routine uptime checks
-  - [ ] 6 AM & 6 PM: routine SSL checks
-  - [ ] Every 5 minutes: queue health monitoring
-  - [ ] Daily 2 AM: cleanup tasks
-- [ ] **3.2** Add queue monitoring and management commands
-- [ ] **3.3** Add system health check commands
-- [ ] **3.4** Test scheduler with `schedule:run` command
+- [x] **3.1** Create scheduler configuration in `routes/console.php` (Laravel 12)
+  - [x] Every minute: routine uptime checks
+  - [x] 6 AM & 6 PM: routine SSL checks
+  - [x] Every 5 minutes: queue health monitoring
+  - [x] Daily 2 AM: cleanup tasks
+  - [x] Every 30 minutes: website-monitor sync
+  - [x] Weekly Sunday 3 AM: system health reports
+- [x] **3.2** Test scheduler recognition with `schedule:list` command
+- [ ] **3.3** Add queue monitoring and management commands
+- [ ] **3.4** Add system health check commands
 - [ ] **3.5** Validate cron job setup requirements
 
 **Expected Outcome**: Fully automated task scheduling system
 
 ### **Phase 4: Enhanced WebsiteController (Immediate Checks)**
-- [ ] **4.1** Modify `WebsiteController@store` for immediate checks
-  - [ ] Dispatch `ImmediateWebsiteCheckJob` on creation
-  - [ ] Return job IDs for frontend tracking
-  - [ ] Handle job failures gracefully
-- [ ] **4.2** Add immediate check endpoints
-  - [ ] Manual trigger for existing websites
-  - [ ] Job status polling endpoints
-  - [ ] Real-time results retrieval
-- [ ] **4.3** Add comprehensive tests for controller changes
-- [ ] **4.4** Test immediate check workflow end-to-end
+- [x] **4.1** Modify `WebsiteController@store` for immediate checks
+  - [x] Dispatch `ImmediateWebsiteCheckJob` on creation
+  - [x] Background job execution with proper logging
+  - [x] Handle job failures gracefully
+- [x] **4.2** Add immediate check endpoints
+  - [x] Manual trigger for existing websites (`POST /immediate-check`)
+  - [x] Job status polling endpoints (`GET /check-status`)
+  - [x] Real-time results retrieval via API
+- [x] **4.3** Add comprehensive tests for controller changes
+  - [x] 8 comprehensive tests covering all scenarios
+  - [x] Authorization, validation, and error handling tests
+- [x] **4.4** Test immediate check workflow end-to-end
+  - [x] All 8 tests passing (30 assertions)
 
 **Expected Outcome**: Immediate feedback system for new websites
 

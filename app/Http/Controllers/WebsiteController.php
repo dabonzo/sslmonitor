@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWebsiteRequest;
 use App\Http\Requests\UpdateWebsiteRequest;
+use App\Jobs\ImmediateWebsiteCheckJob;
 use App\Models\Website;
 use App\Models\SslCertificate;
 use App\Models\SslCheck;
 use App\Services\MonitorIntegrationService;
 use App\Services\SslCertificateAnalysisService;
+use App\Support\AutomationLogger;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -222,6 +224,15 @@ class WebsiteController extends Controller
     {
         $user = $request->user();
 
+        AutomationLogger::info("Creating new website", [
+            'user_id' => $user->id,
+            'url' => $request->validated('url'),
+            'name' => $request->validated('name'),
+            'ssl_monitoring_enabled' => $request->validated('ssl_monitoring_enabled', false),
+            'uptime_monitoring_enabled' => $request->validated('uptime_monitoring_enabled', false),
+            'immediate_check_requested' => $request->validated('immediate_check', false),
+        ]);
+
         $website = Website::create([
             'user_id' => $user->id,
             'name' => $request->validated('name'),
@@ -231,15 +242,28 @@ class WebsiteController extends Controller
             'monitoring_config' => $request->validated('monitoring_config', []),
         ]);
 
+        AutomationLogger::info("Website created successfully", [
+            'website_id' => $website->id,
+            'user_id' => $user->id,
+            'url' => $website->url,
+            'name' => $website->name,
+        ]);
+
         // Handle immediate checks if requested
         if ($request->validated('immediate_check', false)) {
-            $this->performImmediateChecks($website);
+            $dispatched = $this->dispatchImmediateCheck($website);
+
+            AutomationLogger::info("Immediate check requested for new website", [
+                'website_id' => $website->id,
+                'dispatched' => $dispatched,
+                'user_id' => $user->id,
+            ]);
         }
 
         $message = "Website '{$website->name}' has been added successfully.";
 
         if ($request->validated('immediate_check', false)) {
-            $message .= " Initial checks are being performed.";
+            $message .= " Initial checks are being performed in the background.";
         }
 
         return redirect()
@@ -247,25 +271,34 @@ class WebsiteController extends Controller
             ->with('success', $message);
     }
 
-    private function performImmediateChecks(Website $website): void
+    private function dispatchImmediateCheck(Website $website): bool
     {
         try {
-            // Sync website with Spatie monitor for both uptime and SSL monitoring
-            if ($website->ssl_monitoring_enabled || $website->uptime_monitoring_enabled) {
-                Artisan::call('monitors:sync-websites');
+            // Log the immediate check request
+            AutomationLogger::immediateCheck(
+                "Dispatching immediate check for newly created website: {$website->url}",
+                ['website_id' => $website->id, 'triggered_by' => 'website_creation']
+            );
 
-                // Run both uptime and certificate checks via Spatie
-                if ($website->uptime_monitoring_enabled) {
-                    Artisan::call('monitor:check-uptime');
-                }
+            // Dispatch the immediate check job to high-priority queue
+            ImmediateWebsiteCheckJob::dispatch($website)
+                ->onQueue(env('QUEUE_IMMEDIATE', 'immediate'));
 
-                if ($website->ssl_monitoring_enabled) {
-                    Artisan::call('monitor:check-certificate');
-                }
-            }
+            AutomationLogger::immediateCheck(
+                "Immediate check job dispatched successfully",
+                ['website_id' => $website->id, 'queue' => env('QUEUE_IMMEDIATE', 'immediate')]
+            );
+
+            return true;
+
         } catch (\Exception $e) {
-            // Log the error but don't fail the website creation
-            \Log::error("Failed to perform immediate checks for website {$website->id}: " . $e->getMessage());
+            AutomationLogger::error(
+                "Failed to dispatch immediate check for website {$website->id}",
+                ['website_id' => $website->id, 'url' => $website->url],
+                $e
+            );
+
+            return false;
         }
     }
 
@@ -393,6 +426,138 @@ class WebsiteController extends Controller
             return redirect()
                 ->back()
                 ->with('error', 'Check failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Trigger immediate check for existing website (new queue-based approach)
+     */
+    public function immediateCheck(Request $request, Website $website): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $website);
+
+        $user = $request->user();
+
+        AutomationLogger::info("API immediate check requested", [
+            'website_id' => $website->id,
+            'website_url' => $website->url,
+            'user_id' => $user->id,
+            'ssl_monitoring_enabled' => $website->ssl_monitoring_enabled,
+            'uptime_monitoring_enabled' => $website->uptime_monitoring_enabled,
+        ]);
+
+        try {
+            // Ensure at least one monitoring type is enabled
+            if (!$website->ssl_monitoring_enabled && !$website->uptime_monitoring_enabled) {
+                AutomationLogger::warning("Immediate check blocked - no monitoring enabled", [
+                    'website_id' => $website->id,
+                    'website_url' => $website->url,
+                    'user_id' => $user->id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No monitoring is enabled for this website.',
+                ], 400);
+            }
+
+            // Dispatch the immediate check job
+            $dispatched = $this->dispatchImmediateCheck($website);
+
+            if (!$dispatched) {
+                AutomationLogger::error("Failed to dispatch immediate check", [
+                    'website_id' => $website->id,
+                    'website_url' => $website->url,
+                    'user_id' => $user->id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to schedule immediate check.',
+                ], 500);
+            }
+
+            AutomationLogger::info("API immediate check job dispatched successfully", [
+                'website_id' => $website->id,
+                'dispatched' => $dispatched,
+                'user_id' => $user->id,
+                'queue' => env('QUEUE_IMMEDIATE', 'immediate'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Immediate check queued for {$website->name}",
+                'website_id' => $website->id,
+                'estimated_completion' => now()->addSeconds(30)->toISOString(),
+            ]);
+
+        } catch (\Exception $e) {
+            AutomationLogger::error(
+                "Failed to trigger immediate check via API",
+                ['website_id' => $website->id, 'url' => $website->url, 'user_id' => $user->id],
+                $e
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Immediate check failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get job status for immediate check (for real-time UI feedback)
+     */
+    public function checkStatus(Request $request, Website $website): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $website);
+
+        $user = $request->user();
+
+        AutomationLogger::debug("Check status API requested", [
+            'website_id' => $website->id,
+            'website_url' => $website->url,
+            'user_id' => $user->id,
+        ]);
+
+        try {
+            // Get the latest status from the website's updated_at timestamp
+            $website->refresh();
+
+            // Get monitor data for current status
+            $monitor = $website->getSpatieMonitor();
+
+            $response = [
+                'website_id' => $website->id,
+                'last_updated' => $website->updated_at,
+                'ssl_status' => $monitor?->certificate_status ?? 'not yet checked',
+                'uptime_status' => $monitor?->uptime_status ?? 'not yet checked',
+                'ssl_monitoring_enabled' => $website->ssl_monitoring_enabled,
+                'uptime_monitoring_enabled' => $website->uptime_monitoring_enabled,
+                'checked_at' => now()->toISOString(),
+            ];
+
+            AutomationLogger::debug("Check status API response", [
+                'website_id' => $website->id,
+                'ssl_status' => $response['ssl_status'],
+                'uptime_status' => $response['uptime_status'],
+                'last_updated' => $response['last_updated'],
+                'user_id' => $user->id,
+            ]);
+
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            AutomationLogger::error(
+                "Failed to get check status via API",
+                ['website_id' => $website->id, 'url' => $website->url, 'user_id' => $user->id],
+                $e
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get check status: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

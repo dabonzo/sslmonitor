@@ -154,6 +154,22 @@ class AutomationLogger
     }
 
     /**
+     * Log general informational messages
+     */
+    public static function info(string $message, array $context = []): void
+    {
+        Log::info("[AUTOMATION] {$message}", $context);
+    }
+
+    /**
+     * Log warning messages
+     */
+    public static function warning(string $message, array $context = []): void
+    {
+        Log::warning("[AUTOMATION WARNING] {$message}", $context);
+    }
+
+    /**
      * Debug helper for development
      */
     public static function debug(string $message, array $context = []): void
