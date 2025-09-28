@@ -35,7 +35,7 @@ const form = useForm<FormData>({
   name: '',
   url: '',
   ssl_monitoring_enabled: true,
-  uptime_monitoring_enabled: false,
+  uptime_monitoring_enabled: true,
   monitoring_config: {
     check_interval: 3600, // 1 hour default
     timeout: 30,
@@ -55,6 +55,34 @@ const showCheckProgress = ref(false);
 const checkState = computed(() => {
   return createdWebsiteId.value ? getWebsiteState(createdWebsiteId.value) : null;
 });
+
+// URL normalization function
+function normalizeUrl(url: string): string {
+  if (!url) return url;
+
+  // Remove whitespace
+  url = url.trim();
+
+  // Convert http:// to https:// (auto-upgrade insecure URLs)
+  if (url.startsWith('http://')) {
+    url = 'https://' + url.substring(7);
+  }
+  // If it already has https://, keep as is
+  else if (url.startsWith('https://')) {
+    return url;
+  }
+  // Add https:// prefix for domain-only URLs
+  else {
+    url = `https://${url}`;
+  }
+
+  return url;
+}
+
+// Handle URL input blur to normalize
+function handleUrlBlur() {
+  form.url = normalizeUrl(form.url);
+}
 
 // Check interval options in seconds
 const checkIntervalOptions = [
@@ -88,6 +116,9 @@ const selectedTimeoutLabel = computed(() => {
 });
 
 function handleSubmit() {
+  // Normalize URL before submission
+  form.url = normalizeUrl(form.url);
+
   form.post(ssl.websites.store().url, {
     onSuccess: (page) => {
       // If immediate check was requested, show progress instead of redirecting immediately
@@ -157,10 +188,11 @@ function cancel() {
               </label>
               <input
                 v-model="form.url"
-                type="url"
+                type="text"
+                @blur="handleUrlBlur"
                 class="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
                 :class="{ 'border-red-500': form.errors.url }"
-                placeholder="https://example.com"
+                placeholder="example.com or https://example.com"
                 required
               />
               <div v-if="form.errors.url" class="text-red-500 text-xs mt-1">

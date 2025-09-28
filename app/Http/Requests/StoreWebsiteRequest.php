@@ -20,6 +20,7 @@ class StoreWebsiteRequest extends FormRequest
                 'required',
                 'string',
                 'url',
+                'regex:/^https:\/\//',
                 Rule::unique('websites', 'url')->where(function ($query) {
                     return $query->where('user_id', $this->user()->id);
                 }),
@@ -40,6 +41,7 @@ class StoreWebsiteRequest extends FormRequest
             'name.required' => 'A website name is required.',
             'url.required' => 'A website URL is required.',
             'url.url' => 'Please enter a valid URL (e.g., https://example.com).',
+            'url.regex' => 'Only secure HTTPS URLs are allowed. HTTP is not supported for SSL monitoring.',
             'url.unique' => 'You are already monitoring this URL.',
             'monitoring_config.check_interval.min' => 'Check interval must be at least 5 minutes.',
             'monitoring_config.check_interval.max' => 'Check interval cannot exceed 24 hours.',
@@ -55,8 +57,10 @@ class StoreWebsiteRequest extends FormRequest
         if ($this->has('url')) {
             $url = trim($this->url);
 
-            // Add protocol if missing
-            if (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) {
+            // Convert http:// to https:// or add https:// if missing
+            if (str_starts_with($url, 'http://')) {
+                $url = 'https://' . substr($url, 7); // Remove http:// and add https://
+            } elseif (!str_starts_with($url, 'https://')) {
                 $url = 'https://' . $url;
             }
 
