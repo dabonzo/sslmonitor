@@ -126,6 +126,16 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
                 ]
             );
 
+            // Initialize ConsoleOutput for queue context to prevent static property access errors
+            // The ConsoleOutput helper expects a command context but we're in queue context
+            $consoleOutput = app(\Spatie\UptimeMonitor\Helpers\ConsoleOutput::class);
+            $consoleOutput->setOutput(new class extends \Illuminate\Console\Command {
+                protected $signature = 'queue:dummy';
+                public function info($string, $verbosity = null) { return null; }
+                public function error($string, $verbosity = null) { return null; }
+                public function warn($string, $verbosity = null) { return null; }
+            });
+
             // Use Spatie's MonitorCollection for single monitor uptime check
             $collection = new \Spatie\UptimeMonitor\MonitorCollection([$monitor]);
             $collection->checkUptime();
