@@ -2,9 +2,16 @@
 
 use App\Models\PluginConfiguration;
 use App\Models\User;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 test('plugin configuration can be created with valid data', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     $plugin = PluginConfiguration::create([
         'user_id' => $user->id,
@@ -26,7 +33,7 @@ test('plugin configuration can be created with valid data', function () {
 });
 
 test('plugin configuration belongs to user', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
     $plugin = PluginConfiguration::factory()->create(['user_id' => $user->id]);
 
     expect($plugin->user)->toBeInstanceOf(User::class)
@@ -34,7 +41,7 @@ test('plugin configuration belongs to user', function () {
 });
 
 test('plugin configuration can have different types', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     $agent = PluginConfiguration::factory()->agent()->create(['user_id' => $user->id]);
     $webhook = PluginConfiguration::factory()->webhook()->create(['user_id' => $user->id]);
@@ -46,7 +53,7 @@ test('plugin configuration can have different types', function () {
 });
 
 test('plugin configuration can have different statuses', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     $active = PluginConfiguration::factory()->active()->create(['user_id' => $user->id]);
     $inactive = PluginConfiguration::factory()->inactive()->create(['user_id' => $user->id]);
@@ -217,7 +224,7 @@ test('plugin configuration can have custom authentication', function () {
 });
 
 test('plugin configuration scopes work correctly', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     PluginConfiguration::factory()->active()->create(['user_id' => $user->id]);
     PluginConfiguration::factory()->active()->agent()->create(['user_id' => $user->id]);

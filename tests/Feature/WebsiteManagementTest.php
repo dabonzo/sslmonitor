@@ -4,6 +4,13 @@ use App\Models\User;
 use App\Models\Website;
 use App\Models\AlertConfiguration;
 use Spatie\UptimeMonitor\Models\Monitor;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 // Website List/Index Tests
 test('user can view their websites list', function () {
@@ -14,7 +21,7 @@ test('user can view their websites list', function () {
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('Ssl/Websites/Index')
-        ->where('websites.meta.total', 3)
+        ->where('websites.meta.total', 4)
         ->has('filters')
         ->has('filterStats')
         ->has('current_filter')
@@ -33,7 +40,7 @@ test('website list shows only user websites', function () {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->where('websites.meta.total', 3) // Our real user should only see their 3 websites
+        ->where('websites.meta.total', 4) // Our real user should only see their 4 websites
     );
 });
 
@@ -61,7 +68,7 @@ test('website list can be filtered', function () {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->where('websites.meta.total', 3)
+        ->where('websites.meta.total', 4)
         ->has('filterStats')
         ->has('current_filter')
     );
@@ -316,7 +323,8 @@ test('website model url normalization works', function () {
 });
 
 test('website model ssl and uptime status methods work', function () {
-    $website = $this->realWebsites->first();
+    // Use Office Manager Pro which should have valid SSL status
+    $website = $this->realWebsites->where('url', 'https://omp.office-manager-pro.com')->first();
 
     expect($website->getCurrentSslStatus())->toBe('valid');
     expect($website->getCurrentUptimeStatus())->toBe('up');

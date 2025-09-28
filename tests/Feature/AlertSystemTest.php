@@ -7,6 +7,13 @@ use App\Services\AlertService;
 use App\Mail\SslCertificateExpiryAlert;
 use Illuminate\Support\Facades\Mail;
 use Spatie\UptimeMonitor\Models\Monitor;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 // Alert Configuration Tests
 test('user can view alert configurations', function () {
@@ -24,7 +31,7 @@ test('user can view alert configurations', function () {
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('Alerts/Index')
-        ->has('alertConfigurations', 3)
+        ->has('alertConfigurations', 5) // 3 factory + 2 seeded = 5 total
     );
 });
 

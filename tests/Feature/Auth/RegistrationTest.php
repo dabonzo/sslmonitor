@@ -1,5 +1,13 @@
 <?php
 
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
+
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
 

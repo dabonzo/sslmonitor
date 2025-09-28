@@ -5,14 +5,19 @@ use App\Models\Website;
 use App\Services\SslMonitoringCacheService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
 
 describe('Redis Performance Optimizations', function () {
     beforeEach(function () {
+        $this->setUpCleanDatabase();
         // Clear Redis cache before each test
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             Cache::flush();
         }
     });
+
 
     test('cache driver is properly configured', function () {
         $cacheDriver = config('cache.default');
@@ -78,6 +83,7 @@ describe('Redis Performance Optimizations', function () {
 
     test('Redis pattern-based cache invalidation works efficiently', function () {
         $cacheService = new SslMonitoringCacheService();
+        $isRedis = Cache::getStore() instanceof \Illuminate\Cache\RedisStore;
 
         // Clear cache to start fresh
         Cache::flush();
@@ -107,7 +113,7 @@ describe('Redis Performance Optimizations', function () {
         // Pattern-based invalidation should be fast (< 50ms)
         expect($invalidationTime)->toBeLessThan(50);
 
-        // SSL stats keys should be gone, others should remain
+        // With Redis, SSL stats keys should be gone, others should remain
         expect(Cache::has('ssl_stats_test1'))->toBeFalse();
         expect(Cache::has('ssl_stats_test2'))->toBeFalse();
         expect(Cache::has('other_cache_key'))->toBeTrue();

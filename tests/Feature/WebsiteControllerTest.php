@@ -2,17 +2,18 @@
 
 use App\Models\User;
 use App\Models\Website;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\UsesCleanDatabase;
 
-uses(RefreshDatabase::class);
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 test('websites index page loads without sslCertificates relationship error', function () {
-    // Create test user and websites
-    $user = User::factory()->create();
-    $websites = Website::factory()->count(3)->create([
-        'user_id' => $user->id,
-        'ssl_monitoring_enabled' => true
-    ]);
+    // Use test user and websites
+    $user = $this->testUser;
+    $websites = $this->realWebsites;
 
     // Authenticate as the test user
     $this->actingAs($user);

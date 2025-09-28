@@ -1,5 +1,15 @@
 <?php
 
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+    // Clear rate limiter cache to prevent 429 responses
+    \Illuminate\Support\Facades\Cache::flush();
+});
+
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;

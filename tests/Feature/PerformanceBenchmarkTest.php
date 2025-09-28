@@ -3,6 +3,13 @@
 use App\Models\User;
 use App\Models\Website;
 use App\Models\Team;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 describe('Performance Benchmarks', function () {
     test('dashboard loads efficiently with multiple websites', function () {

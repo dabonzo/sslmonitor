@@ -2,9 +2,16 @@
 
 use App\Models\Website;
 use App\Models\User;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 test('website can be created with valid data', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     $website = Website::create([
         'name' => 'Example Site',
@@ -22,7 +29,7 @@ test('website can be created with valid data', function () {
 });
 
 test('website belongs to a user', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
     $website = Website::factory()->create(['user_id' => $user->id]);
 
     expect($website->user)->toBeInstanceOf(User::class)
@@ -30,7 +37,7 @@ test('website belongs to a user', function () {
 });
 
 test('website url is sanitized on save', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
     $website = Website::create([
         'name' => 'Example Site',
         'url' => 'HTTP://EXAMPLE.COM/PATH/../',
@@ -41,7 +48,7 @@ test('website url is sanitized on save', function () {
 });
 
 test('website url is normalized to lowercase and https', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
     $website = Website::create([
         'name' => 'Example Site',
         'url' => 'HTTP://EXAMPLE.COM',
@@ -83,7 +90,7 @@ test('website has plugin data methods', function () {
 });
 
 test('website enforces unique url per user', function () {
-    $user = User::factory()->create();
+    $user = $this->testUser;
 
     Website::create([
         'name' => 'First Site',
@@ -99,8 +106,8 @@ test('website enforces unique url per user', function () {
 });
 
 test('different users can have same url', function () {
-    $user1 = User::factory()->create();
-    $user2 = User::factory()->create();
+    $user1 = $this->testUser;
+    $user2 = User::factory()->create(); // Different user for testing
 
     $website1 = Website::create([
         'name' => 'User 1 Site',

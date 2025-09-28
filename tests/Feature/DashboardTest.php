@@ -1,6 +1,13 @@
 <?php
 
 use App\Models\User;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));

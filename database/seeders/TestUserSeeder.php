@@ -68,6 +68,13 @@ class TestUserSeeder extends Seeder
                 'cert_expiry_days' => -1, // Expired
                 'team_id' => null, // Keep as personal
             ],
+            [
+                'name' => 'Gebrauchte',
+                'url' => 'https://www.gebrauchte.at',
+                'ssl_status' => 'valid',
+                'cert_expiry_days' => 30,
+                'team_id' => null, // Keep as personal
+            ],
         ];
 
         foreach ($websites as $websiteData) {
@@ -104,6 +111,8 @@ class TestUserSeeder extends Seeder
                     'certificate_expiration_date' => $websiteData['cert_expiry_days'] > 0
                         ? now()->addDays($websiteData['cert_expiry_days'])
                         : now()->subDays(abs($websiteData['cert_expiry_days'])),
+                    'uptime_check_enabled' => true,
+                    'uptime_status' => 'up',
                 ]
             );
         }
@@ -145,6 +154,7 @@ class TestUserSeeder extends Seeder
         $this->command->info('- https://omp.office-manager-pro.com (valid, expires in 90 days) [TEAM]');
         $this->command->info('- https://www.redgas.at (valid, expires in 7 days) [TEAM]');
         $this->command->info('- https://www.fairnando.at (invalid/expired) [PERSONAL]');
+        $this->command->info('- https://www.gebrauchte.at (valid, expires in 30 days) [PERSONAL]');
         $this->command->info('Created alert configurations: SSL Expiry (7 days) + Website Down');
     }
 }

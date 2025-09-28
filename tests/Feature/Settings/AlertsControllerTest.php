@@ -1,5 +1,13 @@
 <?php
 
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
+
 use App\Models\User;
 use App\Models\Website;
 

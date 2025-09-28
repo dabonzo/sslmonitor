@@ -4,20 +4,15 @@ use App\Models\User;
 use App\Models\Website;
 use Spatie\UptimeMonitor\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Traits\UsesCleanDatabase;
+
 use Illuminate\Support\Facades\Hash;
 
+uses(UsesCleanDatabase::class);
+
 beforeEach(function () {
-    // Use the seeded test user instead of creating a new one
-    $this->user = User::firstOrCreate(
-        ['email' => 'bonzo@konjscina.com'],
-        [
-            'name' => 'Bonzo',
-            'email' => 'bonzo@konjscina.com',
-            'password' => Hash::make('to16ro12'),
-            'email_verified_at' => now(),
-        ]
-    );
-    $this->actingAs($this->user);
+    $this->setUpCleanDatabase();
+    $this->actingAs($this->testUser);
 });
 
 describe('SSL Dashboard Controller', function () {
@@ -31,10 +26,10 @@ describe('SSL Dashboard Controller', function () {
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Dashboard')
                 ->has('sslStatistics')
-                ->where('sslStatistics.total_websites', 3)
+                ->where('sslStatistics.total_websites', 4)
                 ->where('sslStatistics.valid_certificates', 3)
-                ->where('sslStatistics.expiring_soon', 0)
-                ->where('sslStatistics.expired_certificates', 0)
+                ->where('sslStatistics.expiring_soon', 1)
+                ->where('sslStatistics.expired_certificates', 1)
                 ->has('recentSslActivity')
                 ->has('criticalAlerts')
             );
@@ -51,9 +46,9 @@ describe('SSL Dashboard Controller', function () {
         $response = $this->get(route('dashboard'));
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->where('sslStatistics.total_websites', 3) // Only bonzo's websites
+            ->where('sslStatistics.total_websites', 4) // Only bonzo's websites
             ->where('sslStatistics.valid_certificates', 3)
-            ->where('sslStatistics.expiring_soon', 0)
+            ->where('sslStatistics.expiring_soon', 1)
         );
     });
 
@@ -93,7 +88,7 @@ describe('SSL Dashboard Controller', function () {
     });
 
     it('calculates average response time for SSL checks', function () {
-        $website = Website::factory()->create(['user_id' => $this->user->id]);
+        $website = Website::factory()->create(['user_id' => $this->testUser->id]);
         $testUrl = 'https://response-test-' . hrtime(true) . '.example.com';
         $website->update(['url' => $testUrl]);
 
@@ -118,10 +113,10 @@ describe('SSL Dashboard Controller', function () {
         $response = $this->get(route('dashboard'));
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->where('sslStatistics.total_websites', 3)
+            ->where('sslStatistics.total_websites', 4)
             ->where('sslStatistics.valid_certificates', 3)
-            ->where('sslStatistics.expiring_soon', 0)
-            ->where('sslStatistics.expired_certificates', 0)
+            ->where('sslStatistics.expiring_soon', 1)
+            ->where('sslStatistics.expired_certificates', 1)
             ->has('recentSslActivity')
             ->has('criticalAlerts')
         );

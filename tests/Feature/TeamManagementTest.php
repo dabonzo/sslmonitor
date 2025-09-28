@@ -7,6 +7,13 @@ use App\Models\User;
 use App\Models\Website;
 use App\Mail\TeamInvitationMail;
 use Illuminate\Support\Facades\Mail;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 // Team Creation Tests
 test('user can create a new team', function () {

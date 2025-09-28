@@ -2,6 +2,13 @@
 
 use App\Models\User;
 use App\Services\TwoFactorAuthService;
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
 
 test('service can generate secret key', function () {
     $service = new TwoFactorAuthService();

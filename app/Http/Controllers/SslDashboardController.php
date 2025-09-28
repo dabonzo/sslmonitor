@@ -119,8 +119,7 @@ class SslDashboardController extends Controller
                 $query->where('certificate_status', 'invalid')
                       ->orWhere(function ($q) {
                           $q->where('certificate_status', 'valid')
-                            ->whereNotNull('certificate_expiration_date')
-                            ->whereRaw('DATEDIFF(certificate_expiration_date, NOW()) <= 10');
+                            ->whereNotNull('certificate_expiration_date');
                       });
             })
             ->get();
@@ -138,7 +137,8 @@ class SslDashboardController extends Controller
                 ];
             } elseif ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
                 $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
-                if ($expirationDate->diffInDays(now()) <= 10) {
+                $daysUntilExpiry = (int) now()->diffInDays($expirationDate, false);
+                if ($daysUntilExpiry <= 10 && $daysUntilExpiry > 0) {
                     $alerts[] = [
                         'type' => 'ssl_expiring_soon',
                         'website_name' => $websiteName,

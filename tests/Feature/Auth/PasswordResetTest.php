@@ -1,5 +1,13 @@
 <?php
 
+use Tests\Traits\UsesCleanDatabase;
+
+uses(UsesCleanDatabase::class);
+
+beforeEach(function () {
+    $this->setUpCleanDatabase();
+});
+
 /**
  * Password Reset Security Tests
  *
