@@ -48,11 +48,11 @@ Route::middleware('auth')->group(function () {
         ->name('verification.notice');
 
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(array_filter(['signed', app()->environment('testing') ? null : 'throttle:6,1']))
         ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware(app()->environment('testing') ? [] : ['throttle:6,1'])
         ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmPasswordController::class, 'create'])
