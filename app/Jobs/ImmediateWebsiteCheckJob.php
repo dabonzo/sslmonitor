@@ -84,8 +84,8 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
                 "Completed immediate check for website: {$this->website->url}",
                 [
                     'website_id' => $this->website->id,
-                    'uptime_status' => $results['uptime']['status'],
-                    'ssl_status' => $results['ssl']['status'],
+                    'uptime_status' => $results['uptime']['status'] ?? 'unknown',
+                    'ssl_status' => $results['ssl']['status'] ?? 'unknown',
                 ]
             );
 
@@ -110,13 +110,37 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
     }
 
     /**
-     * Check website uptime status.
+     * Check website uptime status using Spatie Monitor directly (optimized).
      */
     private function checkUptime(): array
     {
         try {
-            $monitorService = app(MonitorIntegrationService::class);
-            $result = $monitorService->checkWebsiteUptime($this->website);
+            $startTime = microtime(true);
+
+            // Get or create monitor (fast lookup)
+            $monitor = \Spatie\UptimeMonitor\Models\Monitor::firstOrCreate(
+                ['url' => $this->website->url],
+                [
+                    'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
+                    'certificate_check_enabled' => $this->website->ssl_monitoring_enabled,
+                ]
+            );
+
+            // Use Spatie's MonitorCollection for single monitor uptime check
+            $collection = new \Spatie\UptimeMonitor\MonitorCollection([$monitor]);
+            $collection->checkUptime();
+
+            // Refresh to get latest data
+            $monitor->refresh();
+
+            $result = [
+                'status' => $monitor->uptime_status,
+                'response_time' => $monitor->uptime_check_response_time_in_ms,
+                'status_code' => $monitor->uptime_check_response_status_code,
+                'failure_reason' => $monitor->uptime_check_failure_reason,
+                'checked_at' => $monitor->uptime_last_check_date?->toISOString(),
+                'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
+            ];
 
             AutomationLogger::websiteCheck(
                 $this->website->url,
@@ -137,18 +161,56 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
                 'status' => 'error',
                 'error' => $exception->getMessage(),
                 'checked_at' => Carbon::now()->toISOString(),
+                'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
             ];
         }
     }
 
     /**
-     * Check website SSL certificate status.
+     * Check website SSL certificate status using Spatie Monitor directly (optimized).
      */
     private function checkSsl(): array
     {
         try {
-            $sslService = app(SslCertificateAnalysisService::class);
-            $result = $sslService->analyzeWebsite($this->website->url);
+            $startTime = microtime(true);
+
+            // Get the same monitor instance (already created in uptime check)
+            $monitor = \Spatie\UptimeMonitor\Models\Monitor::where('url', $this->website->url)->first();
+
+            if (!$monitor) {
+                // Fallback: create monitor if not exists
+                $monitor = \Spatie\UptimeMonitor\Models\Monitor::create([
+                    'url' => $this->website->url,
+                    'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
+                    'certificate_check_enabled' => $this->website->ssl_monitoring_enabled,
+                ]);
+            }
+
+            // Use Spatie's checkCertificate method directly
+            $monitor->checkCertificate();
+
+            // Refresh to get latest data
+            $monitor->refresh();
+
+            // Determine status based on Spatie's certificate data
+            $status = 'valid';
+            if ($monitor->certificate_status === 'invalid') {
+                $status = 'invalid';
+            } elseif ($monitor->certificate_expiration_date && $monitor->certificate_expiration_date->isPast()) {
+                $status = 'expired';
+            } elseif ($monitor->certificate_expiration_date && $monitor->certificate_expiration_date->diffInDays() <= 30) {
+                $status = 'expires_soon';
+            }
+
+            $result = [
+                'status' => $status,
+                'expires_at' => $monitor->certificate_expiration_date?->toISOString(),
+                'issuer' => $monitor->certificate_issuer ?? 'Unknown',
+                'certificate_status' => $monitor->certificate_status,
+                'failure_reason' => $monitor->certificate_check_failure_reason,
+                'checked_at' => Carbon::now()->toISOString(),
+                'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
+            ];
 
             AutomationLogger::websiteCheck(
                 $this->website->url,
@@ -169,6 +231,7 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
                 'status' => 'error',
                 'error' => $exception->getMessage(),
                 'checked_at' => Carbon::now()->toISOString(),
+                'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
             ];
         }
     }

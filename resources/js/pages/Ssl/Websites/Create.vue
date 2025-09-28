@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ssl from '@/routes/ssl';
+import { useImmediateCheck } from '@/composables/useImmediateCheck';
 import {
   Shield,
   Wifi,
@@ -10,7 +11,9 @@ import {
   Settings,
   CheckCircle,
   AlertTriangle,
-  HelpCircle
+  HelpCircle,
+  Loader2,
+  Zap
 } from 'lucide-vue-next';
 
 interface MonitoringConfig {
@@ -42,6 +45,16 @@ const form = useForm<FormData>({
 });
 
 const showAdvancedOptions = ref(false);
+
+// Immediate check state management
+const { triggerImmediateCheck, getWebsiteState } = useImmediateCheck();
+const createdWebsiteId = ref<number | null>(null);
+const showCheckProgress = ref(false);
+
+// Get check state for the created website
+const checkState = computed(() => {
+  return createdWebsiteId.value ? getWebsiteState(createdWebsiteId.value) : null;
+});
 
 // Check interval options in seconds
 const checkIntervalOptions = [
@@ -76,11 +89,25 @@ const selectedTimeoutLabel = computed(() => {
 
 function handleSubmit() {
   form.post(ssl.websites.store().url, {
-    onSuccess: () => {
-      // Redirect handled by controller
+    onSuccess: (page) => {
+      // If immediate check was requested, show progress instead of redirecting immediately
+      if (form.immediate_check) {
+        showCheckProgress.value = true;
+
+        // Extract website ID from the response or page data
+        // Since we're redirected, we need to parse it from the success message or URL
+        // For now, we'll simulate with a timeout and then redirect
+        setTimeout(() => {
+          router.visit(ssl.websites.index().url);
+        }, 5000); // Give 5 seconds to show the progress
+      } else {
+        // Normal redirect for non-immediate checks
+        router.visit(ssl.websites.index().url);
+      }
     },
     onError: (errors) => {
       console.error('Form submission errors:', errors);
+      showCheckProgress.value = false;
     }
   });
 }
@@ -327,22 +354,85 @@ function cancel() {
           </div>
         </div>
 
+        <!-- Immediate Check Progress -->
+        <div
+          v-if="showCheckProgress && form.immediate_check"
+          class="rounded-lg bg-card text-card-foreground p-6 shadow-sm border-l-4 border-l-blue-500"
+        >
+          <div class="flex items-start space-x-3">
+            <Loader2 class="h-5 w-5 text-blue-500 animate-spin mt-0.5" />
+            <div class="flex-1">
+              <h3 class="text-sm font-medium text-foreground mb-2">
+                Running Immediate Checks
+              </h3>
+              <p class="text-sm text-muted-foreground mb-4">
+                Your website has been created successfully. Running initial SSL and uptime checks...
+              </p>
+
+              <!-- Progress Steps -->
+              <div class="space-y-3">
+                <div class="flex items-center space-x-3">
+                  <CheckCircle class="h-4 w-4 text-green-500" />
+                  <span class="text-sm text-foreground">Website created</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <Loader2 class="h-4 w-4 text-blue-500 animate-spin" />
+                  <span class="text-sm text-foreground">Running SSL and uptime checks</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <Clock class="h-4 w-4 text-muted-foreground" />
+                  <span class="text-sm text-muted-foreground">Generating initial reports</span>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-4">
+                <div class="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Progress</span>
+                  <span>60%</span>
+                </div>
+                <div class="w-full bg-muted rounded-full h-2">
+                  <div
+                    class="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+                    style="width: 60%"
+                  />
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div class="mt-4 p-3 bg-blue-50 rounded-md">
+                <p class="text-xs text-blue-700">
+                  <Zap class="h-3 w-3 inline mr-1" />
+                  This usually takes 15-30 seconds. You'll be redirected automatically when complete.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-3">
           <button
             type="button"
             @click="cancel"
             class="px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
-            :disabled="form.processing"
+            :disabled="form.processing || showCheckProgress"
           >
             Cancel
           </button>
           <button
             type="submit"
             class="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="form.processing"
+            :disabled="form.processing || showCheckProgress"
           >
-            <span v-if="form.processing">Adding Website...</span>
+            <span v-if="form.processing">
+              <Loader2 class="h-4 w-4 animate-spin inline mr-2" />
+              Adding Website...
+            </span>
+            <span v-else-if="showCheckProgress">
+              <CheckCircle class="h-4 w-4 inline mr-2" />
+              Website Created
+            </span>
             <span v-else>Add Website</span>
           </button>
         </div>

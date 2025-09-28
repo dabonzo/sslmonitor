@@ -10,6 +10,7 @@ import BulkTransferModal from '@/components/team/BulkTransferModal.vue';
 import WebsiteSkeleton from '@/components/ui/WebsiteSkeleton.vue';
 import CertificateDetailsModal from '@/components/ssl/CertificateDetailsModal.vue';
 import BulkCertificateActions from '@/components/ssl/BulkCertificateActions.vue';
+import ImmediateCheckButton from '@/components/ssl/ImmediateCheckButton.vue';
 
 interface SslCertificate {
   status: string;
@@ -730,6 +731,16 @@ watch(activeTeam, () => {
                       View
                     </button>
 
+                    <!-- Immediate Check Button -->
+                    <ImmediateCheckButton
+                      :website-id="website.id"
+                      :website-name="website.name"
+                      :ssl-enabled="website.ssl_monitoring_enabled"
+                      :uptime-enabled="website.uptime_monitoring_enabled"
+                      size="sm"
+                      variant="compact"
+                    />
+
                     <!-- Inline Quick Transfer -->
                     <button
                       v-if="website.team_badge.type === 'personal' && availableTeams && availableTeams.length > 0"
@@ -908,6 +919,16 @@ watch(activeTeam, () => {
                 <Shield class="h-4 w-4 mr-1.5" />
                 Certificate
               </button>
+
+              <!-- Immediate Check Button -->
+              <ImmediateCheckButton
+                :website-id="website.id"
+                :website-name="website.name"
+                :ssl-enabled="website.ssl_monitoring_enabled"
+                :uptime-enabled="website.uptime_monitoring_enabled"
+                size="md"
+                variant="default"
+              />
 
               <button
                 v-if="website.team_badge.type === 'personal' && availableTeams && availableTeams.length > 0"

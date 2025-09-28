@@ -61,6 +61,7 @@
 4. **ALWAYS check documentation with laravel-boost MCP before implementing Laravel features** - Laravel versions change implementation approaches, always verify current version documentation first
 5. **ALWAYS prioritize environment variables** - Use `.env` configuration instead of hardcoding values in PHP files where it makes sense
 6. **Fix the code, not the expectations** - When tests fail, fix the implementation to meet the test requirements rather than changing the test expectations (unless the test is fundamentally wrong)
+7. **NO Claude Code branding in commits** - Do not include "Generated with Claude Code" or similar branding in commit messages
 
 ---
 
