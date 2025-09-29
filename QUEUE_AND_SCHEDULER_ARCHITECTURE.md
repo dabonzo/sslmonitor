@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-SSL Monitor v4 uses a **hybrid architecture** combining Laravel's **Scheduler** for automated monitoring and **Queues** for manual user actions. This document explains the complete monitoring system architecture.
+SSL Monitor v4 uses a **hybrid architecture** that **extends Spatie Uptime Monitor** with custom enhanced functionality. The system combines Laravel's **Scheduler** for automated monitoring and **Queues** for manual user actions, while using our **extended Monitor model** (`App\Models\Monitor`) that adds JavaScript content validation, response time tracking, and advanced content checking capabilities.
 
 ## 🏗️ Architecture Diagram
 
@@ -27,13 +27,17 @@ SSL Monitor v4 uses a **hybrid architecture** combining Laravel's **Scheduler** 
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                   SPATIE UPTIME MONITOR                                │
+│                   EXTENDED MONITOR SYSTEM                              │
+│                (App\Models\Monitor extends SpatieMonitor)              │
 │                                                                         │
 │  • Batch processes ALL websites simultaneously                         │
-│  • Updates `monitors` table with latest results                        │
+│  • Updates `monitors` table with enhanced results                      │
 │  • Fires Laravel events (success/failure/recovery)                     │
 │  • NO individual queued jobs per website                               │
-│  • Handles both SSL certificate and uptime checking                    │
+│  • Handles SSL certificate and uptime checking                         │
+│  • Tracks response times and content validation                        │
+│  • JavaScript content rendering support                                │
+│  • Advanced content validation (expected/forbidden strings, regex)     │
 └─────────────────────────────┬───────────────────────────────────────────┘
                               │
                               ▼
@@ -56,7 +60,7 @@ SSL Monitor v4 uses a **hybrid architecture** combining Laravel's **Scheduler** 
 ### 1. 🤖 Automated Monitoring (Scheduler-Based)
 
 **Purpose**: Continuous background monitoring of all websites
-**Technology**: Laravel Scheduler + Spatie Uptime Monitor package
+**Technology**: Laravel Scheduler + Extended Monitor Model (App\Models\Monitor)
 **Frequency**:
 - Uptime checks: Every 5 minutes
 - SSL certificate checks: Twice daily (6 AM and 6 PM)
@@ -74,9 +78,12 @@ php artisan monitor:check-certificate # Twice daily
 **Key Characteristics**:
 - ✅ Processes ALL websites in batch operations
 - ✅ No individual jobs queued per website
-- ✅ Updates `monitors` table directly
+- ✅ Updates `monitors` table with enhanced data
 - ✅ Fires Laravel events for notifications
 - ✅ Efficient for large numbers of websites
+- ✅ Enhanced with response time tracking
+- ✅ JavaScript content validation support
+- ✅ Advanced content checking (expected/forbidden strings, regex)
 
 ### 2. 👤 Manual Monitoring (Queue-Based)
 
@@ -90,16 +97,18 @@ php artisan monitor:check-certificate # Twice daily
 ImmediateWebsiteCheckJob::dispatch($website)
     ->onQueue('immediate');
 
-// Queue worker processes job
+// Queue worker processes job (uses Redis for optimal performance)
 php artisan queue:work redis --queue=immediate
 ```
 
 **Key Characteristics**:
 - ✅ Individual jobs per website check
 - ✅ Immediate user feedback
-- ✅ Uses `ImmediateWebsiteCheckJob`
+- ✅ Uses `ImmediateWebsiteCheckJob` with enhanced monitoring
 - ✅ Queued on `immediate` queue
 - ✅ Perfect for responsive UI interactions
+- ✅ Uses extended `App\Models\Monitor` for enhanced data collection
+- ✅ Supports JavaScript content validation and response time tracking
 
 ## 🎯 Queue Configuration Analysis
 
@@ -115,15 +124,16 @@ php artisan queue:work redis --queue=immediate
 
 | Queue Name | Configured | Actually Used | Reason |
 |------------|------------|---------------|---------|
-| `uptime` | ✅ Yes | ❌ No | Spatie handles via scheduler |
-| `ssl` | ✅ Yes | ❌ No | Spatie handles via scheduler |
+| `uptime` | ✅ Yes | ❌ No | Extended Monitor handles via scheduler |
+| `ssl` | ✅ Yes | ❌ No | Extended Monitor handles via scheduler |
 | `cleanup` | ✅ Yes | ❌ No | Cleanup runs via scheduler |
 
 **Why they exist**:
 1. **Legacy from v3**: Original design had separate queue workers
 2. **Production planning**: Supervisor config shows intended scale architecture
-3. **Future-proofing**: Could be used if architecture changes
+3. **Future-proofing**: Could be used if architecture changes to separate queue workers
 4. **Documentation**: Shows intended production queue separation
+5. **Hybrid architecture**: Current system uses scheduler for batch processing, queues for manual actions
 
 ## 🛠️ Development Setup
 
@@ -133,7 +143,7 @@ php artisan queue:work redis --queue=immediate
 # Terminal 1: Start scheduler worker (automated monitoring)
 ./vendor/bin/sail artisan schedule:work
 
-# Terminal 2: Start queue workers (manual actions)
+# Terminal 2: Start queue workers (manual actions - uses Redis for optimal performance)
 ./vendor/bin/sail artisan queue:work redis --queue=immediate,notifications --timeout=90 --tries=3
 ```
 
@@ -183,8 +193,11 @@ sudo supervisorctl start ssl-monitor-queues:*
 ### Recommended Production Command
 
 ```bash
-# Efficient: Only run active queues
+# Efficient: Only run active queues (Redis for optimal performance)
 php artisan queue:work redis --queue=immediate,notifications,default --timeout=90 --tries=3
+
+# Alternative: Database queues (for development environments with limited Redis)
+php artisan queue:work database --queue=immediate,notifications,default --timeout=90 --tries=3
 ```
 
 ## 📊 Data Flow
@@ -193,17 +206,54 @@ php artisan queue:work redis --queue=immediate,notifications,default --timeout=9
 
 1. **User creates website** → Website model saved
 2. **ImmediateWebsiteCheckJob dispatched** → `immediate` queue
-3. **Queue worker processes job** → Calls Spatie monitor methods
-4. **Results saved** → `monitors` table updated
-5. **UI updated** → Real-time status display
+3. **Queue worker processes job** → Uses extended `App\Models\Monitor` with enhanced features
+4. **Results saved** → `monitors` table updated with response times and content validation
+5. **UI updated** → Real-time status display with enhanced data
 
 ### Automated Monitoring Flow
 
 1. **Cron triggers scheduler** → Every minute
 2. **Scheduler runs monitor commands** → Batch processes all websites
-3. **Spatie package checks all sites** → HTTP requests + SSL validation
-4. **Results saved** → `monitors` table updated
+3. **Extended Monitor checks all sites** → HTTP requests + SSL validation + content validation
+4. **Results saved** → `monitors` table updated with enhanced data (response times, content validation)
 5. **Events fired** → Notifications sent if failures
+
+## 🔧 Extended Monitor Model Features
+
+### JavaScript Content Validation
+The extended `App\Models\Monitor` adds powerful content validation capabilities:
+
+```php
+// Enhanced database fields
+'content_expected_strings' => 'array',      // Strings that must be present
+'content_forbidden_strings' => 'array',     // Strings that must not be present
+'content_regex_patterns' => 'array',        // Regex patterns to match
+'javascript_enabled' => 'boolean',          // Enable JavaScript rendering
+'javascript_wait_seconds' => 'integer',     // Wait time for JS rendering
+'content_validation_failure_reason' => 'text', // Failure details
+```
+
+### Enhanced Methods
+```php
+// Content validation management
+$monitor->addExpectedString('Welcome to our site');
+$monitor->addForbiddenString('Error 404');
+$monitor->addRegexPattern('/copyright \d{4}/i');
+
+// Check validation configuration
+$monitor->hasContentValidation();
+$monitor->hasJavaScriptEnabled();
+$monitor->getJavaScriptWaitSeconds();
+
+// Response time tracking
+$monitor->uptime_check_response_time_in_ms; // Tracked automatically
+```
+
+### Integration Benefits
+- **Backward Compatible**: All existing Spatie functionality preserved
+- **Enhanced Data**: Additional fields for advanced monitoring
+- **Custom Logic**: Override methods for specialized behavior
+- **Future-Proof**: Easy to extend further as needs evolve
 
 ## 🔍 Key Files
 
@@ -212,16 +262,37 @@ php artisan queue:work redis --queue=immediate,notifications,default --timeout=9
 - `app/Console/Kernel.php` - Legacy (Laravel 12 uses routes/console.php)
 
 ### Queue Configuration
-- `.env` - Queue connection and queue names
+- `.env` - Queue connection and queue names (Redis optimized)
 - `config/queue.php` - Queue driver configuration
-- `supervisor/ssl-monitor-queues.conf` - Production worker config
+- `supervisor/ssl-monitor-queues.conf` - Production worker config (Redis-ready)
+
+### Redis Queue Configuration
+```bash
+# Environment variables for Redis queues
+QUEUE_CONNECTION=redis
+REDIS_QUEUE_CONNECTION=default
+REDIS_QUEUE=default
+REDIS_QUEUE_RETRY_AFTER=90
+
+# Multiple queue setup for different job types
+QUEUE_IMMEDIATE=immediate
+QUEUE_UPTIME=uptime
+QUEUE_SSL=ssl
+QUEUE_NOTIFICATIONS=notifications
+```
 
 ### Monitoring Jobs
-- `app/Jobs/ImmediateWebsiteCheckJob.php` - Manual check job
+- `app/Jobs/ImmediateWebsiteCheckJob.php` - Manual check job with enhanced monitoring
 - `app/Mail/TeamInvitationMail.php` - Email notifications
+
+### Extended Monitor Model
+- `app/Models/Monitor.php` - Extended Monitor model with JavaScript content validation
+- Database: Enhanced `monitors` table with content validation fields
+- Features: Response time tracking, content validation, JavaScript rendering
 
 ### Spatie Integration
 - `config/uptime-monitor.php` - Spatie package configuration
+- Base functionality: Spatie Uptime Monitor package
 - Artisan commands: `monitor:check-uptime`, `monitor:check-certificate`
 
 ## 🚨 Common Issues & Solutions
@@ -233,7 +304,7 @@ php artisan queue:work redis --queue=immediate,notifications,default --timeout=9
 ```
 
 ### Issue: Manual "Check Now" buttons don't work
-**Solution**: Ensure queue worker is running
+**Solution**: Ensure queue worker is running (Redis for optimal performance)
 ```bash
 ./vendor/bin/sail artisan queue:work redis --queue=immediate
 ```
@@ -276,13 +347,23 @@ tail -f storage/logs/queue-notifications.log
 
 ## 🎯 Summary
 
-**SSL Monitor v4 Architecture**:
+**SSL Monitor v4 Hybrid Architecture**:
+- **Extended Monitor Model** (`App\Models\Monitor`) extends Spatie with enhanced features
 - **Scheduler** handles automated periodic monitoring (efficient batch processing)
 - **Queues** handle manual user actions (responsive UI interactions)
-- **Spatie Uptime Monitor** provides the core monitoring functionality
-- **Hybrid approach** combines the best of both worlds
+- **Enhanced Features**: JavaScript content validation, response time tracking, advanced content checking
+- **Hybrid approach** combines Spatie's reliability with custom enhancements
 
-**For Development**: Run both `schedule:work` and `queue:work`
+**Key Enhancements**:
+- ✅ JavaScript content rendering support
+- ✅ Advanced content validation (expected/forbidden strings, regex patterns)
+- ✅ Response time tracking and performance metrics
+- ✅ Enhanced database schema with content validation fields
+- ✅ Backward compatibility with existing Spatie functionality
+- ✅ Redis queues for optimal performance and low latency
+- ✅ Multiple specialized queues for different job types
+
+**For Development**: Run both `schedule:work` and `queue:work` (Redis for optimal performance)
 **For Production**: Setup cron + supervisor for robust 24/7 operation
 
-This architecture provides reliable automated monitoring while maintaining responsive manual interactions for users.
+This hybrid architecture provides reliable automated monitoring while maintaining responsive manual interactions and adding powerful content validation capabilities. Redis queues ensure immediate job processing with minimal latency for optimal user experience.
