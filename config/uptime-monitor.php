@@ -58,7 +58,7 @@ return [
          *
          * You can use any implementation of Spatie\UptimeMonitor\Helpers\UptimeResponseCheckers\UptimeResponseChecker here.
          */
-        'response_checker' => Spatie\UptimeMonitor\Helpers\UptimeResponseCheckers\LookForStringChecker::class,
+        'response_checker' => App\Services\UptimeMonitor\ResponseCheckers\EnhancedContentChecker::class,
 
         /*
          * An uptime check will be performed if the last check was performed more than the

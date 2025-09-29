@@ -117,8 +117,8 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
         try {
             $startTime = microtime(true);
 
-            // Get or create monitor (fast lookup)
-            $monitor = \Spatie\UptimeMonitor\Models\Monitor::firstOrCreate(
+            // Get or create monitor (fast lookup) - Use our extended Monitor model
+            $monitor = \App\Models\Monitor::firstOrCreate(
                 ['url' => $this->website->url],
                 [
                     'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
@@ -184,12 +184,12 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
         try {
             $startTime = microtime(true);
 
-            // Get the same monitor instance (already created in uptime check)
-            $monitor = \Spatie\UptimeMonitor\Models\Monitor::where('url', $this->website->url)->first();
+            // Get the same monitor instance (already created in uptime check) - Use our extended Monitor model
+            $monitor = \App\Models\Monitor::where('url', $this->website->url)->first();
 
             if (!$monitor) {
-                // Fallback: create monitor if not exists
-                $monitor = \Spatie\UptimeMonitor\Models\Monitor::create([
+                // Fallback: create monitor if not exists - Use our extended Monitor model
+                $monitor = \App\Models\Monitor::create([
                     'url' => $this->website->url,
                     'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
                     'certificate_check_enabled' => $this->website->ssl_monitoring_enabled,
