@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 
 class WebsiteController extends Controller
 {
@@ -220,7 +220,7 @@ class WebsiteController extends Controller
         return Inertia::render('Ssl/Websites/Create');
     }
 
-    public function store(StoreWebsiteRequest $request): RedirectResponse
+    public function store(StoreWebsiteRequest $request, MonitorIntegrationService $monitorService): RedirectResponse
     {
         $user = $request->user();
 
@@ -248,6 +248,24 @@ class WebsiteController extends Controller
             'url' => $website->url,
             'name' => $website->name,
         ]);
+
+        // Create or update Monitor with content validation settings
+        try {
+            $monitor = $monitorService->createOrUpdateMonitorForWebsite($website);
+
+            AutomationLogger::info("Monitor created/updated for new website", [
+                'website_id' => $website->id,
+                'monitor_id' => $monitor->id,
+                'content_validation_enabled' => !empty($website->monitoring_config['content_expected_strings']) ||
+                                               !empty($website->monitoring_config['content_forbidden_strings']) ||
+                                               !empty($website->monitoring_config['content_regex_patterns']),
+            ]);
+        } catch (\Exception $e) {
+            AutomationLogger::error("Failed to create monitor for new website", [
+                'website_id' => $website->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Handle immediate checks if requested
         if ($request->validated('immediate_check', false)) {
@@ -361,7 +379,7 @@ class WebsiteController extends Controller
         ]);
     }
 
-    public function update(UpdateWebsiteRequest $request, Website $website): RedirectResponse
+    public function update(UpdateWebsiteRequest $request, Website $website, MonitorIntegrationService $monitorService): RedirectResponse
     {
         $this->authorize('update', $website);
 
@@ -370,11 +388,18 @@ class WebsiteController extends Controller
             'url' => $request->validated('url'),
             'ssl_monitoring_enabled' => $request->validated('ssl_monitoring_enabled', false),
             'uptime_monitoring_enabled' => $request->validated('uptime_monitoring_enabled', false),
+            'monitoring_config' => $request->validated('monitoring_config', []),
         ]);
 
+        // Sync changes with monitor
+        $monitorService->createOrUpdateMonitorForWebsite($website);
+
+        // Trigger immediate check to verify updated settings
+        $this->dispatchImmediateCheck($website);
+
         return redirect()
-            ->route('ssl.websites.show', $website)
-            ->with('success', "Website '{$website->name}' has been updated.");
+            ->route('ssl.websites.index', ['refresh' => 'check'])
+            ->with('success', "Website '{$website->name}' has been updated and check initiated.");
     }
 
     public function destroy(Website $website): RedirectResponse

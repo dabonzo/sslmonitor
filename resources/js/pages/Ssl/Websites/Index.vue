@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft, Loader2 } from 'lucide-vue-next';
@@ -127,6 +127,33 @@ const deleting = ref<number | null>(null);
 // Page loading states
 const isFilterLoading = ref(false);
 const isPageLoading = ref(false);
+
+// Simple auto-refresh for immediate checks after edit
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const refreshParam = urlParams.get('refresh');
+
+  if (refreshParam === 'check') {
+    // Start checking every 3 seconds for updates after an immediate check
+    let refreshCount = 0;
+    const maxRefreshes = 10; // Check for 30 seconds (3s * 10)
+
+    const intervalId = setInterval(() => {
+      refreshCount++;
+      router.reload({ only: ['websites'] });
+
+      // Stop after 30 seconds
+      if (refreshCount >= maxRefreshes) {
+        clearInterval(intervalId);
+      }
+    }, 3000);
+
+    // Clean up the URL parameter
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.delete('refresh');
+    window.history.replaceState({}, '', newUrl);
+  }
+});
 
 // Bulk transfer modal state
 const showBulkTransferModal = ref(false);
@@ -679,9 +706,21 @@ watch(activeTeam, () => {
                   </span>
                 </td>
                 <td class="p-4">
-                  <!-- Uptime Status Placeholder -->
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Online
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    :class="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                    }"
+                  >
+                    {{ website.uptime_status === 'up' ? 'Online' :
+                       website.uptime_status === 'down' ? 'Down' :
+                       website.uptime_status === 'slow' ? 'Slow' :
+                       website.uptime_status === 'content_mismatch' ? 'Content Issue' :
+                       website.uptime_status === 'not yet checked' ? 'Not Checked' :
+                       'Unknown' }}
                   </span>
                 </td>
                 <td class="p-4">
@@ -855,8 +894,21 @@ watch(activeTeam, () => {
               </div>
               <div>
                 <div class="text-xs text-muted-foreground mb-1">Uptime Status</div>
-                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  Online
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                  }"
+                >
+                  {{ website.uptime_status === 'up' ? 'Online' :
+                     website.uptime_status === 'down' ? 'Down' :
+                     website.uptime_status === 'slow' ? 'Slow' :
+                     website.uptime_status === 'content_mismatch' ? 'Content Issue' :
+                     website.uptime_status === 'not yet checked' ? 'Not Checked' :
+                     'Unknown' }}
                 </span>
               </div>
             </div>
