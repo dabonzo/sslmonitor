@@ -85,6 +85,19 @@ interface TransferSuggestions {
   should_show_suggestion: boolean;
 }
 
+interface ExpirationTimelineItem {
+  website_id?: number;
+  website_name: string;
+  expires_at: string;
+  days_until_expiry: number;
+}
+
+interface ExpirationTimeline {
+  expiring_7_days: ExpirationTimelineItem[];
+  expiring_30_days: ExpirationTimelineItem[];
+  expiring_90_days: ExpirationTimelineItem[];
+}
+
 interface Props {
   sslStatistics: SslStatistics;
   uptimeStatistics: UptimeStatistics;
@@ -92,6 +105,7 @@ interface Props {
   recentUptimeActivity: UptimeActivity[];
   criticalAlerts: SslAlert[];
   transferSuggestions: TransferSuggestions;
+  expirationTimeline: ExpirationTimeline;
 }
 
 const props = defineProps<Props>();
@@ -427,227 +441,9 @@ const handleCheckNow = (websiteId: number) => {
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-            <!-- SSL & Uptime Status Chart -->
-            <div class="lg:col-span-2 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-800 dark:to-gray-900 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
-                            <Activity class="h-6 w-6 text-gray-600 dark:text-gray-400" />
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-                            SSL & Uptime Monitoring Overview
-                        </h3>
-                    </div>
-                    <button class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                        View All
-                    </button>
-                </div>
-
-                <!-- Enhanced status grid -->
-                <div class="grid grid-cols-2 gap-6 h-80">
-                    <!-- SSL Status -->
-                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100/20 dark:bg-gray-700/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
-
-                        <div class="relative flex items-center justify-between mb-6">
-                            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">SSL Certificates</h4>
-                            <div class="rounded-xl bg-green-100 dark:bg-green-900/30 p-3 group-hover:scale-110 transition-transform duration-300">
-                                <Shield class="h-6 w-6 text-green-600 dark:text-green-400" />
-                            </div>
-                        </div>
-
-                        <div class="relative space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Valid</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.valid_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.valid_certificates }}</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Expiring</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-amber-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expiring_soon / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.expiring_soon }}</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Expired</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.sslStatistics.total_websites > 0 ? (props.sslStatistics.expired_certificates / props.sslStatistics.total_websites) * 100 : 0}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.sslStatistics.expired_certificates }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Uptime Status -->
-                    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100/20 dark:bg-gray-700/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
-
-                        <div class="relative flex items-center justify-between mb-6">
-                            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Uptime Monitors</h4>
-                            <div class="rounded-xl bg-blue-100 dark:bg-blue-900/30 p-3 group-hover:scale-110 transition-transform duration-300">
-                                <Wifi class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                        </div>
-
-                        <div class="relative space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Healthy</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.healthy_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.healthy_monitors }}</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Down</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.uptimeStatistics.total_monitors > 0 ? (props.uptimeStatistics.down_monitors / props.uptimeStatistics.total_monitors) * 100 : 0}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.down_monitors }}</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Uptime</span>
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-3">
-                                        <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
-                                             :style="{ width: `${props.uptimeStatistics.uptime_percentage}%` }"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100 min-w-[2rem]">{{ props.uptimeStatistics.uptime_percentage }}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
-                            <Clock class="h-6 w-6 text-gray-600 dark:text-gray-400" />
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-                            Recent Activity
-                        </h3>
-                    </div>
-                    <button
-                        @click="showActivityModal = true"
-                        class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                        View All
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    <div
-                        v-for="activity in dashboardActivity"
-                        :key="activity.title + activity.time"
-                        class="group flex items-start space-x-4 p-3 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 border border-white/60 dark:border-white/10"
-                    >
-                        <div class="flex items-center mt-1 space-x-2">
-                            <div
-                                class="h-3 w-3 rounded-full"
-                                :class="{
-                                    'bg-green-500': activity.type === 'success',
-                                    'bg-red-500': activity.type === 'error',
-                                    'bg-amber-500': activity.type === 'warning'
-                                }"
-                            />
-                            <div class="rounded-lg p-1.5" :class="{
-                                'bg-green-100 dark:bg-green-900/30': activity.category === 'ssl',
-                                'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
-                            }">
-                                <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
-                                <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                                {{ activity.title }}
-                            </p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate">
-                                {{ activity.description }}
-                            </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
-                                {{ activity.time }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Content Row -->
-        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-            <!-- Critical Alerts -->
-            <div class="rounded-2xl bg-gradient-to-br from-rose-50 via-red-50 to-pink-50 dark:from-rose-900/30 dark:via-red-900/30 dark:to-pink-900/30 p-6 shadow-xl border border-rose-100 dark:border-rose-800">
-                <div class="mb-6 flex items-center space-x-3">
-                    <div class="rounded-xl bg-gradient-to-br from-red-500 to-pink-600 p-2.5">
-                        <AlertTriangle class="h-6 w-6 text-white" />
-                    </div>
-                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                        Critical Alerts
-                    </h3>
-                </div>
-
-                <div class="space-y-4">
-                    <div
-                        v-if="criticalAlerts.length === 0"
-                        class="text-center py-8"
-                    >
-                        <div class="rounded-2xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 p-6 inline-block">
-                            <CheckCircle class="h-12 w-12 mx-auto mb-3 text-emerald-600 dark:text-emerald-400" />
-                            <p class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">No critical SSL alerts</p>
-                            <p class="text-sm text-emerald-700 dark:text-emerald-300 mt-1">All certificates are healthy</p>
-                        </div>
-                    </div>
-
-                    <div
-                        v-for="alert in criticalAlerts"
-                        :key="alert.website_name"
-                        class="group flex items-start space-x-4 rounded-xl bg-gradient-to-r from-red-100 via-rose-100 to-pink-100 dark:from-red-900/40 dark:via-rose-900/40 dark:to-pink-900/40 p-4 border border-red-200 dark:border-red-700 hover:shadow-lg transition-all duration-300"
-                    >
-                        <div class="rounded-lg bg-red-500/10 p-2">
-                            <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold text-red-900 dark:text-red-100">
-                                {{ alert.type === 'ssl_expired' ? 'Certificate Expired' : 'SSL Alert' }}
-                            </p>
-                            <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-                                {{ alert.message }}
-                            </p>
-                            <p class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
-                                Expired: {{ new Date(alert.expires_at).toLocaleDateString() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Enhanced Quick Actions -->
-            <div class="rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            <!-- Quick Actions -->
+            <div class="lg:col-span-2 rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
@@ -769,22 +565,224 @@ const handleCheckNow = (websiteId: number) => {
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Team Access</h4>
                         <Link
                             href="/settings/team"
-                            class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                            class="text-xs text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
                         >
                             View All
                         </Link>
                     </div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="space-y-2">
                         <Link
                             v-for="team in transferSuggestions.quick_transfer_teams"
                             :key="team.id"
                             :href="`/settings/team/${team.id}`"
-                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            class="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors group"
                         >
-                            <Users class="h-3 w-3 mr-1" />
-                            {{ team.name }}
-                            <span class="ml-1 text-gray-500 dark:text-gray-400">({{ team.member_count }})</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="rounded-md bg-gray-200 dark:bg-gray-700 p-1.5">
+                                    <Users class="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
+                                </div>
+                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300">{{ team.name }}</span>
+                            </div>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">({{ team.member_count }})</span>
                         </Link>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="lg:col-span-3 rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
+                <div class="mb-6 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
+                            <Clock class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                            Recent Activity
+                        </h3>
+                    </div>
+                    <button
+                        @click="showActivityModal = true"
+                        class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                        View All
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div
+                        v-for="activity in dashboardActivity"
+                        :key="activity.title + activity.time"
+                        class="group flex items-start space-x-4 p-3 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 border border-white/60 dark:border-white/10"
+                    >
+                        <div class="flex items-center mt-1 space-x-2">
+                            <div
+                                class="h-3 w-3 rounded-full"
+                                :class="{
+                                    'bg-green-500': activity.type === 'success',
+                                    'bg-red-500': activity.type === 'error',
+                                    'bg-amber-500': activity.type === 'warning'
+                                }"
+                            />
+                            <div class="rounded-lg p-1.5" :class="{
+                                'bg-green-100 dark:bg-green-900/30': activity.category === 'ssl',
+                                'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
+                            }">
+                                <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                                {{ activity.title }}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate">
+                                {{ activity.description }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
+                                {{ activity.time }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificate Expiration Timeline -->
+        <div class="mt-6">
+            <div class="rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 p-6 shadow-xl border border-amber-100 dark:border-amber-800">
+                <div class="mb-6 flex items-center space-x-3">
+                    <div class="rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-2.5">
+                        <Clock class="h-6 w-6 text-white" />
+                    </div>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        Certificate Expiration Timeline
+                    </h3>
+                </div>
+
+                <div v-if="props.expirationTimeline.expiring_7_days.length === 0 && props.expirationTimeline.expiring_30_days.length === 0 && props.expirationTimeline.expiring_90_days.length === 0" class="text-center py-8">
+                    <div class="rounded-2xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/50 dark:to-green-900/50 p-6 inline-block">
+                        <CheckCircle class="h-12 w-12 mx-auto mb-3 text-emerald-600 dark:text-emerald-400" />
+                        <p class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">All certificates are healthy</p>
+                        <p class="text-sm text-emerald-700 dark:text-emerald-300 mt-1">No certificates expiring in the next 90 days</p>
+                    </div>
+                </div>
+
+                <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Critical: Expiring in 7 days -->
+                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-red-200 dark:border-red-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
+                                    <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-red-900 dark:text-red-100">Critical</h4>
+                                    <p class="text-xs text-red-700 dark:text-red-300">Expiring in 7 days</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-red-600 dark:text-red-400">
+                                {{ props.expirationTimeline.expiring_7_days.length }}
+                            </div>
+                        </div>
+                        <div v-if="props.expirationTimeline.expiring_7_days.length > 0" class="space-y-2">
+                            <Link
+                                v-for="cert in props.expirationTimeline.expiring_7_days.slice(0, 3)"
+                                :key="cert.website_name"
+                                :href="cert.website_id ? ssl.websites.edit(cert.website_id).url : '#'"
+                                class="block p-3 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800"
+                            >
+                                <p class="text-sm font-semibold text-red-900 dark:text-red-100 truncate">
+                                    {{ cert.website_name }}
+                                </p>
+                                <p class="text-xs text-red-700 dark:text-red-300 mt-1">
+                                    {{ cert.days_until_expiry }} day{{ cert.days_until_expiry === 1 ? '' : 's' }} remaining
+                                </p>
+                            </Link>
+                            <p v-if="props.expirationTimeline.expiring_7_days.length > 3" class="text-xs text-red-600 dark:text-red-400 text-center pt-2">
+                                +{{ props.expirationTimeline.expiring_7_days.length - 3 }} more
+                            </p>
+                        </div>
+                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                            No certificates
+                        </p>
+                    </div>
+
+                    <!-- Warning: Expiring in 30 days -->
+                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-amber-200 dark:border-amber-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
+                                    <Clock class="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-amber-900 dark:text-amber-100">Warning</h4>
+                                    <p class="text-xs text-amber-700 dark:text-amber-300">Expiring in 30 days</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                                {{ props.expirationTimeline.expiring_30_days.length }}
+                            </div>
+                        </div>
+                        <div v-if="props.expirationTimeline.expiring_30_days.length > 0" class="space-y-2">
+                            <Link
+                                v-for="cert in props.expirationTimeline.expiring_30_days.slice(0, 3)"
+                                :key="cert.website_name"
+                                :href="cert.website_id ? ssl.websites.edit(cert.website_id).url : '#'"
+                                class="block p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors border border-amber-200 dark:border-amber-800"
+                            >
+                                <p class="text-sm font-semibold text-amber-900 dark:text-amber-100 truncate">
+                                    {{ cert.website_name }}
+                                </p>
+                                <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                                    {{ cert.days_until_expiry }} days remaining
+                                </p>
+                            </Link>
+                            <p v-if="props.expirationTimeline.expiring_30_days.length > 3" class="text-xs text-amber-600 dark:text-amber-400 text-center pt-2">
+                                +{{ props.expirationTimeline.expiring_30_days.length - 3 }} more
+                            </p>
+                        </div>
+                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                            No certificates
+                        </p>
+                    </div>
+
+                    <!-- Info: Expiring in 90 days -->
+                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-blue-200 dark:border-blue-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                                    <Shield class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-blue-900 dark:text-blue-100">Info</h4>
+                                    <p class="text-xs text-blue-700 dark:text-blue-300">Expiring in 90 days</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                {{ props.expirationTimeline.expiring_90_days.length }}
+                            </div>
+                        </div>
+                        <div v-if="props.expirationTimeline.expiring_90_days.length > 0" class="space-y-2">
+                            <Link
+                                v-for="cert in props.expirationTimeline.expiring_90_days.slice(0, 3)"
+                                :key="cert.website_name"
+                                :href="cert.website_id ? ssl.websites.edit(cert.website_id).url : '#'"
+                                class="block p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-blue-200 dark:border-blue-800"
+                            >
+                                <p class="text-sm font-semibold text-blue-900 dark:text-blue-100 truncate">
+                                    {{ cert.website_name }}
+                                </p>
+                                <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                    {{ cert.days_until_expiry }} days remaining
+                                </p>
+                            </Link>
+                            <p v-if="props.expirationTimeline.expiring_90_days.length > 3" class="text-xs text-blue-600 dark:text-blue-400 text-center pt-2">
+                                +{{ props.expirationTimeline.expiring_90_days.length - 3 }} more
+                            </p>
+                        </div>
+                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                            No certificates
+                        </p>
                     </div>
                 </div>
             </div>
