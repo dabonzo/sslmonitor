@@ -59,7 +59,13 @@ const form = useForm({
   }
 });
 
-const showAdvancedOptions = ref(false);
+// Auto-expand content validation if already configured
+const showContentValidation = ref(
+  (props.website.monitoring_config?.content_expected_strings?.length ?? 0) > 0 ||
+  (props.website.monitoring_config?.content_forbidden_strings?.length ?? 0) > 0 ||
+  (props.website.monitoring_config?.content_regex_patterns?.length ?? 0) > 0 ||
+  props.website.monitoring_config?.javascript_enabled === true
+);
 
 // Timeout options in seconds
 const timeoutOptions = [
@@ -219,18 +225,37 @@ function cancel() {
                 </label>
               </div>
 
-              <div v-if="form.ssl_monitoring_enabled" class="pl-8 space-y-2">
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>Certificate expiration monitoring</span>
+              <div v-if="form.ssl_monitoring_enabled" class="space-y-4">
+                <div class="pl-8 space-y-2">
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>Certificate expiration monitoring</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>Certificate validity checks</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>Response time measurement</span>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>Certificate validity checks</span>
-                </div>
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>Response time measurement</span>
+
+                <!-- SSL Monitoring Schedule Info -->
+                <div class="ml-8 rounded-lg border border-border/50 bg-blue-500/5 p-3">
+                  <div class="flex items-start space-x-2">
+                    <Clock class="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div class="space-y-1.5 text-xs text-muted-foreground">
+                      <div class="flex items-center space-x-2">
+                        <CheckCircle class="h-3 w-3 text-green-500" />
+                        <span>SSL checks: Twice daily (6 AM & 6 PM)</span>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <HelpCircle class="h-3 w-3 text-blue-500" />
+                        <span>Automatic scheduling by the system</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -255,18 +280,214 @@ function cancel() {
                 </label>
               </div>
 
-              <div v-if="form.uptime_monitoring_enabled" class="pl-8 space-y-2">
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>HTTP/HTTPS availability checks</span>
+              <div v-if="form.uptime_monitoring_enabled" class="space-y-4">
+                <!-- Basic Features -->
+                <div class="pl-8 space-y-2">
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>HTTP/HTTPS availability checks</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>Response time tracking</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <CheckCircle class="h-3 w-3 text-green-500" />
+                    <span>Downtime notifications</span>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>Response time tracking</span>
+
+                <!-- Content Validation Section -->
+                <div class="ml-8 rounded-lg border border-border/50 bg-muted/20 p-4">
+                  <button
+                    type="button"
+                    @click="showContentValidation = !showContentValidation"
+                    class="flex items-center justify-between w-full text-left"
+                  >
+                    <div class="flex items-center space-x-3">
+                      <FileText class="h-4 w-4 text-orange-500" />
+                      <div>
+                        <h4 class="text-sm font-medium text-foreground">Content Validation</h4>
+                        <p class="text-xs text-muted-foreground">Detect error pages and unexpected content</p>
+                      </div>
+                    </div>
+                    <Settings class="h-4 w-4 text-muted-foreground transition-transform duration-200" :class="{ 'rotate-90': showContentValidation }" />
+                  </button>
+
+                  <div v-if="showContentValidation" class="mt-4 space-y-4">
+                    <!-- Expected Content -->
+                    <div class="space-y-3">
+                      <label class="block text-xs font-medium text-foreground">
+                        Expected Content (strings that must be present)
+                      </label>
+                      <div v-if="form.monitoring_config.content_expected_strings?.length" class="space-y-2">
+                        <div
+                          v-for="(string, index) in form.monitoring_config.content_expected_strings"
+                          :key="`expected-${index}`"
+                          class="flex items-center space-x-2"
+                        >
+                          <input
+                            v-model="form.monitoring_config.content_expected_strings[index]"
+                            type="text"
+                            placeholder="e.g., Welcome to our site"
+                            class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                          />
+                          <button
+                            type="button"
+                            @click="removeExpectedString(index)"
+                            class="p-1 text-red-500 hover:text-red-700"
+                          >
+                            <X class="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        @click="addExpectedString"
+                        class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
+                      >
+                        <Plus class="h-3 w-3" />
+                        <span>Add expected content</span>
+                      </button>
+                    </div>
+
+                    <!-- Forbidden Content -->
+                    <div class="space-y-3">
+                      <label class="block text-xs font-medium text-foreground">
+                        Forbidden Content (strings that must NOT be present)
+                      </label>
+                      <div v-if="form.monitoring_config.content_forbidden_strings?.length" class="space-y-2">
+                        <div
+                          v-for="(string, index) in form.monitoring_config.content_forbidden_strings"
+                          :key="`forbidden-${index}`"
+                          class="flex items-center space-x-2"
+                        >
+                          <input
+                            v-model="form.monitoring_config.content_forbidden_strings[index]"
+                            type="text"
+                            placeholder="e.g., Error 500, Page not found"
+                            class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                          />
+                          <button
+                            type="button"
+                            @click="removeForbiddenString(index)"
+                            class="p-1 text-red-500 hover:text-red-700"
+                          >
+                            <X class="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        @click="addForbiddenString"
+                        class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
+                      >
+                        <Plus class="h-3 w-3" />
+                        <span>Add forbidden content</span>
+                      </button>
+                    </div>
+
+                    <!-- Regex Patterns -->
+                    <div class="space-y-3">
+                      <label class="block text-xs font-medium text-foreground">
+                        Regex Patterns (advanced content matching)
+                      </label>
+                      <div v-if="form.monitoring_config.content_regex_patterns?.length" class="space-y-2">
+                        <div
+                          v-for="(pattern, index) in form.monitoring_config.content_regex_patterns"
+                          :key="`regex-${index}`"
+                          class="flex items-center space-x-2"
+                        >
+                          <input
+                            v-model="form.monitoring_config.content_regex_patterns[index]"
+                            type="text"
+                            placeholder="e.g., /status.*ok/i"
+                            class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary font-mono"
+                          />
+                          <button
+                            type="button"
+                            @click="removeRegexPattern(index)"
+                            class="p-1 text-red-500 hover:text-red-700"
+                          >
+                            <X class="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        @click="addRegexPattern"
+                        class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
+                      >
+                        <Plus class="h-3 w-3" />
+                        <span>Add regex pattern</span>
+                      </button>
+                    </div>
+
+                    <!-- JavaScript Rendering (inside Content Validation) -->
+                    <div class="pt-4 border-t border-border/50">
+                      <div class="flex items-start space-x-3 mb-3">
+                        <Code class="h-4 w-4 text-purple-500 mt-0.5" />
+                        <div class="flex-1">
+                          <h5 class="text-xs font-medium text-foreground mb-1">JavaScript Rendering</h5>
+                          <p class="text-xs text-muted-foreground">Enable for dynamic websites that load content via JavaScript</p>
+                        </div>
+                      </div>
+
+                      <div class="space-y-3">
+                        <label class="flex items-start space-x-3">
+                          <input
+                            v-model="form.monitoring_config.javascript_enabled"
+                            type="checkbox"
+                            class="rounded border-border text-primary focus:ring-primary mt-0.5"
+                          />
+                          <div>
+                            <span class="text-sm text-foreground">Enable JavaScript rendering</span>
+                            <p class="text-xs text-muted-foreground mt-1">
+                              Use headless browser to render JavaScript before content validation
+                            </p>
+                          </div>
+                        </label>
+
+                        <div v-if="form.monitoring_config.javascript_enabled" class="ml-6 space-y-3">
+                          <div>
+                            <label class="block text-xs font-medium text-foreground mb-2">
+                              Wait Time (seconds)
+                            </label>
+                            <select
+                              v-model="form.monitoring_config.javascript_wait_seconds"
+                              class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                            >
+                              <option value="1">1 second</option>
+                              <option value="3">3 seconds</option>
+                              <option value="5">5 seconds (recommended)</option>
+                              <option value="10">10 seconds</option>
+                              <option value="15">15 seconds</option>
+                            </select>
+                            <p class="text-xs text-muted-foreground mt-1">
+                              Time to wait for JavaScript to fully render the page
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <CheckCircle class="h-3 w-3 text-green-500" />
-                  <span>Downtime notifications</span>
+
+                <!-- Monitoring Schedule Info -->
+                <div class="ml-8 rounded-lg border border-border/50 bg-blue-500/5 p-3">
+                  <div class="flex items-start space-x-2">
+                    <Clock class="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div class="space-y-1.5 text-xs text-muted-foreground">
+                      <div class="flex items-center space-x-2">
+                        <CheckCircle class="h-3 w-3 text-green-500" />
+                        <span>Uptime checks: Every 5 minutes</span>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <HelpCircle class="h-3 w-3 text-blue-500" />
+                        <span>Automatic scheduling by the system</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,211 +496,31 @@ function cancel() {
 
         <!-- Advanced Options -->
         <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Advanced Options</h2>
-            <button
-              type="button"
-              @click="showAdvancedOptions = !showAdvancedOptions"
-              class="flex items-center space-x-2 text-sm text-primary hover:text-primary/80"
-            >
-              <Settings class="h-4 w-4" />
-              <span>{{ showAdvancedOptions ? 'Hide' : 'Show' }} Advanced</span>
-            </button>
-          </div>
+          <h2 class="text-lg font-semibold text-foreground mb-4">Advanced Options</h2>
 
-          <div v-if="showAdvancedOptions" class="space-y-6">
-            <!-- Global Monitoring Info -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-              <div class="flex items-center space-x-2 mb-2">
-                <Clock class="h-4 w-4 text-blue-500" />
-                <h4 class="text-sm font-medium text-blue-900 dark:text-blue-100">Global Monitoring Schedule</h4>
-              </div>
-              <div class="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-                <p>• Uptime checks: Every 5 minutes</p>
-                <p>• SSL certificate checks: Every 12 hours</p>
-                <p>• Applied to all websites uniformly</p>
-              </div>
+          <!-- Timeout -->
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-2">
+              Request Timeout
+            </label>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <button
+                v-for="option in timeoutOptions"
+                :key="option.value"
+                type="button"
+                @click="form.monitoring_config.timeout = option.value"
+                class="px-3 py-2 text-xs rounded-md border border-border hover:bg-muted transition-colors"
+                :class="{
+                  'bg-primary text-primary-foreground border-primary': form.monitoring_config.timeout === option.value,
+                  'bg-background text-foreground': form.monitoring_config.timeout !== option.value
+                }"
+              >
+                {{ option.label }}
+              </button>
             </div>
-
-            <!-- Timeout -->
-            <div>
-              <label class="block text-sm font-medium text-foreground mb-2">
-                Request Timeout
-              </label>
-              <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-                <button
-                  v-for="option in timeoutOptions"
-                  :key="option.value"
-                  type="button"
-                  @click="form.monitoring_config.timeout = option.value"
-                  class="px-3 py-2 text-xs rounded-md border border-border hover:bg-muted transition-colors"
-                  :class="{
-                    'bg-primary text-primary-foreground border-primary': form.monitoring_config.timeout === option.value,
-                    'bg-background text-foreground': form.monitoring_config.timeout !== option.value
-                  }"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-              <p class="text-xs text-muted-foreground mt-1">
-                Current: {{ selectedTimeoutLabel }}
-              </p>
-            </div>
-
-            <!-- Content Validation -->
-            <div class="border-t border-border pt-6">
-              <div class="flex items-center space-x-2 mb-4">
-                <FileText class="h-4 w-4 text-blue-500" />
-                <h3 class="text-sm font-medium text-foreground">Content Validation</h3>
-                <HelpCircle class="h-3 w-3 text-muted-foreground" />
-              </div>
-
-              <!-- Expected Content -->
-              <div class="space-y-3 mb-4">
-                <label class="block text-xs font-medium text-foreground">
-                  Expected Content (strings that must be present)
-                </label>
-                <div v-if="form.monitoring_config.content_expected_strings?.length" class="space-y-2">
-                  <div
-                    v-for="(string, index) in form.monitoring_config.content_expected_strings"
-                    :key="`expected-${index}`"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      v-model="form.monitoring_config.content_expected_strings[index]"
-                      type="text"
-                      placeholder="e.g., Welcome to our site"
-                      class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
-                    <button
-                      type="button"
-                      @click="removeExpectedString(index)"
-                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                    >
-                      <X class="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  @click="addExpectedString"
-                  class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
-                >
-                  <Plus class="h-3 w-3" />
-                  <span>Add expected string</span>
-                </button>
-              </div>
-
-              <!-- Forbidden Content -->
-              <div class="space-y-3 mb-4">
-                <label class="block text-xs font-medium text-foreground">
-                  Forbidden Content (strings that must NOT be present)
-                </label>
-                <div v-if="form.monitoring_config.content_forbidden_strings?.length" class="space-y-2">
-                  <div
-                    v-for="(string, index) in form.monitoring_config.content_forbidden_strings"
-                    :key="`forbidden-${index}`"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      v-model="form.monitoring_config.content_forbidden_strings[index]"
-                      type="text"
-                      placeholder="e.g., Error 500, Page not found"
-                      class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
-                    <button
-                      type="button"
-                      @click="removeForbiddenString(index)"
-                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                    >
-                      <X class="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  @click="addForbiddenString"
-                  class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
-                >
-                  <Plus class="h-3 w-3" />
-                  <span>Add forbidden string</span>
-                </button>
-              </div>
-
-              <!-- Regex Patterns -->
-              <div class="space-y-3 mb-4">
-                <label class="block text-xs font-medium text-foreground">
-                  Regex Patterns (advanced pattern matching)
-                </label>
-                <div v-if="form.monitoring_config.content_regex_patterns?.length" class="space-y-2">
-                  <div
-                    v-for="(pattern, index) in form.monitoring_config.content_regex_patterns"
-                    :key="`regex-${index}`"
-                    class="flex items-center space-x-2"
-                  >
-                    <input
-                      v-model="form.monitoring_config.content_regex_patterns[index]"
-                      type="text"
-                      placeholder="e.g., /user-count:\s*(\d+)/i"
-                      class="flex-1 rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary font-mono"
-                    />
-                    <button
-                      type="button"
-                      @click="removeRegexPattern(index)"
-                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                    >
-                      <X class="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  @click="addRegexPattern"
-                  class="flex items-center space-x-2 text-xs text-primary hover:text-primary/80"
-                >
-                  <Plus class="h-3 w-3" />
-                  <span>Add regex pattern</span>
-                </button>
-              </div>
-
-              <!-- JavaScript Rendering -->
-              <div class="space-y-4">
-                <label class="flex items-start space-x-3">
-                  <input
-                    v-model="form.monitoring_config.javascript_enabled"
-                    type="checkbox"
-                    class="rounded border-border text-primary focus:ring-primary mt-0.5"
-                  />
-                  <div>
-                    <span class="text-sm text-foreground">Enable JavaScript rendering</span>
-                    <p class="text-xs text-muted-foreground">
-                      Use headless browser to render JavaScript before content validation
-                    </p>
-                  </div>
-                </label>
-                <div v-if="form.monitoring_config.javascript_enabled" class="ml-6 space-y-3">
-                  <div>
-                    <label class="block text-xs font-medium text-foreground mb-2">
-                      Wait Time (seconds)
-                    </label>
-                    <select
-                      v-model="form.monitoring_config.javascript_wait_seconds"
-                      class="rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="1">1 second</option>
-                      <option value="3">3 seconds</option>
-                      <option value="5">5 seconds</option>
-                      <option value="10">10 seconds</option>
-                      <option value="15">15 seconds</option>
-                      <option value="30">30 seconds</option>
-                    </select>
-                    <p class="text-xs text-muted-foreground mt-1">
-                      How long to wait for JavaScript to execute before checking content
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p class="text-xs text-muted-foreground mt-1">
+              Current: {{ selectedTimeoutLabel }}
+            </p>
           </div>
         </div>
 
