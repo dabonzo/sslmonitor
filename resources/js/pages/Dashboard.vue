@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ssl from '@/routes/ssl';
 import {
@@ -256,6 +256,20 @@ const failedChecks = computed(() => {
 // Show failure banner if there are any failures
 const showFailureBanner = computed(() => failedChecks.value.length > 0);
 const dismissedFailures = ref(false);
+
+// Track which website is being checked
+const checkingWebsiteId = ref<number | null>(null);
+
+// Handle immediate check
+const handleCheckNow = (websiteId: number) => {
+  checkingWebsiteId.value = websiteId;
+  router.post(`/ssl/websites/${websiteId}/check`, {}, {
+    preserveScroll: true,
+    onFinish: () => {
+      checkingWebsiteId.value = null;
+    }
+  });
+};
 </script>
 
 <template>
@@ -380,15 +394,21 @@ const dismissedFailures = ref(false);
                                 <Edit class="h-4 w-4 mr-1.5" />
                                 Edit
                             </Link>
-                            <Link
-                                as="button"
-                                method="post"
-                                :href="`/ssl/websites/${failure.website_id}/check`"
-                                class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400 rounded-md transition-colors"
+                            <button
+                                v-if="failure.website_id"
+                                @click="handleCheckNow(failure.website_id)"
+                                :disabled="checkingWebsiteId === failure.website_id"
+                                class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                                :class="checkingWebsiteId === failure.website_id
+                                    ? 'text-gray-400 bg-gray-50 dark:bg-gray-800 cursor-not-allowed'
+                                    : 'text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400'"
                             >
-                                <RefreshCw class="h-4 w-4 mr-1.5" />
-                                Check Now
-                            </Link>
+                                <RefreshCw
+                                    class="h-4 w-4 mr-1.5"
+                                    :class="{ 'animate-spin': checkingWebsiteId === failure.website_id }"
+                                />
+                                {{ checkingWebsiteId === failure.website_id ? 'Checking...' : 'Check Now' }}
+                            </button>
                         </div>
                     </div>
                 </div>
