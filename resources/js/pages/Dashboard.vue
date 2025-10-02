@@ -23,7 +23,9 @@ import {
   Search,
   X,
   XCircle,
-  ExternalLink
+  ExternalLink,
+  RefreshCw,
+  Edit
 } from 'lucide-vue-next';
 
 // Define TypeScript interfaces for SSL and Uptime data
@@ -45,19 +47,24 @@ interface UptimeStatistics {
 
 interface SslActivity {
   id: number;
+  website_id?: number;
   website_name: string;
   status: string;
   checked_at: string;
   time_ago: string;
+  failure_reason?: string;
 }
 
 interface UptimeActivity {
   id: number;
+  website_id?: number;
   website_name: string;
   status: string;
   checked_at: string;
   time_ago: string;
   response_time: number;
+  failure_reason?: string;
+  content_failure_reason?: string;
 }
 
 interface SslAlert {
@@ -209,9 +216,12 @@ const failedChecks = computed(() => {
     if (activity.status === 'expired' || activity.status === 'invalid') {
       failures.push({
         type: 'ssl',
+        website_id: activity.website_id,
+        monitor_id: activity.id,
         website_name: activity.website_name,
         status: activity.status,
         message: activity.status === 'expired' ? 'SSL certificate has expired' : 'SSL certificate is invalid',
+        failure_reason: activity.failure_reason,
         time_ago: activity.time_ago,
         checked_at: activity.checked_at
       });
@@ -221,11 +231,18 @@ const failedChecks = computed(() => {
   // Check recent uptime activity for failures
   for (const activity of props.recentUptimeActivity) {
     if (activity.status === 'down' || activity.status === 'content_mismatch') {
+      // Determine the failure reason to display
+      let failureReason = activity.content_failure_reason || activity.failure_reason;
+      let message = activity.status === 'down' ? 'Website is down' : 'Content validation failed';
+
       failures.push({
         type: 'uptime',
+        website_id: activity.website_id,
+        monitor_id: activity.id,
         website_name: activity.website_name,
         status: activity.status,
-        message: activity.status === 'down' ? 'Website is down' : 'Content validation failed',
+        message,
+        failure_reason: failureReason,
         time_ago: activity.time_ago,
         checked_at: activity.checked_at,
         response_time: activity.response_time
@@ -277,87 +294,115 @@ const dismissedFailures = ref(false);
             </div>
         </div>
 
-        <!-- Failure Alert Banner -->
-        <div
-            v-if="showFailureBanner && !dismissedFailures"
-            class="mb-8 rounded-2xl bg-gradient-to-r from-red-50 via-rose-50 to-pink-50 dark:from-red-900/20 dark:via-rose-900/20 dark:to-pink-900/20 border-2 border-red-200 dark:border-red-800 shadow-xl overflow-hidden"
-        >
-            <div class="p-6">
-                <!-- Header -->
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-red-500 p-3">
-                            <XCircle class="h-7 w-7 text-white" />
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-red-900 dark:text-red-100">
-                                {{ failedChecks.length }} Check{{ failedChecks.length === 1 ? '' : 's' }} Failed
-                            </h3>
-                            <p class="text-sm text-red-700 dark:text-red-300 mt-0.5">
-                                Immediate attention required for the following issues
-                            </p>
-                        </div>
+        <!-- Failure Alert Cards (Individual Cards) -->
+        <div v-if="showFailureBanner && !dismissedFailures" class="mb-8">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="rounded-lg bg-red-500 p-2">
+                        <AlertTriangle class="h-5 w-5 text-white" />
                     </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {{ failedChecks.length }} Check{{ failedChecks.length === 1 ? '' : 's' }} Failed
+                    </h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <Link
+                        :href="ssl.websites.index().url + '?filter=critical'"
+                        class="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                    >
+                        View All
+                    </Link>
                     <button
                         @click="dismissedFailures = true"
-                        class="rounded-lg p-2 text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 transition-colors"
-                        title="Dismiss"
+                        class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 transition-colors"
+                        title="Dismiss all"
                     >
-                        <X class="h-5 w-5" />
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
+            </div>
 
-                <!-- Failed Checks List -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div
-                        v-for="(failure, index) in failedChecks.slice(0, 4)"
-                        :key="index"
-                        class="group flex items-start space-x-3 p-4 rounded-xl bg-white dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 hover:shadow-md transition-all duration-200"
-                    >
-                        <div class="rounded-lg p-2" :class="{
-                            'bg-red-100 dark:bg-red-900/30': failure.type === 'ssl',
-                            'bg-orange-100 dark:bg-orange-900/30': failure.type === 'uptime'
-                        }">
-                            <Shield v-if="failure.type === 'ssl'" class="h-5 w-5 text-red-600 dark:text-red-400" />
-                            <Wifi v-else class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            <!-- Individual Failure Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div
+                    v-for="(failure, index) in failedChecks.slice(0, 4)"
+                    :key="index"
+                    class="group relative rounded-lg border-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                    :class="{
+                        'border-red-400 dark:border-red-700 bg-red-50/50 dark:bg-red-950/30': failure.type === 'ssl',
+                        'border-red-400 dark:border-red-700 bg-red-50/50 dark:bg-red-950/30': failure.type === 'uptime'
+                    }"
+                >
+                    <!-- Status Bar - Thicker and more prominent -->
+                    <div class="absolute top-0 left-0 right-0 h-2 rounded-t-lg bg-gradient-to-r from-red-600 to-red-500"></div>
+
+                    <div class="p-4 pt-5">
+                        <!-- Header with Icon and Actions -->
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-start space-x-3 flex-1 min-w-0">
+                                <div class="rounded-lg p-2 flex-shrink-0 bg-red-100 dark:bg-red-900/30 ring-2 ring-red-200 dark:ring-red-800">
+                                    <Shield v-if="failure.type === 'ssl'" class="h-5 w-5 text-red-700 dark:text-red-400" />
+                                    <Wifi v-else class="h-5 w-5 text-red-700 dark:text-red-400" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-bold text-red-900 dark:text-red-100 truncate">
+                                        {{ failure.website_name }}
+                                    </h4>
+                                    <p class="text-xs text-red-700 dark:text-red-400 mt-0.5 font-medium">
+                                        {{ failure.type === 'ssl' ? 'SSL Certificate' : 'Uptime Monitor' }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold text-red-900 dark:text-red-100 truncate">
-                                {{ failure.website_name }}
-                            </p>
-                            <p class="text-sm text-red-700 dark:text-red-300 mt-0.5">
+
+                        <!-- Error Details -->
+                        <div class="mb-3 space-y-2">
+                            <p class="text-sm font-bold text-red-800 dark:text-red-200">
                                 {{ failure.message }}
                             </p>
-                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">
+                            <p v-if="failure.failure_reason" class="text-xs font-mono bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2 py-1.5 rounded border-2 border-red-300 dark:border-red-700">
+                                {{ failure.failure_reason }}
+                            </p>
+                            <p class="text-xs text-red-600 dark:text-red-400 font-medium">
+                                <Clock class="h-3 w-3 inline mr-1" />
                                 {{ failure.time_ago }}
                             </p>
                         </div>
-                        <Link
-                            :href="ssl.websites.index().url + '?filter=' + (failure.type === 'ssl' ? 'ssl_issues' : 'uptime_issues')"
-                            class="rounded-lg p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors opacity-0 group-hover:opacity-100"
-                            title="View details"
-                        >
-                            <ExternalLink class="h-4 w-4" />
-                        </Link>
-                    </div>
-                </div>
 
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between pt-4 border-t border-red-200 dark:border-red-800/50">
-                    <p class="text-sm text-red-700 dark:text-red-300">
-                        <span v-if="failedChecks.length > 4">Showing 4 of {{ failedChecks.length }} failures</span>
-                        <span v-else>All failures shown</span>
-                    </p>
-                    <div class="flex items-center space-x-3">
-                        <Link
-                            :href="ssl.websites.index().url + '?filter=critical'"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 rounded-lg transition-colors shadow-md hover:shadow-lg"
-                        >
-                            <AlertTriangle class="h-4 w-4 mr-2" />
-                            View All Issues
-                        </Link>
+                        <!-- Action Buttons -->
+                        <div class="flex items-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <Link
+                                v-if="failure.website_id"
+                                :href="ssl.websites.edit(failure.website_id).url"
+                                class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 rounded-md transition-colors"
+                            >
+                                <Edit class="h-4 w-4 mr-1.5" />
+                                Edit
+                            </Link>
+                            <Link
+                                as="button"
+                                method="post"
+                                :href="`/ssl/websites/${failure.website_id}/check`"
+                                class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400 rounded-md transition-colors"
+                            >
+                                <RefreshCw class="h-4 w-4 mr-1.5" />
+                                Check Now
+                            </Link>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Show More Link -->
+            <div v-if="failedChecks.length > 4" class="mt-4 text-center">
+                <Link
+                    :href="ssl.websites.index().url + '?filter=critical'"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 rounded-lg transition-colors"
+                >
+                    <AlertTriangle class="h-4 w-4 mr-2" />
+                    View {{ failedChecks.length - 4 }} More Issue{{ failedChecks.length - 4 === 1 ? '' : 's' }}
+                </Link>
             </div>
         </div>
 

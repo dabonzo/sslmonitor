@@ -215,18 +215,24 @@ class SslDashboardController extends Controller
             ->take(10)
             ->get();
 
-        return $monitors->map(function ($monitor) {
+        return $monitors->map(function ($monitor) use ($websites) {
             // Extract domain name from URL for cleaner display
             $urlParts = parse_url($monitor->url);
             $websiteName = $urlParts['host'] ?? $monitor->url;
 
+            // Get website ID for edit link
+            $website = $websites->firstWhere('url', $monitor->url);
+
             return [
                 'id' => $monitor->id,
+                'website_id' => $website?->id,
                 'website_name' => $websiteName,
                 'status' => $monitor->uptime_status,
                 'checked_at' => $monitor->uptime_last_check_date,
                 'time_ago' => $monitor->uptime_last_check_date->diffForHumans(),
                 'response_time' => $monitor->uptime_check_response_time_in_ms,
+                'failure_reason' => $monitor->uptime_check_failure_reason,
+                'content_failure_reason' => $monitor->content_validation_failure_reason,
             ];
         })->toArray();
     }
@@ -247,17 +253,22 @@ class SslDashboardController extends Controller
             ->take(10)
             ->get();
 
-        return $monitors->map(function ($monitor) {
+        return $monitors->map(function ($monitor) use ($websites) {
             // Extract domain name from URL for cleaner display
             $urlParts = parse_url($monitor->url);
             $websiteName = $urlParts['host'] ?? $monitor->url;
 
+            // Get website ID for edit link
+            $website = $websites->firstWhere('url', $monitor->url);
+
             return [
                 'id' => $monitor->id,
+                'website_id' => $website?->id,
                 'website_name' => $websiteName,
                 'status' => $monitor->certificate_status,
                 'checked_at' => $monitor->updated_at,
                 'time_ago' => $monitor->updated_at->diffForHumans(),
+                'failure_reason' => $monitor->certificate_check_failure_reason,
             ];
         })->toArray();
     }
