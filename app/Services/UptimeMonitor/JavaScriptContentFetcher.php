@@ -20,8 +20,9 @@ class JavaScriptContentFetcher
     {
         try {
             // Use BrowserShot to fetch content with JavaScript rendering
+            // Use Puppeteer's installed Chrome in ~/.cache/puppeteer
             $content = Browsershot::url($url)
-                ->setChromePath('/usr/bin/google-chrome-stable') // Use system Chrome
+                ->setChromePath('/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome')
                 ->waitUntilNetworkIdle()
                 ->timeout(30) // 30 seconds timeout
                 ->delay($waitSeconds * 1000) // Wait for JavaScript to render
@@ -35,6 +36,20 @@ class JavaScriptContentFetcher
                     'disable-gpu'
                 ])
                 ->bodyHtml();
+
+            // Save content to file for debugging
+            try {
+                $filename = storage_path('logs/browsershot-' . md5($url) . '.html');
+                file_put_contents($filename, $content);
+                Log::info('BrowserShot content saved', [
+                    'url' => $url,
+                    'filename' => $filename,
+                    'content_length' => strlen($content),
+                    'contains_erdgasversorger' => str_contains($content, 'Erdgasversorger')
+                ]);
+            } catch (\Exception $e) {
+                // Ignore file save errors - don't break the content fetching
+            }
 
             return $content;
 
@@ -78,8 +93,9 @@ class JavaScriptContentFetcher
     public static function isAvailable(): bool
     {
         try {
+            // Use Puppeteer's installed Chrome in ~/.cache/puppeteer
             $content = Browsershot::html('<html><body>Test</body></html>')
-                ->setChromePath('/usr/bin/google-chrome-stable') // Use system Chrome
+                ->setChromePath('/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome')
                 ->noSandbox() // Use BrowserShot's built-in method for Docker
                 ->addChromiumArguments([
                     'disable-setuid-sandbox',

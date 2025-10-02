@@ -117,14 +117,47 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
         try {
             $startTime = microtime(true);
 
+            // Get monitoring config from website
+            $config = $this->website->monitoring_config ?? [];
+
             // Get or create monitor (fast lookup) - Use our extended Monitor model
             $monitor = \App\Models\Monitor::firstOrCreate(
                 ['url' => $this->website->url],
                 [
                     'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
                     'certificate_check_enabled' => $this->website->ssl_monitoring_enabled,
+                    'content_expected_strings' => $config['content_expected_strings'] ?? null,
+                    'content_forbidden_strings' => $config['content_forbidden_strings'] ?? null,
+                    'content_regex_patterns' => $config['content_regex_patterns'] ?? null,
+                    'javascript_enabled' => $config['javascript_enabled'] ?? false,
+                    'javascript_wait_seconds' => $config['javascript_wait_seconds'] ?? 5,
                 ]
             );
+
+            // Always sync content validation settings (in case they changed)
+            // Convert empty arrays to null for proper database storage
+            $expectedStrings = !empty($config['content_expected_strings']) ? $config['content_expected_strings'] : null;
+            $forbiddenStrings = !empty($config['content_forbidden_strings']) ? $config['content_forbidden_strings'] : null;
+            $regexPatterns = !empty($config['content_regex_patterns']) ? $config['content_regex_patterns'] : null;
+
+            // Only use EnhancedContentChecker if content validation is configured
+            $hasContentValidation = $expectedStrings || $forbiddenStrings || $regexPatterns;
+
+            $monitor->update([
+                'uptime_check_enabled' => $this->website->uptime_monitoring_enabled,
+                'certificate_check_enabled' => $this->website->ssl_monitoring_enabled,
+                'content_expected_strings' => $expectedStrings,
+                'content_forbidden_strings' => $forbiddenStrings,
+                'content_regex_patterns' => $regexPatterns,
+                'javascript_enabled' => $config['javascript_enabled'] ?? false,
+                'javascript_wait_seconds' => $config['javascript_wait_seconds'] ?? 5,
+                'uptime_check_response_checker' => $hasContentValidation
+                    ? \App\Services\UptimeMonitor\ResponseCheckers\EnhancedContentChecker::class
+                    : null,
+            ]);
+
+            // Refresh to ensure the monitor instance has the latest values
+            $monitor->refresh();
 
             // Initialize ConsoleOutput for queue context to prevent static property access errors
             // The ConsoleOutput helper expects a command context but we're in queue context
