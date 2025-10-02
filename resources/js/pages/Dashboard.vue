@@ -276,6 +276,9 @@ const dismissedFailures = ref(false);
 // Track which website is being checked
 const checkingWebsiteId = ref<number | null>(null);
 
+// Track test alerts sending state
+const isTestingAlerts = ref(false);
+
 // Handle immediate check
 const handleCheckNow = (websiteId: number) => {
   checkingWebsiteId.value = websiteId;
@@ -283,6 +286,17 @@ const handleCheckNow = (websiteId: number) => {
     preserveScroll: true,
     onFinish: () => {
       checkingWebsiteId.value = null;
+    }
+  });
+};
+
+// Handle test alerts
+const handleTestAlerts = () => {
+  isTestingAlerts.value = true;
+  router.post('/alerts/test-all', {}, {
+    preserveScroll: true,
+    onFinish: () => {
+      isTestingAlerts.value = false;
     }
   });
 };
@@ -591,18 +605,21 @@ const handleCheckNow = (websiteId: number) => {
                     </Link>
 
                     <!-- Test Alerts -->
-                    <Link
-                        href="/settings/alerts?test=true"
-                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 p-4 text-center hover:from-yellow-100 hover:to-amber-200 dark:hover:from-yellow-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg hover:scale-[1.02]"
+                    <button
+                        @click="handleTestAlerts"
+                        :disabled="isTestingAlerts"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 p-4 text-center hover:from-yellow-100 hover:to-amber-200 dark:hover:from-yellow-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
                             <div class="rounded-lg bg-yellow-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <Bell class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                                <Bell class="h-6 w-6 text-yellow-600 dark:text-yellow-400" :class="{ 'animate-pulse': isTestingAlerts }" />
                             </div>
-                            <p class="text-sm font-bold text-yellow-900 dark:text-yellow-100">Test Alerts</p>
+                            <p class="text-sm font-bold text-yellow-900 dark:text-yellow-100">
+                                {{ isTestingAlerts ? 'Sending...' : 'Test Alerts' }}
+                            </p>
                         </div>
-                    </Link>
+                    </button>
 
                     <!-- Import Sites -->
                     <Link

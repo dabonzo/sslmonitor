@@ -503,6 +503,62 @@ testForm.post = (args: { alertConfiguration: number | { id: number } } | [alertC
 test.form = testForm
 
 /**
+* @see \App\Http\Controllers\AlertConfigurationController::testAll
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+export const testAll = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: testAll.url(options),
+    method: 'post',
+})
+
+testAll.definition = {
+    methods: ["post"],
+    url: '/alerts/test-all',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAll
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAll.url = (options?: RouteQueryOptions) => {
+    return testAll.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAll
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAll.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: testAll.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAll
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+const testAllForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: testAll.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAll
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAllForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: testAll.url(options),
+    method: 'post',
+})
+
+testAll.form = testAllForm
+
+/**
 * @see \App\Http\Controllers\Settings\AlertsController::edit
 * @see app/Http/Controllers/Settings/AlertsController.php:14
 * @route '/settings/alerts'
@@ -735,6 +791,7 @@ const alerts = {
     history: Object.assign(history, history),
     update: Object.assign(update, update),
     test: Object.assign(test, test),
+    testAll: Object.assign(testAll, testAll),
     edit: Object.assign(edit, edit),
     store: Object.assign(store, store),
     destroy: Object.assign(destroy, destroy),

@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->grou
     Route::get('/history', [App\Http\Controllers\AlertConfigurationController::class, 'history'])->name('history');
     Route::put('/{alertConfiguration}', [App\Http\Controllers\AlertConfigurationController::class, 'update'])->name('update');
     Route::post('/{alertConfiguration}/test', [App\Http\Controllers\AlertConfigurationController::class, 'testAlert'])->name('test');
+    Route::post('/test-all', [App\Http\Controllers\AlertConfigurationController::class, 'testAllAlerts'])->name('test-all');
 });
 
 // Team Management Routes

@@ -412,6 +412,62 @@ testAlertForm.post = (args: { alertConfiguration: number | { id: number } } | [a
 
 testAlert.form = testAlertForm
 
-const AlertConfigurationController = { index, notifications, history, update, testAlert }
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAllAlerts
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+export const testAllAlerts = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: testAllAlerts.url(options),
+    method: 'post',
+})
+
+testAllAlerts.definition = {
+    methods: ["post"],
+    url: '/alerts/test-all',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAllAlerts
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAllAlerts.url = (options?: RouteQueryOptions) => {
+    return testAllAlerts.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAllAlerts
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAllAlerts.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: testAllAlerts.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAllAlerts
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+const testAllAlertsForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: testAllAlerts.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AlertConfigurationController::testAllAlerts
+* @see app/Http/Controllers/AlertConfigurationController.php:172
+* @route '/alerts/test-all'
+*/
+testAllAlertsForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: testAllAlerts.url(options),
+    method: 'post',
+})
+
+testAllAlerts.form = testAllAlertsForm
+
+const AlertConfigurationController = { index, notifications, history, update, testAlert, testAllAlerts }
 
 export default AlertConfigurationController
