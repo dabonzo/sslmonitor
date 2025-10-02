@@ -139,7 +139,7 @@ const websitesLocal = ref([...props.websites.data]);
 // Function to calculate filter stats locally
 const calculateFilterStats = (websites: any[]) => {
   const stats = {
-    all: 0,
+    all: websites.length,
     ssl_issues: 0,
     uptime_issues: 0,
     expiring_soon: 0,
@@ -147,24 +147,19 @@ const calculateFilterStats = (websites: any[]) => {
   };
 
   for (const website of websites) {
-    let hasIssues = false;
-
     // SSL Issues
     if (website.ssl_status && ['invalid', 'expired'].includes(website.ssl_status)) {
       stats.ssl_issues++;
-      hasIssues = true;
     }
 
     // Uptime Issues
     if (website.uptime_status && ['down', 'slow', 'content_mismatch'].includes(website.uptime_status)) {
       stats.uptime_issues++;
-      hasIssues = true;
     }
 
     // Expiring Soon (within 30 days)
     if (website.ssl_days_remaining !== null && website.ssl_days_remaining <= 30 && website.ssl_days_remaining >= 0) {
       stats.expiring_soon++;
-      hasIssues = true;
     }
 
     // Critical (3 days or less, expired certs, or down sites)
@@ -174,12 +169,6 @@ const calculateFilterStats = (websites: any[]) => {
       ['down', 'content_mismatch'].includes(website.uptime_status)
     ) {
       stats.critical++;
-      hasIssues = true;
-    }
-
-    // Count healthy websites (those without any issues)
-    if (!hasIssues) {
-      stats.all++;
     }
   }
 

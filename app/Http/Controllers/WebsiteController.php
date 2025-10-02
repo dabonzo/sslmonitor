@@ -60,6 +60,33 @@ class WebsiteController extends Controller
             $query->whereNotNull('team_id');
         }
 
+        // Apply status filtering by joining monitors table
+        if ($filter !== 'all') {
+            $query->join('monitors', 'websites.url', '=', 'monitors.url');
+
+            if ($filter === 'ssl_issues') {
+                $query->whereIn('monitors.certificate_status', ['invalid', 'expired']);
+            } elseif ($filter === 'uptime_issues') {
+                $query->whereIn('monitors.uptime_status', ['down', 'slow', 'content_mismatch']);
+            } elseif ($filter === 'expiring_soon') {
+                $query->whereNotNull('monitors.certificate_expiration_date')
+                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 30')
+                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) >= 0');
+            } elseif ($filter === 'critical') {
+                $query->where(function($q) {
+                    $q->where('monitors.certificate_status', 'expired')
+                      ->orWhere('monitors.uptime_status', 'down')
+                      ->orWhere(function($subQ) {
+                          $subQ->whereNotNull('monitors.certificate_expiration_date')
+                               ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 3');
+                      });
+                });
+            }
+
+            // Select only websites columns to avoid conflicts
+            $query->select('websites.*');
+        }
+
         $websites = $query->with(['team', 'user'])->orderBy('created_at', 'desc')->paginate(15);
 
         // Bulk fetch all monitors in a single query to avoid N+1
