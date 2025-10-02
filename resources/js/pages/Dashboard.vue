@@ -25,7 +25,9 @@ import {
   XCircle,
   ExternalLink,
   RefreshCw,
-  Edit
+  Edit,
+  Bell,
+  Upload
 } from 'lucide-vue-next';
 
 // Define TypeScript interfaces for SSL and Uptime data
@@ -441,9 +443,9 @@ const handleCheckNow = (websiteId: number) => {
         </div>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-10">
             <!-- Quick Actions -->
-            <div class="lg:col-span-2 rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+            <div class="lg:col-span-7 rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
@@ -484,7 +486,7 @@ const handleCheckNow = (websiteId: number) => {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <!-- Add Website -->
                     <Link
                         :href="ssl.websites.create().url"
@@ -557,6 +559,64 @@ const handleCheckNow = (websiteId: number) => {
                             <p class="text-sm font-bold text-orange-900 dark:text-orange-100">Settings</p>
                         </div>
                     </Link>
+
+                    <!-- Bulk Check All -->
+                    <Link
+                        :href="ssl.websites.index().url + '?action=bulk-check'"
+                        method="post"
+                        as="button"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-900/30 dark:to-cyan-900/30 p-4 text-center hover:from-teal-100 hover:to-cyan-200 dark:hover:from-teal-900/50 dark:hover:to-cyan-900/50 transition-all duration-300 border border-teal-200 dark:border-teal-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-teal-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-teal-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <RefreshCw class="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                            </div>
+                            <p class="text-sm font-bold text-teal-900 dark:text-teal-100">Bulk Check All</p>
+                        </div>
+                    </Link>
+
+                    <!-- View Reports -->
+                    <Link
+                        href="/analytics"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 p-4 text-center hover:from-pink-100 hover:to-rose-200 dark:hover:from-pink-900/50 dark:hover:to-rose-900/50 transition-all duration-300 border border-pink-200 dark:border-pink-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-pink-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-pink-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <BarChart3 class="h-6 w-6 text-pink-600 dark:text-pink-400" />
+                            </div>
+                            <p class="text-sm font-bold text-pink-900 dark:text-pink-100">View Reports</p>
+                        </div>
+                    </Link>
+
+                    <!-- Test Alerts -->
+                    <Link
+                        href="/settings/alerts?test=true"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 p-4 text-center hover:from-yellow-100 hover:to-amber-200 dark:hover:from-yellow-900/50 dark:hover:to-amber-900/50 transition-all duration-300 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-yellow-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Bell class="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <p class="text-sm font-bold text-yellow-900 dark:text-yellow-100">Test Alerts</p>
+                        </div>
+                    </Link>
+
+                    <!-- Import Sites -->
+                    <Link
+                        href="/ssl/websites/import"
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/30 dark:to-gray-900/30 p-4 text-center hover:from-slate-100 hover:to-gray-200 dark:hover:from-slate-900/50 dark:hover:to-gray-900/50 transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-lg hover:scale-[1.02]"
+                    >
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-slate-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="relative">
+                            <div class="rounded-lg bg-slate-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Upload class="h-6 w-6 text-slate-600 dark:text-slate-400" />
+                            </div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">Import Sites</p>
+                        </div>
+                    </Link>
                 </div>
 
                 <!-- Quick Team Access (when available) -->
@@ -590,13 +650,13 @@ const handleCheckNow = (websiteId: number) => {
             </div>
 
             <!-- Recent Activity -->
-            <div class="lg:col-span-3 rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
-                            <Clock class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+            <div class="lg:col-span-3 rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-5 shadow-xl border border-gray-200 dark:border-gray-700">
+                <div class="mb-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
+                            <Clock class="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
                             Recent Activity
                         </h3>
                     </div>
