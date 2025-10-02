@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import ssl from '@/routes/ssl';
 import {
   Shield,
@@ -19,7 +19,9 @@ import {
   ArrowRightLeft,
   Users,
   Settings,
-  Plus
+  Plus,
+  Search,
+  X
 } from 'lucide-vue-next';
 
 // Define TypeScript interfaces for SSL and Uptime data
@@ -161,8 +163,36 @@ const recentActivity = computed(() => {
 
   // Combine and sort by most recent
   return [...sslActivity, ...uptimeActivity]
-    .sort((a, b) => a.time.localeCompare(b.time))
-    .slice(0, 10);
+    .sort((a, b) => a.time.localeCompare(b.time));
+});
+
+// Display only 4 items on dashboard
+const dashboardActivity = computed(() => recentActivity.value.slice(0, 4));
+
+// Modal state
+const showActivityModal = ref(false);
+const searchQuery = ref('');
+const statusFilter = ref<'all' | 'success' | 'error' | 'warning'>('all');
+
+// Filtered activity for modal
+const filteredActivity = computed(() => {
+  let filtered = recentActivity.value;
+
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(activity =>
+      activity.title.toLowerCase().includes(query) ||
+      activity.description.toLowerCase().includes(query)
+    );
+  }
+
+  // Apply status filter
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(activity => activity.type === statusFilter.value);
+  }
+
+  return filtered;
 });
 
 // Use real critical alerts data
@@ -329,14 +359,17 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                             Recent Activity
                         </h3>
                     </div>
-                    <button class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button
+                        @click="showActivityModal = true"
+                        class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
                         View All
                     </button>
                 </div>
 
                 <div class="space-y-4">
                     <div
-                        v-for="activity in recentActivity"
+                        v-for="activity in dashboardActivity"
                         :key="activity.title + activity.time"
                         class="group flex items-start space-x-4 p-3 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 border border-white/60 dark:border-white/10"
                     >
@@ -565,6 +598,136 @@ const criticalAlerts = computed(() => props.criticalAlerts);
                 </div>
             </div>
         </div>
+
+        <!-- Activity Modal -->
+        <Teleport to="body">
+            <div
+                v-if="showActivityModal"
+                class="fixed inset-0 z-50 overflow-y-auto"
+                aria-labelledby="modal-title"
+                role="dialog"
+                aria-modal="true"
+            >
+                <!-- Backdrop -->
+                <div
+                    class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                    @click="showActivityModal = false"
+                ></div>
+
+                <!-- Modal -->
+                <div class="flex min-h-full items-center justify-center p-4">
+                    <div
+                        class="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[80vh] flex flex-col"
+                        @click.stop
+                    >
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6">
+                            <div class="flex items-center space-x-3">
+                                <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
+                                    <Activity class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                    All Activity
+                                </h3>
+                            </div>
+                            <button
+                                @click="showActivityModal = false"
+                                class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 transition-colors"
+                            >
+                                <X class="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <!-- Search and Filters -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 p-6 space-y-4">
+                            <!-- Search -->
+                            <div class="relative">
+                                <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    placeholder="Search activity..."
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="flex items-center space-x-2">
+                                <button
+                                    v-for="filter in [
+                                        { value: 'all', label: 'All' },
+                                        { value: 'success', label: 'Success' },
+                                        { value: 'error', label: 'Errors' },
+                                        { value: 'warning', label: 'Warnings' }
+                                    ]"
+                                    :key="filter.value"
+                                    @click="statusFilter = filter.value as any"
+                                    class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+                                    :class="{
+                                        'bg-blue-500 text-white': statusFilter === filter.value,
+                                        'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700': statusFilter !== filter.value
+                                    }"
+                                >
+                                    {{ filter.label }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Activity List -->
+                        <div class="flex-1 overflow-y-auto p-6">
+                            <div v-if="filteredActivity.length === 0" class="text-center py-12">
+                                <Activity class="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                                <p class="text-gray-500 dark:text-gray-400">No activity found</p>
+                            </div>
+
+                            <div v-else class="space-y-3">
+                                <div
+                                    v-for="(activity, index) in filteredActivity"
+                                    :key="`${activity.category}-${activity.title}-${activity.time}-${index}`"
+                                    class="group flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                                >
+                                    <div class="flex items-center mt-1 space-x-2">
+                                        <div
+                                            class="h-3 w-3 rounded-full flex-shrink-0"
+                                            :class="{
+                                                'bg-green-500': activity.type === 'success',
+                                                'bg-red-500': activity.type === 'error',
+                                                'bg-amber-500': activity.type === 'warning'
+                                            }"
+                                        />
+                                        <div class="rounded-lg p-1.5" :class="{
+                                            'bg-green-100 dark:bg-green-900/30': activity.category === 'ssl',
+                                            'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
+                                        }">
+                                            <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
+                                            <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            {{ activity.title }}
+                                        </p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                                            {{ activity.description }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
+                                            {{ activity.time }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="border-t border-gray-200 dark:border-gray-700 p-4 text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Showing {{ filteredActivity.length }} of {{ recentActivity.length }} activities
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
 
     </DashboardLayout>
 </template>
