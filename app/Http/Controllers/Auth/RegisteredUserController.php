@@ -44,6 +44,16 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        return to_route('verification.notice');
+        return to_route('registration.success', ['email' => $user->email]);
+    }
+
+    /**
+     * Show the registration success page.
+     */
+    public function success(Request $request): Response
+    {
+        return Inertia::render('auth/RegistrationSuccess', [
+            'email' => $request->query('email'),
+        ]);
     }
 }
