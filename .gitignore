@@ -28,6 +28,9 @@ yarn-error.log
 /.zed
 tests/Browser/Screenshots
 
+# Playwright MCP screenshots
+.playwright-mcp/
+
 # VRISTO Template Files
 vristo-html-main/
 vristo-html-starter/
