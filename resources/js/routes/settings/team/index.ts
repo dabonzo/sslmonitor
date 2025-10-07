@@ -422,6 +422,86 @@ inviteForm.post = (args: { team: number | { id: number } } | [team: number | { i
 
 invite.form = inviteForm
 
+/**
+* @see \App\Http\Controllers\TeamController::transferOwnership
+* @see app/Http/Controllers/TeamController.php:326
+* @route '/settings/team/{team}/transfer-ownership'
+*/
+export const transferOwnership = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: transferOwnership.url(args, options),
+    method: 'post',
+})
+
+transferOwnership.definition = {
+    methods: ["post"],
+    url: '/settings/team/{team}/transfer-ownership',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\TeamController::transferOwnership
+* @see app/Http/Controllers/TeamController.php:326
+* @route '/settings/team/{team}/transfer-ownership'
+*/
+transferOwnership.url = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { team: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { team: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            team: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        team: typeof args.team === 'object'
+        ? args.team.id
+        : args.team,
+    }
+
+    return transferOwnership.definition.url
+            .replace('{team}', parsedArgs.team.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\TeamController::transferOwnership
+* @see app/Http/Controllers/TeamController.php:326
+* @route '/settings/team/{team}/transfer-ownership'
+*/
+transferOwnership.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: transferOwnership.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\TeamController::transferOwnership
+* @see app/Http/Controllers/TeamController.php:326
+* @route '/settings/team/{team}/transfer-ownership'
+*/
+const transferOwnershipForm = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: transferOwnership.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\TeamController::transferOwnership
+* @see app/Http/Controllers/TeamController.php:326
+* @route '/settings/team/{team}/transfer-ownership'
+*/
+transferOwnershipForm.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: transferOwnership.url(args, options),
+    method: 'post',
+})
+
+transferOwnership.form = transferOwnershipForm
+
 const team = {
     store: Object.assign(store, store),
     show: Object.assign(show, show),
@@ -430,6 +510,7 @@ const team = {
     invite: Object.assign(invite, invite),
     members: Object.assign(members, members),
     invitations: Object.assign(invitations, invitations),
+    transferOwnership: Object.assign(transferOwnership, transferOwnership),
 }
 
 export default team

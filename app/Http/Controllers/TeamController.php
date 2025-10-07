@@ -322,4 +322,38 @@ class TeamController extends Controller
 
         return redirect()->back()->with('success', 'Invitation resent successfully!');
     }
+
+    public function transferOwnership(Request $request, Team $team): RedirectResponse
+    {
+        $currentUser = $request->user();
+
+        // Only current owner can transfer ownership
+        if (!$currentUser->canManageTeam($team)) {
+            abort(403, 'Only team owners can transfer ownership.');
+        }
+
+        $request->validate([
+            'new_owner_id' => 'required|exists:users,id',
+        ]);
+
+        $newOwner = User::findOrFail($request->new_owner_id);
+
+        // Verify new owner is a team member
+        if (!$newOwner->isMemberOf($team)) {
+            return redirect()->back()->with('error', 'The new owner must be a team member.');
+        }
+
+        // Verify new owner is not already the owner
+        if ($newOwner->id === $currentUser->id) {
+            return redirect()->back()->with('error', 'You are already the team owner.');
+        }
+
+        try {
+            $team->transferOwnership($newOwner);
+
+            return redirect()->back()->with('success', "Team ownership transferred to {$newOwner->name} successfully!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to transfer ownership: ' . $e->getMessage());
+        }
+    }
 }

@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->prefix('settings')->name('settings.')->
     Route::patch('/team/{team}/members/{user}/role', [App\Http\Controllers\TeamController::class, 'updateMemberRole'])->name('team.members.role');
     Route::delete('/team/{team}/invitations/{invitation}', [App\Http\Controllers\TeamController::class, 'cancelInvitation'])->name('team.invitations.cancel');
     Route::post('/team/{team}/invitations/{invitation}/resend', [App\Http\Controllers\TeamController::class, 'resendInvitation'])->name('team.invitations.resend');
+    Route::post('/team/{team}/transfer-ownership', [App\Http\Controllers\TeamController::class, 'transferOwnership'])->name('team.transfer-ownership');
 });
 
 // Team invitation routes (public access)
