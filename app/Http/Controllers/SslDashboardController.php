@@ -282,9 +282,9 @@ class SslDashboardController extends Controller
         // Get personal websites that can be transferred
         $personalWebsites = $allWebsites->where('user_id', $user->id)->whereNull('team_id');
 
-        // Get user's teams where they can transfer websites (OWNER, ADMIN, MANAGER roles)
+        // Get user's teams where they can transfer websites (OWNER, ADMIN roles)
         $availableTeams = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->limit(5) // Show only top 5 for quick actions
             ->get(['teams.id', 'teams.name']);
 

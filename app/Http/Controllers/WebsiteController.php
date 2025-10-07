@@ -220,7 +220,7 @@ class WebsiteController extends Controller
 
         // Get available teams for transfer operations
         $availableTeams = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->get(['teams.id', 'teams.name', 'teams.description'])
             ->map(function ($team) use ($user) {
                 return [
@@ -792,7 +792,7 @@ class WebsiteController extends Controller
         }
 
         $userRole = $user->getRoleInTeam($team);
-        if (!in_array($userRole, ['OWNER', 'ADMIN', 'MANAGER'])) {
+        if (!in_array($userRole, ['OWNER', 'ADMIN'])) {
             abort(403, 'You do not have permission to transfer websites to this team.');
         }
 
@@ -849,7 +849,7 @@ class WebsiteController extends Controller
 
         // Get teams where user can manage websites
         $availableTeams = $user->teams()
-            ->whereIn('team_members.role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->whereIn('team_members.role', ['OWNER', 'ADMIN'])
             ->get()
             ->map(function ($team) {
                 return [
@@ -1000,7 +1000,7 @@ class WebsiteController extends Controller
 
         // Verify user has permission to transfer to this team
         $team = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->where('teams.id', $request->team_id)
             ->first();
 
@@ -1040,7 +1040,7 @@ class WebsiteController extends Controller
 
         // Get user's team IDs where they have transfer permissions
         $userTeamIds = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->pluck('teams.id');
 
         // Get websites that belong to the user's teams

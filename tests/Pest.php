@@ -425,7 +425,6 @@ dataset('ssl_statuses', [
 dataset('team_roles', [
     'owner' => [\App\Models\TeamMember::ROLE_OWNER],
     'admin' => [\App\Models\TeamMember::ROLE_ADMIN],
-    'manager' => [\App\Models\TeamMember::ROLE_MANAGER],
     'viewer' => [\App\Models\TeamMember::ROLE_VIEWER],
 ]);
 

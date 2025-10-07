@@ -9,7 +9,6 @@ class TeamMember extends Model
 {
     public const ROLE_OWNER = 'OWNER';
     public const ROLE_ADMIN = 'ADMIN';
-    public const ROLE_MANAGER = 'MANAGER';
     public const ROLE_VIEWER = 'VIEWER';
 
     protected $fillable = [
@@ -52,7 +51,6 @@ class TeamMember extends Model
         return [
             self::ROLE_OWNER,
             self::ROLE_ADMIN,
-            self::ROLE_MANAGER,
             self::ROLE_VIEWER,
         ];
     }
@@ -63,9 +61,8 @@ class TeamMember extends Model
     public static function getRoleDescriptions(): array
     {
         return [
-            self::ROLE_OWNER => 'Full access - manage team, websites, and settings',
-            self::ROLE_ADMIN => 'Manage websites and email settings (cannot manage team)',
-            self::ROLE_MANAGER => 'Add/edit websites and view settings',
+            self::ROLE_OWNER => 'Full access - manage team, websites, settings, can transfer/delete team',
+            self::ROLE_ADMIN => 'Manage websites, email settings, and invite members',
             self::ROLE_VIEWER => 'View-only access to websites and settings',
         ];
     }
@@ -80,7 +77,7 @@ class TeamMember extends Model
 
     public function canManageWebsites(): bool
     {
-        return in_array($this->role, [self::ROLE_OWNER, self::ROLE_ADMIN, self::ROLE_MANAGER]);
+        return in_array($this->role, [self::ROLE_OWNER, self::ROLE_ADMIN]);
     }
 
     public function canManageEmailSettings(): bool
@@ -118,10 +115,6 @@ class TeamMember extends Model
         return $this->role === self::ROLE_ADMIN;
     }
 
-    public function isManager(): bool
-    {
-        return $this->role === self::ROLE_MANAGER;
-    }
 
     public function isViewer(): bool
     {

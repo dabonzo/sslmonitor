@@ -118,28 +118,28 @@ test('team admin can invite new members', function () {
     $response = $this->actingAs($admin)
         ->post("/settings/team/{$team->id}/invite", [
             'email' => 'newmember@example.com',
-            'role' => TeamMember::ROLE_MANAGER,
+            'role' => TeamMember::ROLE_ADMIN,
         ]);
 
     $response->assertRedirect();
     $response->assertSessionHas('success', 'Invitation sent successfully!');
 });
 
-test('team manager cannot invite new members', function () {
+test('team viewer cannot invite new members', function () {
     $owner = User::factory()->create();
-    $manager = User::factory()->create();
+    $viewer = User::factory()->create();
     $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
 
-    // Add manager to team
+    // Add viewer to team
     TeamMember::create([
         'team_id' => $team->id,
-        'user_id' => $manager->id,
-        'role' => TeamMember::ROLE_MANAGER,
+        'user_id' => $viewer->id,
+        'role' => TeamMember::ROLE_VIEWER,
         'joined_at' => now(),
         'invited_by_user_id' => $owner->id,
     ]);
 
-    $response = $this->actingAs($manager)
+    $response = $this->actingAs($viewer)
         ->post("/settings/team/{$team->id}/invite", [
             'email' => 'newmember@example.com',
             'role' => TeamMember::ROLE_VIEWER,
@@ -390,7 +390,7 @@ test('website transfer respects team member permissions', function () {
     TeamMember::create([
         'team_id' => $team->id,
         'user_id' => $manager->id,
-        'role' => TeamMember::ROLE_MANAGER,
+        'role' => TeamMember::ROLE_ADMIN,
         'joined_at' => now(),
         'invited_by_user_id' => $owner->id,
     ]);
@@ -433,7 +433,7 @@ test('website transfer respects team member permissions', function () {
 test('website transfer to personal requires admin or owner permissions', function () {
     $owner = User::factory()->create();
     $admin = User::factory()->create();
-    $manager = User::factory()->create();
+    $viewer = User::factory()->create();
 
     $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
     $website = Website::factory()->create([
@@ -462,8 +462,8 @@ test('website transfer to personal requires admin or owner permissions', functio
 
     TeamMember::create([
         'team_id' => $team->id,
-        'user_id' => $manager->id,
-        'role' => TeamMember::ROLE_MANAGER,
+        'user_id' => $viewer->id,
+        'role' => TeamMember::ROLE_VIEWER,
         'joined_at' => now(),
         'invited_by_user_id' => $owner->id,
     ]);
@@ -490,8 +490,8 @@ test('website transfer to personal requires admin or owner permissions', functio
     // Transfer back to team
     $website->transferToTeam($team, $admin);
 
-    // Manager cannot transfer to personal
-    $response = $this->actingAs($manager)
+    // Viewer cannot transfer to personal
+    $response = $this->actingAs($viewer)
         ->post("/ssl/websites/{$website->id}/transfer-to-personal");
     $response->assertForbidden();
 });
@@ -639,13 +639,6 @@ test('team member role permissions work correctly', function () {
     expect($teamMember->canManageWebsites())->toBeTrue();
     expect($teamMember->canManageEmailSettings())->toBeTrue();
     expect($teamMember->canInviteMembers())->toBeTrue();
-    expect($teamMember->canRemoveMembers())->toBeFalse();
-
-    $teamMember->role = TeamMember::ROLE_MANAGER;
-    expect($teamMember->canManageTeam())->toBeFalse();
-    expect($teamMember->canManageWebsites())->toBeTrue();
-    expect($teamMember->canManageEmailSettings())->toBeFalse();
-    expect($teamMember->canInviteMembers())->toBeFalse();
     expect($teamMember->canRemoveMembers())->toBeFalse();
 
     $teamMember->role = TeamMember::ROLE_VIEWER;
