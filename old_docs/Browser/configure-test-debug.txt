@@ -1,9 +1,0 @@
-Configure Test Debug
-
-Looking for Configure buttons and SSL data...
-
-Page includes SSL Certificate Expiry: YES
-Page includes Configure button: NO
-Page includes threshold_days: YES
-Page includes alert_level: YES
-

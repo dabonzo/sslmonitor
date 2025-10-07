@@ -12,8 +12,14 @@
 /vendor
 .DS_Store
 
+# Environment files (IMPORTANT: Never commit!)
+.env
+.env.*
+!.env.example
 .env.backup
 .env.production
+.env.local
+.env.development
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -34,3 +40,17 @@ tests/Browser/Screenshots
 # VRISTO Template Files
 vristo-html-main/
 vristo-html-starter/
+
+# Documentation with sensitive info
+CLAUDE.md
+claude.md
+
+# Development-only documentation
+old_docs/
+
+# Backup files
+*.backup
+*.bak
+*.swp
+*.swo
+*~
