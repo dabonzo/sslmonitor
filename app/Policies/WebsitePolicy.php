@@ -50,18 +50,19 @@ class WebsitePolicy
      */
     public function update(User $user, Website $website): bool
     {
-        // Allow if user owns the website directly
-        if ($user->id === $website->user_id) {
-            return true;
-        }
-
-        // Allow if website belongs to a team and user has management permissions
+        // If website belongs to a team, ONLY check team permissions
+        // (team membership overrides direct ownership)
         if ($website->team_id) {
             $teamMember = TeamMember::where('team_id', $website->team_id)
                 ->where('user_id', $user->id)
                 ->first();
 
             return $teamMember && $teamMember->canManageWebsites();
+        }
+
+        // Allow if user owns the website directly (personal website)
+        if ($user->id === $website->user_id) {
+            return true;
         }
 
         return false;
@@ -72,18 +73,19 @@ class WebsitePolicy
      */
     public function delete(User $user, Website $website): bool
     {
-        // Allow if user owns the website directly
-        if ($user->id === $website->user_id) {
-            return true;
-        }
-
-        // Allow if website belongs to a team and user has management permissions
+        // If website belongs to a team, ONLY check team permissions
+        // (team membership overrides direct ownership)
         if ($website->team_id) {
             $teamMember = TeamMember::where('team_id', $website->team_id)
                 ->where('user_id', $user->id)
                 ->first();
 
             return $teamMember && $teamMember->canManageWebsites();
+        }
+
+        // Allow if user owns the website directly (personal website)
+        if ($user->id === $website->user_id) {
+            return true;
         }
 
         return false;
@@ -94,18 +96,19 @@ class WebsitePolicy
      */
     public function restore(User $user, Website $website): bool
     {
-        // Allow if user owns the website directly
-        if ($user->id === $website->user_id) {
-            return true;
-        }
-
-        // Allow if website belongs to a team and user has management permissions
+        // If website belongs to a team, ONLY check team permissions
+        // (team membership overrides direct ownership)
         if ($website->team_id) {
             $teamMember = TeamMember::where('team_id', $website->team_id)
                 ->where('user_id', $user->id)
                 ->first();
 
             return $teamMember && $teamMember->canManageWebsites();
+        }
+
+        // Allow if user owns the website directly (personal website)
+        if ($user->id === $website->user_id) {
+            return true;
         }
 
         return false;
@@ -116,18 +119,19 @@ class WebsitePolicy
      */
     public function forceDelete(User $user, Website $website): bool
     {
-        // Allow if user owns the website directly
-        if ($user->id === $website->user_id) {
-            return true;
-        }
-
-        // Allow if website belongs to a team and user has management permissions
+        // If website belongs to a team, ONLY check team permissions
+        // (team membership overrides direct ownership)
         if ($website->team_id) {
             $teamMember = TeamMember::where('team_id', $website->team_id)
                 ->where('user_id', $user->id)
                 ->first();
 
             return $teamMember && $teamMember->canManageWebsites();
+        }
+
+        // Allow if user owns the website directly (personal website)
+        if ($user->id === $website->user_id) {
+            return true;
         }
 
         return false;
