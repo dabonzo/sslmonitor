@@ -20,6 +20,7 @@ class StoreWebsiteRequest extends FormRequest
                 'required',
                 'string',
                 'url',
+                'regex:/^https:\/\//',
                 Rule::unique('websites', 'url')->where(function ($query) {
                     return $query->where('user_id', $this->user()->id);
                 }),
@@ -27,9 +28,15 @@ class StoreWebsiteRequest extends FormRequest
             'ssl_monitoring_enabled' => ['boolean'],
             'uptime_monitoring_enabled' => ['boolean'],
             'monitoring_config' => ['array'],
-            'monitoring_config.check_interval' => ['integer', 'min:300', 'max:86400'], // 5 minutes to 24 hours
-            'monitoring_config.timeout' => ['integer', 'min:10', 'max:90'], // 10 to 90 seconds
             'monitoring_config.description' => ['nullable', 'string', 'max:500'],
+            'monitoring_config.content_expected_strings' => ['nullable', 'array'],
+            'monitoring_config.content_expected_strings.*' => ['string', 'max:255'],
+            'monitoring_config.content_forbidden_strings' => ['nullable', 'array'],
+            'monitoring_config.content_forbidden_strings.*' => ['string', 'max:255'],
+            'monitoring_config.content_regex_patterns' => ['nullable', 'array'],
+            'monitoring_config.content_regex_patterns.*' => ['string', 'max:255'],
+            'monitoring_config.javascript_enabled' => ['boolean'],
+            'monitoring_config.javascript_wait_seconds' => ['integer', 'min:1', 'max:30'],
             'immediate_check' => ['boolean'],
         ];
     }
@@ -40,12 +47,14 @@ class StoreWebsiteRequest extends FormRequest
             'name.required' => 'A website name is required.',
             'url.required' => 'A website URL is required.',
             'url.url' => 'Please enter a valid URL (e.g., https://example.com).',
+            'url.regex' => 'Only secure HTTPS URLs are allowed. HTTP is not supported for SSL monitoring.',
             'url.unique' => 'You are already monitoring this URL.',
-            'monitoring_config.check_interval.min' => 'Check interval must be at least 5 minutes.',
-            'monitoring_config.check_interval.max' => 'Check interval cannot exceed 24 hours.',
-            'monitoring_config.timeout.min' => 'Timeout must be at least 10 seconds.',
-            'monitoring_config.timeout.max' => 'Timeout cannot exceed 90 seconds.',
             'monitoring_config.description.max' => 'Description cannot exceed 500 characters.',
+            'monitoring_config.content_expected_strings.*.max' => 'Expected content strings cannot exceed 255 characters.',
+            'monitoring_config.content_forbidden_strings.*.max' => 'Forbidden content strings cannot exceed 255 characters.',
+            'monitoring_config.content_regex_patterns.*.max' => 'Regex patterns cannot exceed 255 characters.',
+            'monitoring_config.javascript_wait_seconds.min' => 'JavaScript wait time must be at least 1 second.',
+            'monitoring_config.javascript_wait_seconds.max' => 'JavaScript wait time cannot exceed 30 seconds.',
         ];
     }
 
@@ -55,8 +64,10 @@ class StoreWebsiteRequest extends FormRequest
         if ($this->has('url')) {
             $url = trim($this->url);
 
-            // Add protocol if missing
-            if (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) {
+            // Convert http:// to https:// or add https:// if missing
+            if (str_starts_with($url, 'http://')) {
+                $url = 'https://' . substr($url, 7); // Remove http:// and add https://
+            } elseif (!str_starts_with($url, 'https://')) {
                 $url = 'https://' . $url;
             }
 

@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 
 class WebsiteController extends Controller
 {
@@ -58,6 +58,33 @@ class WebsiteController extends Controller
             $query->whereNull('team_id');
         } elseif ($teamFilter === 'team') {
             $query->whereNotNull('team_id');
+        }
+
+        // Apply status filtering by joining monitors table
+        if ($filter !== 'all') {
+            $query->join('monitors', 'websites.url', '=', 'monitors.url');
+
+            if ($filter === 'ssl_issues') {
+                $query->whereIn('monitors.certificate_status', ['invalid', 'expired']);
+            } elseif ($filter === 'uptime_issues') {
+                $query->whereIn('monitors.uptime_status', ['down', 'slow', 'content_mismatch']);
+            } elseif ($filter === 'expiring_soon') {
+                $query->whereNotNull('monitors.certificate_expiration_date')
+                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 30')
+                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) >= 0');
+            } elseif ($filter === 'critical') {
+                $query->where(function($q) {
+                    $q->where('monitors.certificate_status', 'expired')
+                      ->orWhere('monitors.uptime_status', 'down')
+                      ->orWhere(function($subQ) {
+                          $subQ->whereNotNull('monitors.certificate_expiration_date')
+                               ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 3');
+                      });
+                });
+            }
+
+            // Select only websites columns to avoid conflicts
+            $query->select('websites.*');
         }
 
         $websites = $query->with(['team', 'user'])->orderBy('created_at', 'desc')->paginate(15);
@@ -193,7 +220,7 @@ class WebsiteController extends Controller
 
         // Get available teams for transfer operations
         $availableTeams = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->get(['teams.id', 'teams.name', 'teams.description'])
             ->map(function ($team) use ($user) {
                 return [
@@ -220,7 +247,7 @@ class WebsiteController extends Controller
         return Inertia::render('Ssl/Websites/Create');
     }
 
-    public function store(StoreWebsiteRequest $request): RedirectResponse
+    public function store(StoreWebsiteRequest $request, MonitorIntegrationService $monitorService): RedirectResponse
     {
         $user = $request->user();
 
@@ -248,6 +275,24 @@ class WebsiteController extends Controller
             'url' => $website->url,
             'name' => $website->name,
         ]);
+
+        // Create or update Monitor with content validation settings
+        try {
+            $monitor = $monitorService->createOrUpdateMonitorForWebsite($website);
+
+            AutomationLogger::info("Monitor created/updated for new website", [
+                'website_id' => $website->id,
+                'monitor_id' => $monitor->id,
+                'content_validation_enabled' => !empty($website->monitoring_config['content_expected_strings']) ||
+                                               !empty($website->monitoring_config['content_forbidden_strings']) ||
+                                               !empty($website->monitoring_config['content_regex_patterns']),
+            ]);
+        } catch (\Exception $e) {
+            AutomationLogger::error("Failed to create monitor for new website", [
+                'website_id' => $website->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Handle immediate checks if requested
         if ($request->validated('immediate_check', false)) {
@@ -361,7 +406,7 @@ class WebsiteController extends Controller
         ]);
     }
 
-    public function update(UpdateWebsiteRequest $request, Website $website): RedirectResponse
+    public function update(UpdateWebsiteRequest $request, Website $website, MonitorIntegrationService $monitorService): RedirectResponse
     {
         $this->authorize('update', $website);
 
@@ -370,11 +415,18 @@ class WebsiteController extends Controller
             'url' => $request->validated('url'),
             'ssl_monitoring_enabled' => $request->validated('ssl_monitoring_enabled', false),
             'uptime_monitoring_enabled' => $request->validated('uptime_monitoring_enabled', false),
+            'monitoring_config' => $request->validated('monitoring_config', []),
         ]);
 
+        // Sync changes with monitor
+        $monitorService->createOrUpdateMonitorForWebsite($website);
+
+        // Trigger immediate check to verify updated settings
+        $this->dispatchImmediateCheck($website);
+
         return redirect()
-            ->route('ssl.websites.show', $website)
-            ->with('success', "Website '{$website->name}' has been updated.");
+            ->route('ssl.websites.index', ['refresh' => 'check'])
+            ->with('success', "Website '{$website->name}' has been updated and check initiated.");
     }
 
     public function destroy(Website $website): RedirectResponse
@@ -740,7 +792,7 @@ class WebsiteController extends Controller
         }
 
         $userRole = $user->getRoleInTeam($team);
-        if (!in_array($userRole, ['OWNER', 'ADMIN', 'MANAGER'])) {
+        if (!in_array($userRole, ['OWNER', 'ADMIN'])) {
             abort(403, 'You do not have permission to transfer websites to this team.');
         }
 
@@ -797,7 +849,7 @@ class WebsiteController extends Controller
 
         // Get teams where user can manage websites
         $availableTeams = $user->teams()
-            ->whereIn('team_members.role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->whereIn('team_members.role', ['OWNER', 'ADMIN'])
             ->get()
             ->map(function ($team) {
                 return [
@@ -948,7 +1000,7 @@ class WebsiteController extends Controller
 
         // Verify user has permission to transfer to this team
         $team = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->where('teams.id', $request->team_id)
             ->first();
 
@@ -988,7 +1040,7 @@ class WebsiteController extends Controller
 
         // Get user's team IDs where they have transfer permissions
         $userTeamIds = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->pluck('teams.id');
 
         // Get websites that belong to the user's teams

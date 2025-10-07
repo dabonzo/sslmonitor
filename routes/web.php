@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->grou
     Route::get('/history', [App\Http\Controllers\AlertConfigurationController::class, 'history'])->name('history');
     Route::put('/{alertConfiguration}', [App\Http\Controllers\AlertConfigurationController::class, 'update'])->name('update');
     Route::post('/{alertConfiguration}/test', [App\Http\Controllers\AlertConfigurationController::class, 'testAlert'])->name('test');
+    Route::post('/test-all', [App\Http\Controllers\AlertConfigurationController::class, 'testAllAlerts'])->name('test-all');
 });
 
 // Team Management Routes
@@ -78,6 +79,7 @@ Route::middleware(['auth', 'verified'])->prefix('settings')->name('settings.')->
     Route::patch('/team/{team}/members/{user}/role', [App\Http\Controllers\TeamController::class, 'updateMemberRole'])->name('team.members.role');
     Route::delete('/team/{team}/invitations/{invitation}', [App\Http\Controllers\TeamController::class, 'cancelInvitation'])->name('team.invitations.cancel');
     Route::post('/team/{team}/invitations/{invitation}/resend', [App\Http\Controllers\TeamController::class, 'resendInvitation'])->name('team.invitations.resend');
+    Route::post('/team/{team}/transfer-ownership', [App\Http\Controllers\TeamController::class, 'transferOwnership'])->name('team.transfer-ownership');
 });
 
 // Team invitation routes (public access)

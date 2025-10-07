@@ -94,6 +94,7 @@ class AlertService
                 'user_id' => $website->user_id,
                 'website_id' => $website->id,
                 'alert_type' => $default['alert_type'],
+                'alert_level' => $default['alert_level'],
             ], $default);
         }
     }

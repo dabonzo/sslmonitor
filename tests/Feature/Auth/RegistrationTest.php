@@ -15,13 +15,25 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
+    $email = 'test-' . time() . '@example.com';
+
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
-        'email' => 'test-' . time() . '@example.com', // Unique email to avoid conflicts
+        'email' => $email,
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $this->assertGuest(); // User should not be logged in automatically
+    $response->assertRedirect(route('registration.success', ['email' => $email], absolute: false));
+});
+
+test('unverified users cannot access dashboard', function () {
+    $user = \App\Models\User::factory()->create([
+        'email_verified_at' => null, // Unverified user
+    ]);
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $response->assertRedirect(route('verification.notice'));
 });

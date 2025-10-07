@@ -6,12 +6,12 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/resources/js/actions
-/resources/js/routes
-/resources/js/wayfinder
+#/resources/js/actions
+#/resources/js/routes
+#/resources/js/wayfinder
 /vendor
 .DS_Store
-.env
+
 .env.backup
 .env.production
 .phpactor.json
@@ -27,6 +27,9 @@ yarn-error.log
 /.vscode
 /.zed
 tests/Browser/Screenshots
+
+# Playwright MCP screenshots
+.playwright-mcp/
 
 # VRISTO Template Files
 vristo-html-main/

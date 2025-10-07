@@ -168,4 +168,141 @@ class AlertConfigurationController extends Controller
             ->back()
             ->with('error', 'Failed to send test alert. Check the logs for details.');
     }
+
+    public function testAllAlerts(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $alertService = app(AlertService::class);
+
+        // Get one of the user's websites to use for test alerts
+        $website = Website::where('user_id', $user->id)->first();
+
+        if (!$website) {
+            return redirect()
+                ->back()
+                ->with('error', 'You need at least one website to test alerts.');
+        }
+
+        $testLevels = [
+            [
+                'level' => AlertConfiguration::LEVEL_INFO,
+                'days' => 30,
+                'label' => 'Info (30 days)',
+            ],
+            [
+                'level' => AlertConfiguration::LEVEL_WARNING,
+                'days' => 14,
+                'label' => 'Warning (14 days)',
+            ],
+            [
+                'level' => AlertConfiguration::LEVEL_URGENT,
+                'days' => 7,
+                'label' => 'Urgent (7 days)',
+            ],
+            [
+                'level' => AlertConfiguration::LEVEL_CRITICAL,
+                'days' => 3,
+                'label' => 'Critical (3 days)',
+            ],
+        ];
+
+        $sentCount = 0;
+
+        // Send SSL Certificate Expiry test alerts
+        foreach ($testLevels as $testLevel) {
+            try {
+                $testConfig = new AlertConfiguration([
+                    'user_id' => $user->id,
+                    'website_id' => $website->id,
+                    'alert_type' => AlertConfiguration::ALERT_SSL_EXPIRY,
+                    'enabled' => true,
+                    'threshold_days' => $testLevel['days'],
+                    'alert_level' => $testLevel['level'],
+                    'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
+                    'custom_message' => "This is a test {$testLevel['label']} SSL certificate alert.",
+                ]);
+
+                $checkData = [
+                    'ssl_status' => 'valid',
+                    'uptime_status' => 'up',
+                    'ssl_days_remaining' => $testLevel['days'],
+                    'is_lets_encrypt' => false,
+                ];
+
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                    new \App\Mail\SslCertificateExpiryAlert($website, $testConfig, $checkData)
+                );
+
+                $sentCount++;
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send SSL test alert for level {$testLevel['level']}: " . $e->getMessage());
+            }
+        }
+
+        // Send Uptime Down test alert
+        try {
+            $uptimeDownConfig = new AlertConfiguration([
+                'user_id' => $user->id,
+                'website_id' => $website->id,
+                'alert_type' => AlertConfiguration::ALERT_UPTIME_DOWN,
+                'enabled' => true,
+                'alert_level' => AlertConfiguration::LEVEL_CRITICAL,
+                'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
+                'custom_message' => "This is a test uptime down alert.",
+            ]);
+
+            $uptimeDownData = [
+                'uptime_status' => 'down',
+                'failure_reason' => 'Connection timeout - This is a test alert',
+                'status_code' => null,
+                'checked_at' => now(),
+            ];
+
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                new \App\Mail\UptimeDownAlert($website, $uptimeDownConfig, $uptimeDownData)
+            );
+
+            $sentCount++;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send uptime down test alert: " . $e->getMessage());
+        }
+
+        // Send Uptime Recovered test alert
+        try {
+            $uptimeRecoveredConfig = new AlertConfiguration([
+                'user_id' => $user->id,
+                'website_id' => $website->id,
+                'alert_type' => AlertConfiguration::ALERT_UPTIME_DOWN,
+                'enabled' => true,
+                'alert_level' => AlertConfiguration::LEVEL_INFO,
+                'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
+                'custom_message' => "This is a test uptime recovered alert.",
+            ]);
+
+            $uptimeRecoveredData = [
+                'uptime_status' => 'up',
+                'response_time' => 287,
+                'status_code' => 200,
+                'checked_at' => now(),
+            ];
+
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                new \App\Mail\UptimeRecoveredAlert($website, $uptimeRecoveredConfig, $uptimeRecoveredData, '15 minutes')
+            );
+
+            $sentCount++;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send uptime recovered test alert: " . $e->getMessage());
+        }
+
+        if ($sentCount > 0) {
+            return redirect()
+                ->back()
+                ->with('success', "Sent {$sentCount} test alerts ({$sentCount} total: SSL + Uptime)! Check your email and Mailpit at http://localhost:8025");
+        }
+
+        return redirect()
+            ->back()
+            ->with('error', 'Failed to send test alerts. Check the logs for details.');
+    }
 }

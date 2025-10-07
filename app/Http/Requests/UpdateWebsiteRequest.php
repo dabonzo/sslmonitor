@@ -26,6 +26,17 @@ class UpdateWebsiteRequest extends FormRequest
             ],
             'ssl_monitoring_enabled' => ['boolean'],
             'uptime_monitoring_enabled' => ['boolean'],
+            'monitoring_config' => ['array'],
+            'monitoring_config.timeout' => ['nullable', 'integer', 'min:5', 'max:300'],
+            'monitoring_config.description' => ['nullable', 'string', 'max:500'],
+            'monitoring_config.content_expected_strings' => ['nullable', 'array'],
+            'monitoring_config.content_expected_strings.*' => ['string', 'max:255'],
+            'monitoring_config.content_forbidden_strings' => ['nullable', 'array'],
+            'monitoring_config.content_forbidden_strings.*' => ['string', 'max:255'],
+            'monitoring_config.content_regex_patterns' => ['nullable', 'array'],
+            'monitoring_config.content_regex_patterns.*' => ['string', 'max:255'],
+            'monitoring_config.javascript_enabled' => ['boolean'],
+            'monitoring_config.javascript_wait_seconds' => ['nullable', 'integer', 'min:1', 'max:30'],
         ];
     }
 

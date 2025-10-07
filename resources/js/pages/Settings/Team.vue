@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import ModernSettingsLayout from '@/layouts/ModernSettingsLayout.vue';
-import { Users, UserPlus, Crown, Shield, Eye, Plus } from 'lucide-vue-next';
+import { Users, UserPlus, Crown, Shield, Eye, Plus, Trash2 } from 'lucide-vue-next';
 
 interface Team {
     id: number;
@@ -75,6 +75,7 @@ const props = defineProps<Props>();
 // Component state
 const showCreateTeamDialog = ref(false);
 const showInviteMemberDialog = ref(false);
+const showDeleteTeamDialog = ref(false);
 const selectedTeam = ref<Team | null>(null);
 
 // Role color mapping
@@ -101,6 +102,14 @@ const viewTeamDetails = (teamId: number) => {
 
 const backToTeamList = () => {
     router.visit('/settings/team');
+};
+
+const deleteTeam = (teamId: number) => {
+    router.delete(`/settings/team/${teamId}`, {
+        onSuccess: () => {
+            showDeleteTeamDialog.value = false;
+        },
+    });
 };
 </script>
 
@@ -137,6 +146,15 @@ const backToTeamList = () => {
                         <Badge v-if="props.team?.is_owner" variant="outline">
                             Owner
                         </Badge>
+                        <Button
+                            v-if="props.team?.is_owner"
+                            variant="destructive"
+                            @click="selectedTeam = props.team; showDeleteTeamDialog = true"
+                            class="h-10 px-4"
+                        >
+                            <Trash2 class="h-4 w-4 mr-2" />
+                            Delete Team
+                        </Button>
                     </div>
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -217,7 +235,13 @@ const backToTeamList = () => {
                             <DialogHeader>
                                 <DialogTitle>Create New Team</DialogTitle>
                             </DialogHeader>
-                            <Form action="/settings/team" method="post" class="space-y-4" #default="{ errors, processing }">
+                            <Form
+                                action="/settings/team"
+                                method="post"
+                                class="space-y-4"
+                                @success="showCreateTeamDialog = false"
+                                #default="{ errors, processing }"
+                            >
                                 <div class="space-y-2">
                                     <Label for="name">Team Name</Label>
                                     <Input
@@ -315,6 +339,15 @@ const backToTeamList = () => {
                                     <UserPlus class="h-4 w-4 mr-2" />
                                     Invite Member
                                 </Button>
+                                <Button
+                                    v-if="team.is_owner"
+                                    variant="destructive"
+                                    class="h-10 px-4"
+                                    @click="selectedTeam = team; showDeleteTeamDialog = true"
+                                >
+                                    <Trash2 class="h-4 w-4 mr-2" />
+                                    Delete
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -358,6 +391,7 @@ const backToTeamList = () => {
                     :action="`/settings/team/${selectedTeam.id}/invite`"
                     method="post"
                     class="space-y-4"
+                    @success="showInviteMemberDialog = false"
                     #default="{ errors, processing }"
                 >
                     <div class="space-y-2">
@@ -396,6 +430,36 @@ const backToTeamList = () => {
                         </Button>
                     </div>
                 </Form>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Delete Team Dialog -->
+        <Dialog v-model:open="showDeleteTeamDialog">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Delete Team</DialogTitle>
+                </DialogHeader>
+                <div class="space-y-4">
+                    <div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+                        <p class="text-sm text-red-800 dark:text-red-200">
+                            Are you sure you want to delete <strong>{{ selectedTeam?.name }}</strong>?
+                        </p>
+                        <p class="text-sm text-red-700 dark:text-red-300 mt-2">
+                            This action cannot be undone. All team websites will be transferred back to their original owners.
+                        </p>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <Button type="button" variant="outline" @click="showDeleteTeamDialog = false">
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            @click="selectedTeam && deleteTeam(selectedTeam.id)"
+                        >
+                            Delete Team
+                        </Button>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     </ModernSettingsLayout>

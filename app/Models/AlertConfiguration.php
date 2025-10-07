@@ -68,13 +68,37 @@ class AlertConfiguration extends Model
     public static function getDefaultConfigurations(): array
     {
         return [
+            // SSL Certificate Expiry - Multiple severity levels
             [
                 'alert_type' => self::ALERT_SSL_EXPIRY,
-                'enabled' => true,
+                'enabled' => false, // Disabled by default - users usually don't want 30-day warnings
+                'threshold_days' => 30,
+                'alert_level' => self::LEVEL_INFO,
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
+            ],
+            [
+                'alert_type' => self::ALERT_SSL_EXPIRY,
+                'enabled' => false, // Disabled by default
+                'threshold_days' => 14,
+                'alert_level' => self::LEVEL_WARNING,
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
+            ],
+            [
+                'alert_type' => self::ALERT_SSL_EXPIRY,
+                'enabled' => true, // Enabled - most users want 7-day warnings
                 'threshold_days' => 7,
                 'alert_level' => self::LEVEL_URGENT,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
+            [
+                'alert_type' => self::ALERT_SSL_EXPIRY,
+                'enabled' => true, // Enabled - critical 3-day alert
+                'threshold_days' => 3,
+                'alert_level' => self::LEVEL_CRITICAL,
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
+            ],
+
+            // Let's Encrypt Renewal - Separate from general SSL expiry
             [
                 'alert_type' => self::ALERT_LETS_ENCRYPT_RENEWAL,
                 'enabled' => true,
@@ -82,6 +106,8 @@ class AlertConfiguration extends Model
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
+
+            // SSL Certificate Invalid
             [
                 'alert_type' => self::ALERT_SSL_INVALID,
                 'enabled' => true,
@@ -89,6 +115,8 @@ class AlertConfiguration extends Model
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
+
+            // Uptime Monitoring
             [
                 'alert_type' => self::ALERT_UPTIME_DOWN,
                 'enabled' => true,
@@ -96,6 +124,8 @@ class AlertConfiguration extends Model
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
+
+            // Response Time
             [
                 'alert_type' => self::ALERT_RESPONSE_TIME,
                 'enabled' => true,

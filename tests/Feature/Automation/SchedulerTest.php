@@ -48,9 +48,9 @@ test('scheduler uptime monitoring runs every minute', function () {
 
     expect($uptimeEvents)->not()->toBeEmpty();
 
-    // Verify it's scheduled to run every minute
+    // Verify it's scheduled to run every 5 minutes
     $uptimeEvent = $uptimeEvents->first();
-    expect($uptimeEvent->expression)->toBe('* * * * *');
+    expect($uptimeEvent->expression)->toBe('*/5 * * * *');
 });
 
 test('scheduler ssl monitoring runs twice daily', function () {

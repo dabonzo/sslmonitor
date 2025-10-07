@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
-import { ChevronDown } from 'lucide-vue-next'
+import MenuItem from '@/components/Navigation/MenuItem.vue'
 import { mainMenuItems, bottomMenuItems, isActiveRoute } from '@/config/navigation'
 
 const themeStore = useThemeStore()
@@ -50,62 +50,27 @@ function toggleDropdown(key: string) {
           <!-- Main menu items -->
           <template v-for="item in mainMenuItems" :key="item.key">
             <li class="menu nav-item">
-              <!-- Direct link items -->
-              <Link
-                v-if="item.href"
-                :href="item.href"
-                class="nav-link group w-full"
-                :class="{ 'active': isActiveRoute(item.href) }"
-              >
-                <div class="flex items-center">
-                  <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <div class="ltr:pl-3 rtl:pr-3">
-                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary">
-                      {{ item.title }}
-                    </span>
-                    <div v-if="item.description" class="text-xs text-sidebar-muted">
-                      {{ item.description }}
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <MenuItem
+                :item="item"
+                :is-active="item.href ? isActiveRoute(item.href) : false"
+                :is-dropdown-open="activeDropdown === item.key"
+                variant="sidebar"
+                @toggle="toggleDropdown(item.key)"
+              />
 
-              <!-- Dropdown items -->
-              <template v-else>
-                <button
-                  type="button"
-                  class="nav-link group w-full"
-                  :class="{ 'active': activeDropdown === item.key }"
-                  @click="toggleDropdown(item.key)"
-                >
-                  <div class="flex items-center">
-                    <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary ltr:pl-3 rtl:pr-3">
-                      {{ item.title }}
-                    </span>
-                  </div>
-
-                  <div
-                    class="rtl:rotate-180 transition-transform duration-200"
-                    :class="{ '!rotate-90': activeDropdown === item.key }"
-                  >
-                    <ChevronDown class="h-4 w-4" />
-                  </div>
-                </button>
-
-                <Transition name="slide-down">
-                  <ul v-show="activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
-                    <li v-for="child in item.children" :key="child.href">
-                      <Link
-                        :href="child.href"
-                        :class="{ 'active': isActiveRoute(child.href) }"
-                      >
-                        {{ child.title }}
-                      </Link>
-                    </li>
-                  </ul>
-                </Transition>
-              </template>
+              <!-- Sub-menu for dropdown items -->
+              <Transition v-if="item.children" name="slide-down">
+                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
+                  <li v-for="child in item.children" :key="child.href">
+                    <Link
+                      :href="child.href"
+                      :class="{ 'active': isActiveRoute(child.href) }"
+                    >
+                      {{ child.title }}
+                    </Link>
+                  </li>
+                </ul>
+              </Transition>
             </li>
           </template>
 
@@ -115,23 +80,11 @@ function toggleDropdown(key: string) {
           <!-- Bottom menu items -->
           <template v-for="item in bottomMenuItems" :key="item.key">
             <li class="menu nav-item">
-              <Link
-                :href="item.href"
-                class="nav-link group w-full"
-                :class="{ 'active': isActiveRoute(item.href) }"
-              >
-                <div class="flex items-center">
-                  <component :is="item.icon" class="shrink-0 group-hover:!text-primary" />
-                  <div class="ltr:pl-3 rtl:pr-3">
-                    <span class="text-sidebar-foreground group-hover:text-sidebar-primary">
-                      {{ item.title }}
-                    </span>
-                    <div v-if="item.description" class="text-xs text-sidebar-muted">
-                      {{ item.description }}
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <MenuItem
+                :item="item"
+                :is-active="item.href ? isActiveRoute(item.href) : false"
+                variant="sidebar"
+              />
             </li>
           </template>
 
@@ -142,37 +95,6 @@ function toggleDropdown(key: string) {
 </template>
 
 <style scoped>
-/* Navigation styles */
-.nav-link {
-  display: flex;
-  cursor: pointer;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 0.375rem;
-  padding: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.nav-link:hover {
-  background-color: rgb(248 250 252);
-  color: rgb(67 97 238);
-}
-
-.dark .nav-link:hover {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
-}
-
-.nav-link.active {
-  background-color: rgb(243 244 246);
-  color: rgb(67 97 238);
-}
-
-.dark .nav-link.active {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
-}
-
 .sub-menu {
   margin-left: 1.5rem;
   list-style: none;

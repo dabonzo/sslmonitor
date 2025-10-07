@@ -9,9 +9,9 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Production automation scheduling
-// Every minute: Routine uptime checks for active websites
+// Every 5 minutes: Routine uptime checks for active websites
 Schedule::command('monitor:check-uptime')
-    ->everyMinute()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler.log'));

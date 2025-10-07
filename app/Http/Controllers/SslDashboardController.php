@@ -48,6 +48,9 @@ class SslDashboardController extends Controller
         // Get team transfer suggestions
         $transferSuggestions = $this->getTeamTransferSuggestions($user, $allUserWebsites);
 
+        // Get certificate expiration timeline
+        $expirationTimeline = $this->getCertificateExpirationTimeline($allUserWebsites);
+
         return Inertia::render('Dashboard', [
             'sslStatistics' => $sslStatistics,
             'uptimeStatistics' => $uptimeStatistics,
@@ -55,6 +58,7 @@ class SslDashboardController extends Controller
             'recentUptimeActivity' => $recentUptimeActivity,
             'criticalAlerts' => $criticalAlerts,
             'transferSuggestions' => $transferSuggestions,
+            'expirationTimeline' => $expirationTimeline,
         ]);
     }
 
@@ -215,18 +219,24 @@ class SslDashboardController extends Controller
             ->take(10)
             ->get();
 
-        return $monitors->map(function ($monitor) {
+        return $monitors->map(function ($monitor) use ($websites) {
             // Extract domain name from URL for cleaner display
             $urlParts = parse_url($monitor->url);
             $websiteName = $urlParts['host'] ?? $monitor->url;
 
+            // Get website ID for edit link
+            $website = $websites->firstWhere('url', $monitor->url);
+
             return [
                 'id' => $monitor->id,
+                'website_id' => $website?->id,
                 'website_name' => $websiteName,
                 'status' => $monitor->uptime_status,
                 'checked_at' => $monitor->uptime_last_check_date,
                 'time_ago' => $monitor->uptime_last_check_date->diffForHumans(),
                 'response_time' => $monitor->uptime_check_response_time_in_ms,
+                'failure_reason' => $monitor->uptime_check_failure_reason,
+                'content_failure_reason' => $monitor->content_validation_failure_reason,
             ];
         })->toArray();
     }
@@ -247,17 +257,22 @@ class SslDashboardController extends Controller
             ->take(10)
             ->get();
 
-        return $monitors->map(function ($monitor) {
+        return $monitors->map(function ($monitor) use ($websites) {
             // Extract domain name from URL for cleaner display
             $urlParts = parse_url($monitor->url);
             $websiteName = $urlParts['host'] ?? $monitor->url;
 
+            // Get website ID for edit link
+            $website = $websites->firstWhere('url', $monitor->url);
+
             return [
                 'id' => $monitor->id,
+                'website_id' => $website?->id,
                 'website_name' => $websiteName,
                 'status' => $monitor->certificate_status,
                 'checked_at' => $monitor->updated_at,
                 'time_ago' => $monitor->updated_at->diffForHumans(),
+                'failure_reason' => $monitor->certificate_check_failure_reason,
             ];
         })->toArray();
     }
@@ -267,9 +282,9 @@ class SslDashboardController extends Controller
         // Get personal websites that can be transferred
         $personalWebsites = $allWebsites->where('user_id', $user->id)->whereNull('team_id');
 
-        // Get user's teams where they can transfer websites (OWNER, ADMIN, MANAGER roles)
+        // Get user's teams where they can transfer websites (OWNER, ADMIN roles)
         $availableTeams = $user->teams()
-            ->wherePivotIn('role', ['OWNER', 'ADMIN', 'MANAGER'])
+            ->wherePivotIn('role', ['OWNER', 'ADMIN'])
             ->limit(5) // Show only top 5 for quick actions
             ->get(['teams.id', 'teams.name']);
 
@@ -286,5 +301,61 @@ class SslDashboardController extends Controller
         ];
 
         return $suggestions;
+    }
+
+    private function getCertificateExpirationTimeline($websites): array
+    {
+        $websiteUrls = $websites->pluck('url')->toArray();
+
+        if (empty($websiteUrls)) {
+            return [
+                'expiring_7_days' => [],
+                'expiring_30_days' => [],
+                'expiring_90_days' => [],
+            ];
+        }
+
+        $monitors = Monitor::whereIn('url', $websiteUrls)
+            ->where('certificate_check_enabled', true)
+            ->where('certificate_status', 'valid')
+            ->whereNotNull('certificate_expiration_date')
+            ->orderBy('certificate_expiration_date', 'asc')
+            ->get();
+
+        $now = now();
+        $expiring7Days = [];
+        $expiring30Days = [];
+        $expiring90Days = [];
+
+        foreach ($monitors as $monitor) {
+            $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
+            $daysUntilExpiry = (int) $now->diffInDays($expirationDate, false);
+
+            // Get website for additional info
+            $website = $websites->firstWhere('url', $monitor->url);
+            $urlParts = parse_url($monitor->url);
+            $websiteName = $urlParts['host'] ?? $monitor->url;
+
+            $item = [
+                'website_id' => $website?->id,
+                'website_name' => $websiteName,
+                'expires_at' => $monitor->certificate_expiration_date,
+                'days_until_expiry' => $daysUntilExpiry,
+            ];
+
+            if ($daysUntilExpiry <= 7 && $daysUntilExpiry > 0) {
+                $expiring7Days[] = $item;
+            } elseif ($daysUntilExpiry <= 30 && $daysUntilExpiry > 7) {
+                $expiring30Days[] = $item;
+            } elseif ($daysUntilExpiry <= 90 && $daysUntilExpiry > 30) {
+                $expiring90Days[] = $item;
+            }
+        }
+
+        return [
+            'expiring_7_days' => $expiring7Days,
+            'expiring_30_days' => $expiring30Days,
+            'expiring_90_days' => $expiring90Days,
+        ];
     }
 }

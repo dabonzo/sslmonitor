@@ -83,6 +83,33 @@ const getAlertLevelColor = (level: string) => {
     return colors[level] || colors['info'];
 };
 
+// Group SSL expiry alerts by level for simple checkbox interface
+const sslExpiryAlerts = computed(() => {
+    const levels = ['info', 'warning', 'urgent', 'critical'];
+    const thresholds = { info: 30, warning: 14, urgent: 7, critical: 3 };
+
+    return levels.map(level => {
+        const alert = props.alertConfigurations.find(
+            a => a.alert_type === 'ssl_expiry' && a.alert_level === level
+        );
+        return {
+            level,
+            days: thresholds[level],
+            alert,
+            enabled: alert?.enabled || false
+        };
+    });
+});
+
+// Toggle SSL expiry alert level
+const toggleSslExpiryLevel = (alertId: number, currentEnabled: boolean) => {
+    router.put(`/settings/alerts/${alertId}`, {
+        enabled: !currentEnabled
+    }, {
+        preserveScroll: true
+    });
+};
+
 // Configure alert functionality
 const openConfigureDialog = (alert: AlertConfiguration) => {
     console.log('Opening configure dialog for alert:', alert);
@@ -186,6 +213,55 @@ const handleRuleDeleted = (ruleId) => {
 
     <ModernSettingsLayout title="Alert Settings">
             <div class="space-y-6">
+                <!-- SSL Certificate Alert Levels - Simple Checkboxes -->
+                <Card class="p-6">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-foreground mb-2">SSL Certificate Expiry Alerts</h3>
+                        <p class="text-sm text-muted-foreground">
+                            Choose which alert levels you want to receive. Alerts are sent when certificates are approaching expiration.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div
+                            v-for="item in sslExpiryAlerts"
+                            :key="item.level"
+                            class="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                        >
+                            <div class="flex items-center space-x-4">
+                                <Checkbox
+                                    :checked="item.enabled"
+                                    @update:checked="() => item.alert && toggleSslExpiryLevel(item.alert.id, item.enabled)"
+                                    :disabled="!item.alert"
+                                />
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <Badge :class="getAlertLevelColor(item.level)">
+                                            {{ item.level.toUpperCase() }}
+                                        </Badge>
+                                        <span class="font-medium text-foreground">{{ item.days }} days before expiry</span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground mt-1">
+                                        {{ item.level === 'info' ? 'Early warning - certificate will expire in a month' :
+                                           item.level === 'warning' ? 'Moderate urgency - certificate expires in 2 weeks' :
+                                           item.level === 'urgent' ? 'High priority - certificate expires in 1 week' :
+                                           'Critical - certificate expires in 3 days' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-muted-foreground">
+                                {{ item.enabled ? 'Enabled' : 'Disabled' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p class="text-sm text-blue-800 dark:text-blue-300">
+                            <strong>Tip:</strong> Most users enable only <strong>Urgent (7 days)</strong> and <strong>Critical (3 days)</strong> alerts to avoid notification fatigue while staying informed of important certificate expirations.
+                        </p>
+                    </div>
+                </Card>
+
                 <!-- Real-time Alert Dashboard -->
                 <AlertDashboard
                     @alert-acknowledged="handleAlertAcknowledged"

@@ -79,4 +79,64 @@ class Team extends Model
         $membership = $this->members()->where('user_id', $user->id)->first();
         return $membership?->pivot->role;
     }
+
+    /**
+     * Transfer team ownership to another user
+     */
+    public function transferOwnership(User $newOwner): void
+    {
+        // Check if new owner is a team member
+        if (!$this->hasMember($newOwner)) {
+            throw new \Exception('New owner must be a team member');
+        }
+
+        // Update the team creator
+        $this->update(['created_by_user_id' => $newOwner->id]);
+
+        // Update team member role to OWNER
+        TeamMember::where('team_id', $this->id)
+            ->where('user_id', $newOwner->id)
+            ->update(['role' => TeamMember::ROLE_OWNER]);
+
+        // Optionally downgrade previous owner to ADMIN
+        TeamMember::where('team_id', $this->id)
+            ->where('user_id', '!=', $newOwner->id)
+            ->where('role', TeamMember::ROLE_OWNER)
+            ->update(['role' => TeamMember::ROLE_ADMIN]);
+    }
+
+    /**
+     * Delete team and clean up resources
+     */
+    public function deleteTeam(): void
+    {
+        // Transfer all team websites back to personal ownership of team creator
+        $this->websites()->update([
+            'team_id' => null,
+            'user_id' => $this->created_by_user_id,
+            'assigned_by_user_id' => null,
+            'assigned_at' => null,
+        ]);
+
+        // Delete team (cascade will handle team_members, invitations, etc.)
+        $this->delete();
+    }
+
+    /**
+     * Check if user can delete this team
+     */
+    public function canBeDeletedBy(User $user): bool
+    {
+        $role = $this->getUserRole($user);
+        return $role === TeamMember::ROLE_OWNER;
+    }
+
+    /**
+     * Check if user can transfer this team
+     */
+    public function canBeTransferredBy(User $user): bool
+    {
+        $role = $this->getUserRole($user);
+        return $role === TeamMember::ROLE_OWNER;
+    }
 }

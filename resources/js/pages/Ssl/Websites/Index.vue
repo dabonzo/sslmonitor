@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft, Loader2 } from 'lucide-vue-next';
@@ -128,6 +128,160 @@ const deleting = ref<number | null>(null);
 const isFilterLoading = ref(false);
 const isPageLoading = ref(false);
 
+// Search input ref for focus management
+const searchInputRef = ref<HTMLInputElement | null>(null);
+
+// Real-time status monitoring with individual website polling
+const websiteStatuses = ref<Map<number, any>>(new Map());
+const filterStatsLocal = ref(props.filterStats);
+const websitesLocal = ref([...props.websites.data]);
+
+// Function to calculate filter stats locally
+const calculateFilterStats = (websites: any[]) => {
+  const stats = {
+    all: websites.length,
+    ssl_issues: 0,
+    uptime_issues: 0,
+    expiring_soon: 0,
+    critical: 0,
+  };
+
+  for (const website of websites) {
+    // SSL Issues
+    if (website.ssl_status && ['invalid', 'expired'].includes(website.ssl_status)) {
+      stats.ssl_issues++;
+    }
+
+    // Uptime Issues
+    if (website.uptime_status && ['down', 'slow', 'content_mismatch'].includes(website.uptime_status)) {
+      stats.uptime_issues++;
+    }
+
+    // Expiring Soon (within 30 days)
+    if (website.ssl_days_remaining !== null && website.ssl_days_remaining <= 30 && website.ssl_days_remaining >= 0) {
+      stats.expiring_soon++;
+    }
+
+    // Critical (3 days or less, expired certs, or down sites)
+    if (
+      (website.ssl_days_remaining !== null && website.ssl_days_remaining <= 3) ||
+      website.ssl_status === 'expired' ||
+      ['down', 'content_mismatch'].includes(website.uptime_status)
+    ) {
+      stats.critical++;
+    }
+  }
+
+  return stats;
+};
+
+// Function to check individual website status
+const checkWebsiteStatus = async (websiteId: number) => {
+  try {
+    const response = await axios.get(`/ssl/websites/${websiteId}/check-status`);
+    const newStatus = response.data;
+
+    const currentStatus = websiteStatuses.value.get(websiteId);
+
+    // Check if status has changed
+    if (!currentStatus ||
+        currentStatus.ssl_status !== newStatus.ssl_status ||
+        currentStatus.uptime_status !== newStatus.uptime_status) {
+
+      websiteStatuses.value.set(websiteId, newStatus);
+
+      // Update the website in the local list
+      const websiteIndex = websitesLocal.value.findIndex(w => w.id === websiteId);
+      if (websiteIndex !== -1) {
+        websitesLocal.value[websiteIndex].ssl_status = newStatus.ssl_status;
+        websitesLocal.value[websiteIndex].uptime_status = newStatus.uptime_status;
+
+        // Recalculate filter stats locally
+        filterStatsLocal.value = calculateFilterStats(websitesLocal.value);
+
+        console.log(`Status updated for website ${websiteId}: SSL=${newStatus.ssl_status}, Uptime=${newStatus.uptime_status}`);
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to check status for website ${websiteId}:`, error);
+  }
+};
+
+// Function to poll all website statuses
+const pollAllWebsiteStatuses = async () => {
+  const promises = websitesLocal.value.map(website => checkWebsiteStatus(website.id));
+  await Promise.allSettled(promises);
+};
+
+// Real-time status monitoring
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const refreshParam = urlParams.get('refresh');
+
+  // Initialize website statuses
+  websitesLocal.value.forEach(website => {
+    websiteStatuses.value.set(website.id, {
+      ssl_status: website.ssl_status,
+      uptime_status: website.uptime_status,
+    });
+  });
+
+  // Immediate check refresh (short-term, frequent updates)
+  if (refreshParam === 'check') {
+    // Start checking every 3 seconds for updates after an immediate check
+    let refreshCount = 0;
+    const maxRefreshes = 10; // Check for 30 seconds (3s * 10)
+
+    const intervalId = setInterval(async () => {
+      refreshCount++;
+      console.log('Fast polling: checking all website statuses...');
+      await pollAllWebsiteStatuses();
+
+      // Stop after 30 seconds and switch to normal polling
+      if (refreshCount >= maxRefreshes) {
+        clearInterval(intervalId);
+        console.log('Fast polling stopped, switching to normal polling');
+
+        // Start normal polling
+        const normalPollingId = setInterval(async () => {
+          console.log('Normal polling: checking all website statuses...');
+          await pollAllWebsiteStatuses();
+        }, 15000); // 15 seconds
+
+        // Store interval ID globally to prevent multiple intervals
+        (window as any).sslMonitorStatusInterval = normalPollingId;
+      }
+    }, 3000);
+
+    // Clean up the URL parameter
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.delete('refresh');
+    window.history.replaceState({}, '', newUrl);
+  } else {
+    // Clear any existing interval to prevent duplicates
+    if ((window as any).sslMonitorStatusInterval) {
+      clearInterval((window as any).sslMonitorStatusInterval);
+    }
+
+    // Start normal polling immediately if not coming from immediate check
+    const normalPollingId = setInterval(async () => {
+      console.log('Normal polling: checking all website statuses...');
+      await pollAllWebsiteStatuses();
+    }, 15000); // 15 seconds
+
+    // Store interval ID globally to prevent multiple intervals
+    (window as any).sslMonitorStatusInterval = normalPollingId;
+  }
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    if ((window as any).sslMonitorStatusInterval) {
+      clearInterval((window as any).sslMonitorStatusInterval);
+      delete (window as any).sslMonitorStatusInterval;
+    }
+  });
+});
+
 // Bulk transfer modal state
 const showBulkTransferModal = ref(false);
 const selectedWebsitesForTransfer = computed(() =>
@@ -253,7 +407,7 @@ const runManualCheck = async (website: Website) => {
   try {
     await axios.post(`/ssl/websites/${website.id}/check`);
     // Refresh the page data
-    router.reload({ only: ['websites'] });
+    router.reload({ only: ['websites', 'filterStats'] });
   } catch (error) {
     console.error('Failed to run manual check:', error);
     alert('Failed to run manual check. Please try again.');
@@ -277,13 +431,13 @@ const hasSelection = computed(() => {
   return selectedWebsites.value.length > 0;
 });
 
-const filterOptions = [
-  { key: 'all', label: 'All Websites', icon: Shield, count: props.filterStats.all },
-  { key: 'ssl_issues', label: 'SSL Issues', icon: AlertTriangle, count: props.filterStats.ssl_issues },
-  { key: 'uptime_issues', label: 'Uptime Issues', icon: Zap, count: props.filterStats.uptime_issues },
-  { key: 'expiring_soon', label: 'Expiring Soon', icon: Clock, count: props.filterStats.expiring_soon },
-  { key: 'critical', label: 'Critical', icon: AlertTriangle, count: props.filterStats.critical }
-];
+const filterOptions = computed(() => [
+  { key: 'all', label: 'All Websites', icon: Shield, count: filterStatsLocal.value.all },
+  { key: 'ssl_issues', label: 'SSL Issues', icon: AlertTriangle, count: filterStatsLocal.value.ssl_issues },
+  { key: 'uptime_issues', label: 'Uptime Issues', icon: Zap, count: filterStatsLocal.value.uptime_issues },
+  { key: 'expiring_soon', label: 'Expiring Soon', icon: Clock, count: filterStatsLocal.value.expiring_soon },
+  { key: 'critical', label: 'Critical', icon: AlertTriangle, count: filterStatsLocal.value.critical }
+]);
 
 const teamOptions = [
   { key: 'all', label: 'All Websites' },
@@ -394,7 +548,7 @@ const quickTransferToFirstTeam = (website: Website) => {
     }, {
       onSuccess: () => {
         // Refresh the page data
-        router.reload({ only: ['websites'] });
+        router.reload({ only: ['websites', 'filterStats'] });
       },
       onError: (errors) => {
         console.error('Quick transfer failed:', errors);
@@ -410,6 +564,9 @@ let searchTimeout: NodeJS.Timeout | null = null;
 const performFilterUpdate = () => {
   isFilterLoading.value = true;
 
+  // Check if search input is currently focused
+  const wasSearchFocused = searchInputRef.value === document.activeElement;
+
   const params: any = {};
 
   if (searchQuery.value) params.search = searchQuery.value;
@@ -421,6 +578,13 @@ const performFilterUpdate = () => {
     replace: true,
     onFinish: () => {
       isFilterLoading.value = false;
+
+      // Restore focus to search input if it was focused before the update
+      if (wasSearchFocused && searchInputRef.value) {
+        nextTick(() => {
+          searchInputRef.value?.focus();
+        });
+      }
     }
   });
 };
@@ -476,6 +640,7 @@ watch(activeTeam, () => {
               <Search v-if="!isFilterLoading" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Loader2 v-if="isFilterLoading" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
               <input
+                ref="searchInputRef"
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search websites..."
@@ -679,9 +844,21 @@ watch(activeTeam, () => {
                   </span>
                 </td>
                 <td class="p-4">
-                  <!-- Uptime Status Placeholder -->
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Online
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    :class="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                    }"
+                  >
+                    {{ website.uptime_status === 'up' ? 'Online' :
+                       website.uptime_status === 'down' ? 'Down' :
+                       website.uptime_status === 'slow' ? 'Slow' :
+                       website.uptime_status === 'content_mismatch' ? 'Content Issue' :
+                       website.uptime_status === 'not yet checked' ? 'Not Checked' :
+                       'Unknown' }}
                   </span>
                 </td>
                 <td class="p-4">
@@ -855,8 +1032,21 @@ watch(activeTeam, () => {
               </div>
               <div>
                 <div class="text-xs text-muted-foreground mb-1">Uptime Status</div>
-                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  Online
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                  }"
+                >
+                  {{ website.uptime_status === 'up' ? 'Online' :
+                     website.uptime_status === 'down' ? 'Down' :
+                     website.uptime_status === 'slow' ? 'Slow' :
+                     website.uptime_status === 'content_mismatch' ? 'Content Issue' :
+                     website.uptime_status === 'not yet checked' ? 'Not Checked' :
+                     'Unknown' }}
                 </span>
               </div>
             </div>
@@ -964,7 +1154,7 @@ watch(activeTeam, () => {
         <!-- Enhanced Footer -->
         <div v-if="websites.links" class="mt-6 flex items-center justify-between">
           <div class="text-sm text-muted-foreground">
-            Showing {{ websites.data.length }} of {{ filterStats.all }} websites
+            Showing {{ websites.data.length }} of {{ filterStatsLocal.all }} websites
             <span v-if="hasActiveFilters" class="text-primary font-medium">(filtered)</span>
           </div>
           <div class="flex items-center space-x-2">
