@@ -344,7 +344,7 @@ destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\TeamController::invite
-* @see app/Http/Controllers/TeamController.php:172
+* @see app/Http/Controllers/TeamController.php:180
 * @route '/settings/team/{team}/invite'
 */
 export const invite = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -359,7 +359,7 @@ invite.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::invite
-* @see app/Http/Controllers/TeamController.php:172
+* @see app/Http/Controllers/TeamController.php:180
 * @route '/settings/team/{team}/invite'
 */
 invite.url = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -392,7 +392,7 @@ invite.url = (args: { team: number | { id: number } } | [team: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\TeamController::invite
-* @see app/Http/Controllers/TeamController.php:172
+* @see app/Http/Controllers/TeamController.php:180
 * @route '/settings/team/{team}/invite'
 */
 invite.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -402,7 +402,7 @@ invite.post = (args: { team: number | { id: number } } | [team: number | { id: n
 
 /**
 * @see \App\Http\Controllers\TeamController::invite
-* @see app/Http/Controllers/TeamController.php:172
+* @see app/Http/Controllers/TeamController.php:180
 * @route '/settings/team/{team}/invite'
 */
 const inviteForm = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -412,7 +412,7 @@ const inviteForm = (args: { team: number | { id: number } } | [team: number | { 
 
 /**
 * @see \App\Http\Controllers\TeamController::invite
-* @see app/Http/Controllers/TeamController.php:172
+* @see app/Http/Controllers/TeamController.php:180
 * @route '/settings/team/{team}/invite'
 */
 inviteForm.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

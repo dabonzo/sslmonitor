@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\TeamController::remove
-* @see app/Http/Controllers/TeamController.php:217
+* @see app/Http/Controllers/TeamController.php:225
 * @route '/settings/team/{team}/members/{user}'
 */
 export const remove = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -16,7 +16,7 @@ remove.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::remove
-* @see app/Http/Controllers/TeamController.php:217
+* @see app/Http/Controllers/TeamController.php:225
 * @route '/settings/team/{team}/members/{user}'
 */
 remove.url = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -46,7 +46,7 @@ remove.url = (args: { team: number | { id: number }, user: number | { id: number
 
 /**
 * @see \App\Http\Controllers\TeamController::remove
-* @see app/Http/Controllers/TeamController.php:217
+* @see app/Http/Controllers/TeamController.php:225
 * @route '/settings/team/{team}/members/{user}'
 */
 remove.delete = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -56,7 +56,7 @@ remove.delete = (args: { team: number | { id: number }, user: number | { id: num
 
 /**
 * @see \App\Http\Controllers\TeamController::remove
-* @see app/Http/Controllers/TeamController.php:217
+* @see app/Http/Controllers/TeamController.php:225
 * @route '/settings/team/{team}/members/{user}'
 */
 const removeForm = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -71,7 +71,7 @@ const removeForm = (args: { team: number | { id: number }, user: number | { id: 
 
 /**
 * @see \App\Http\Controllers\TeamController::remove
-* @see app/Http/Controllers/TeamController.php:217
+* @see app/Http/Controllers/TeamController.php:225
 * @route '/settings/team/{team}/members/{user}'
 */
 removeForm.delete = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -88,7 +88,7 @@ remove.form = removeForm
 
 /**
 * @see \App\Http\Controllers\TeamController::role
-* @see app/Http/Controllers/TeamController.php:250
+* @see app/Http/Controllers/TeamController.php:258
 * @route '/settings/team/{team}/members/{user}/role'
 */
 export const role = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -103,7 +103,7 @@ role.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::role
-* @see app/Http/Controllers/TeamController.php:250
+* @see app/Http/Controllers/TeamController.php:258
 * @route '/settings/team/{team}/members/{user}/role'
 */
 role.url = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -133,7 +133,7 @@ role.url = (args: { team: number | { id: number }, user: number | { id: number }
 
 /**
 * @see \App\Http\Controllers\TeamController::role
-* @see app/Http/Controllers/TeamController.php:250
+* @see app/Http/Controllers/TeamController.php:258
 * @route '/settings/team/{team}/members/{user}/role'
 */
 role.patch = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -143,7 +143,7 @@ role.patch = (args: { team: number | { id: number }, user: number | { id: number
 
 /**
 * @see \App\Http\Controllers\TeamController::role
-* @see app/Http/Controllers/TeamController.php:250
+* @see app/Http/Controllers/TeamController.php:258
 * @route '/settings/team/{team}/members/{user}/role'
 */
 const roleForm = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -158,7 +158,7 @@ const roleForm = (args: { team: number | { id: number }, user: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\TeamController::role
-* @see app/Http/Controllers/TeamController.php:250
+* @see app/Http/Controllers/TeamController.php:258
 * @route '/settings/team/{team}/members/{user}/role'
 */
 roleForm.patch = (args: { team: number | { id: number }, user: number | { id: number } } | [team: number | { id: number }, user: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
