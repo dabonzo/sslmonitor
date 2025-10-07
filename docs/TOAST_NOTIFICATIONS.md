@@ -2,7 +2,7 @@
 
 ## Overview
 
-The toast notification system provides an elegant way to show temporary notifications to users. It's built using Reka UI's Toast components and integrates seamlessly with both Vue components and Laravel's flash messages.
+The toast notification system provides an elegant way to show temporary notifications to users. It's a custom-built solution using Vue 3's composition API and transition system, integrating seamlessly with both Vue components and Laravel's flash messages.
 
 ## Features
 
@@ -11,9 +11,10 @@ The toast notification system provides an elegant way to show temporary notifica
 - ✅ Manual dismiss option
 - ✅ Automatic Laravel flash message integration
 - ✅ Dark mode support
-- ✅ Accessible (built on Reka UI)
-- ✅ Icon indicators for each variant
+- ✅ Smooth animations and transitions
+- ✅ Icon indicators for each variant (Lucide icons)
 - ✅ Simple API
+- ✅ Responsive design
 
 ## Usage in Vue Components
 
@@ -250,11 +251,18 @@ const deleteWebsite = (id: number) => {
 
 ### Toast System Architecture
 
-The toast notification system consists of three main parts:
+The toast notification system is a custom-built solution consisting of three main parts:
 
 1. **useToast Composable** (`/resources/js/composables/useToast.ts`): Manages toast state using Vue's reactive system
-2. **ToastContainer Component** (`/resources/js/components/ui/toast/ToastContainer.vue`): Renders toasts with animations
+2. **ToastContainer Component** (`/resources/js/components/ui/toast/ToastContainer.vue`): Custom component that renders toasts with Vue 3's TransitionGroup for smooth animations, using Lucide icons for visual indicators
 3. **Inertia Event Integration** (`/resources/js/app.ts`): Listens for successful page navigations and displays flash messages
+
+### Technical Details
+
+- **Icons**: Uses lucide-vue-next for variant icons (CheckCircle2, XCircle, AlertTriangle, Info)
+- **Animations**: Custom CSS animations (bounce-subtle, shake) with Vue 3's TransitionGroup
+- **Styling**: Gradient backgrounds with backdrop blur, TailwindCSS for responsive design
+- **Positioning**: Fixed positioning (top-right) with z-index [100] for layering
 
 ### How Flash Messages Work
 
