@@ -424,7 +424,7 @@ invite.form = inviteForm
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 export const transferOwnership = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -439,7 +439,7 @@ transferOwnership.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnership.url = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -472,7 +472,7 @@ transferOwnership.url = (args: { team: number | { id: number } } | [team: number
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnership.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -482,7 +482,7 @@ transferOwnership.post = (args: { team: number | { id: number } } | [team: numbe
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 const transferOwnershipForm = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -492,7 +492,7 @@ const transferOwnershipForm = (args: { team: number | { id: number } } | [team: 
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnershipForm.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

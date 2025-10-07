@@ -258,9 +258,10 @@ class TeamController extends Controller
     public function updateMemberRole(Request $request, Team $team, User $user): RedirectResponse
     {
         $currentUser = $request->user();
+        $currentUserRole = $currentUser->getRoleInTeam($team);
 
-        // Only owners can update member roles
-        if (!$currentUser->canManageTeam($team)) {
+        // Must be at least ADMIN to change roles
+        if (!in_array($currentUserRole, [TeamMember::ROLE_OWNER, TeamMember::ROLE_ADMIN])) {
             abort(403, 'You do not have permission to update member roles.');
         }
 
@@ -268,22 +269,54 @@ class TeamController extends Controller
             'role' => 'required|in:' . implode(',', TeamMember::getRoles()),
         ]);
 
-        // Can't change your own role if you're the only owner
-        if ($user->id === $currentUser->id && $request->role !== TeamMember::ROLE_OWNER) {
-            $ownerCount = TeamMember::where('team_id', $team->id)->where('role', TeamMember::ROLE_OWNER)->count();
-            if ($ownerCount <= 1) {
-                return redirect()->back()->with('error', 'You cannot change your role as the last owner. Assign another owner first.');
+        // Get target user's current role
+        $targetMember = TeamMember::where('team_id', $team->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$targetMember) {
+            return redirect()->back()->with('error', 'Member not found.');
+        }
+
+        $targetCurrentRole = $targetMember->role;
+        $newRole = $request->role;
+
+        // Cannot change your own role
+        if ($user->id === $currentUser->id) {
+            return redirect()->back()->with('error', 'You cannot change your own role. Ask another team member to change it.');
+        }
+
+        // ADMIN permissions: Can only manage VIEWER and ADMIN roles
+        if ($currentUserRole === TeamMember::ROLE_ADMIN) {
+            // ADMIN cannot touch OWNER role (promote to or demote from)
+            if ($targetCurrentRole === TeamMember::ROLE_OWNER || $newRole === TeamMember::ROLE_OWNER) {
+                abort(403, 'Only team owners can change OWNER role assignments.');
+            }
+
+            // ADMIN can change between VIEWER and ADMIN
+            if (!in_array($targetCurrentRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN]) ||
+                !in_array($newRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN])) {
+                abort(403, 'Admins can only change roles between VIEWER and ADMIN.');
+            }
+        }
+
+        // OWNER permissions: Can change any role, but with restrictions
+        if ($currentUserRole === TeamMember::ROLE_OWNER) {
+            // Cannot demote the last owner
+            if ($targetCurrentRole === TeamMember::ROLE_OWNER && $newRole !== TeamMember::ROLE_OWNER) {
+                $ownerCount = TeamMember::where('team_id', $team->id)
+                    ->where('role', TeamMember::ROLE_OWNER)
+                    ->count();
+
+                if ($ownerCount <= 1) {
+                    return redirect()->back()->with('error', 'Cannot demote the last owner. Transfer ownership or promote another member first.');
+                }
             }
         }
 
         // Update member role
-        $updated = TeamMember::where('team_id', $team->id)
-            ->where('user_id', $user->id)
-            ->update(['role' => $request->role]);
-
-        if ($updated === 0) {
-            return redirect()->back()->with('error', 'Member not found or could not be updated.');
-        }
+        $targetMember->role = $newRole;
+        $targetMember->save();
 
         return redirect()->back()->with('success', 'Member role updated successfully!');
     }

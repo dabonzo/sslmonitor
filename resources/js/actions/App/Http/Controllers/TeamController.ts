@@ -677,7 +677,7 @@ updateMemberRole.form = updateMemberRoleForm
 
 /**
 * @see \App\Http\Controllers\TeamController::cancelInvitation
-* @see app/Http/Controllers/TeamController.php:291
+* @see app/Http/Controllers/TeamController.php:324
 * @route '/settings/team/{team}/invitations/{invitation}'
 */
 export const cancelInvitation = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -692,7 +692,7 @@ cancelInvitation.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::cancelInvitation
-* @see app/Http/Controllers/TeamController.php:291
+* @see app/Http/Controllers/TeamController.php:324
 * @route '/settings/team/{team}/invitations/{invitation}'
 */
 cancelInvitation.url = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -722,7 +722,7 @@ cancelInvitation.url = (args: { team: number | { id: number }, invitation: numbe
 
 /**
 * @see \App\Http\Controllers\TeamController::cancelInvitation
-* @see app/Http/Controllers/TeamController.php:291
+* @see app/Http/Controllers/TeamController.php:324
 * @route '/settings/team/{team}/invitations/{invitation}'
 */
 cancelInvitation.delete = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -732,7 +732,7 @@ cancelInvitation.delete = (args: { team: number | { id: number }, invitation: nu
 
 /**
 * @see \App\Http\Controllers\TeamController::cancelInvitation
-* @see app/Http/Controllers/TeamController.php:291
+* @see app/Http/Controllers/TeamController.php:324
 * @route '/settings/team/{team}/invitations/{invitation}'
 */
 const cancelInvitationForm = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -747,7 +747,7 @@ const cancelInvitationForm = (args: { team: number | { id: number }, invitation:
 
 /**
 * @see \App\Http\Controllers\TeamController::cancelInvitation
-* @see app/Http/Controllers/TeamController.php:291
+* @see app/Http/Controllers/TeamController.php:324
 * @route '/settings/team/{team}/invitations/{invitation}'
 */
 cancelInvitationForm.delete = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -764,7 +764,7 @@ cancelInvitation.form = cancelInvitationForm
 
 /**
 * @see \App\Http\Controllers\TeamController::resendInvitation
-* @see app/Http/Controllers/TeamController.php:305
+* @see app/Http/Controllers/TeamController.php:338
 * @route '/settings/team/{team}/invitations/{invitation}/resend'
 */
 export const resendInvitation = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -779,7 +779,7 @@ resendInvitation.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::resendInvitation
-* @see app/Http/Controllers/TeamController.php:305
+* @see app/Http/Controllers/TeamController.php:338
 * @route '/settings/team/{team}/invitations/{invitation}/resend'
 */
 resendInvitation.url = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -809,7 +809,7 @@ resendInvitation.url = (args: { team: number | { id: number }, invitation: numbe
 
 /**
 * @see \App\Http\Controllers\TeamController::resendInvitation
-* @see app/Http/Controllers/TeamController.php:305
+* @see app/Http/Controllers/TeamController.php:338
 * @route '/settings/team/{team}/invitations/{invitation}/resend'
 */
 resendInvitation.post = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -819,7 +819,7 @@ resendInvitation.post = (args: { team: number | { id: number }, invitation: numb
 
 /**
 * @see \App\Http\Controllers\TeamController::resendInvitation
-* @see app/Http/Controllers/TeamController.php:305
+* @see app/Http/Controllers/TeamController.php:338
 * @route '/settings/team/{team}/invitations/{invitation}/resend'
 */
 const resendInvitationForm = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -829,7 +829,7 @@ const resendInvitationForm = (args: { team: number | { id: number }, invitation:
 
 /**
 * @see \App\Http\Controllers\TeamController::resendInvitation
-* @see app/Http/Controllers/TeamController.php:305
+* @see app/Http/Controllers/TeamController.php:338
 * @route '/settings/team/{team}/invitations/{invitation}/resend'
 */
 resendInvitationForm.post = (args: { team: number | { id: number }, invitation: number | { id: number } } | [team: number | { id: number }, invitation: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -841,7 +841,7 @@ resendInvitation.form = resendInvitationForm
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 export const transferOwnership = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -856,7 +856,7 @@ transferOwnership.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnership.url = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -889,7 +889,7 @@ transferOwnership.url = (args: { team: number | { id: number } } | [team: number
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnership.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -899,7 +899,7 @@ transferOwnership.post = (args: { team: number | { id: number } } | [team: numbe
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 const transferOwnershipForm = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -909,7 +909,7 @@ const transferOwnershipForm = (args: { team: number | { id: number } } | [team: 
 
 /**
 * @see \App\Http\Controllers\TeamController::transferOwnership
-* @see app/Http/Controllers/TeamController.php:326
+* @see app/Http/Controllers/TeamController.php:359
 * @route '/settings/team/{team}/transfer-ownership'
 */
 transferOwnershipForm.post = (args: { team: number | { id: number } } | [team: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
