@@ -4,6 +4,7 @@ import { useThemeStore } from '@/stores/theme'
 import AppSidebar from './components/AppSidebar.vue'
 import AppHeader from './components/AppHeader.vue'
 import AppFooter from './components/AppFooter.vue'
+import ToastContainer from '@/components/ui/toast/ToastContainer.vue'
 
 interface Props {
   title?: string
@@ -116,6 +117,9 @@ function scrollToTop() {
         </svg>
       </button>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastContainer />
   </div>
 </template>
 
