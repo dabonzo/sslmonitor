@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import ThemeCustomizer from '@/components/ThemeCustomizer.vue'
+import MenuItem from '@/components/Navigation/MenuItem.vue'
 import {
   Menu,
   Search,
@@ -323,34 +324,16 @@ document.addEventListener('click', handleDocumentClick)
           :key="item.key"
           class="relative dropdown"
         >
-          <!-- Items with children use button to toggle dropdown -->
-          <button
-            v-if="item.children"
-            type="button"
-            class="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 rounded-xl hover:bg-white/60 dark:hover:bg-white/10"
-            @click="toggleHorizontalDropdown(item.key)"
-          >
-            <component :is="item.icon" class="h-4 w-4" />
-            <span>{{ item.title }}</span>
-            <ChevronDown
-              class="h-3 w-3 transition-transform duration-300"
-              :class="{ 'rotate-180': activeHorizontalDropdown === item.key }"
-            />
-          </button>
-
-          <!-- Items without children use Link for direct navigation -->
-          <Link
-            v-else
-            :href="item.href || '#'"
-            class="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 rounded-xl hover:bg-white/60 dark:hover:bg-white/10"
-          >
-            <component :is="item.icon" class="h-4 w-4" />
-            <span>{{ item.title }}</span>
-          </Link>
+          <MenuItem
+            :item="item"
+            :is-dropdown-open="activeHorizontalDropdown === item.key"
+            variant="horizontal"
+            @toggle="toggleHorizontalDropdown(item.key)"
+          />
 
           <!-- Dropdown menu -->
           <div
-            v-if="item.children && activeHorizontalDropdown === item.key"
+            v-if="item.children && !item.disabled && activeHorizontalDropdown === item.key"
             class="absolute top-full left-0 z-50 mt-2 w-56 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
           >
             <div class="py-2">

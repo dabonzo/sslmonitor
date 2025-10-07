@@ -16,6 +16,7 @@ export interface MenuItem {
   icon: any
   href?: string
   description?: string
+  disabled?: boolean
   children?: {
     title: string
     href: string
@@ -42,6 +43,7 @@ export const mainMenuItems: MenuItem[] = [
     key: 'certificates',
     title: 'SSL Certificates',
     icon: Shield,
+    disabled: true,
     children: [
       { title: 'All Certificates', href: '/ssl/certificates' },
       { title: 'Expiring Soon', href: '/ssl/certificates/expiring' },
@@ -53,6 +55,7 @@ export const mainMenuItems: MenuItem[] = [
     key: 'uptime',
     title: 'Uptime Monitoring',
     icon: Clock,
+    disabled: true,
     children: [
       { title: 'Status Overview', href: '/uptime/status' },
       { title: 'Response Times', href: '/uptime/performance' },
@@ -64,12 +67,14 @@ export const mainMenuItems: MenuItem[] = [
     title: 'Analytics',
     icon: TrendingUp,
     href: '/analytics',
-    description: 'Performance insights & trends'
+    description: 'Performance insights & trends',
+    disabled: true
   },
   {
     key: 'reports',
     title: 'Reports',
     icon: BarChart3,
+    disabled: true,
     children: [
       { title: 'SSL Reports', href: '/reports/ssl' },
       { title: 'Uptime Reports', href: '/reports/uptime' },
@@ -109,7 +114,8 @@ export const bottomMenuItems: MenuItem[] = [
     title: 'Help',
     icon: HelpCircle,
     href: '/help',
-    description: 'Documentation & support'
+    description: 'Documentation & support',
+    disabled: true
   }
 ]
 
