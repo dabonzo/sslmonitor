@@ -157,12 +157,20 @@ class TeamController extends Controller
             abort(403, 'You do not have permission to delete this team.');
         }
 
-        // Transfer all team websites back to personal ownership
-        $team->websites()->update([
-            'team_id' => null,
-            'assigned_by_user_id' => null,
-            'assigned_at' => null,
-        ]);
+        // Transfer team websites back to their original owners (users who added them)
+        $teamWebsites = $team->websites()->get();
+
+        foreach ($teamWebsites as $website) {
+            // If we know who assigned it, transfer to them, otherwise transfer to team owner
+            $newOwnerId = $website->assigned_by_user_id ?? $team->created_by_user_id;
+
+            $website->update([
+                'user_id' => $newOwnerId,
+                'team_id' => null,
+                'assigned_by_user_id' => null,
+                'assigned_at' => null,
+            ]);
+        }
 
         $team->delete();
 

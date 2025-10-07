@@ -971,3 +971,138 @@ test('team invitation can be declined', function () {
         'id' => $invitation->id,
     ]);
 });
+
+// Team Deletion Tests
+test('team owner can delete team', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
+
+    TeamMember::create([
+        'team_id' => $team->id,
+        'user_id' => $owner->id,
+        'role' => TeamMember::ROLE_OWNER,
+        'joined_at' => now(),
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    $response = $this->actingAs($owner)
+        ->delete("/settings/team/{$team->id}");
+
+    $response->assertRedirect('/settings/team');
+    $response->assertSessionHas('success', 'Team deleted successfully!');
+
+    $this->assertDatabaseMissing('teams', [
+        'id' => $team->id,
+    ]);
+});
+
+test('non-owner cannot delete team', function () {
+    $owner = User::factory()->create();
+    $admin = User::factory()->create();
+    $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
+
+    TeamMember::create([
+        'team_id' => $team->id,
+        'user_id' => $admin->id,
+        'role' => TeamMember::ROLE_ADMIN,
+        'joined_at' => now(),
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->delete("/settings/team/{$team->id}");
+
+    $response->assertForbidden();
+
+    $this->assertDatabaseHas('teams', [
+        'id' => $team->id,
+    ]);
+});
+
+test('deleting team transfers websites to their original owners', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
+
+    TeamMember::create([
+        'team_id' => $team->id,
+        'user_id' => $owner->id,
+        'role' => TeamMember::ROLE_OWNER,
+        'joined_at' => now(),
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    TeamMember::create([
+        'team_id' => $team->id,
+        'user_id' => $member->id,
+        'role' => TeamMember::ROLE_ADMIN,
+        'joined_at' => now(),
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    // Create websites assigned by different users
+    $websiteByOwner = Website::factory()->create([
+        'user_id' => $owner->id,
+        'team_id' => $team->id,
+        'assigned_by_user_id' => $owner->id,
+        'assigned_at' => now(),
+    ]);
+
+    $websiteByMember = Website::factory()->create([
+        'user_id' => $member->id,
+        'team_id' => $team->id,
+        'assigned_by_user_id' => $member->id,
+        'assigned_at' => now(),
+    ]);
+
+    $response = $this->actingAs($owner)
+        ->delete("/settings/team/{$team->id}");
+
+    $response->assertRedirect('/settings/team');
+
+    // Verify websites were transferred back to their original owners
+    $websiteByOwner->refresh();
+    expect($websiteByOwner->user_id)->toBe($owner->id);
+    expect($websiteByOwner->team_id)->toBeNull();
+    expect($websiteByOwner->assigned_by_user_id)->toBeNull();
+    expect($websiteByOwner->assigned_at)->toBeNull();
+
+    $websiteByMember->refresh();
+    expect($websiteByMember->user_id)->toBe($member->id);
+    expect($websiteByMember->team_id)->toBeNull();
+    expect($websiteByMember->assigned_by_user_id)->toBeNull();
+    expect($websiteByMember->assigned_at)->toBeNull();
+});
+
+test('deleting team transfers websites without assigned_by to team owner', function () {
+    $owner = User::factory()->create();
+    $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
+
+    TeamMember::create([
+        'team_id' => $team->id,
+        'user_id' => $owner->id,
+        'role' => TeamMember::ROLE_OWNER,
+        'joined_at' => now(),
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    // Create website without assigned_by_user_id (legacy data scenario)
+    $website = Website::factory()->create([
+        'user_id' => $owner->id,
+        'team_id' => $team->id,
+        'assigned_by_user_id' => null,
+        'assigned_at' => now(),
+    ]);
+
+    $response = $this->actingAs($owner)
+        ->delete("/settings/team/{$team->id}");
+
+    $response->assertRedirect('/settings/team');
+
+    // Verify website was transferred to team owner
+    $website->refresh();
+    expect($website->user_id)->toBe($owner->id);
+    expect($website->team_id)->toBeNull();
+    expect($website->assigned_by_user_id)->toBeNull();
+    expect($website->assigned_at)->toBeNull();
+});
