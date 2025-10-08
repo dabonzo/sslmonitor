@@ -1,0 +1,109 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, json, bcmath, pdo, mysql, redis
+          tools: composer:v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Create deployment archive
+        run: |
+          mkdir -p deployment
+          rsync -a --exclude='.git' \
+                   --exclude='node_modules' \
+                   --exclude='tests' \
+                   --exclude='storage' \
+                   --exclude='.env' \
+                   --exclude='.github' \
+                   --exclude='deployment' \
+                   . deployment/
+          tar -czf deploy.tar.gz -C deployment .
+
+      - name: Deploy to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+
+          # Create release directory
+          RELEASE_DIR=$(date +%Y%m%d%H%M%S)
+
+          # Upload and extract
+          scp -i ~/.ssh/deploy_key deploy.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH/releases/
+
+          ssh -i ~/.ssh/deploy_key $SSH_USER@$SSH_HOST << EOF
+            set -e
+            cd $DEPLOY_PATH/releases
+            mkdir -p $RELEASE_DIR
+            tar -xzf deploy.tar.gz -C $RELEASE_DIR
+            rm deploy.tar.gz
+
+            # Link shared storage
+            rm -rf $RELEASE_DIR/storage
+            ln -s $DEPLOY_PATH/shared/storage $RELEASE_DIR/storage
+
+            # Create .env from existing or fail
+            if [ ! -f $DEPLOY_PATH/shared/.env ]; then
+              echo "ERROR: .env file not found at $DEPLOY_PATH/shared/.env"
+              echo "Please create it before deploying!"
+              exit 1
+            fi
+            ln -s $DEPLOY_PATH/shared/.env $RELEASE_DIR/.env
+
+            # Run Laravel optimization
+            cd $RELEASE_DIR
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # Run migrations
+            php artisan migrate --force
+
+            # Update current symlink (atomic swap)
+            ln -sfn $DEPLOY_PATH/releases/$RELEASE_DIR $DEPLOY_PATH/current
+
+            # Restart services
+            sudo systemctl restart ssl-monitor-horizon
+
+            # Cleanup old releases (keep last 3)
+            cd $DEPLOY_PATH/releases
+            ls -t | tail -n +4 | xargs -r rm -rf
+
+            echo "Deployment successful: $RELEASE_DIR"
+          EOF
