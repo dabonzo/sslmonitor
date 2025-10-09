@@ -87,11 +87,10 @@ jobs:
             ln -s $DEPLOY_PATH/shared/.env $RELEASE_DIR/.env
 
             # Install production Node.js dependencies (for puppeteer/browsershot)
-            cd $RELEASE_DIR
+            cd $DEPLOY_PATH/releases/$RELEASE_DIR
             npm ci --production
 
             # Run Laravel optimization
-            cd $RELEASE_DIR
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
