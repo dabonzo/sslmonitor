@@ -16,28 +16,19 @@ class JavaScriptContentFetcher
     /**
      * Fetch content from URL with JavaScript rendering
      */
-    public function fetchContent(string $url, int $waitSeconds = 5): string
+    public function fetchContent(string $url, ?int $waitSeconds = null): string
     {
+        $waitSeconds = $waitSeconds ?? config('browsershot.wait_seconds', 5);
+
         try {
             // Use BrowserShot to fetch content with JavaScript rendering
             $content = Browsershot::url($url)
-                ->setChromePath(env('BROWSERSHOT_CHROME_PATH', '/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome'))
+                ->setChromePath(config('browsershot.chrome_path'))
                 ->waitUntilNetworkIdle()
-                ->timeout(30) // 30 seconds timeout
+                ->timeout(config('browsershot.timeout', 30))
                 ->delay($waitSeconds * 1000) // Wait for JavaScript to render
                 ->noSandbox() // Use BrowserShot's built-in method for Docker
-                ->addChromiumArguments([
-                    'disable-setuid-sandbox',
-                    'disable-dev-shm-usage',
-                    'disable-accelerated-2d-canvas',
-                    'no-first-run',
-                    'no-zygote',
-                    'disable-gpu',
-                    'disable-crash-reporter',
-                    'disable-breakpad',
-                    'disable-features=CrashReporter',
-                    'crash-dumps-dir=/tmp'
-                ])
+                ->addChromiumArguments(config('browsershot.chrome_arguments', []))
                 ->bodyHtml();
 
             // Save content to file for debugging
@@ -97,27 +88,17 @@ class JavaScriptContentFetcher
     {
         try {
             $content = Browsershot::html('<html><body>Test</body></html>')
-                ->setChromePath(env('BROWSERSHOT_CHROME_PATH', '/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome'))
-                ->noSandbox() // Use BrowserShot's built-in method for Docker
-                ->addChromiumArguments([
-                    'disable-setuid-sandbox',
-                    'disable-dev-shm-usage',
-                    'disable-accelerated-2d-canvas',
-                    'no-first-run',
-                    'no-zygote',
-                    'disable-gpu',
-                    'disable-crash-reporter',
-                    'disable-breakpad',
-                    'disable-features=CrashReporter',
-                    'crash-dumps-dir=/tmp'
-                ])
+                ->setChromePath(config('browsershot.chrome_path'))
+                ->noSandbox()
+                ->addChromiumArguments(config('browsershot.chrome_arguments', []))
                 ->bodyHtml();
 
             return ! empty($content) && str_contains($content, 'Test');
 
         } catch (\Exception $e) {
             Log::info('BrowserShot is not available', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'chrome_path' => config('browsershot.chrome_path')
             ]);
             return false;
         }
