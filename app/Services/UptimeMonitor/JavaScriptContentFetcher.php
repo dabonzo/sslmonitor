@@ -34,7 +34,9 @@ class JavaScriptContentFetcher
                     'no-zygote',
                     'disable-gpu',
                     'disable-crash-reporter',
-                    'disable-breakpad'
+                    'disable-breakpad',
+                    'disable-features=CrashReporter',
+                    'crash-dumps-dir=/tmp'
                 ])
                 ->bodyHtml();
 
@@ -105,7 +107,9 @@ class JavaScriptContentFetcher
                     'no-zygote',
                     'disable-gpu',
                     'disable-crash-reporter',
-                    'disable-breakpad'
+                    'disable-breakpad',
+                    'disable-features=CrashReporter',
+                    'crash-dumps-dir=/tmp'
                 ])
                 ->bodyHtml();
 
