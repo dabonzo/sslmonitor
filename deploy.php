@@ -269,3 +269,4 @@ task('deploy:success', function () {
 
 // After deploy hooks
 after('deploy:failed', 'deploy:unlock');
+after('deploy:success', 'deploy:unlock');
