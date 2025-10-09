@@ -86,9 +86,12 @@ jobs:
             fi
             ln -s $DEPLOY_PATH/shared/.env $RELEASE_DIR/.env
 
-            # Install production Node.js dependencies (for puppeteer/browsershot)
+            # Install production Node.js dependencies (for playwright/browsershot)
             cd $DEPLOY_PATH/releases/$RELEASE_DIR
-            PUPPETEER_CACHE_DIR=$DEPLOY_PATH/shared/.puppeteer_cache npm ci --production
+            npm ci --production
+
+            # Install Playwright browsers (ARM-compatible)
+            PLAYWRIGHT_BROWSERS_PATH=$DEPLOY_PATH/shared/.playwright npx playwright install chromium --with-deps
 
             # Run Laravel optimization
             php artisan config:cache

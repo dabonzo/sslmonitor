@@ -36,7 +36,7 @@
         "laravel-vite-plugin": "^2.0.0",
         "lucide-vue-next": "^0.468.0",
         "pinia": "^3.0.3",
-        "puppeteer": "^24.22.3",
+        "playwright": "^1.48.2",
         "reka-ui": "^2.4.1",
         "tailwind-merge": "^3.2.0",
         "tailwindcss": "^4.1.1",
