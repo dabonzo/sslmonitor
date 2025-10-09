@@ -31,11 +31,8 @@ class JavaScriptContentFetcher
                 $command[] = $chromePath;
             }
 
-            // Execute Playwright script with environment variables to disable crashpad
-            $process = new Process($command, null, [
-                'CHROME_DEVEL_SANDBOX' => '/dev/null',
-                'PLAYWRIGHT_SKIP_BROWSER_GC' => '1',
-            ]);
+            // Execute Playwright script
+            $process = new Process($command);
             $process->setTimeout(config('browsershot.timeout', 30) + 10); // Add buffer
             $process->run();
 
