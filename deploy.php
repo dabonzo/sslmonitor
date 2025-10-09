@@ -56,7 +56,7 @@ host('production')
     ->set('http_user', 'web6')
     ->set('http_group', 'client0')
     ->set('bin/php', '/usr/bin/php8.3')
-    ->set('bin/composer', '/usr/bin/composer');
+    ->set('bin/composer', '/usr/local/bin/composer');
 
 // Custom Tasks
 
