@@ -1,0 +1,13 @@
+{
+  "name": "js-content-fetcher",
+  "version": "1.0.0",
+  "description": "HTTP service for fetching JavaScript-rendered content using Playwright",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "playwright-core": "^1.40.0"
+  }
+}

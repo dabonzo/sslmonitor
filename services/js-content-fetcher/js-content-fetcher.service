@@ -1,0 +1,16 @@
+[Unit]
+Description=JavaScript Content Fetcher Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/js-content-fetcher
+ExecStart=/usr/bin/node /opt/js-content-fetcher/server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/js-content-fetcher.log
+StandardError=append:/var/log/js-content-fetcher-error.log
+
+[Install]
+WantedBy=multi-user.target
