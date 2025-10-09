@@ -2,15 +2,17 @@
 
 namespace App\Services\UptimeMonitor;
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Spatie\UptimeMonitor\Models\Monitor;
-use Symfony\Component\Process\Process;
 
 class JavaScriptContentFetcher
 {
+    private string $serviceUrl;
+
     public function __construct()
     {
-        // Playwright script-based fetching
+        $this->serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
     }
 
     /**
@@ -19,38 +21,32 @@ class JavaScriptContentFetcher
     public function fetchContent(string $url, ?int $waitSeconds = null): string
     {
         $waitSeconds = $waitSeconds ?? config('browsershot.wait_seconds', 5);
-        $chromePath = config('browsershot.chrome_path');
-        $scriptPath = base_path('scripts/fetch-js-content.mjs');
 
         try {
-            // Build command
-            $command = ['node', $scriptPath, $url, (string) $waitSeconds];
+            // Call the HTTP service
+            $response = Http::timeout(config('browsershot.timeout', 30) + 10)
+                ->post("{$this->serviceUrl}/fetch", [
+                    'url' => $url,
+                    'waitSeconds' => $waitSeconds,
+                ]);
 
-            // Add Chrome path if configured
-            if ($chromePath) {
-                $command[] = $chromePath;
+            if (! $response->successful()) {
+                throw new \RuntimeException(
+                    $response->json('error') ?? 'HTTP service returned error: ' . $response->status()
+                );
             }
 
-            // Execute Playwright script
-            $process = new Process($command);
-            $process->setTimeout(config('browsershot.timeout', 30) + 10); // Add buffer
-            $process->run();
-
-            if (! $process->isSuccessful()) {
-                throw new \RuntimeException($process->getErrorOutput());
-            }
-
-            $content = $process->getOutput();
+            $content = $response->json('content', '');
 
             // Save content to file for debugging
             try {
                 $filename = storage_path('logs/playwright-' . md5($url) . '.html');
                 file_put_contents($filename, $content);
-                Log::info('Playwright content saved', [
+                Log::info('JavaScript content fetched via HTTP service', [
                     'url' => $url,
                     'filename' => $filename,
                     'content_length' => strlen($content),
-                    'contains_erdgasversorger' => str_contains($content, 'Erdgasversorger')
+                    'wait_seconds' => $waitSeconds,
                 ]);
             } catch (\Exception $e) {
                 // Ignore file save errors - don't break the content fetching
@@ -63,7 +59,7 @@ class JavaScriptContentFetcher
                 'url' => $url,
                 'error' => $e->getMessage(),
                 'wait_seconds' => $waitSeconds,
-                'chrome_path' => $chromePath
+                'service_url' => $this->serviceUrl,
             ]);
 
             // Return empty string on failure
@@ -86,44 +82,45 @@ class JavaScriptContentFetcher
     }
 
     /**
-     * Clean up browser resources (not needed for Playwright script)
+     * Clean up browser resources (not needed - HTTP service handles this)
      */
     public function cleanup(): void
     {
-        // Playwright handles cleanup automatically
+        // HTTP service handles cleanup automatically
     }
 
     /**
-     * Test if Playwright is available and working
+     * Test if JavaScript content fetching service is available
      */
     public static function isAvailable(): bool
     {
-        $scriptPath = base_path('scripts/fetch-js-content.mjs');
-
-        if (! file_exists($scriptPath)) {
-            Log::warning('Playwright script not found', ['path' => $scriptPath]);
-            return false;
-        }
+        $serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
 
         try {
-            $process = new Process(['node', '--version']);
-            $process->run();
+            $response = Http::timeout(5)->get("{$serviceUrl}/health");
 
-            if (! $process->isSuccessful()) {
-                Log::info('Node.js is not available');
-                return false;
+            if ($response->successful() && $response->json('status') === 'ok') {
+                Log::info('JavaScript content fetching service is available', [
+                    'service_url' => $serviceUrl,
+                    'browser' => $response->json('browser'),
+                ]);
+
+                return true;
             }
 
-            Log::info('Playwright is available', [
-                'node_version' => trim($process->getOutput())
+            Log::warning('JavaScript content fetching service returned unhealthy status', [
+                'service_url' => $serviceUrl,
+                'response' => $response->json(),
             ]);
 
-            return true;
+            return false;
 
         } catch (\Exception $e) {
-            Log::info('Playwright is not available', [
-                'error' => $e->getMessage()
+            Log::warning('JavaScript content fetching service is not available', [
+                'service_url' => $serviceUrl,
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

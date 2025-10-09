@@ -83,4 +83,16 @@ return [
     */
 
     'wait_seconds' => env('BROWSERSHOT_WAIT_SECONDS', 5),
+
+    /*
+    |--------------------------------------------------------------------------
+    | JavaScript Content Fetching Service URL
+    |--------------------------------------------------------------------------
+    |
+    | URL of the JavaScript content fetching HTTP service.
+    | This service runs as a systemd service with persistent browser pool.
+    |
+    */
+
+    'service_url' => env('BROWSERSHOT_SERVICE_URL', 'http://127.0.0.1:3000'),
 ];
