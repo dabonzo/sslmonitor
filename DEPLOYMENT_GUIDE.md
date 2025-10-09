@@ -87,18 +87,37 @@ BROWSERSHOT_CHROME_PATH=/var/www/monitor.intermedien.at/web/shared/.playwright/c
 
 ### Step 4: Verify Systemd Services
 
-The services are already configured correctly:
+**IMPORTANT**: Horizon service must have environment variables set for Node.js/Playwright to work.
+
+The Horizon service should look like this:
 
 ```bash
-# Check services point to /current directory (✓ already correct)
-cat /etc/systemd/system/ssl-monitor-horizon.service | grep WorkingDirectory
-# Should show: WorkingDirectory=/var/www/monitor.intermedien.at/web/current
+# /etc/systemd/system/ssl-monitor-horizon.service
+[Unit]
+Description=SSL Monitor Horizon Queue Worker
+After=network.target redis.service mariadb.service
 
-cat /etc/systemd/system/ssl-monitor-scheduler.service | grep ExecStart
-# Should show: ExecStart=/usr/bin/php /var/www/monitor.intermedien.at/web/current/artisan
+[Service]
+Type=simple
+User=web6
+Group=client0
+Restart=always
+RestartSec=3
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="HOME=/var/www/clients/client0/web6"
+ExecStart=/usr/bin/php /var/www/monitor.intermedien.at/web/current/artisan horizon
+WorkingDirectory=/var/www/monitor.intermedien.at/web/current
+StandardOutput=append:/var/www/monitor.intermedien.at/web/shared/storage/logs/horizon.log
+StandardError=append:/var/www/monitor.intermedien.at/web/shared/storage/logs/horizon-error.log
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-**No changes needed** - your services are already configured for Deployer!
+**Key Requirements**:
+- `Environment="PATH=/usr/local/bin:/usr/bin:/bin"` - Required for Node.js execution
+- `Environment="HOME=/var/www/clients/client0/web6"` - Required for Playwright
+- After editing, run: `systemctl daemon-reload && systemctl restart ssl-monitor-horizon`
 
 ### Step 5: Test SSH Connection from Local Machine
 
