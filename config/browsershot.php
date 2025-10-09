@@ -61,8 +61,8 @@ return [
         'disable-gpu',
         'disable-crash-reporter',
         'disable-breakpad',
-        'disable-features=CrashReporter',
-        'crash-dumps-dir=/tmp',
+        'disable-features=CrashReporter,Crashpad',
+        'disable-gpu-sandbox',
     ],
 
     /*

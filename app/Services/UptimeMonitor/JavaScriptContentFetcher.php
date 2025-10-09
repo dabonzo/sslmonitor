@@ -91,6 +91,7 @@ class JavaScriptContentFetcher
                 ->setChromePath(config('browsershot.chrome_path'))
                 ->noSandbox()
                 ->addChromiumArguments(config('browsershot.chrome_arguments', []))
+                ->timeout(10) // Short timeout for test
                 ->bodyHtml();
 
             return ! empty($content) && str_contains($content, 'Test');
