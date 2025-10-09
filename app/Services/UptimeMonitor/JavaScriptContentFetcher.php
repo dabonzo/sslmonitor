@@ -29,6 +29,7 @@ class JavaScriptContentFetcher
                 ->delay($waitSeconds * 1000) // Wait for JavaScript to render
                 ->noSandbox() // Use BrowserShot's built-in method for Docker
                 ->addChromiumArguments(config('browsershot.chrome_arguments', []))
+                ->setEnvironmentVariable('CHROME_DISABLE_CRASHPAD', '1') // Disable crashpad in Chrome 128+
                 ->bodyHtml();
 
             // Save content to file for debugging
@@ -91,6 +92,7 @@ class JavaScriptContentFetcher
                 ->setChromePath(config('browsershot.chrome_path'))
                 ->noSandbox()
                 ->addChromiumArguments(config('browsershot.chrome_arguments', []))
+                ->setEnvironmentVariable('CHROME_DISABLE_CRASHPAD', '1') // Disable crashpad in Chrome 128+
                 ->timeout(10) // Short timeout for test
                 ->bodyHtml();
 
