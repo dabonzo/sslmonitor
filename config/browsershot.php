@@ -59,10 +59,9 @@ return [
         'no-first-run',
         'no-zygote',
         'disable-gpu',
-        'disable-crash-reporter',
-        'disable-breakpad',
-        'disable-features=CrashReporter,Crashpad',
         'disable-gpu-sandbox',
+        // Chrome 128+ requires a writable directory for crashpad
+        'crash-dumps-dir=' . storage_path('logs/chrome-crashes'),
     ],
 
     /*
