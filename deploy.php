@@ -141,13 +141,13 @@ task('horizon:restart', function () {
     writeln('<comment>Restarting Horizon service via systemd...</comment>');
 
     try {
-        run('sudo /usr/bin/systemctl restart ssl-monitor-horizon');
+        run('sudo -n /usr/bin/systemctl restart ssl-monitor-horizon');
 
         // Wait a moment for service to start
         run('sleep 2');
 
         // Verify it's running
-        $status = run('sudo /usr/bin/systemctl is-active ssl-monitor-horizon || echo "inactive"');
+        $status = run('sudo -n /usr/bin/systemctl is-active ssl-monitor-horizon || echo "inactive"');
 
         if ($status === 'active') {
             writeln('<info>✓ Horizon service restarted successfully</info>');
