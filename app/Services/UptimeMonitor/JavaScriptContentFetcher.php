@@ -32,7 +32,9 @@ class JavaScriptContentFetcher
                     'disable-accelerated-2d-canvas',
                     'no-first-run',
                     'no-zygote',
-                    'disable-gpu'
+                    'disable-gpu',
+                    'disable-crash-reporter',
+                    'disable-breakpad'
                 ])
                 ->bodyHtml();
 
@@ -101,7 +103,9 @@ class JavaScriptContentFetcher
                     'disable-accelerated-2d-canvas',
                     'no-first-run',
                     'no-zygote',
-                    'disable-gpu'
+                    'disable-gpu',
+                    'disable-crash-reporter',
+                    'disable-breakpad'
                 ])
                 ->bodyHtml();
 
