@@ -88,10 +88,10 @@ jobs:
 
             # Install production Node.js dependencies (for playwright/browsershot)
             cd $DEPLOY_PATH/releases/$RELEASE_DIR
-            npm ci --production
+            npm install --production --no-audit
 
-            # Install Playwright browsers (ARM-compatible)
-            PLAYWRIGHT_BROWSERS_PATH=$DEPLOY_PATH/shared/.playwright npx playwright install chromium --with-deps
+            # Install Playwright browsers (ARM-compatible, skip system deps - install manually)
+            PLAYWRIGHT_BROWSERS_PATH=$DEPLOY_PATH/shared/.playwright npx playwright install chromium
 
             # Run Laravel optimization
             php artisan config:cache
