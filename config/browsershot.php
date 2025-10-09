@@ -60,8 +60,6 @@ return [
         'no-zygote',
         'disable-gpu',
         'disable-gpu-sandbox',
-        // Chrome 128+ requires a writable directory for crashpad
-        'crash-dumps-dir=' . storage_path('logs/chrome-crashes'),
     ],
 
     /*

@@ -3,14 +3,14 @@
 namespace App\Services\UptimeMonitor;
 
 use Illuminate\Support\Facades\Log;
-use Spatie\Browsershot\Browsershot;
 use Spatie\UptimeMonitor\Models\Monitor;
+use Symfony\Component\Process\Process;
 
 class JavaScriptContentFetcher
 {
     public function __construct()
     {
-        // BrowserShot doesn't need persistent instances
+        // Playwright script-based fetching
     }
 
     /**
@@ -19,24 +19,34 @@ class JavaScriptContentFetcher
     public function fetchContent(string $url, ?int $waitSeconds = null): string
     {
         $waitSeconds = $waitSeconds ?? config('browsershot.wait_seconds', 5);
+        $chromePath = config('browsershot.chrome_path');
+        $scriptPath = base_path('scripts/fetch-js-content.mjs');
 
         try {
-            // Use BrowserShot to fetch content with JavaScript rendering
-            $content = Browsershot::url($url)
-                ->setChromePath(config('browsershot.chrome_path'))
-                ->waitUntilNetworkIdle()
-                ->timeout(config('browsershot.timeout', 30))
-                ->delay($waitSeconds * 1000) // Wait for JavaScript to render
-                ->noSandbox() // Use BrowserShot's built-in method for Docker
-                ->addChromiumArguments(config('browsershot.chrome_arguments', []))
-                ->setEnvironmentVariable('CHROME_DISABLE_CRASHPAD', '1') // Disable crashpad in Chrome 128+
-                ->bodyHtml();
+            // Build command
+            $command = ['node', $scriptPath, $url, (string) $waitSeconds];
+
+            // Add Chrome path if configured
+            if ($chromePath) {
+                $command[] = $chromePath;
+            }
+
+            // Execute Playwright script
+            $process = new Process($command);
+            $process->setTimeout(config('browsershot.timeout', 30) + 10); // Add buffer
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                throw new \RuntimeException($process->getErrorOutput());
+            }
+
+            $content = $process->getOutput();
 
             // Save content to file for debugging
             try {
-                $filename = storage_path('logs/browsershot-' . md5($url) . '.html');
+                $filename = storage_path('logs/playwright-' . md5($url) . '.html');
                 file_put_contents($filename, $content);
-                Log::info('BrowserShot content saved', [
+                Log::info('Playwright content saved', [
                     'url' => $url,
                     'filename' => $filename,
                     'content_length' => strlen($content),
@@ -52,7 +62,8 @@ class JavaScriptContentFetcher
             Log::error('JavaScript content fetching failed', [
                 'url' => $url,
                 'error' => $e->getMessage(),
-                'wait_seconds' => $waitSeconds
+                'wait_seconds' => $waitSeconds,
+                'chrome_path' => $chromePath
             ]);
 
             // Return empty string on failure
@@ -75,33 +86,43 @@ class JavaScriptContentFetcher
     }
 
     /**
-     * Clean up browser resources (not needed for BrowserShot)
+     * Clean up browser resources (not needed for Playwright script)
      */
     public function cleanup(): void
     {
-        // BrowserShot handles cleanup automatically
+        // Playwright handles cleanup automatically
     }
 
     /**
-     * Test if BrowserShot is available and working
+     * Test if Playwright is available and working
      */
     public static function isAvailable(): bool
     {
-        try {
-            $content = Browsershot::html('<html><body>Test</body></html>')
-                ->setChromePath(config('browsershot.chrome_path'))
-                ->noSandbox()
-                ->addChromiumArguments(config('browsershot.chrome_arguments', []))
-                ->setEnvironmentVariable('CHROME_DISABLE_CRASHPAD', '1') // Disable crashpad in Chrome 128+
-                ->timeout(10) // Short timeout for test
-                ->bodyHtml();
+        $scriptPath = base_path('scripts/fetch-js-content.mjs');
 
-            return ! empty($content) && str_contains($content, 'Test');
+        if (! file_exists($scriptPath)) {
+            Log::warning('Playwright script not found', ['path' => $scriptPath]);
+            return false;
+        }
+
+        try {
+            $process = new Process(['node', '--version']);
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                Log::info('Node.js is not available');
+                return false;
+            }
+
+            Log::info('Playwright is available', [
+                'node_version' => trim($process->getOutput())
+            ]);
+
+            return true;
 
         } catch (\Exception $e) {
-            Log::info('BrowserShot is not available', [
-                'error' => $e->getMessage(),
-                'chrome_path' => config('browsershot.chrome_path')
+            Log::info('Playwright is not available', [
+                'error' => $e->getMessage()
             ]);
             return false;
         }
