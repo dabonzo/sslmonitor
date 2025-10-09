@@ -98,13 +98,14 @@ jobs:
             # Run migrations
             php artisan migrate --force
 
+            # Stop Horizon before swapping symlink
+            sudo systemctl stop ssl-monitor-horizon
+
             # Update current symlink (atomic swap)
             ln -sfn $DEPLOY_PATH/releases/$RELEASE_DIR $DEPLOY_PATH/current
 
-            # Restart services
-            cd $DEPLOY_PATH/current
-            php artisan horizon:terminate
-            sudo systemctl restart ssl-monitor-horizon
+            # Start Horizon with new release
+            sudo systemctl start ssl-monitor-horizon
 
             # Cleanup old releases (keep last 3)
             cd $DEPLOY_PATH/releases
