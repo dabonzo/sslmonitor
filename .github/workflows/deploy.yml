@@ -102,6 +102,8 @@ jobs:
             ln -sfn $DEPLOY_PATH/releases/$RELEASE_DIR $DEPLOY_PATH/current
 
             # Restart services
+            cd $DEPLOY_PATH/current
+            php artisan horizon:terminate
             sudo systemctl restart ssl-monitor-horizon
 
             # Cleanup old releases (keep last 3)
