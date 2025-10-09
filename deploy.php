@@ -68,44 +68,44 @@ task('playwright:install', function () {
 
     $playwrightPath = '{{deploy_path}}/shared/.playwright';
 
-    // Check if Playwright is already installed
-    $installed = run("test -d $playwrightPath/chromium-* && echo 'yes' || echo 'no'");
+    // Check if Firefox is already installed (using Firefox instead of Chrome to avoid crashpad issues)
+    $installed = run("test -d $playwrightPath/firefox-* && echo 'yes' || echo 'no'");
 
     if ($installed === 'no') {
-        writeln('<comment>Installing Playwright browsers for the first time (this may take 2-3 minutes)...</comment>');
-        run("PLAYWRIGHT_BROWSERS_PATH=$playwrightPath npx playwright install chromium --with-deps", ['timeout' => 600]);
-        writeln('<info>✓ Playwright browsers installed to shared directory</info>');
+        writeln('<comment>Installing Firefox for the first time (this may take 2-3 minutes)...</comment>');
+        run("PLAYWRIGHT_BROWSERS_PATH=$playwrightPath npx playwright install firefox", ['timeout' => 600]);
+        writeln('<info>✓ Firefox installed to shared directory</info>');
     } else {
-        writeln('<info>✓ Playwright browsers already installed in shared directory</info>');
+        writeln('<info>✓ Firefox already installed in shared directory</info>');
     }
-})->desc('Install Playwright browsers in shared directory');
+})->desc('Install Playwright Firefox in shared directory');
 
 /**
- * Task: Update Chrome path in .env
+ * Task: Update Firefox path in .env
  */
 task('playwright:update_env', function () {
     $playwrightPath = '{{deploy_path}}/shared/.playwright';
 
-    // Find the actual Chrome binary path
-    $chromePath = run("find $playwrightPath -name chrome -type f -path '*/chrome-linux/chrome' | head -n 1 || echo ''");
+    // Find the actual Firefox binary path
+    $firefoxPath = run("find $playwrightPath -name firefox -type f -path '*/firefox/firefox' | head -n 1 || echo ''");
 
-    if (empty($chromePath)) {
-        writeln('<comment>Chrome binary not found yet - will be set after Playwright installation</comment>');
+    if (empty($firefoxPath)) {
+        writeln('<comment>Firefox binary not found yet - config will auto-detect it</comment>');
         return;
     }
 
-    // Update or add BROWSERSHOT_CHROME_PATH in .env
+    // Update or add BROWSERSHOT_CHROME_PATH in .env (keeping name for compatibility)
     $envPath = '{{deploy_path}}/shared/.env';
     $hasPath = run("grep -q 'BROWSERSHOT_CHROME_PATH' $envPath && echo 'yes' || echo 'no'");
 
     if ($hasPath === 'yes') {
-        run("sed -i 's|^BROWSERSHOT_CHROME_PATH=.*|BROWSERSHOT_CHROME_PATH=$chromePath|' $envPath");
+        run("sed -i 's|^BROWSERSHOT_CHROME_PATH=.*|BROWSERSHOT_CHROME_PATH=$firefoxPath|' $envPath");
     } else {
-        run("echo 'BROWSERSHOT_CHROME_PATH=$chromePath' >> $envPath");
+        run("echo 'BROWSERSHOT_CHROME_PATH=$firefoxPath' >> $envPath");
     }
 
-    writeln("<info>✓ Updated BROWSERSHOT_CHROME_PATH to: $chromePath</info>");
-})->desc('Update Chrome path in .env file');
+    writeln("<info>✓ Updated BROWSERSHOT_CHROME_PATH to Firefox: $firefoxPath</info>");
+})->desc('Update Firefox path in .env file');
 
 /**
  * Task: Terminate Horizon gracefully

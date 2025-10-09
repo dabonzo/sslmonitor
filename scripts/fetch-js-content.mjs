@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
  * Fetch content from URL with JavaScript rendering using Playwright
- * Usage: node fetch-js-content.mjs <url> [waitSeconds] [chromePath]
+ * Usage: node fetch-js-content.mjs <url> [waitSeconds] [browserPath]
  */
 
-import { chromium } from 'playwright-core';
+import { firefox } from 'playwright-core';
 
 const url = process.argv[2];
 const waitSeconds = parseInt(process.argv[3] || '5');
-const chromePath = process.argv[4];
+const browserPath = process.argv[4];
 
 if (!url) {
-    console.error('Usage: node fetch-js-content.mjs <url> [waitSeconds] [chromePath]');
+    console.error('Usage: node fetch-js-content.mjs <url> [waitSeconds] [browserPath]');
     process.exit(1);
 }
 
@@ -20,24 +20,15 @@ if (!url) {
     try {
         const launchOptions = {
             headless: true,
-            args: [
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--disable-gpu',
-                '--disable-gpu-sandbox',
-                '--no-sandbox'
-            ]
+            args: []
         };
 
         // Set executable path if provided
-        if (chromePath) {
-            launchOptions.executablePath = chromePath;
+        if (browserPath) {
+            launchOptions.executablePath = browserPath;
         }
 
-        browser = await chromium.launch(launchOptions);
+        browser = await firefox.launch(launchOptions);
         const context = await browser.newContext();
         const page = await context.newPage();
 

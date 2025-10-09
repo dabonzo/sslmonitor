@@ -16,27 +16,27 @@ return [
 
     'chrome_path' => env('BROWSERSHOT_CHROME_PATH') ?? (function () {
         // Auto-detect environment if not set in .env
+        // Note: Using Firefox instead of Chrome to avoid Chrome 128+ crashpad issues
+
+        // Try to find Firefox in shared Playwright directory (production)
+        $playwrightShared = '/var/www/monitor.intermedien.at/web/shared/.playwright';
+        if (is_dir($playwrightShared)) {
+            $firefoxDirs = glob($playwrightShared . '/firefox-*/firefox/firefox');
+            if (!empty($firefoxDirs)) {
+                return $firefoxDirs[0];
+            }
+        }
+
+        // Development environment
         if (env('APP_ENV') === 'local' && file_exists('/home/sail')) {
-            // Laravel Sail environment - try Playwright in node_modules first
+            // Try Playwright in node_modules first
             $playwrightPath = base_path('node_modules/playwright-core/.local-browsers');
             if (is_dir($playwrightPath)) {
-                $chromeDirs = glob($playwrightPath . '/chromium-*/chrome-linux/chrome');
-                if (!empty($chromeDirs)) {
-                    return $chromeDirs[0];
+                $firefoxDirs = glob($playwrightPath . '/firefox-*/firefox/firefox');
+                if (!empty($firefoxDirs)) {
+                    return $firefoxDirs[0];
                 }
             }
-
-            // Fallback: Try Puppeteer cache
-            $puppeteerPath = '/home/sail/.cache/puppeteer';
-            if (is_dir($puppeteerPath)) {
-                $chromeDirs = glob($puppeteerPath . '/chrome/linux-*/chrome-linux*/chrome');
-                if (!empty($chromeDirs)) {
-                    return $chromeDirs[0];
-                }
-            }
-
-            // Last fallback for Sail
-            return '/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome';
         }
 
         // Production environment - must be set in .env
