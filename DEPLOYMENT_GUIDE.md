@@ -81,15 +81,66 @@ DB_PASSWORD=q48TUU3QaaGL$y
 QUEUE_CONNECTION=redis
 REDIS_HOST=127.0.0.1
 
-# This will be auto-updated by Deployer
-BROWSERSHOT_CHROME_PATH=/var/www/monitor.intermedien.at/web/shared/.playwright/chromium-XXXX/chrome-linux/chrome
+# JavaScript Content Fetcher Service
+BROWSERSHOT_SERVICE_URL=http://127.0.0.1:3000
+BROWSERSHOT_TIMEOUT=30
+BROWSERSHOT_WAIT_SECONDS=5
 ```
 
-### Step 4: Verify Systemd Services
+### Step 4: Setup JavaScript Content Fetcher Service
 
-**IMPORTANT**: Horizon service must have environment variables set for Node.js/Playwright to work.
+**NEW**: We use a separate HTTP service for JavaScript rendering to avoid permission issues.
 
-The Horizon service should look like this:
+```bash
+# SSH as root
+ssh root@monitor.intermedien.at
+
+# Create service directory
+mkdir -p /opt/js-content-fetcher
+cd /opt/js-content-fetcher
+
+# Copy files from repository (services/js-content-fetcher/)
+# - server.js
+# - package.json
+
+# Install dependencies
+npm install
+
+# Install Playwright Firefox browser
+PLAYWRIGHT_BROWSERS_PATH=/var/www/monitor.intermedien.at/web/shared/.playwright \
+  npx playwright install firefox
+
+# Install systemd service
+cp js-content-fetcher.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable js-content-fetcher
+systemctl start js-content-fetcher
+systemctl status js-content-fetcher
+```
+
+**Service Configuration**: `/etc/systemd/system/js-content-fetcher.service`
+```ini
+[Unit]
+Description=JavaScript Content Fetcher Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/js-content-fetcher
+ExecStart=/usr/bin/node /opt/js-content-fetcher/server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/js-content-fetcher.log
+StandardError=append:/var/log/js-content-fetcher-error.log
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Step 5: Verify Systemd Services
+
+The Horizon service configuration:
 
 ```bash
 # /etc/systemd/system/ssl-monitor-horizon.service
@@ -114,10 +165,7 @@ StandardError=append:/var/www/monitor.intermedien.at/web/shared/storage/logs/hor
 WantedBy=multi-user.target
 ```
 
-**Key Requirements**:
-- `Environment="PATH=/usr/local/bin:/usr/bin:/bin"` - Required for Node.js execution
-- `Environment="HOME=/var/www/clients/client0/web6"` - Required for Playwright
-- After editing, run: `systemctl daemon-reload && systemctl restart ssl-monitor-horizon`
+**Note**: No special browser-related environment variables needed - JavaScript rendering is handled by the separate HTTP service.
 
 ### Step 5: Test SSH Connection from Local Machine
 
@@ -272,18 +320,43 @@ ssh -i ~/.ssh/ssl-monitor-deploy default_deploy@monitor.intermedien.at
 
 ## 🔍 Troubleshooting
 
-### Issue: Playwright browsers not found
+### Issue: JavaScript content fetcher service not working
 
-**Check**:
+**Check service status**:
 ```bash
-ssh -i ~/.ssh/ssl-monitor-deploy default_deploy@monitor.intermedien.at
-ls -la /var/www/monitor.intermedien.at/web/shared/.playwright
+ssh arm002 "systemctl status js-content-fetcher"
 ```
 
-**Fix**:
+**Check logs**:
 ```bash
-cd /var/www/monitor.intermedien.at/web/current
-PLAYWRIGHT_BROWSERS_PATH=/var/www/monitor.intermedien.at/web/shared/.playwright npx playwright install chromium --with-deps
+ssh arm002 "tail -f /var/log/js-content-fetcher.log"
+ssh arm002 "tail -f /var/log/js-content-fetcher-error.log"
+```
+
+**Test service manually**:
+```bash
+ssh arm002 'curl -X POST http://127.0.0.1:3000/fetch \
+  -H "Content-Type: application/json" \
+  -d "{\"url\":\"https://www.redgas.at\",\"waitSeconds\":5}"'
+```
+
+**Restart service**:
+```bash
+ssh arm002 "systemctl restart js-content-fetcher && systemctl status js-content-fetcher"
+```
+
+### Issue: Playwright Firefox browser not found
+
+**Check Firefox installation**:
+```bash
+ssh arm002 "ls -la /var/www/monitor.intermedien.at/web/shared/.playwright/firefox-*/firefox/firefox"
+```
+
+**Reinstall Firefox**:
+```bash
+ssh arm002 "cd /opt/js-content-fetcher && \
+  PLAYWRIGHT_BROWSERS_PATH=/var/www/monitor.intermedien.at/web/shared/.playwright \
+  npx playwright install firefox"
 ```
 
 ### Issue: Horizon not restarting
