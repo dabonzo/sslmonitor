@@ -20,9 +20,8 @@ class JavaScriptContentFetcher
     {
         try {
             // Use BrowserShot to fetch content with JavaScript rendering
-            // Use Puppeteer's installed Chrome in ~/.cache/puppeteer
             $content = Browsershot::url($url)
-                ->setChromePath('/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome')
+                ->setChromePath(env('BROWSERSHOT_CHROME_PATH', '/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome'))
                 ->waitUntilNetworkIdle()
                 ->timeout(30) // 30 seconds timeout
                 ->delay($waitSeconds * 1000) // Wait for JavaScript to render
@@ -93,9 +92,8 @@ class JavaScriptContentFetcher
     public static function isAvailable(): bool
     {
         try {
-            // Use Puppeteer's installed Chrome in ~/.cache/puppeteer
             $content = Browsershot::html('<html><body>Test</body></html>')
-                ->setChromePath('/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome')
+                ->setChromePath(env('BROWSERSHOT_CHROME_PATH', '/home/sail/.cache/puppeteer/chrome/linux-140.0.7339.207/chrome-linux64/chrome'))
                 ->noSandbox() // Use BrowserShot's built-in method for Docker
                 ->addChromiumArguments([
                     'disable-setuid-sandbox',
