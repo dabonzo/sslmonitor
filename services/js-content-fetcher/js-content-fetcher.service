@@ -12,5 +12,9 @@ RestartSec=5
 StandardOutput=append:/var/log/js-content-fetcher.log
 StandardError=append:/var/log/js-content-fetcher-error.log
 
+# Security: By default binds to 127.0.0.1 (localhost only)
+# Set BIND_ADDRESS=0.0.0.0 only if needed (not recommended for production)
+# Environment=BIND_ADDRESS=127.0.0.1
+
 [Install]
 WantedBy=multi-user.target

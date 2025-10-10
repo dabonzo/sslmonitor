@@ -4,6 +4,9 @@ const { firefox } = require('playwright-core');
 const app = express();
 const PORT = 3000;
 const MAX_CONCURRENT_TABS = 5;
+// For production: 127.0.0.1 (localhost only)
+// For development/Docker: 0.0.0.0 (allow inter-container communication)
+const BIND_ADDRESS = process.env.BIND_ADDRESS || '127.0.0.1';
 
 app.use(express.json());
 
@@ -15,9 +18,8 @@ const requestQueue = [];
 async function initBrowser() {
     console.log('[Init] Starting Firefox browser...');
     try {
-        browser = await firefox.launch({
+        const launchOptions = {
             headless: true,
-            executablePath: '/var/www/monitor.intermedien.at/web/shared/.playwright/firefox-1495/firefox/firefox',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -25,7 +27,14 @@ async function initBrowser() {
                 '--disable-accelerated-2d-canvas',
                 '--disable-gpu'
             ]
-        });
+        };
+
+        // Use custom path in production, auto-detect in development
+        if (process.env.FIREFOX_PATH) {
+            launchOptions.executablePath = process.env.FIREFOX_PATH;
+        }
+
+        browser = await firefox.launch(launchOptions);
         console.log('[Init] ✓ Firefox browser ready');
     } catch (error) {
         console.error('[Init] ✗ Failed to start browser:', error.message);
@@ -129,8 +138,8 @@ process.on('SIGINT', shutdown);
 // Start server
 async function start() {
     await initBrowser();
-    app.listen(PORT, '127.0.0.1', () => {
-        console.log(`[Server] Listening on http://127.0.0.1:${PORT}`);
+    app.listen(PORT, BIND_ADDRESS, () => {
+        console.log(`[Server] Listening on http://${BIND_ADDRESS}:${PORT}`);
     });
 }
 

@@ -29,6 +29,7 @@ services:
             - mailpit
             - typesense
             - selenium
+            - js-content-fetcher
     mariadb:
         image: 'mariadb:11'
         ports:
@@ -134,6 +135,20 @@ services:
             - '/dev/shm:/dev/shm'
         networks:
             - sail
+    js-content-fetcher:
+        build:
+            context: ./services/js-content-fetcher
+            dockerfile: Dockerfile
+        image: js-content-fetcher
+        environment:
+            BIND_ADDRESS: '0.0.0.0'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:3000/health"]
+            retries: 3
+            timeout: 5s
+            interval: 10s
 networks:
     sail:
         driver: bridge
