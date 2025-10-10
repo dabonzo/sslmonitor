@@ -303,7 +303,51 @@ php artisan tinker
 2. `docs/CONTINUATION_PROMPT.md` for implementation checklist and context
 3. `app/Jobs/ImmediateWebsiteCheckJob.php` as reference implementation
 
+**IMPORTANT:** First, create a todo list using the TodoWrite tool based on the Implementation Checklist in the continuation prompt. This will help track progress through all phases.
+
 Follow Laravel best practices (DRY, KISS), use the implementation checklist in order, and ask clarifying questions before proceeding with each phase. Let's start with Phase 1: Creating CheckMonitorJob."
+
+---
+
+## Todo List Template
+
+When starting, create this todo list:
+
+```
+Phase 1: Create CheckMonitorJob
+- Create app/Jobs/CheckMonitorJob.php
+- Base on ImmediateWebsiteCheckJob logic
+- Accept Monitor model, perform uptime + SSL checks
+- Test manually with single monitor
+
+Phase 2: Create Dispatch Command
+- Create app/Console/Commands/DispatchScheduledChecks.php
+- Query due monitors and dispatch jobs
+- Test command manually
+
+Phase 3: Refactor ImmediateWebsiteCheckJob
+- Update to use CheckMonitorJob internally
+- Use dispatchSync() for immediate execution
+- Test immediate checks still work
+
+Phase 4: Update Horizon Configuration
+- Simplify queues to just ['default']
+- Update config/horizon.php
+- Test Horizon starts
+
+Phase 5: Update Scheduler
+- Replace Spatie commands with dispatch command
+- Add withoutOverlapping()
+- Change to everyFiveMinutes()
+- Test jobs dispatch and monitors update
+
+Phase 6: Testing & Deployment
+- Test on development
+- Verify Horizon visibility
+- Update monitors to 5-minute intervals
+- Deploy to production
+- Monitor production
+```
 
 ---
 
