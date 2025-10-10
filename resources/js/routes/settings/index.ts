@@ -1,5 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 import team4b9005 from './team'
+import alerts from './alerts'
 /**
 * @see \App\Http\Controllers\TeamController::team
 * @see app/Http/Controllers/TeamController.php:19
@@ -83,6 +84,7 @@ team.form = teamForm
 
 const settings = {
     team: Object.assign(team, team4b9005),
+    alerts: Object.assign(alerts, alerts),
 }
 
 export default settings
