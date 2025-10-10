@@ -164,7 +164,9 @@ class MonitorIntegrationService
      */
     private function getCheckIntervalInMinutes(array $config): int
     {
-        $intervalSeconds = $config['check_interval'] ?? 3600; // Default 1 hour
+        // Use config default if not specified in monitoring_config
+        $defaultMinutes = config('uptime-monitor.uptime_check.run_interval_in_minutes', 5);
+        $intervalSeconds = $config['check_interval'] ?? ($defaultMinutes * 60);
         return max(1, (int) ceil($intervalSeconds / 60)); // Minimum 1 minute
     }
 

@@ -45,6 +45,7 @@ const form = useForm<FormData>({
   uptime_monitoring_enabled: true,
   monitoring_config: {
     description: '',
+    check_interval: 300,
     content_expected_strings: [],
     content_forbidden_strings: [],
     content_regex_patterns: [],
@@ -332,6 +333,28 @@ function removeRegexPattern(index: number) {
                     <CheckCircle class="h-3 w-3 text-green-500" />
                     <span>Downtime notifications</span>
                   </div>
+                </div>
+
+                <!-- Check Interval Configuration -->
+                <div class="ml-8 space-y-2">
+                  <label class="block text-xs font-medium text-foreground">
+                    Check Interval
+                  </label>
+                  <select
+                    v-model.number="form.monitoring_config.check_interval"
+                    class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                  >
+                    <option :value="60">Every minute</option>
+                    <option :value="120">Every 2 minutes</option>
+                    <option :value="300">Every 5 minutes (recommended)</option>
+                    <option :value="600">Every 10 minutes</option>
+                    <option :value="900">Every 15 minutes</option>
+                    <option :value="1800">Every 30 minutes</option>
+                    <option :value="3600">Every hour</option>
+                  </select>
+                  <p class="text-xs text-muted-foreground">
+                    How often should we check if this website is up
+                  </p>
                 </div>
 
                 <!-- Content Validation Section -->
