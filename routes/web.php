@@ -11,6 +11,22 @@ Route::get('dashboard', [App\Http\Controllers\SslDashboardController::class, 'in
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Temporary debug route for Horizon authentication
+Route::get('debug-horizon', function () {
+    $user = auth()->user();
+    $allowedEmails = explode(',', env('HORIZON_ALLOWED_EMAILS', ''));
+    $isAllowed = $user ? in_array($user->email, array_filter(array_map('trim', $allowedEmails))) : false;
+
+    return response()->json([
+        'authenticated' => $user ? true : false,
+        'user_email' => $user ? $user->email : null,
+        'allowed_emails' => env('HORIZON_ALLOWED_EMAILS'),
+        'is_allowed' => $isAllowed,
+        'environment' => app()->environment(),
+        'horizon_gate_test' => Gate::allows('viewHorizon'),
+    ]);
+})->middleware(['auth', 'verified']);
+
 // SSL Website Management Routes
 Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(function () {
     Route::resource('websites', App\Http\Controllers\WebsiteController::class);
