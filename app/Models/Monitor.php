@@ -16,6 +16,7 @@ class Monitor extends SpatieMonitor
         'uptime_status_last_change_date' => 'datetime',
         'uptime_check_failed_event_fired_on_date' => 'datetime',
         'certificate_expiration_date' => 'datetime',
+        'uptime_check_interval_in_minutes' => 'integer',
         'uptime_check_response_time_in_ms' => 'integer',
         'javascript_enabled' => 'boolean',
         'javascript_wait_seconds' => 'integer',

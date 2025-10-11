@@ -22,7 +22,7 @@ test('automation system handles multiple concurrent immediate checks', function 
     // Process multiple jobs concurrently (simulating queue processing)
     foreach ($websites as $website) {
         $job = new ImmediateWebsiteCheckJob($website);
-        $results[] = $job->handle();
+        $results[] = app()->call([$job, 'handle']);
     }
 
     $endTime = microtime(true);
@@ -118,7 +118,7 @@ test('memory usage remains reasonable during bulk operations', function () {
 
     // Process fewer jobs to reduce test time while still testing memory usage
     foreach ($jobs as $job) {
-        $job->handle();
+        app()->call([$job, 'handle']);
     }
 
     $afterProcessing = memory_get_usage();
@@ -145,7 +145,7 @@ test('database queries remain efficient during automation', function () {
 
     foreach ($websites as $website) {
         $job = new ImmediateWebsiteCheckJob($website);
-        $job->handle();
+        app()->call([$job, 'handle']);
     }
 
     $queries = \DB::getQueryLog();
@@ -173,7 +173,7 @@ test('automation system handles error scenarios without performance degradation'
 
     foreach ($allWebsites as $website) {
         $job = new ImmediateWebsiteCheckJob($website);
-        $results[] = $job->handle();
+        $results[] = app()->call([$job, 'handle']);
     }
 
     $endTime = microtime(true);

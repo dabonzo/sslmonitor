@@ -43,7 +43,7 @@ test('complete automation workflow from website creation to monitoring', functio
 
     // 3. Test immediate check job dispatch and execution
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // 4. Verify job completed successfully with expected structure
     expect($result)->toBeArray()
@@ -104,7 +104,7 @@ test('automation workflow handles multiple websites concurrently', function () {
     // Process multiple immediate checks
     foreach ($websites as $website) {
         $job = new ImmediateWebsiteCheckJob($website);
-        $results[] = $job->handle();
+        $results[] = app()->call([$job, 'handle']);
     }
 
     // Verify all jobs completed successfully
@@ -134,7 +134,7 @@ test('automation workflow error handling and recovery', function () {
     ]);
 
     $job = new ImmediateWebsiteCheckJob($invalidWebsite);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // Verify job handled errors gracefully
     expect($result)->toBeArray()
@@ -142,8 +142,8 @@ test('automation workflow error handling and recovery', function () {
         ->and($result)->toHaveKey('ssl')
         ->and($result['ssl'])->toHaveKey('status');
 
-    // SSL check should fail gracefully
-    expect($result['ssl']['status'])->toBe('error');
+    // SSL check should fail gracefully (Monitor status for invalid domains is 'invalid')
+    expect($result['ssl']['status'])->toBe('invalid');
 
     // Website should still be updated even with errors
     $invalidWebsite->refresh();
@@ -189,7 +189,7 @@ test('automation workflow status checking and polling', function () {
 
     // 1. Trigger immediate check
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // 2. Test status checking endpoint
     $response = $this->actingAs($this->user)
@@ -218,7 +218,7 @@ test('automation workflow performance and timing', function () {
 
     // Process immediate check
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     $endTime = microtime(true);
     $executionTime = $endTime - $startTime;

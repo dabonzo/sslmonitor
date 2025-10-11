@@ -12,61 +12,55 @@ test('scheduler has all required monitoring commands configured', function () {
         return $event->command ?? $event->getSummaryForDisplay();
     })->toArray();
 
-    // Verify uptime monitoring command is scheduled
-    $hasUptimeCommand = collect($commands)->contains(function ($command) {
-        return str_contains($command, 'monitor:check-uptime');
+    // Verify unified monitor dispatch command is scheduled (replaces separate uptime/SSL commands)
+    $hasDispatchCommand = collect($commands)->contains(function ($command) {
+        return str_contains($command, 'monitors:dispatch-scheduled-checks');
     });
-    expect($hasUptimeCommand)->toBeTrue();
-
-    // Verify SSL certificate monitoring command is scheduled
-    $hasSslCommand = collect($commands)->contains(function ($command) {
-        return str_contains($command, 'monitor:check-certificate');
-    });
-    expect($hasSslCommand)->toBeTrue();
+    expect($hasDispatchCommand)->toBeTrue('monitors:dispatch-scheduled-checks command should be scheduled');
 
     // Verify queue health check command is scheduled
     $hasQueueCommand = collect($commands)->contains(function ($command) {
         return str_contains($command, 'queue-health-check');
     });
-    expect($hasQueueCommand)->toBeTrue();
+    expect($hasQueueCommand)->toBeTrue('queue-health-check should be scheduled');
 
     // Verify website-monitor sync command is scheduled
     $hasSyncCommand = collect($commands)->contains(function ($command) {
         return str_contains($command, 'monitors:sync-websites');
     });
-    expect($hasSyncCommand)->toBeTrue();
+    expect($hasSyncCommand)->toBeTrue('monitors:sync-websites command should be scheduled');
 });
 
-test('scheduler uptime monitoring runs every minute', function () {
+test('scheduler unified monitor dispatch runs every minute', function () {
     $schedule = app(Schedule::class);
     $events = $schedule->events();
 
-    $uptimeEvents = collect($events)->filter(function (Event $event) {
+    $dispatchEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
-        return str_contains($command, 'monitor:check-uptime');
+        return str_contains($command, 'monitors:dispatch-scheduled-checks');
     });
 
-    expect($uptimeEvents)->not()->toBeEmpty();
+    expect($dispatchEvents)->not()->toBeEmpty('monitors:dispatch-scheduled-checks should be scheduled');
 
-    // Verify it's scheduled to run every 5 minutes
-    $uptimeEvent = $uptimeEvents->first();
-    expect($uptimeEvent->expression)->toBe('*/5 * * * *');
+    // Verify it's scheduled to run every minute (queue-based architecture)
+    $dispatchEvent = $dispatchEvents->first();
+    expect($dispatchEvent->expression)->toBe('* * * * *', 'Should run every minute');
 });
 
-test('scheduler ssl monitoring runs twice daily', function () {
+test('scheduler sync command runs every 30 minutes', function () {
     $schedule = app(Schedule::class);
     $events = $schedule->events();
 
-    $sslEvents = collect($events)->filter(function (Event $event) {
+    $syncEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
-        return str_contains($command, 'monitor:check-certificate');
+        return str_contains($command, 'monitors:sync-websites');
     });
 
-    expect($sslEvents)->not()->toBeEmpty();
+    expect($syncEvents)->not()->toBeEmpty('monitors:sync-websites should be scheduled');
 
-    // Verify it's scheduled to run twice daily (6 AM and 6 PM)
-    $sslEvent = $sslEvents->first();
-    expect($sslEvent->expression)->toBe('0 6,18 * * *');
+    // Verify it's scheduled to run every 30 minutes
+    $syncEvent = $syncEvents->first();
+    expect($syncEvent->expression)->toBe('*/30 * * * *', 'Should run every 30 minutes');
 });
 
 test('scheduler queue monitoring runs regularly', function () {
@@ -91,29 +85,32 @@ test('scheduler commands have proper overlap protection', function () {
 
     $monitoringEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
-        return str_contains($command, 'monitor:check-uptime') ||
-               str_contains($command, 'monitor:check-certificate');
+        return str_contains($command, 'monitors:dispatch-scheduled-checks') ||
+               str_contains($command, 'monitors:sync-websites');
     });
+
+    expect($monitoringEvents)->not()->toBeEmpty('Should have monitoring commands with overlap protection');
 
     foreach ($monitoringEvents as $event) {
         // Verify withoutOverlapping is configured
-        expect($event->withoutOverlapping)->toBe(true);
+        expect($event->withoutOverlapping)->toBe(true, 'Monitoring commands should have overlap protection');
     }
 });
 
-test('scheduler runs in background for monitoring commands', function () {
+test('scheduler runs sync command in background', function () {
     $schedule = app(Schedule::class);
     $events = $schedule->events();
 
-    $monitoringEvents = collect($events)->filter(function (Event $event) {
+    $syncEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
-        return str_contains($command, 'monitor:check-uptime') ||
-               str_contains($command, 'monitor:check-certificate');
+        return str_contains($command, 'monitors:sync-websites');
     });
 
-    foreach ($monitoringEvents as $event) {
-        // Verify runInBackground is configured
-        expect($event->runInBackground)->toBe(true);
+    expect($syncEvents)->not()->toBeEmpty('monitors:sync-websites should be scheduled');
+
+    foreach ($syncEvents as $event) {
+        // Verify runInBackground is configured for sync command
+        expect($event->runInBackground)->toBe(true, 'Sync command should run in background');
     }
 });
 
@@ -121,32 +118,36 @@ test('scheduler configuration matches production requirements', function () {
     $schedule = app(Schedule::class);
     $events = $schedule->events();
 
-    // Count different types of scheduled tasks
-    $uptimeCount = 0;
-    $sslCount = 0;
+    // Count different types of scheduled tasks in queue-based architecture
+    $dispatchCount = 0;
     $queueCount = 0;
     $syncCount = 0;
+    $cleanupCount = 0;
+    $reportCount = 0;
 
     foreach ($events as $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
 
-        if (str_contains($command, 'monitor:check-uptime')) {
-            $uptimeCount++;
-        } elseif (str_contains($command, 'monitor:check-certificate')) {
-            $sslCount++;
+        if (str_contains($command, 'monitors:dispatch-scheduled-checks')) {
+            $dispatchCount++;
         } elseif (str_contains($command, 'queue-health-check')) {
             $queueCount++;
         } elseif (str_contains($command, 'monitors:sync-websites')) {
             $syncCount++;
+        } elseif (str_contains($command, 'daily-cleanup')) {
+            $cleanupCount++;
+        } elseif (str_contains($command, 'weekly-health-report')) {
+            $reportCount++;
         }
     }
 
-    // Verify we have the expected number of each type of scheduled task
-    expect($uptimeCount)->toBeGreaterThanOrEqual(1)
-        ->and($sslCount)->toBeGreaterThanOrEqual(1)
-        ->and($queueCount)->toBeGreaterThanOrEqual(1)
-        ->and($syncCount)->toBeGreaterThanOrEqual(1);
+    // Verify we have the expected scheduled tasks for queue-based architecture
+    expect($dispatchCount)->toBeGreaterThanOrEqual(1, 'Should have monitors:dispatch-scheduled-checks')
+        ->and($queueCount)->toBeGreaterThanOrEqual(1, 'Should have queue-health-check')
+        ->and($syncCount)->toBeGreaterThanOrEqual(1, 'Should have monitors:sync-websites')
+        ->and($cleanupCount)->toBeGreaterThanOrEqual(1, 'Should have daily-cleanup')
+        ->and($reportCount)->toBeGreaterThanOrEqual(1, 'Should have weekly-health-report');
 
-    // Verify total events include our automation tasks
-    expect(count($events))->toBeGreaterThanOrEqual(4);
+    // Verify total events include our automation tasks (at least 5: dispatch, queue, sync, cleanup, report)
+    expect(count($events))->toBeGreaterThanOrEqual(5, 'Should have at least 5 scheduled tasks');
 });

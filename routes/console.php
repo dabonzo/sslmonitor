@@ -9,18 +9,13 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Production automation scheduling
-// Every minute: Routine uptime checks for active websites (temporarily set to 1 minute for testing)
-Schedule::command('monitor:check-uptime')
+// Queue-based monitor checks: Dispatch jobs for monitors that are due
+// Runs every minute to support 1-minute monitor intervals
+// Non-blocking dispatcher (~500ms) - actual checks run via Horizon workers
+// Handles both uptime AND SSL checks via CheckMonitorJob
+Schedule::command('monitors:dispatch-scheduled-checks')
     ->everyMinute()
     ->withoutOverlapping()
-    ->runInBackground()
-    ->appendOutputTo(storage_path('logs/scheduler.log'));
-
-// Twice daily: SSL certificate checks (6 AM and 6 PM)
-Schedule::command('monitor:check-certificate')
-    ->twiceDaily(6, 18)
-    ->withoutOverlapping()
-    ->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler.log'));
 
 // Every 5 minutes: Queue health monitoring

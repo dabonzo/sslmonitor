@@ -325,13 +325,13 @@ class WebsiteController extends Controller
                 ['website_id' => $website->id, 'triggered_by' => 'website_creation']
             );
 
-            // Dispatch the immediate check job to high-priority queue
+            // Dispatch the immediate check job
             ImmediateWebsiteCheckJob::dispatch($website)
-                ->onQueue(env('QUEUE_IMMEDIATE', 'immediate'));
+                ->onQueue(env('QUEUE_DEFAULT', 'default'));
 
             AutomationLogger::immediateCheck(
                 "Immediate check job dispatched successfully",
-                ['website_id' => $website->id, 'queue' => env('QUEUE_IMMEDIATE', 'immediate')]
+                ['website_id' => $website->id, 'queue' => env('QUEUE_DEFAULT', 'default')]
             );
 
             return true;

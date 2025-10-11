@@ -7,10 +7,16 @@ use App\Support\AutomationLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Tests\Traits\MocksMonitorHttpRequests;
 
 uses(RefreshDatabase::class);
+uses(MocksMonitorHttpRequests::class);
 
 beforeEach(function () {
+    // Mock all HTTP requests to avoid real network calls
+    $this->setUpMocksMonitorHttpRequests();
+
+    // Additional setup after HTTP mocking
     // Create test user and website
     $this->user = User::factory()->create([
         'email' => 'test@example.com',
@@ -21,6 +27,21 @@ beforeEach(function () {
         'url' => 'https://example.com',
         'name' => 'Test Website',
     ]);
+
+    // Mock MonitorIntegrationService to avoid real HTTP requests
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $monitor = \App\Models\Monitor::factory()->make([
+            'url' => 'https://example.com',
+            'uptime_status' => 'up',
+            'certificate_status' => 'valid',
+        ]);
+
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')
+            ->andReturn($monitor);
+
+        $mock->shouldReceive('getMonitorForWebsite')
+            ->andReturn($monitor);
+    });
 });
 
 test('immediate website check job can be created and dispatched', function () {
@@ -47,7 +68,7 @@ test('immediate check job handles website uptime check', function () {
     ]);
 
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // Verify job completed and returned expected structure
     expect($result)->toBeArray()
@@ -74,7 +95,7 @@ test('immediate check job handles website SSL check', function () {
     ]);
 
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // Verify job completed and returned expected structure
     expect($result)->toBeArray()
@@ -91,7 +112,7 @@ test('immediate check job logs activity correctly', function () {
     ]);
 
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $result = $job->handle();
+    $result = app()->call([$job, 'handle']);
 
     // Verify job completed successfully with expected structure
     expect($result)->toHaveKey('website_id')
@@ -102,10 +123,24 @@ test('immediate check job logs activity correctly', function () {
 });
 
 test('immediate check job handles failures gracefully', function () {
-    // Use invalid URL to trigger SSL check failure
+    // Mock failure scenario
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $failedMonitor = \App\Models\Monitor::factory()->make([
+            'url' => 'https://invalid.test',
+            'uptime_status' => 'down',
+            'certificate_status' => 'invalid',
+        ]);
+
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')
+            ->andReturn($failedMonitor);
+
+        $mock->shouldReceive('getMonitorForWebsite')
+            ->andReturn($failedMonitor);
+    });
+
     $invalidWebsite = Website::factory()->create([
         'user_id' => $this->user->id,
-        'url' => 'https://thisdoesnotexist12345.invalid',
+        'url' => 'https://invalid.test',
         'name' => 'Invalid Website',
         'uptime_monitoring_enabled' => true,
         'ssl_monitoring_enabled' => true,
@@ -113,13 +148,13 @@ test('immediate check job handles failures gracefully', function () {
 
     $job = new ImmediateWebsiteCheckJob($invalidWebsite);
 
-    // Job should handle invalid URL and return error/failure status
-    $result = $job->handle();
+    // Job should handle invalid URL and return invalid status
+    $result = app()->call([$job, 'handle']);
 
     expect($result)->toBeArray()
         ->and($result)->toHaveKey('ssl')
         ->and($result['ssl'])->toHaveKey('status')
-        ->and($result['ssl']['status'])->toBe('error');
+        ->and($result['ssl']['status'])->toBe('invalid');
 });
 
 test('immediate check job updates website last checked timestamp', function () {
@@ -138,7 +173,7 @@ test('immediate check job updates website last checked timestamp', function () {
     sleep(1);
 
     $job = new ImmediateWebsiteCheckJob($this->website);
-    $job->handle();
+    app()->call([$job, 'handle']);
 
     $this->website->refresh();
 
@@ -152,7 +187,7 @@ test('immediate check job has correct queue configuration', function () {
 
     // Test job properties
     expect($job->tries)->toBe(3)
-        ->and($job->timeout)->toBe(60);
+        ->and($job->timeout)->toBe(120);
 });
 
 test('immediate check job can be retried on failure', function () {

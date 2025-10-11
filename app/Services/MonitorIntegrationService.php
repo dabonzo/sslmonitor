@@ -2,28 +2,52 @@
 
 namespace App\Services;
 
+use App\Models\Monitor;
 use App\Models\Website;
-use Spatie\UptimeMonitor\Models\Monitor;
 use Illuminate\Support\Facades\Log;
 
 class MonitorIntegrationService
 {
     /**
      * Create or update a Monitor for a Website
+     * Syncs ALL monitoring settings including content validation
      */
     public function createOrUpdateMonitorForWebsite(Website $website): Monitor
     {
         $config = $website->monitoring_config ?? [];
 
+        // Convert empty arrays to null for proper database storage
+        $expectedStrings = !empty($config['content_expected_strings']) ? $config['content_expected_strings'] : null;
+        $forbiddenStrings = !empty($config['content_forbidden_strings']) ? $config['content_forbidden_strings'] : null;
+        $regexPatterns = !empty($config['content_regex_patterns']) ? $config['content_regex_patterns'] : null;
+
+        // Only use EnhancedContentChecker if content validation is configured
+        $hasContentValidation = $expectedStrings || $forbiddenStrings || $regexPatterns;
+
         $monitor = Monitor::updateOrCreate(
             ['url' => $website->url],
             [
+                // Basic monitoring settings
                 'uptime_check_enabled' => $website->uptime_monitoring_enabled,
                 'certificate_check_enabled' => $website->ssl_monitoring_enabled,
                 'uptime_check_interval_in_minutes' => $this->getCheckIntervalInMinutes($config),
                 'look_for_string' => $config['expected_content'] ?? '',
                 'uptime_check_method' => $config['http_method'] ?? 'get',
                 'uptime_check_additional_headers' => $this->formatHeaders($config),
+
+                // Content validation settings
+                'content_expected_strings' => $expectedStrings,
+                'content_forbidden_strings' => $forbiddenStrings,
+                'content_regex_patterns' => $regexPatterns,
+
+                // JavaScript rendering settings
+                'javascript_enabled' => $config['javascript_enabled'] ?? false,
+                'javascript_wait_seconds' => $config['javascript_wait_seconds'] ?? 5,
+
+                // Response checker (EnhancedContentChecker if content validation configured)
+                'uptime_check_response_checker' => $hasContentValidation
+                    ? \App\Services\UptimeMonitor\ResponseCheckers\EnhancedContentChecker::class
+                    : null,
             ]
         );
 
@@ -33,6 +57,8 @@ class MonitorIntegrationService
             'url' => $website->url,
             'uptime_enabled' => $website->uptime_monitoring_enabled,
             'ssl_enabled' => $website->ssl_monitoring_enabled,
+            'content_validation_enabled' => $hasContentValidation,
+            'javascript_enabled' => $config['javascript_enabled'] ?? false,
         ]);
 
         return $monitor;

@@ -217,6 +217,8 @@ const pollAllWebsiteStatuses = async () => {
 onMounted(() => {
   const urlParams = new URLSearchParams(window.location.search);
   const refreshParam = urlParams.get('refresh');
+  const page = usePage();
+  const isAuthenticated = page.props.auth?.user !== null;
 
   // Initialize website statuses
   websitesLocal.value.forEach(website => {
@@ -225,6 +227,12 @@ onMounted(() => {
       uptime_status: website.uptime_status,
     });
   });
+
+  // Only enable polling if user is authenticated
+  if (!isAuthenticated) {
+    console.log('User not authenticated, polling disabled');
+    return;
+  }
 
   // Immediate check refresh (short-term, frequent updates)
   if (refreshParam === 'check') {

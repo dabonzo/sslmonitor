@@ -21,6 +21,7 @@ return new class extends Migration
             $table->json('plugin_data')->nullable(); // Extensible data for future plugins
 
             $table->timestamps();
+            $table->softDeletes(); // Support soft deletes for data retention
 
             $table->unique(['url', 'user_id']);
             $table->index('user_id');

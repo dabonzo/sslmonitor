@@ -121,8 +121,8 @@ class EnhancedContentChecker implements UptimeResponseChecker
         $expectedStrings = $this->getExpectedStrings($monitor);
         if (! empty($expectedStrings)) {
             foreach ($expectedStrings as $expectedString) {
-                if (! Str::contains($responseBody, $expectedString)) {
-                    return "Expected string `{$expectedString}` was not found in response.";
+                if (! $this->containsWord($responseBody, $expectedString)) {
+                    return "Expected word `{$expectedString}` was not found in response (uses word boundary matching).";
                 }
             }
         }
@@ -152,6 +152,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
 
     /**
      * Validate that all expected strings are present
+     * Uses word boundary matching to ensure exact word matches
      */
     private function validateExpectedStrings(string $responseBody, Monitor $monitor): bool
     {
@@ -162,7 +163,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
         }
 
         foreach ($expectedStrings as $expectedString) {
-            if (! Str::contains($responseBody, $expectedString)) {
+            if (! $this->containsWord($responseBody, $expectedString)) {
                 return false;
             }
         }
@@ -284,5 +285,21 @@ class EnhancedContentChecker implements UptimeResponseChecker
 
         // Bound the wait time between 1 and 30 seconds
         return max(1, min(30, $waitSeconds));
+    }
+
+    /**
+     * Check if response body contains a word using word boundary matching
+     * This ensures "Erdgasversorger" won't match "Erdgasversorger1"
+     */
+    private function containsWord(string $responseBody, string $word): bool
+    {
+        // Escape special regex characters in the search word
+        $escapedWord = preg_quote($word, '/');
+
+        // Use word boundaries (\b) to match whole words only
+        // The 'u' flag enables Unicode support
+        $pattern = '/\b' . $escapedWord . '\b/u';
+
+        return preg_match($pattern, $responseBody) === 1;
     }
 }

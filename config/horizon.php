@@ -85,11 +85,6 @@ return [
 
     'waits' => [
         'redis:default' => 60,
-        'redis:immediate' => 30,
-        'redis:uptime' => 60,
-        'redis:ssl' => 60,
-        'redis:notifications' => 60,
-        'redis:cleanup' => 120,
     ],
 
     /*
@@ -191,10 +186,10 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default', 'immediate', 'uptime', 'ssl', 'notifications', 'cleanup'],
+            'queue' => ['default'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
-            'maxProcesses' => 1,
+            'maxProcesses' => 3,
             'maxTime' => 0,
             'maxJobs' => 0,
             'memory' => 128,
