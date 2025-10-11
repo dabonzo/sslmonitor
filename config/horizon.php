@@ -174,6 +174,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Horizon Authentication Gate
+    |--------------------------------------------------------------------------
+    |
+    | This gate controls who can access Horizon in non-local environments.
+    | You may customize the gate as needed - for example, limit access by
+    | email address, user role, or other criteria.
+    |
+    */
+
+    'gate' => [
+        'allowed_emails' => explode(',', env('HORIZON_ALLOWED_EMAILS', '')),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Queue Worker Configuration
     |--------------------------------------------------------------------------
     |
