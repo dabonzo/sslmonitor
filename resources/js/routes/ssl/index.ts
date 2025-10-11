@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 import websites from './websites'
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 export const bulkOperations = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -15,7 +15,7 @@ bulkOperations.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 bulkOperations.url = (options?: RouteQueryOptions) => {
@@ -23,7 +23,7 @@ bulkOperations.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 bulkOperations.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -32,7 +32,7 @@ bulkOperations.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 bulkOperations.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -41,7 +41,7 @@ bulkOperations.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => 
 })
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 const bulkOperationsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -50,7 +50,7 @@ const bulkOperationsForm = (options?: RouteQueryOptions): RouteFormDefinition<'g
 })
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 bulkOperationsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -59,7 +59,7 @@ bulkOperationsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get
 })
 
 /**
-* @see routes/web.php:38
+* @see routes/web.php:23
 * @route '/ssl/bulk-operations'
 */
 bulkOperationsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

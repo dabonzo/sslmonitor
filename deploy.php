@@ -267,6 +267,27 @@ task('deploy:success', function () {
     writeln('');
 })->desc('Display success message');
 
+/**
+ * Task: Clear all caches and restart services after deployment
+ */
+task('deploy:post_cleanup', function () {
+    writeln('<comment>Clearing caches and restarting services...</comment>');
+
+    // Clear all Laravel caches to prevent authentication issues
+    run('cd {{release_path}} && {{bin/php}} artisan cache:clear');
+    run('cd {{release_path}} && {{bin/php}} artisan config:clear');
+    run('cd {{release_path}} && {{bin/php}} artisan view:clear');
+    run('cd {{release_path}} && {{bin/php}} artisan route:clear');
+
+    // Restart services to ensure fresh state
+    run('sudo /usr/bin/systemctl restart php8.3-fpm');
+    run('sudo /usr/bin/systemctl restart redis');
+    run('sudo /usr/bin/systemctl restart apache2');
+
+    writeln('<info>✓ All caches cleared and services restarted</info>');
+})->desc('Clear caches and restart services after deployment');
+
 // After deploy hooks
 after('deploy:failed', 'deploy:unlock');
 after('deploy:success', 'deploy:unlock');
+after('deploy:success', 'deploy:post_cleanup');
