@@ -43,7 +43,9 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? array_merge($request->user()->toArray(), [
+                    'primary_role' => $this->getUserPrimaryRole($request->user()),
+                ]) : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
@@ -54,5 +56,46 @@ class HandleInertiaRequests extends Middleware
                 'message' => $request->session()->get('message'),
             ],
         ];
+    }
+
+    /**
+     * Get the user's primary role from their team memberships
+     */
+    private function getUserPrimaryRole($user): ?string
+    {
+        if (!$user) {
+            return null;
+        }
+
+        // Get the user's highest priority role from all team memberships
+        $teamMemberships = $user->teams()->withPivot('role')->get();
+
+        if ($teamMemberships->isEmpty()) {
+            // If no team memberships, check if they're a super admin or return default
+            return 'User'; // Default role for users without teams
+        }
+
+        // Define role priority hierarchy (ADMIN and MANAGER merged)
+        $rolePriority = [
+            'OWNER' => 3,
+            'ADMIN' => 2,  // Includes former MANAGER role
+            'VIEWER' => 1,
+        ];
+
+        // Find the highest priority role
+        $highestRole = 'VIEWER';
+        $highestPriority = 0;
+
+        foreach ($teamMemberships as $team) {
+            $role = $team->pivot->role;
+            $priority = $rolePriority[$role] ?? 0;
+
+            if ($priority > $highestPriority) {
+                $highestPriority = $priority;
+                $highestRole = $role;
+            }
+        }
+
+        return $highestRole;
     }
 }

@@ -264,7 +264,7 @@ document.addEventListener('click', handleDocumentClick)
             </div>
             <div class="hidden sm:block text-left">
               <p class="text-sm font-bold text-gray-900 dark:text-white">{{ user?.name }}</p>
-              <p class="text-xs text-blue-600 dark:text-blue-300">Admin</p>
+              <p class="text-xs text-blue-600 dark:text-blue-300">{{ user?.primary_role || 'User' }}</p>
             </div>
             <ChevronDown class="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </button>
