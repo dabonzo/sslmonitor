@@ -83,6 +83,61 @@ class Website extends Model
         return $this->belongsTo(User::class, 'assigned_by_user_id');
     }
 
+    public function debugOverrides(): HasMany
+    {
+        return $this->hasMany(DebugOverride::class, 'targetable_id')
+            ->where('targetable_type', Website::class);
+    }
+
+    public function getDebugOverride(string $moduleType, ?int $userId = null): ?DebugOverride
+    {
+        $userId = $userId ?? auth()->id();
+
+        if (!$userId) {
+            return null;
+        }
+
+        return $this->debugOverrides()
+            ->where('module_type', $moduleType)
+            ->where('user_id', $userId)
+            ->active()
+            ->notExpired()
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
+    public function getEffectiveSslExpiryDate(?int $userId = null): ?\Carbon\Carbon
+    {
+        $override = $this->getDebugOverride('ssl_expiry', $userId);
+
+        if ($override && $override->override_data['expiry_date']) {
+            return \Carbon\Carbon::parse($override->override_data['expiry_date']);
+        }
+
+        $monitor = $this->getSpatieMonitor();
+        return $monitor?->certificate_expiration_date
+            ? \Carbon\Carbon::parse($monitor->certificate_expiration_date)
+            : null;
+    }
+
+    public function getDaysRemaining(?int $userId = null): int
+    {
+        $expiry = $this->getEffectiveSslExpiryDate($userId);
+        if (!$expiry) {
+            return 0;
+        }
+
+        $now = now();
+
+        // If expiry is in the future, return positive days
+        if ($expiry->gt($now)) {
+            return (int) $now->diffInDays($expiry);
+        }
+
+        // If expiry is in the past, return negative days (how many days ago it expired)
+        return -(int) $expiry->diffInDays($now);
+    }
+
 
     protected function setUrlAttribute(string $value): void
     {

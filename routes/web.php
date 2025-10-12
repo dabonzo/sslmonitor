@@ -91,5 +91,15 @@ Route::prefix('team/invitations')->name('team.invitations.')->group(function () 
     Route::post('/{token}/decline', [App\Http\Controllers\TeamInvitationController::class, 'decline'])->name('decline');
 });
 
+// Debug Routes (Development & Testing Only)
+Route::middleware(['auth', 'verified'])->prefix('debug')->name('debug.')->group(function () {
+    // SSL Overrides
+    Route::get('/ssl-overrides', [App\Http\Controllers\Debug\SslOverridesController::class, 'index'])->name('ssl-overrides.index');
+    Route::post('/ssl-overrides', [App\Http\Controllers\Debug\SslOverridesController::class, 'store'])->name('ssl-overrides.store');
+    Route::delete('/ssl-overrides/{id}', [App\Http\Controllers\Debug\SslOverridesController::class, 'destroy'])->name('ssl-overrides.destroy');
+    Route::post('/ssl-overrides/bulk', [App\Http\Controllers\Debug\SslOverridesController::class, 'bulkStore'])->name('ssl-overrides.bulk-store');
+    Route::delete('/ssl-overrides/bulk', [App\Http\Controllers\Debug\SslOverridesController::class, 'bulkDestroy'])->name('ssl-overrides.bulk-destroy');
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

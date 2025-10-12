@@ -123,4 +123,23 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Debug Menu Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options control the debug menu system for development
+    | and testing purposes. This allows authorized users to override SSL expiry
+    | dates and test alert scenarios without affecting production data.
+    |
+    */
+
+    'debug' => [
+        'menu_enabled' => env('DEBUG_MENU_ENABLED', false),
+        'menu_users' => env('DEBUG_MENU_USERS', ''),
+        'menu_roles' => env('DEBUG_MENU_ROLES', 'OWNER,ADMIN'),
+        'menu_audit' => env('DEBUG_MENU_AUDIT', true),
+        'overrides_expire_hours' => env('DEBUG_OVERRIDES_EXPIRE_HOURS', 24),
+    ],
+
 ];
