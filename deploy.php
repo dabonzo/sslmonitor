@@ -214,6 +214,7 @@ task('deploy', [
     'horizon:terminate',
     'deploy:symlink',
     'horizon:restart',
+    //'deploy:fix_permissions',
     'deploy:cleanup',
     'deploy:success',
 ])->desc('Deploy SSL Monitor v4 to production');
@@ -266,6 +267,24 @@ task('deploy:success', function () {
     writeln('  4. Check Horizon status: sudo systemctl status ssl-monitor-horizon');
     writeln('');
 })->desc('Display success message');
+
+/**
+ * Task: Fix file permissions before cleanup
+ */
+task('deploy:fix_permissions', function () {
+    writeln('<comment>Fixing file permissions for cleanup...</comment>');
+
+    // Fix permissions on all releases to ensure cleanup can remove them
+    run('find {{deploy_path}}/releases -type d -exec chmod 755 {} \;');
+    run('find {{deploy_path}}/releases -type f -exec chmod 644 {} \;');
+
+    // Specifically fix permissions on build assets and generated files
+    run('find {{deploy_path}}/releases -name "*.js" -exec chmod 644 {} \;');
+    run('find {{deploy_path}}/releases -name "*.css" -exec chmod 644 {} \;');
+    run('find {{deploy_path}}/releases -name "*.ts" -exec chmod 644 {} \;');
+
+    writeln('<info>✓ File permissions fixed for cleanup</info>');
+})->desc('Fix file permissions before cleanup');
 
 /**
  * Task: Clear all caches and restart services after deployment

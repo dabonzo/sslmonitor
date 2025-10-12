@@ -29,6 +29,7 @@ class StoreWebsiteRequest extends FormRequest
             'uptime_monitoring_enabled' => ['boolean'],
             'monitoring_config' => ['array'],
             'monitoring_config.description' => ['nullable', 'string', 'max:500'],
+            'monitoring_config.check_interval' => ['nullable', 'integer', 'min:60', 'max:3600'],
             'monitoring_config.content_expected_strings' => ['nullable', 'array'],
             'monitoring_config.content_expected_strings.*' => ['string', 'max:255'],
             'monitoring_config.content_forbidden_strings' => ['nullable', 'array'],
