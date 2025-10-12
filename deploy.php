@@ -55,7 +55,7 @@ host('production')
     ->set('branch', 'main')
     ->set('http_user', 'web6')
     ->set('http_group', 'client0')
-    ->set('bin/php', '/usr/bin/php8.3')
+    ->set('bin/php', '/usr/bin/php8.4')
     ->set('bin/composer', '/usr/local/bin/composer');
 
 // Custom Tasks
@@ -299,7 +299,7 @@ task('deploy:post_cleanup', function () {
     run('cd {{release_path}} && {{bin/php}} artisan route:clear');
 
     // Restart services to ensure fresh state
-    run('sudo /usr/bin/systemctl restart php8.3-fpm');
+    run('sudo /usr/bin/systemctl restart php8.4-fpm');
     run('sudo /usr/bin/systemctl restart redis');
     run('sudo /usr/bin/systemctl restart apache2');
 

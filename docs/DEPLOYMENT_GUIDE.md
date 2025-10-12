@@ -12,7 +12,7 @@
 - ✅ Deployer installed: `composer require --dev deployer/deployer`
 - ✅ SSH key configured: `~/.ssh/ssl-monitor-deploy`
 - ✅ SSH access working: `ssh -i ~/.ssh/ssl-monitor-deploy default_deploy@monitor.intermedien.at`
-- ✅ Server has: PHP 8.3, Composer, Node.js 22, Redis 7.0.15
+- ✅ Server has: PHP 8.4, Composer, Node.js 22, Redis 7.0.15
 - ✅ Database ready with credentials in `.env`
 - ✅ Systemd services configured (Horizon + Scheduler)
 
