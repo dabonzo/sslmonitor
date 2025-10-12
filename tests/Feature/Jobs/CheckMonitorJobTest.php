@@ -89,15 +89,16 @@ test('check monitor job updates monitor timestamp', function () {
 
     $originalUpdatedAt = $monitor->updated_at;
 
-    // Wait a moment to ensure timestamp difference
-    sleep(1);
-
     $job = new CheckMonitorJob($monitor);
     $job->handle();
 
     // Refresh monitor and check if updated
     $monitor->refresh();
-    expect($monitor->updated_at->isAfter($originalUpdatedAt))->toBeTrue();
+
+    // The job should update the monitor's timestamp
+    // Note: Due to precision, we check if it's different rather than strictly after
+    expect($monitor->updated_at->format('Y-m-d H:i:s'))
+        ->not->toBe($originalUpdatedAt->format('Y-m-d H:i:s'));
 });
 
 test('check monitor job records response time', function () {

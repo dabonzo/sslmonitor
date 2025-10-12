@@ -16,146 +16,19 @@
 
 pest()->extend(Tests\TestCase::class)
     ->beforeEach(function () {
-        // Skip monitor table cleanup if table doesn't exist
-        try {
-            if (\Schema::hasTable('monitors')) {
-                \Spatie\UptimeMonitor\Models\Monitor::truncate();
-            }
-        } catch (\Exception $e) {
-            // Skip monitor cleanup if there are issues
-        }
-
-        // Clear alert configurations for clean testing
-        try {
-            if (\Schema::hasTable('alert_configurations')) {
-                \App\Models\AlertConfiguration::truncate();
-            }
-        } catch (\Exception $e) {
-            // Skip alert configurations cleanup if there are issues
-        }
-
-        // Clear websites except our real test websites
-        try {
-            if (\Schema::hasTable('websites')) {
-                \App\Models\Website::whereNotIn('url', [
-                    'https://www.redgas.at',
-                    'https://www.fairnando.at',
-                    'https://omp.office-manager-pro.com'
-                ])->delete();
-            }
-        } catch (\Exception $e) {
-            // Skip website cleanup if there are issues
-        }
-
         // Clear mail queue for clean testing
         \Illuminate\Support\Facades\Mail::fake();
 
-        // Ensure our real test user exists (only if tables exist)
-        $testUser = null;
-        $testTeam = null;
+        // Clean up all test data first
+        cleanupAllTestData();
 
-        try {
-            if (\Schema::hasTable('users')) {
-                $testUser = \App\Models\User::updateOrCreate(
-                    ['email' => 'bonzo@konjscina.com'],
-                    [
-                        'name' => 'Bonzo',
-                        'password' => bcrypt('to16ro12'),
-                        'email_verified_at' => now(),
-                    ]
-                );
-            }
-        } catch (\Exception $e) {
-            // Skip if users table doesn't exist
-        }
+        // Set up fresh test data and store references
+        $testData = setupTestData();
 
-        // Ensure our real test team exists (only if tables exist)
-        try {
-            if ($testUser && \Schema::hasTable('teams')) {
-                $testTeam = \App\Models\Team::updateOrCreate(
-                    ['name' => 'Intermedien'],
-                    [
-                        'created_by_user_id' => $testUser->id,
-                        'description' => 'Test team for SSL monitoring',
-                    ]
-                );
-            }
-        } catch (\Exception $e) {
-            // Skip if teams table doesn't exist
-        }
-
-        // Ensure team membership exists (only if tables exist)
-        try {
-            if ($testUser && $testTeam && \Schema::hasTable('team_members')) {
-                \App\Models\TeamMember::updateOrCreate(
-                    [
-                        'team_id' => $testTeam->id,
-                        'user_id' => $testUser->id,
-                    ],
-                    [
-                        'role' => \App\Models\TeamMember::ROLE_OWNER,
-                        'joined_at' => now(),
-                        'invited_by_user_id' => $testUser->id,
-                    ]
-                );
-            }
-        } catch (\Exception $e) {
-            // Skip if team_members table doesn't exist
-        }
-
-        // Ensure our real test websites exist (only if tables exist)
-        $realWebsites = [
-            'https://www.redgas.at',
-            'https://www.fairnando.at',
-            'https://omp.office-manager-pro.com'
-        ];
-
-        try {
-            if ($testUser && \Schema::hasTable('websites')) {
-                foreach ($realWebsites as $url) {
-                    // Create website if it doesn't exist
-                    $website = \App\Models\Website::updateOrCreate(
-                        ['url' => $url],
-                        [
-                            'user_id' => $testUser->id,
-                            'name' => parse_url($url, PHP_URL_HOST),
-                            'ssl_monitoring_enabled' => true,
-                            'uptime_monitoring_enabled' => true,
-                        ]
-                    );
-
-                    if (\Schema::hasTable('monitors')) {
-                        \Spatie\UptimeMonitor\Models\Monitor::updateOrCreate(
-                            ['url' => $url],
-                            [
-                                'certificate_check_enabled' => true,
-                                'certificate_status' => 'valid',
-                                'uptime_check_enabled' => true,
-                                'uptime_status' => 'up',
-                                'certificate_expiration_date' => now()->addDays(90),
-                                'certificate_issuer' => "Let's Encrypt Authority X3",
-                            ]
-                        );
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            // Skip if websites/monitors table doesn't exist
-        }
-
-        // Store user and team references for tests (with null checks)
-        $this->testUser = $testUser;
-        $this->testTeam = $testTeam;
-
-        try {
-            if (\Schema::hasTable('websites')) {
-                $this->realWebsites = \App\Models\Website::whereIn('url', $realWebsites)->get();
-            } else {
-                $this->realWebsites = collect();
-            }
-        } catch (\Exception $e) {
-            $this->realWebsites = collect();
-        }
+        // Store references for tests to use
+        $this->testUser = $testData['testUser'];
+        $this->testTeam = $testData['testTeam'];
+        $this->realWebsites = $testData['realWebsites'];
     })
     ->in('Feature');
 
@@ -231,7 +104,7 @@ function createUserWithSslData(): \App\Models\User
     $testUrl = 'https://test-user-' . $timestamp . '.example.com';
     $website->update(['url' => $testUrl]);
 
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $testUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'valid',
@@ -253,7 +126,7 @@ function createWebsiteWithSslData(\App\Models\User $user = null): \App\Models\We
     $testUrl = 'https://test-website-' . $timestamp . '.example.com';
     $website->update(['url' => $testUrl]);
 
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $testUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'valid',
@@ -338,7 +211,7 @@ function createSslTestScenarios(\App\Models\User $user): array
     $validWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
     $validUrl = 'https://test-valid-' . $timestamp . '.example.com';
     $validWebsite->update(['url' => $validUrl]);
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $validUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'valid',
@@ -350,7 +223,7 @@ function createSslTestScenarios(\App\Models\User $user): array
     $expiringSoonWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
     $expiringSoonUrl = 'https://test-expiring-' . $timestamp . '.example.com';
     $expiringSoonWebsite->update(['url' => $expiringSoonUrl]);
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $expiringSoonUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'valid',
@@ -362,7 +235,7 @@ function createSslTestScenarios(\App\Models\User $user): array
     $expiredWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
     $expiredUrl = 'https://test-expired-' . $timestamp . '.example.com';
     $expiredWebsite->update(['url' => $expiredUrl]);
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $expiredUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'invalid',
@@ -374,7 +247,7 @@ function createSslTestScenarios(\App\Models\User $user): array
     $invalidWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
     $invalidUrl = 'https://test-invalid-' . $timestamp . '.example.com';
     $invalidWebsite->update(['url' => $invalidUrl]);
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $invalidUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'invalid',
@@ -385,7 +258,7 @@ function createSslTestScenarios(\App\Models\User $user): array
     $errorWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
     $errorUrl = 'https://test-error-' . $timestamp . '.example.com';
     $errorWebsite->update(['url' => $errorUrl]);
-    \Spatie\UptimeMonitor\Models\Monitor::create([
+    \App\Models\Monitor::create([
         'url' => $errorUrl,
         'certificate_check_enabled' => true,
         'certificate_status' => 'not yet checked',
@@ -393,6 +266,237 @@ function createSslTestScenarios(\App\Models\User $user): array
     $scenarios['error'] = $errorWebsite;
 
     return $scenarios;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Test Data Setup Helpers
+|--------------------------------------------------------------------------
+*/
+
+/**
+ * Clean up all test data before each test
+ */
+function cleanupAllTestData(): void
+{
+    try {
+        // Clear monitors first (foreign key constraints)
+        if (\Schema::hasTable('monitors')) {
+            \App\Models\Monitor::truncate();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+
+    try {
+        if (\Schema::hasTable('alert_configurations')) {
+            \App\Models\AlertConfiguration::truncate();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+
+    try {
+        if (\Schema::hasTable('team_members')) {
+            \App\Models\TeamMember::truncate();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+
+    try {
+        if (\Schema::hasTable('teams')) {
+            \App\Models\Team::truncate();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+
+    try {
+        if (\Schema::hasTable('websites')) {
+            \App\Models\Website::truncate();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+
+    try {
+        if (\Schema::hasTable('users')) {
+            \App\Models\User::where('email', '!=', 'bonzo@konjscina.com')->delete();
+        }
+    } catch (\Exception $e) {
+        // Ignore if table doesn't exist
+    }
+}
+
+/**
+ * Set up test data for each test
+ */
+function setupTestData(): array
+{
+    $testUser = null;
+    $testTeam = null;
+
+    try {
+        // Create or get test user
+        if (\Schema::hasTable('users')) {
+            $testUser = \App\Models\User::updateOrCreate(
+                ['email' => 'bonzo@konjscina.com'],
+                [
+                    'name' => 'Bonzo',
+                    'password' => bcrypt('to16ro12'),
+                    'email_verified_at' => now(),
+                ]
+            );
+        }
+    } catch (\Exception $e) {
+        // Ignore if users table doesn't exist
+    }
+
+    try {
+        // Create test team
+        if ($testUser && \Schema::hasTable('teams')) {
+            $testTeam = \App\Models\Team::updateOrCreate(
+                ['name' => 'Development Team'],
+                [
+                    'created_by_user_id' => $testUser->id,
+                    'description' => 'Team for managing development and staging websites',
+                ]
+            );
+        }
+    } catch (\Exception $e) {
+        // Ignore if teams table doesn't exist
+    }
+
+    try {
+        // Create team membership
+        if ($testUser && $testTeam && \Schema::hasTable('team_members')) {
+            \App\Models\TeamMember::updateOrCreate(
+                [
+                    'team_id' => $testTeam->id,
+                    'user_id' => $testUser->id,
+                ],
+                [
+                    'role' => \App\Models\TeamMember::ROLE_OWNER,
+                    'joined_at' => now(),
+                    'invited_by_user_id' => $testUser->id,
+                ]
+            );
+        }
+    } catch (\Exception $e) {
+        // Ignore if team_members table doesn't exist
+    }
+
+    // Create test websites
+    $testWebsites = [
+        [
+            'name' => 'Office Manager Pro',
+            'url' => 'https://omp.office-manager-pro.com',
+            'team_id' => $testTeam?->id,
+        ],
+        [
+            'name' => 'RedGas Austria',
+            'url' => 'https://www.redgas.at',
+            'team_id' => $testTeam?->id,
+        ],
+        [
+            'name' => 'Fairnando',
+            'url' => 'https://www.fairnando.at',
+            'team_id' => null,
+        ],
+        [
+            'name' => 'Gebrauchte',
+            'url' => 'https://www.gebrauchte.at',
+            'team_id' => null,
+        ],
+    ];
+
+    try {
+        if ($testUser && \Schema::hasTable('websites')) {
+            foreach ($testWebsites as $websiteData) {
+                $website = \App\Models\Website::create([
+                    'user_id' => $testUser->id,
+                    'name' => $websiteData['name'],
+                    'url' => $websiteData['url'],
+                    'team_id' => $websiteData['team_id'],
+                    'ssl_monitoring_enabled' => true,
+                    'uptime_monitoring_enabled' => true,
+                    'monitoring_config' => [
+                        'timeout' => 30,
+                        'retries' => 3,
+                        'follow_redirects' => true,
+                        'verify_ssl' => true,
+                        'alert_days_before_expiry' => 30,
+                        'check_interval' => 3600,
+                        'is_active' => true,
+                    ],
+                    'plugin_data' => [],
+                ]);
+
+                // Create corresponding monitor with matching URL using custom Monitor model
+                if (\Schema::hasTable('monitors')) {
+                    $monitor = \App\Models\Monitor::create([
+                        'url' => $website->url, // Use the website's actual URL
+                        'certificate_check_enabled' => true,
+                        'uptime_check_enabled' => true,
+                        'certificate_expiration_date' => now()->addDays(90),
+                        'certificate_issuer' => "Let's Encrypt Authority X3",
+                        'uptime_check_interval_in_minutes' => 5,
+                    ]);
+
+                    // Force set the status fields after creation to ensure they're not overridden
+                    $monitor->certificate_status = 'valid';
+                    $monitor->uptime_status = 'up';
+                    $monitor->save();
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        // Ignore if websites/monitors tables don't exist
+    }
+
+    // Create default alert configurations for the user
+    try {
+        if ($testUser && \Schema::hasTable('alert_configurations')) {
+            $alertConfigurations = [
+                [
+                    'user_id' => $testUser->id,
+                    'alert_type' => \App\Models\AlertConfiguration::ALERT_SSL_EXPIRY,
+                    'enabled' => true,
+                    'threshold_days' => 7,
+                    'alert_level' => \App\Models\AlertConfiguration::LEVEL_URGENT,
+                    'notification_channels' => [\App\Models\AlertConfiguration::CHANNEL_EMAIL, \App\Models\AlertConfiguration::CHANNEL_DASHBOARD],
+                    'custom_message' => 'SSL certificate for {website} expires in {days} days!',
+                ],
+                [
+                    'user_id' => $testUser->id,
+                    'alert_type' => \App\Models\AlertConfiguration::ALERT_UPTIME_DOWN,
+                    'enabled' => true,
+                    'alert_level' => \App\Models\AlertConfiguration::LEVEL_CRITICAL,
+                    'notification_channels' => [\App\Models\AlertConfiguration::CHANNEL_EMAIL, \App\Models\AlertConfiguration::CHANNEL_DASHBOARD],
+                    'custom_message' => 'Website {website} is down!',
+                ],
+            ];
+
+            foreach ($alertConfigurations as $alertData) {
+                \App\Models\AlertConfiguration::updateOrCreate(
+                    [
+                        'user_id' => $alertData['user_id'],
+                        'alert_type' => $alertData['alert_type']
+                    ],
+                    $alertData
+                );
+            }
+        }
+    } catch (\Exception $e) {
+        // Ignore if alert_configurations table doesn't exist
+    }
+
+    return [
+        'testUser' => $testUser,
+        'testTeam' => $testTeam,
+        'realWebsites' => $testUser ? \App\Models\Website::where('user_id', $testUser->id)->get() : collect(),
+    ];
 }
 
 /*

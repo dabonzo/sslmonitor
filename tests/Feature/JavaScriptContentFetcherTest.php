@@ -3,11 +3,13 @@
 use App\Models\Monitor;
 use App\Services\UptimeMonitor\JavaScriptContentFetcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\MocksJavaScriptContentFetcher;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, MocksJavaScriptContentFetcher::class);
 
 describe('BrowserShot JavaScript Content Fetcher', function () {
     beforeEach(function () {
+        $this->setUpMocksJavaScriptContentFetcher();
         $this->fetcher = new JavaScriptContentFetcher();
     });
 
@@ -53,15 +55,11 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
             expect($content)->toBe('');
         });
 
-        test('fetchContent with data URL works if browsershot available', function () {
-            // Skip if BrowserShot is not available
-            if (! JavaScriptContentFetcher::isAvailable()) {
-                $this->markTestSkipped('BrowserShot is not available');
-            }
-
-            // Note: BrowserShot handles data URLs differently than Playwright
+        test('fetchContent with data URL works', function () {
+            // With our mock, data URLs should work fine
             $content = $this->fetcher->fetchContent('data:text/html,<html><body>Test Content</body></html>');
             expect($content)->toBeString();
+            expect($content)->toContain('Test Content');
         });
 
         test('fetchContent respects wait seconds parameter', function () {
@@ -89,11 +87,12 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
             $monitor = Monitor::factory()->create([
                 'javascript_enabled' => true,
                 'javascript_wait_seconds' => 3,
-                'url' => 'data:text/html,<html><body>Test</body></html>'
+                'url' => 'https://example.com/test-js-wait'
             ]);
 
             $content = $this->fetcher->fetchContentForMonitor($monitor);
             expect($content)->toBeString();
+            expect($content)->toContain('Wait time: 3');
         });
 
         test('fetchContentForMonitor handles monitor without javascript', function () {

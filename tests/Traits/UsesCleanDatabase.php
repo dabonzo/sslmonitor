@@ -15,14 +15,15 @@ trait UsesCleanDatabase
 
     protected function setUpCleanDatabase(): void
     {
-        // Seed the database with real test data
-        $this->seed(\Database\Seeders\TestUserSeeder::class);
-
-        // Get the freshly seeded test user
+        // Test data is now set up in Pest.php beforeEach hook
+        // Just get the references that were set up there
         $this->testUser = User::where('email', 'bonzo@konjscina.com')->first();
 
-        // Get the real websites for this user
-        $this->realWebsites = Website::where('user_id', $this->testUser->id)->get();
+        if ($this->testUser) {
+            $this->realWebsites = Website::where('user_id', $this->testUser->id)->get();
+        } else {
+            $this->realWebsites = collect();
+        }
     }
 
     protected function getRealWebsite(string $domain): ?Website
@@ -32,7 +33,7 @@ trait UsesCleanDatabase
         });
     }
 
-    protected function getRealWebsites(int $count = null): \Illuminate\Support\Collection
+    protected function getRealWebsites(?int $count = null): \Illuminate\Support\Collection
     {
         return $count ? $this->realWebsites->take($count) : $this->realWebsites;
     }

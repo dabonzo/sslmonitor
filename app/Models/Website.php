@@ -137,9 +137,9 @@ class Website extends Model
         $this->attributes['url'] = $url;
     }
 
-    public function getSpatieMonitor(): ?\Spatie\UptimeMonitor\Models\Monitor
+    public function getSpatieMonitor(): ?\App\Models\Monitor
     {
-        return \Spatie\UptimeMonitor\Models\Monitor::where('url', $this->url)->first();
+        return \App\Models\Monitor::where('url', $this->url)->first();
     }
 
     public function getCurrentSslStatus(): string

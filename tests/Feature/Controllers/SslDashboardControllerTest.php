@@ -2,7 +2,7 @@
 
 use App\Models\User;
 use App\Models\Website;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Traits\UsesCleanDatabase;
 
@@ -62,10 +62,12 @@ describe('SSL Dashboard Controller', function () {
             ->has('recentSslActivity')
             ->has('recentSslActivity.0', fn (Assert $activity) => $activity
                 ->has('id')
+                ->has('website_id')
                 ->has('website_name')
                 ->has('status')
                 ->has('checked_at')
                 ->has('time_ago')
+                ->has('failure_reason')
             )
         );
     });
@@ -110,6 +112,61 @@ describe('SSL Dashboard Controller', function () {
     });
 
     it('handles dashboard with real user websites', function () {
+        // Create additional test monitors with different SSL statuses to match expectations
+        $user = $this->testUser;
+
+        // Get existing websites and create monitors with different SSL statuses
+        $websites = $this->realWebsites->take(4);
+
+        // If we don't have enough websites, create additional ones
+        if ($websites->count() < 4) {
+            $additionalWebsites = Website::factory()->count(4 - $websites->count())
+                ->create(['user_id' => $this->testUser->id]);
+            $websites = $websites->concat($additionalWebsites);
+        }
+
+        // Create monitors for all websites if they don't exist
+        foreach ($websites as $website) {
+            Monitor::firstOrCreate(
+                ['url' => $website->url],
+                [
+                    'certificate_check_enabled' => true,
+                    'certificate_status' => 'valid',
+                    'uptime_check_enabled' => true,
+                    'uptime_status' => 'up',
+                    'certificate_expiration_date' => now()->addDays(90),
+                    'uptime_check_interval_in_minutes' => 5,
+                ]
+            );
+        }
+
+        // Now set up the different SSL statuses
+        if ($websites->count() >= 4) {
+            // First website: valid certificate
+            Monitor::where('url', $websites[0]->url)->update([
+                'certificate_status' => 'valid',
+                'certificate_expiration_date' => now()->addDays(90),
+            ]);
+
+            // Second website: valid certificate
+            Monitor::where('url', $websites[1]->url)->update([
+                'certificate_status' => 'valid',
+                'certificate_expiration_date' => now()->addDays(60),
+            ]);
+
+            // Third website: expiring soon
+            Monitor::where('url', $websites[2]->url)->update([
+                'certificate_status' => 'valid',
+                'certificate_expiration_date' => now()->addDays(7),
+            ]);
+
+            // Fourth website: expired
+            Monitor::where('url', $websites[3]->url)->update([
+                'certificate_status' => 'invalid',
+                'certificate_expiration_date' => now()->subDays(1),
+            ]);
+        }
+
         $response = $this->get(route('dashboard'));
 
         $response->assertInertia(fn (Assert $page) => $page

@@ -74,6 +74,23 @@
 - **Redis** - High-performance caching and queue management
 - **Laravel Horizon** - Advanced queue monitoring and management
 
+### 🔧 Core Architecture Patterns
+
+#### **Custom Monitor Model Extension**
+```php
+// app/Models/Monitor.php - Custom extension of Spatie Uptime Monitor
+class Monitor extends Spatie\UptimeMonitor\Models\Monitor
+{
+    // Enhanced functionality:
+    // - Response time tracking
+    // - Content validation
+    // - JavaScript rendering support
+    // - Custom uptime intervals
+}
+```
+
+**Important**: Always use `App\Models\Monitor` instead of Spatie's base model in application code and tests.
+
 ### Frontend Architecture
 - **Vue 3** - Modern JavaScript framework with Composition API
 - **Inertia.js** - SPA experience without API complexity

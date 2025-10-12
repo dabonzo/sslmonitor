@@ -59,7 +59,7 @@ describe('Content Validation System', function () {
 
             expect($this->checker->isValidResponse($response, $this->monitor))->toBeFalse();
             expect($this->checker->getFailureReason($response, $this->monitor))
-                ->toBe('Expected string `Missing` was not found in response.');
+                ->toBe('Expected word `Missing` was not found in response (uses word boundary matching).');
         });
 
         test('passes when expected strings array is empty', function () {
@@ -219,7 +219,7 @@ describe('Content Validation System', function () {
                 'content_expected_strings' => ['NotPresent']
             ]);
             $result = $this->checker->getFailureReason($response, $this->monitor);
-            expect($result)->toBe('Expected string `NotPresent` was not found in response.');
+            expect($result)->toBe('Expected word `NotPresent` was not found in response (uses word boundary matching).');
         });
     });
 });

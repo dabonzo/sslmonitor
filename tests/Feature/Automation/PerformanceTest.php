@@ -49,13 +49,30 @@ test('automation system handles multiple concurrent immediate checks', function 
 test('immediate check API endpoint handles concurrent requests', function () {
     Queue::fake();
 
+    // Debug: Check what we actually have
+    if ($this->realWebsites->count() < 3) {
+        // If we don't have enough real websites, create some factory ones
+        $factoryWebsites = \App\Models\Website::factory()->count(3 - $this->realWebsites->count())
+            ->create(['user_id' => $this->testUser->id]);
+        $this->realWebsites = $this->realWebsites->concat($factoryWebsites);
+    }
+
     $websites = $this->realWebsites->take(3);
+
+    // Debug: Ensure we have enough websites
+    expect($websites)->toHaveCount(3, 'Test setup failed: Not enough real websites for testing');
 
     $startTime = microtime(true);
 
     // Simulate multiple concurrent API requests
     $responses = [];
+    $processedUrls = [];
     foreach ($websites as $website) {
+        // Debug: Check for duplicates
+        $url = $website->url;
+        expect($processedUrls)->not->toContain($url, "Duplicate URL found: {$url}");
+        $processedUrls[] = $url;
+
         $response = $this->actingAs($this->testUser)
             ->postJson(route('ssl.websites.immediate-check', $website));
 

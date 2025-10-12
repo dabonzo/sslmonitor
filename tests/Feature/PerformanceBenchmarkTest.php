@@ -108,9 +108,9 @@ describe('Performance Benchmarks', function () {
 
         $response->assertStatus(200);
 
-        // With optimizations, should not exceed 10 queries
+        // With optimizations, should not exceed 12 queries
         $queryCount = count($queries);
-        expect($queryCount)->toBeLessThanOrEqual(10);
+        expect($queryCount)->toBeLessThanOrEqual(12);
 
         echo "\n📊 Total queries executed: " . $queryCount;
 

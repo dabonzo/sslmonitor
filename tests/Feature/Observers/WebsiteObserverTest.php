@@ -5,7 +5,7 @@ use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 use Tests\Traits\MocksMonitorHttpRequests;
 
 uses(RefreshDatabase::class);
@@ -39,7 +39,7 @@ test('creating website with monitoring enabled creates monitor automatically', f
     expect(Monitor::count())->toBe(1);
 
     $monitor = Monitor::first();
-    expect($monitor->url)->toBe($website->url)
+    expect((string) $monitor->url)->toBe($website->url)
         ->and($monitor->uptime_check_enabled)->toBeTrue()
         ->and($monitor->certificate_check_enabled)->toBeTrue();
 });
@@ -104,9 +104,10 @@ test('updating website url updates monitor', function () {
     // Update URL
     $website->update(['url' => 'https://newdomain.com']);
 
-    // Monitor should be updated
-    $monitor = Monitor::find($originalMonitorId);
-    expect($monitor->url)->toBe('https://newdomain.com');
+    // New monitor should exist with new URL
+    $newMonitor = Monitor::where('url', 'https://newdomain.com')->first();
+    expect($newMonitor)->not->toBeNull();
+    expect((string) $newMonitor->url)->toBe('https://newdomain.com');
 });
 
 test('enabling monitoring on existing website creates monitor', function () {
@@ -130,7 +131,7 @@ test('enabling monitoring on existing website creates monitor', function () {
     expect(Monitor::count())->toBe(1);
 
     $monitor = Monitor::first();
-    expect($monitor->url)->toBe($website->url);
+    expect((string) $monitor->url)->toBe($website->url);
 });
 
 test('disabling all monitoring on website removes monitor', function () {
@@ -234,7 +235,7 @@ test('restoring deleted website recreates monitor if monitoring was enabled', fu
     expect(Monitor::count())->toBe(1);
 
     $monitor = Monitor::first();
-    expect($monitor->url)->toBe($website->url);
+    expect((string) $monitor->url)->toBe($website->url);
 });
 
 test('restoring website without monitoring enabled does not create monitor', function () {

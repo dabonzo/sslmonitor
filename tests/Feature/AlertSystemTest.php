@@ -6,13 +6,15 @@ use App\Models\AlertConfiguration;
 use App\Services\AlertService;
 use App\Mail\SslCertificateExpiryAlert;
 use Illuminate\Support\Facades\Mail;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 use Tests\Traits\UsesCleanDatabase;
+use Tests\Traits\MocksSslCertificateAnalysis;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
 });
 
 // Alert Configuration Tests
@@ -125,13 +127,41 @@ test('alert service creates default alerts for new websites', function () {
         ->where('website_id', $website->id)
         ->get();
 
-    expect($alertConfigs)->toHaveCount(count(AlertConfiguration::getDefaultConfigurations()));
+    // Get the actual default configurations to check against
+    $defaultConfigs = AlertConfiguration::getDefaultConfigurations();
 
-    // Check that SSL expiry alert exists
-    expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY))->toHaveCount(1);
+    // Count how many default configs should be created for a website
+    $expectedCount = 0;
+    $sslExpiryCount = 0;
+    $letsEncryptCount = 0;
+
+    foreach ($defaultConfigs as $config) {
+        if (in_array($config['alert_type'], [
+            AlertConfiguration::ALERT_SSL_EXPIRY,
+            AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL,
+            AlertConfiguration::ALERT_SSL_INVALID,
+            AlertConfiguration::ALERT_UPTIME_DOWN,
+            AlertConfiguration::ALERT_RESPONSE_TIME
+        ])) {
+            $expectedCount++;
+
+            if ($config['alert_type'] === AlertConfiguration::ALERT_SSL_EXPIRY) {
+                $sslExpiryCount++;
+            }
+
+            if ($config['alert_type'] === AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL) {
+                $letsEncryptCount++;
+            }
+        }
+    }
+
+    expect($alertConfigs)->toHaveCount($expectedCount);
+
+    // Check that SSL expiry alerts exist (there are multiple with different thresholds)
+    expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY))->toHaveCount($sslExpiryCount);
 
     // Check that Let's Encrypt renewal alert exists
-    expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL))->toHaveCount(1);
+    expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL))->toHaveCount($letsEncryptCount);
 });
 
 test('alert service checks and triggers alerts correctly', function () {
@@ -374,9 +404,17 @@ test('default alert configurations are properly defined', function () {
     }
 
     // Check that SSL expiry alert is included
+    // Find the SSL expiry alert with 7-day threshold (urgent level)
     $sslExpiryAlert = collect($defaults)->firstWhere('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY);
     expect($sslExpiryAlert)->not->toBeNull();
-    expect($sslExpiryAlert['threshold_days'])->toBe(7);
+
+    // Since there are multiple SSL expiry alerts, find the one with 7-day threshold
+    $sevenDaySslAlert = collect($defaults)->first(function ($config) {
+        return $config['alert_type'] === AlertConfiguration::ALERT_SSL_EXPIRY
+               && $config['threshold_days'] === 7;
+    });
+    expect($sevenDaySslAlert)->not->toBeNull();
+    expect($sevenDaySslAlert['threshold_days'])->toBe(7);
 
     // Check that Let's Encrypt renewal alert is included
     $letsEncryptAlert = collect($defaults)->firstWhere('alert_type', AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL);

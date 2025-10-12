@@ -2,7 +2,8 @@
 
 use App\Models\User;
 use App\Models\Website;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Services\MonitorIntegrationService;
+use App\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -180,6 +181,12 @@ describe('Website Controller', function () {
 
     describe('update method', function () {
         it('updates website with valid data', function () {
+            // Mock MonitorIntegrationService to avoid slow database operations
+            $this->mock(MonitorIntegrationService::class, function ($mock) {
+                $mock->shouldReceive('createOrUpdateMonitorForWebsite')->zeroOrMoreTimes();
+                $mock->shouldReceive('removeMonitorForWebsite')->never();
+            });
+
             $website = Website::factory()->create(['user_id' => $this->user->id]);
 
             $updateData = [
@@ -227,7 +234,8 @@ describe('Website Controller', function () {
                 ->assertRedirect()
                 ->assertSessionHas('success');
 
-            $this->assertDatabaseMissing('websites', ['id' => $website->id]);
+            // With SoftDeletes, the record still exists but has a deleted_at timestamp
+            $this->assertSoftDeleted('websites', ['id' => $website->id]);
         });
     });
 

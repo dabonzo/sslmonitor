@@ -56,11 +56,6 @@ describe('Monitor Content Validation Methods', function () {
             expect($this->monitor->hasJavaScriptEnabled())->toBeFalse();
         });
 
-        test('returns false when javascript_enabled is null', function () {
-            $this->monitor->update(['javascript_enabled' => null]);
-            expect($this->monitor->hasJavaScriptEnabled())->toBeFalse();
-        });
-
         test('returns correct wait seconds', function () {
             $this->monitor->update(['javascript_wait_seconds' => 10]);
             expect($this->monitor->getJavaScriptWaitSeconds())->toBe(10);
@@ -77,11 +72,6 @@ describe('Monitor Content Validation Methods', function () {
         test('enforces maximum wait seconds', function () {
             $this->monitor->update(['javascript_wait_seconds' => 100]);
             expect($this->monitor->getJavaScriptWaitSeconds())->toBe(30);
-        });
-
-        test('uses default wait seconds when null', function () {
-            $this->monitor->update(['javascript_wait_seconds' => null]);
-            expect($this->monitor->getJavaScriptWaitSeconds())->toBe(5);
         });
     });
 

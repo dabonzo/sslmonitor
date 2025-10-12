@@ -8,11 +8,14 @@ use Spatie\UptimeMonitor\Models\Monitor;
 
 class JavaScriptContentFetcher
 {
-    private string $serviceUrl;
+    private ?string $serviceUrl = null;
 
-    public function __construct()
+    private function getServiceUrl(): string
     {
-        $this->serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
+        if ($this->serviceUrl === null) {
+            $this->serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
+        }
+        return $this->serviceUrl;
     }
 
     /**
@@ -24,8 +27,9 @@ class JavaScriptContentFetcher
 
         try {
             // Call the HTTP service
+            $serviceUrl = $this->getServiceUrl();
             $response = Http::timeout(config('browsershot.timeout', 30) + 10)
-                ->post("{$this->serviceUrl}/fetch", [
+                ->post("{$serviceUrl}/fetch", [
                     'url' => $url,
                     'waitSeconds' => $waitSeconds,
                 ]);
@@ -42,12 +46,16 @@ class JavaScriptContentFetcher
             try {
                 $filename = storage_path('logs/playwright-' . md5($url) . '.html');
                 file_put_contents($filename, $content);
-                Log::info('JavaScript content fetched via HTTP service', [
-                    'url' => $url,
-                    'filename' => $filename,
-                    'content_length' => strlen($content),
-                    'wait_seconds' => $waitSeconds,
-                ]);
+                try {
+                    Log::info('JavaScript content fetched via HTTP service', [
+                        'url' => $url,
+                        'filename' => $filename,
+                        'content_length' => strlen($content),
+                        'wait_seconds' => $waitSeconds,
+                    ]);
+                } catch (\Exception $logException) {
+                    // Log facade not available, ignore
+                }
             } catch (\Exception $e) {
                 // Ignore file save errors - don't break the content fetching
             }
@@ -55,12 +63,16 @@ class JavaScriptContentFetcher
             return $content;
 
         } catch (\Exception $e) {
-            Log::error('JavaScript content fetching failed', [
-                'url' => $url,
-                'error' => $e->getMessage(),
-                'wait_seconds' => $waitSeconds,
-                'service_url' => $this->serviceUrl,
-            ]);
+            try {
+                Log::error('JavaScript content fetching failed', [
+                    'url' => $url,
+                    'error' => $e->getMessage(),
+                    'wait_seconds' => $waitSeconds,
+                    'service_url' => $this->getServiceUrl(),
+                ]);
+            } catch (\Exception $logException) {
+                // Log facade not available, ignore
+            }
 
             // Return empty string on failure
             return '';
@@ -94,32 +106,45 @@ class JavaScriptContentFetcher
      */
     public static function isAvailable(): bool
     {
-        $serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
-
         try {
+            // Try to create an instance to check if config is available
+            $fetcher = new self();
+            $serviceUrl = $fetcher->getServiceUrl();
+
             $response = Http::timeout(5)->get("{$serviceUrl}/health");
 
             if ($response->successful() && $response->json('status') === 'ok') {
-                Log::info('JavaScript content fetching service is available', [
-                    'service_url' => $serviceUrl,
-                    'browser' => $response->json('browser'),
-                ]);
+                try {
+                    Log::info('JavaScript content fetching service is available', [
+                        'service_url' => $serviceUrl,
+                        'browser' => $response->json('browser'),
+                    ]);
+                } catch (\Exception $logException) {
+                    // Log facade not available, ignore
+                }
 
                 return true;
             }
 
-            Log::warning('JavaScript content fetching service returned unhealthy status', [
-                'service_url' => $serviceUrl,
-                'response' => $response->json(),
-            ]);
+            try {
+                Log::warning('JavaScript content fetching service returned unhealthy status', [
+                    'service_url' => $serviceUrl,
+                    'response' => $response->json(),
+                ]);
+            } catch (\Exception $logException) {
+                // Log facade not available, ignore
+            }
 
             return false;
 
         } catch (\Exception $e) {
-            Log::warning('JavaScript content fetching service is not available', [
-                'service_url' => $serviceUrl,
-                'error' => $e->getMessage(),
-            ]);
+            try {
+                Log::warning('JavaScript content fetching service is not available', [
+                    'error' => $e->getMessage(),
+                ]);
+            } catch (\Exception $logException) {
+                // Log facade not available, ignore
+            }
 
             return false;
         }
