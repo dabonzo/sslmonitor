@@ -103,7 +103,7 @@ class TestUserSeeder extends Seeder
             );
 
             // Create corresponding Spatie monitor
-            \Spatie\UptimeMonitor\Models\Monitor::updateOrCreate(
+            \App\Models\Monitor::updateOrCreate(
                 ['url' => $websiteData['url']],
                 [
                     'certificate_check_enabled' => true,

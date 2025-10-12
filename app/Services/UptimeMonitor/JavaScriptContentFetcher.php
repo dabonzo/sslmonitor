@@ -4,7 +4,7 @@ namespace App\Services\UptimeMonitor;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 
 class JavaScriptContentFetcher
 {

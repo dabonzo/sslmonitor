@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Website;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 
 class SslMonitoringCacheService
 {

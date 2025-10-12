@@ -7,7 +7,7 @@ use App\Services\SslMonitoringCacheService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\UptimeMonitor\Models\Monitor;
+use App\Models\Monitor;
 
 class SslDashboardController extends Controller
 {

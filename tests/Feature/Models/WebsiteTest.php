@@ -64,7 +64,7 @@ test('website can get spatie monitor', function () {
     expect(method_exists($website, 'getSpatieMonitor'))->toBeTrue();
     // Since SSL monitoring is enabled by default, a monitor should be created automatically
     expect($website->getSpatieMonitor())->not->toBeNull();
-    expect($website->getSpatieMonitor())->toBeInstanceOf(\Spatie\UptimeMonitor\Models\Monitor::class);
+    expect($website->getSpatieMonitor())->toBeInstanceOf(\App\Models\Monitor::class);
 });
 
 test('website can get current ssl status from spatie monitor', function () {

@@ -31,10 +31,10 @@ trait MocksMonitorHttpRequests
     protected function mockMonitorCheckMethods(): void
     {
         // Partial mock Monitor to override check methods
-        $this->partialMock(\Spatie\UptimeMonitor\Models\Monitor::class, function ($mock) {
+        $this->partialMock(\App\Models\Monitor::class, function ($mock) {
             $mock->shouldReceive('checkUptime')
                 ->andReturnUsing(function () {
-                    /** @var \Spatie\UptimeMonitor\Models\Monitor $this */
+                    /** @var \App\Models\Monitor $this */
                     $this->uptime_status = 'up';
                     $this->uptime_check_response_time_in_ms = rand(50, 200);
                     $this->uptime_check_response_status_code = 200;
@@ -44,7 +44,7 @@ trait MocksMonitorHttpRequests
 
             $mock->shouldReceive('checkCertificate')
                 ->andReturnUsing(function () {
-                    /** @var \Spatie\UptimeMonitor\Models\Monitor $this */
+                    /** @var \App\Models\Monitor $this */
                     $this->certificate_status = 'valid';
                     $this->certificate_expiration_date = now()->addDays(90);
                     $this->certificate_issuer = 'Mock CA';
