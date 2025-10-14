@@ -82,6 +82,76 @@
         --font-sans:
             'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
+
+    /* Additional semantic utility classes for debugging and status indicators */
+    .status-badge-info {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+        background-color: hsl(var(--chart-4) / 0.1);
+        color: hsl(var(--chart-4));
+        border: 1px solid hsl(var(--chart-4) / 0.2);
+    }
+
+    .status-badge-success {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+        background-color: hsl(var(--chart-2) / 0.1);
+        color: hsl(var(--chart-2));
+        border: 1px solid hsl(var(--chart-2) / 0.2);
+    }
+
+    .status-badge-warning {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+        background-color: hsl(var(--chart-1) / 0.1);
+        color: hsl(var(--chart-1));
+        border: 1px solid hsl(var(--chart-1) / 0.2);
+    }
+
+    .status-badge-destructive {
+        @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+        background-color: hsl(var(--destructive) / 0.1);
+        color: hsl(var(--destructive));
+        border: 1px solid hsl(var(--destructive) / 0.2);
+    }
+
+    /* Glass morphism effect for cards */
+    .glass-card {
+        @apply bg-card/80 backdrop-blur-sm border border-border shadow-sm;
+    }
+
+    .glass-card-strong {
+        @apply bg-card/95 backdrop-blur-md border border-border shadow-lg;
+    }
+
+    /* Gradient text utilities */
+    .gradient-text {
+        @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+    }
+
+    .gradient-text-accent {
+        @apply bg-gradient-to-r from-accent to-accent/60 bg-clip-text text-transparent;
+    }
+
+    /* Interactive button variants */
+    .button-ghost {
+        @apply hover:bg-accent hover:text-accent-foreground transition-colors duration-200;
+    }
+
+    .button-soft {
+        @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors duration-200;
+    }
+
+    /* Form input styling */
+    .input-styled {
+        @apply w-full px-3 py-2 text-sm bg-background border border-input rounded-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    /* Selection states */
+    .selected-state {
+        @apply bg-primary/10 border-primary/20 text-primary;
+    }
+
+    .hover-lift {
+        @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+    }
 }
 
 :root {

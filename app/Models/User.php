@@ -112,4 +112,48 @@ class User extends Authenticatable implements MustVerifyEmail
         $role = $this->getRoleInTeam($team);
         return $role === TeamMember::ROLE_OWNER;
     }
+
+    /**
+     * Boot the model and add event listeners
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        // Create global alert templates when a new user is created
+        static::created(function (User $user) {
+            $user->createGlobalAlertTemplates();
+        });
+    }
+
+    /**
+     * Create global alert templates for this user
+     */
+    public function createGlobalAlertTemplates(): void
+    {
+        // Only create if user doesn't already have global templates
+        $existingGlobalAlerts = $this->alertConfigurations()
+            ->whereNull('website_id')
+            ->count();
+
+        if ($existingGlobalAlerts > 0) {
+            return;
+        }
+
+        $defaults = AlertConfiguration::getDefaultConfigurations();
+
+        foreach ($defaults as $default) {
+            AlertConfiguration::create([
+                'user_id' => $this->id,
+                'website_id' => null, // Global templates
+                'alert_type' => $default['alert_type'],
+                'alert_level' => $default['alert_level'],
+                'threshold_days' => $default['threshold_days'],
+                'threshold_response_time' => $default['threshold_response_time'] ?? null,
+                'enabled' => $default['enabled'],
+                'notification_channels' => $default['notification_channels'],
+                'custom_message' => $default['custom_message'] ?? null,
+            ]);
+        }
+    }
 }

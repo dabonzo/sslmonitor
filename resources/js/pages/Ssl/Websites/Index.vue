@@ -4,13 +4,14 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft, Loader2 } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, Eye, Search, Filter, RotateCcw, Zap, Shield, Clock, AlertTriangle, CheckSquare, Square, Trash, Play, ArrowRightLeft, Loader2, Bell } from 'lucide-vue-next';
 import ssl from '@/routes/ssl';
 import BulkTransferModal from '@/components/team/BulkTransferModal.vue';
 import WebsiteSkeleton from '@/components/ui/WebsiteSkeleton.vue';
 import CertificateDetailsModal from '@/components/ssl/CertificateDetailsModal.vue';
 import BulkCertificateActions from '@/components/ssl/BulkCertificateActions.vue';
 import ImmediateCheckButton from '@/components/ssl/ImmediateCheckButton.vue';
+import WebsiteAlertsModal from '@/components/ssl/WebsiteAlertsModal.vue';
 
 interface SslCertificate {
   status: string;
@@ -40,6 +41,20 @@ interface Website {
     color: string;
   };
   created_at: string;
+}
+
+interface AlertConfiguration {
+  id: number;
+  alert_type: string;
+  alert_type_label: string;
+  enabled: boolean;
+  alert_level: string;
+  alert_level_color: string;
+  threshold_days: number | null;
+  threshold_response_time: number | null;
+  notification_channels: string[];
+  custom_message: string | null;
+  last_triggered_at: string | null;
 }
 
 interface PaginatedWebsites {
@@ -115,6 +130,12 @@ const certificateAnalysis = ref(null);
 const analysisLoading = ref(false);
 const showCertificateDetails = ref(false);
 const selectedWebsiteForCertificate = ref<Website | null>(null);
+
+// Alerts modal state
+const showWebsiteAlertsModal = ref(false);
+const selectedWebsiteForAlerts = ref<Website | null>(null);
+const websiteAlertConfigurations = ref<AlertConfiguration[]>([]);
+const alertsModalLoading = ref(false);
 
 // Bulk operations state
 const selectedWebsites = ref<number[]>([]);
@@ -360,6 +381,69 @@ const viewWebsite = (website: Website) => {
 
 const editWebsite = (website: Website) => {
   router.visit(ssl.websites.edit(website.id).url);
+};
+
+const openAlertsModal = async (website: Website) => {
+  selectedWebsiteForAlerts.value = website;
+  alertsModalLoading.value = true;
+  showWebsiteAlertsModal.value = true;
+
+  try {
+    const response = await axios.get(`/ssl/websites/${website.id}/alerts`);
+    websiteAlertConfigurations.value = response.data.alertConfigurations || [];
+  } catch (error) {
+    console.error('Failed to load alert configurations:', error);
+    // Use empty array if there's an error
+    websiteAlertConfigurations.value = [];
+  } finally {
+    alertsModalLoading.value = false;
+  }
+};
+
+const closeAlertsModal = () => {
+  showWebsiteAlertsModal.value = false;
+  selectedWebsiteForAlerts.value = null;
+  websiteAlertConfigurations.value = [];
+};
+
+const handleUpdateAlert = async (alertId: number, updates: Partial<AlertConfiguration>) => {
+  try {
+    const response = await axios.patch(`/settings/alerts/${alertId}`, updates);
+
+    // Update the local state
+    const index = websiteAlertConfigurations.value.findIndex(alert => alert.id === alertId);
+    if (index !== -1) {
+      websiteAlertConfigurations.value[index] = { ...websiteAlertConfigurations.value[index], ...response.data };
+    }
+
+    // Show success message
+    router.reload({
+      only: ['flash'],
+      data: {
+        success: 'Alert configuration updated successfully.'
+      }
+    });
+  } catch (error) {
+    console.error('Failed to update alert:', error);
+    alert('Failed to update alert configuration. Please try again.');
+  }
+};
+
+const handleTestAlert = async (alertId: number) => {
+  try {
+    await axios.post(`/settings/alerts/${alertId}/test`);
+
+    // Show success message
+    router.reload({
+      only: ['flash'],
+      data: {
+        success: 'Test alert sent successfully.'
+      }
+    });
+  } catch (error) {
+    console.error('Failed to send test alert:', error);
+    alert('Failed to send test alert. Please try again.');
+  }
 };
 
 const deleteWebsite = async (website: Website) => {
@@ -904,6 +988,13 @@ watch(activeTeam, () => {
                       <Zap class="h-3 w-3 mr-1" />
                       Uptime
                     </button>
+                    <button
+                      @click="openAlertsModal(website)"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors"
+                    >
+                      <Bell class="h-3 w-3 mr-1" />
+                      Alerts
+                    </button>
                   </div>
                 </td>
                 <td class="p-4" @click.stop>
@@ -1097,6 +1188,13 @@ watch(activeTeam, () => {
               >
                 <Zap class="h-4 w-4 mr-1.5" />
                 Uptime Check
+              </button>
+              <button
+                @click="openAlertsModal(website)"
+                class="flex items-center px-3 py-2 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors"
+              >
+                <Bell class="h-4 w-4 mr-1.5" />
+                Alerts
               </button>
 
               <!-- Actions -->
@@ -1717,6 +1815,17 @@ watch(activeTeam, () => {
       :available-teams="availableTeams || []"
       @close="closeBulkTransferModal"
       @transfer-completed="handleTransferCompleted"
+    />
+
+    <!-- Website Alerts Modal -->
+    <WebsiteAlertsModal
+      :show="showWebsiteAlertsModal"
+      :website="selectedWebsiteForAlerts"
+      :alert-configurations="websiteAlertConfigurations"
+      :loading="alertsModalLoading"
+      @close="closeAlertsModal"
+      @update-alert="handleUpdateAlert"
+      @test-alert="handleTestAlert"
     />
   </DashboardLayout>
 </template>

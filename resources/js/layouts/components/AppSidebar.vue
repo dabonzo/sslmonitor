@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import AppLogoIcon from '@/components/AppLogoIcon.vue'
 import MenuItem from '@/components/Navigation/MenuItem.vue'
-import { mainMenuItems, bottomMenuItems, isActiveRoute } from '@/config/navigation'
+import { mainMenuItems, bottomMenuItems, isActiveRoute, getDebugMenuItems } from '@/config/navigation'
 
 const themeStore = useThemeStore()
+const page = usePage()
+
+// Get debug menu items based on user permissions and config
+const debugMenuItems = computed(() => {
+  const auth = page.props.auth as any
+  const config = page.props.config as any
+  return getDebugMenuItems(auth, config)
+})
 
 // Active dropdown state
 const activeDropdown = ref<string>('')
@@ -49,6 +57,33 @@ function toggleDropdown(key: string) {
 
           <!-- Main menu items -->
           <template v-for="item in mainMenuItems" :key="item.key">
+            <li class="menu nav-item">
+              <MenuItem
+                :item="item"
+                :is-active="item.href ? isActiveRoute(item.href) : false"
+                :is-dropdown-open="activeDropdown === item.key"
+                variant="sidebar"
+                @toggle="toggleDropdown(item.key)"
+              />
+
+              <!-- Sub-menu for dropdown items -->
+              <Transition v-if="item.children" name="slide-down">
+                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
+                  <li v-for="child in item.children" :key="child.href">
+                    <Link
+                      :href="child.href"
+                      :class="{ 'active': isActiveRoute(child.href) }"
+                    >
+                      {{ child.title }}
+                    </Link>
+                  </li>
+                </ul>
+              </Transition>
+            </li>
+          </template>
+
+          <!-- Debug Menu (conditionally rendered) -->
+          <template v-for="item in debugMenuItems" :key="item.key">
             <li class="menu nav-item">
               <MenuItem
                 :item="item"

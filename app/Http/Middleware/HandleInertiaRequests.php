@@ -55,6 +55,15 @@ class HandleInertiaRequests extends Middleware
                 'info' => $request->session()->get('info'),
                 'message' => $request->session()->get('message'),
             ],
+            'config' => [
+                'debug' => [
+                    'menu_enabled' => config('debug_menu.menu_enabled', false),
+                    'menu_users' => config('debug_menu.menu_users', ''),
+                    'menu_roles' => config('debug_menu.menu_roles', 'OWNER,ADMIN'),
+                    'menu_audit' => config('debug_menu.menu_audit', true),
+                    'overrides_expire_hours' => config('debug_menu.overrides_expire_hours', 24),
+                ],
+            ],
         ];
     }
 

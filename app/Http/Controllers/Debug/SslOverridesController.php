@@ -14,21 +14,10 @@ class SslOverridesController extends Controller
 {
     public function index(Request $request)
     {
-        // Security check - ensure debug menu is enabled and user has access
-        // TODO: Fix config loading in Sail environment
-        if (!env('DEBUG_MENU_ENABLED', false)) {
-            abort(403, 'Debug menu is disabled');
-        }
-
         $user = $request->user();
-        $allowedUsers = explode(',', env('DEBUG_MENU_USERS', ''));
-
-        if (!in_array($user->email, $allowedUsers)) {
-            abort(403, 'Access denied');
-        }
 
         // Get user's websites with SSL monitoring enabled
-        $websites = Website::with(['monitor', 'debugOverrides' => function ($query) {
+        $websites = Website::with(['debugOverrides' => function ($query) use ($user) {
             $query->where('module_type', 'ssl_expiry')
                   ->where('user_id', $user->id)
                   ->active()
@@ -181,5 +170,75 @@ class SslOverridesController extends Controller
             'message' => "Removed SSL overrides for {$deletedCount} websites",
             'deleted_count' => $deletedCount,
         ]);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'expiry_date' => 'required|date',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $user = $request->user();
+
+        $override = DebugOverride::where('id', $id)
+                               ->where('user_id', $user->id)
+                               ->where('module_type', 'ssl_expiry')
+                               ->firstOrFail();
+
+        $website = $override->targetable;
+
+        $override->update([
+            'override_data' => [
+                'expiry_date' => $request->expiry_date,
+                'original_expiry' => $website->getSpatieMonitor()?->certificate_expiration_date,
+                'reason' => $request->reason ?? $override->override_data['reason'] ?? 'Updated override',
+            ],
+            'is_active' => true,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'override' => $override->fresh(),
+            'effective_expiry' => $website->getEffectiveSslExpiryDate($user->id),
+            'days_remaining' => $website->getDaysRemaining($user->id),
+        ]);
+    }
+
+    public function testAlerts(Request $request): JsonResponse
+    {
+        $request->validate([
+            'website_id' => 'required|exists:websites,id',
+        ]);
+
+        $user = $request->user();
+        $website = Website::where('user_id', $user->id)
+                         ->findOrFail($request->website_id);
+
+        // Get alert service for testing
+        $alertService = app(\App\Services\AlertService::class);
+
+  
+        try {
+            // Test alerts with current effective expiry (including overrides)
+            // Bypass cooldown for debug testing
+            $triggeredAlerts = $alertService->checkAndTriggerAlerts($website, true);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Alert test completed successfully',
+                'triggered_alerts' => $triggeredAlerts,
+                'effective_expiry' => $website->getEffectiveSslExpiryDate($user->id),
+                'days_remaining' => $website->getDaysRemaining($user->id),
+                'monitor_status' => $website->getSpatieMonitor()?->certificate_status,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Alert test failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

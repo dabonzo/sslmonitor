@@ -79,6 +79,14 @@ class DebugOverride extends Model
     }
 
     /**
+     * Check if the override has expired.
+     */
+    public function isExpired(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
      * Mark the override as inactive.
      */
     public function deactivate(): void

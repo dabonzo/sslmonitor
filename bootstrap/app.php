@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CacheApiResponse;
+use App\Http\Middleware\DebugMenuAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -23,9 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // Register cache middleware with alias
+        // Register middleware with aliases
         $middleware->alias([
             'cache.api' => CacheApiResponse::class,
+            'debug.access' => DebugMenuAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

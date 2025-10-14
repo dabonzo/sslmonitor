@@ -6,6 +6,10 @@ use App\Models\Website;
 use App\Models\User;
 use App\Models\AlertConfiguration;
 use App\Mail\SslCertificateExpiryAlert;
+use App\Mail\SslCertificateInvalidAlert;
+use App\Mail\UptimeDownAlert;
+use App\Mail\UptimeRecoveredAlert;
+use App\Mail\SlowResponseTimeAlert;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +22,7 @@ class AlertService
     /**
      * Check and trigger alerts for a specific website
      */
-    public function checkAndTriggerAlerts(Website $website): array
+    public function checkAndTriggerAlerts(Website $website, bool $bypassCooldown = false): array
     {
         $triggeredAlerts = [];
 
@@ -41,7 +45,9 @@ class AlertService
         $checkData = $this->prepareCheckData($website);
 
         foreach ($alertConfigs as $alertConfig) {
-            if ($alertConfig->shouldTrigger($checkData)) {
+            $shouldTrigger = $alertConfig->shouldTrigger($checkData, $bypassCooldown);
+
+            if ($shouldTrigger) {
                 $this->triggerAlert($alertConfig, $website, $checkData);
                 $triggeredAlerts[] = [
                     'type' => $alertConfig->alert_type,
@@ -95,6 +101,7 @@ class AlertService
                 'website_id' => $website->id,
                 'alert_type' => $default['alert_type'],
                 'alert_level' => $default['alert_level'],
+                'threshold_days' => $default['threshold_days'],
             ], $default);
         }
     }
@@ -133,11 +140,18 @@ class AlertService
             $user = $website->user;
 
             match($alertConfig->alert_type) {
-                AlertConfiguration::ALERT_SSL_EXPIRY,
-                AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL =>
+                AlertConfiguration::ALERT_SSL_EXPIRY =>
                     Mail::to($user->email)->send(new SslCertificateExpiryAlert($website, $alertConfig, $checkData)),
 
-                // Add other alert types here as needed
+                AlertConfiguration::ALERT_SSL_INVALID =>
+                    Mail::to($user->email)->send(new SslCertificateInvalidAlert($website, $checkData)),
+
+                AlertConfiguration::ALERT_UPTIME_DOWN =>
+                    Mail::to($user->email)->send(new UptimeDownAlert($website, $alertConfig, $checkData)),
+
+                AlertConfiguration::ALERT_RESPONSE_TIME =>
+                    Mail::to($user->email)->send(new SlowResponseTimeAlert($website, $checkData)),
+
                 default => Log::warning("No email template for alert type: {$alertConfig->alert_type}"),
             };
 
@@ -193,8 +207,18 @@ class AlertService
             'is_lets_encrypt' => false,
         ];
 
-        // Calculate SSL days remaining and Let's Encrypt detection
-        if ($monitor && $monitor->certificate_expiration_date) {
+        // Check for active SSL debug overrides first
+        $sslOverride = $website->getDebugOverride('ssl_expiry', $website->user_id);
+        if ($sslOverride && $sslOverride->is_active && !$sslOverride->isExpired()) {
+            // Use effective expiry date from debug override
+            $effectiveExpiryDate = $website->getEffectiveSslExpiryDate($website->user_id);
+            if ($effectiveExpiryDate) {
+                $daysRemaining = (int) \Carbon\Carbon::parse($effectiveExpiryDate)->diffInDays(now(), false);
+                $checkData['ssl_days_remaining'] = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
+                $checkData['ssl_status'] = $daysRemaining < 0 ? 'expired' : 'valid';
+            }
+        } elseif ($monitor && $monitor->certificate_expiration_date) {
+            // Calculate SSL days remaining and Let's Encrypt detection from original data
             $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
             $daysRemaining = (int) $expirationDate->diffInDays(now(), false);
             $checkData['ssl_days_remaining'] = $daysRemaining < 0 ? abs($daysRemaining) : $daysRemaining;
@@ -204,6 +228,20 @@ class AlertService
             $checkData['is_lets_encrypt'] = str_contains($issuer, "let's encrypt") ||
                                           str_contains($issuer, 'r3') ||
                                           str_contains($issuer, 'e1');
+        }
+
+        // Check for active uptime monitoring debug overrides
+        $uptimeOverride = $website->getDebugOverride('uptime_monitoring', $website->user_id);
+        if ($uptimeOverride && $uptimeOverride->is_active && !$uptimeOverride->isExpired()) {
+            $overrideData = $uptimeOverride->override_data;
+            $checkData['uptime_status'] = $overrideData['uptime_status'] ?? $monitor?->uptime_status ?? 'unknown';
+        }
+
+        // Check for active response time debug overrides
+        $responseTimeOverride = $website->getDebugOverride('response_time', $website->user_id);
+        if ($responseTimeOverride && $responseTimeOverride->is_active && !$responseTimeOverride->isExpired()) {
+            $overrideData = $responseTimeOverride->override_data;
+            $checkData['response_time'] = $overrideData['response_time'] ?? $monitor?->uptime_check_response_time_in_ms;
         }
 
         return $checkData;

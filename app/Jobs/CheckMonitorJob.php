@@ -61,7 +61,7 @@ class CheckMonitorJob implements ShouldQueue
                 'url' => $this->monitor->url,
                 'checked_at' => Carbon::now()->toISOString(),
                 'uptime' => $this->checkUptime(),
-                'ssl' => $this->checkSsl(),
+                'ssl' => $this->shouldCheckSsl() ? $this->checkSsl() : $this->getLastSslResult(),
             ];
 
             AutomationLogger::jobComplete(self::class, $startTime, [
@@ -214,6 +214,73 @@ class CheckMonitorJob implements ShouldQueue
                 'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
             ];
         }
+    }
+
+    /**
+     * Determine if SSL certificate should be checked based on configured interval.
+     * Also forces SSL check if certificate has errors or is expiring soon.
+     */
+    private function shouldCheckSsl(): bool
+    {
+        // Always check SSL if certificate checking is disabled (to catch when it gets re-enabled)
+        if (!$this->monitor->certificate_check_enabled) {
+            return false;
+        }
+
+        // Get SSL check interval from config (default 12 hours)
+        $sslCheckInterval = config('uptime-monitor.certificate_check.run_interval_in_minutes', 720);
+
+        // Check if certificate has issues that need more frequent monitoring
+        if ($this->monitor->certificate_status === 'invalid') {
+            return true; // Always check invalid certificates
+        }
+
+        if ($this->monitor->certificate_expiration_date) {
+            // Check more frequently if expiring soon
+            $daysUntilExpiry = $this->monitor->certificate_expiration_date->diffInDays();
+            if ($daysUntilExpiry <= 7) {
+                return true; // Check daily for certificates expiring in 7 days
+            }
+            if ($daysUntilExpiry <= 30) {
+                $sslCheckInterval = min($sslCheckInterval, 240); // Check every 4 hours for 30-day expiry
+            }
+        }
+
+        // Check if enough time has passed since last SSL check
+        if ($this->monitor->updated_at) {
+            $minutesSinceLastCheck = $this->monitor->updated_at->diffInMinutes();
+            return $minutesSinceLastCheck >= $sslCheckInterval;
+        }
+
+        // If no record of last check, check now
+        return true;
+    }
+
+    /**
+     * Get the last SSL check result when we're not performing a new check.
+     */
+    private function getLastSslResult(): array
+    {
+        // Determine status based on Spatie's certificate data
+        $status = 'valid';
+        if ($this->monitor->certificate_status === 'invalid') {
+            $status = 'invalid';
+        } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->isPast()) {
+            $status = 'expired';
+        } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->diffInDays() <= 30) {
+            $status = 'expires_soon';
+        }
+
+        return [
+            'status' => $status,
+            'expires_at' => $this->monitor->certificate_expiration_date?->toISOString(),
+            'issuer' => $this->monitor->certificate_issuer ?? 'Unknown',
+            'certificate_status' => $this->monitor->certificate_status,
+            'failure_reason' => $this->monitor->certificate_check_failure_reason,
+            'checked_at' => $this->monitor->updated_at?->toISOString(),
+            'check_duration_ms' => null, // Not a fresh check
+            'from_cache' => true, // Indicate this is from cache
+        ];
     }
 
     /**

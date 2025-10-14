@@ -3,6 +3,7 @@ import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ssl from '@/routes/ssl';
+import AlertDashboard from '@/components/alerts/AlertDashboard.vue';
 import {
   Shield,
   CheckCircle,
@@ -248,8 +249,8 @@ const failedChecks = computed(() => {
   for (const activity of props.recentUptimeActivity) {
     if (activity.status === 'down' || activity.status === 'content_mismatch') {
       // Determine the failure reason to display
-      let failureReason = activity.content_failure_reason || activity.failure_reason;
-      let message = activity.status === 'down' ? 'Website is down' : 'Content validation failed';
+      const failureReason = activity.content_failure_reason || activity.failure_reason;
+      const message = activity.status === 'down' ? 'Website is down' : 'Content validation failed';
 
       failures.push({
         type: 'uptime',
@@ -299,6 +300,23 @@ const handleTestAlerts = () => {
       isTestingAlerts.value = false;
     }
   });
+};
+
+// AlertDashboard event handlers
+const handleAlertAcknowledged = (alert: any) => {
+  console.log('Alert acknowledged:', alert);
+  // In production, this would send an API request to acknowledge the alert
+};
+
+const handleAlertDismissed = (alert: any) => {
+  console.log('Alert dismissed:', alert);
+  // In production, this would send an API request to dismiss the alert
+};
+
+const handleCreateRuleFromAlert = (alert: any) => {
+  console.log('Creating rule from alert:', alert);
+  // This would navigate to the alert settings with pre-populated data
+  router.visit('/settings/alerts');
 };
 </script>
 
@@ -863,6 +881,15 @@ const handleTestAlerts = () => {
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Real-time Alert Feed -->
+        <div class="mt-6">
+            <AlertDashboard
+                @alert-acknowledged="handleAlertAcknowledged"
+                @alert-dismissed="handleAlertDismissed"
+                @create-rule="handleCreateRuleFromAlert"
+            />
         </div>
 
         <!-- Activity Modal -->

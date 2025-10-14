@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { Head, usePage, Form, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import ModernSettingsLayout from '@/layouts/ModernSettingsLayout.vue';
-import AdvancedAlertRuleBuilder from '@/components/alerts/AdvancedAlertRuleBuilder.vue';
-import AlertDashboard from '@/components/alerts/AlertDashboard.vue';
-import { Plus, Settings, Trash2 } from 'lucide-vue-next';
+import { Shield, Info, ExternalLink, Zap, Clock } from 'lucide-vue-next';
 
 interface AlertConfiguration {
     id: number;
@@ -22,54 +14,74 @@ interface AlertConfiguration {
     alert_type_label: string;
     enabled: boolean;
     alert_level: string;
-    alert_level_color: string;
-    threshold_days: number;
-    threshold_response_time: number;
+    threshold_days: number | null;
+    threshold_response_time: number | null;
     notification_channels: string[];
-    custom_message: string;
-    last_triggered_at: string | null;
-}
-
-interface Website {
-    id: number;
-    name: string;
-    url: string;
+    custom_message: string | null;
 }
 
 interface Props {
-    alertConfigurations: AlertConfiguration[];
-    alertsByWebsite: Array<{
-        website: Website;
-        alerts: AlertConfiguration[];
-    }>;
-    websites: Website[];
-    defaultConfigurations: Array<{
-        alert_type: string;
-        enabled: boolean;
-        threshold_days: number;
-        alert_level: string;
-        notification_channels: string[];
-    }>;
-    alertTypes: Record<string, string>;
-    notificationChannels: Record<string, string>;
-    alertLevels: Record<string, string>;
+    globalAlerts: {
+        sslExpiryAlerts: AlertConfiguration[];
+        uptimeAlerts: AlertConfiguration[];
+        responseTimeAlerts: AlertConfiguration[];
+    };
 }
 
 const props = defineProps<Props>();
 
-// Component state
-const showAddAlertDialog = ref(false);
-const showConfigureDialog = ref(false);
-const configuringAlert = ref<AlertConfiguration | null>(null);
+// Group SSL expiry alerts by threshold days for simple checkbox interface
+const sslExpiryAlerts = computed(() => {
+    const alerts = props.globalAlerts?.sslExpiryAlerts || [];
 
-// Form data for editing
-const editForm = ref({
-    enabled: true,
-    alert_level: '',
-    threshold_days: null,
-    threshold_response_time: null,
-    notification_channels: [] as string[],
-    custom_message: ''
+    // Group by threshold days - these come from the user's saved database records
+    const grouped = alerts.reduce((acc, alert) => {
+        if (alert.threshold_days !== null) {
+            const existing = acc.find(item => item.threshold_days === alert.threshold_days);
+            if (existing) {
+                existing.alerts.push(alert);
+            } else {
+                acc.push({
+                    threshold_days: alert.threshold_days,
+                    alerts: [alert]
+                });
+            }
+        }
+        return acc;
+    }, []);
+
+    // Always show all SSL expiry periods, using database values
+    // This ensures consistent ordering: 30, 14, 7, 3, 0 days
+    const allPeriods = [30, 14, 7, 3, 0];
+    return allPeriods.map(days => {
+        const userAlert = grouped.find(g => g.threshold_days === days)?.alerts[0];
+
+        // These levels should match the backend defaults
+        const level = days === 30 ? 'info' :
+                    days === 14 ? 'warning' :
+                    days === 7 ? 'urgent' : 'critical';
+
+        return {
+            threshold_days: days,
+            label: days === 0 ? 'EXPIRED' : `${days} days before expiry`,
+            level,
+            enabled: userAlert?.enabled ?? false, // Default to false, will be populated from database
+            id: userAlert?.id
+        };
+    });
+});
+
+// Other alert types - use database values directly
+const uptimeAlerts = computed(() => {
+    const alerts = props.globalAlerts?.uptimeAlerts || [];
+    // Sort by alert_type to ensure consistent ordering (uptime_down first, uptime_up second)
+    return alerts.sort((a, b) => (a.alert_type).localeCompare(b.alert_type));
+});
+
+const responseTimeAlerts = computed(() => {
+    const alerts = props.globalAlerts?.responseTimeAlerts || [];
+    // Sort by threshold_response_time to ensure consistent ordering (5000ms first, 10000ms second)
+    return alerts.sort((a, b) => (a.threshold_response_time || 0) - (b.threshold_response_time || 0));
 });
 
 // Get alert level color
@@ -83,539 +95,366 @@ const getAlertLevelColor = (level: string) => {
     return colors[level] || colors['info'];
 };
 
-// Group SSL expiry alerts by level for simple checkbox interface
-const sslExpiryAlerts = computed(() => {
-    const levels = ['info', 'warning', 'urgent', 'critical'];
-    const thresholds = { info: 30, warning: 14, urgent: 7, critical: 3 };
-
-    return levels.map(level => {
-        const alert = props.alertConfigurations.find(
-            a => a.alert_type === 'ssl_expiry' && a.alert_level === level
-        );
-        return {
-            level,
-            days: thresholds[level],
-            alert,
-            enabled: alert?.enabled || false
-        };
-    });
-});
-
-// Toggle SSL expiry alert level
-const toggleSslExpiryLevel = (alertId: number, currentEnabled: boolean) => {
-    router.put(`/settings/alerts/${alertId}`, {
-        enabled: !currentEnabled
-    }, {
-        preserveScroll: true
-    });
-};
-
-// Configure alert functionality
-const openConfigureDialog = (alert: AlertConfiguration) => {
-    console.log('Opening configure dialog for alert:', alert);
-
-    configuringAlert.value = alert;
-
-    // Populate form with existing data
-    editForm.value = {
-        enabled: alert.enabled,
-        alert_level: alert.alert_level,
-        threshold_days: alert.threshold_days,
-        threshold_response_time: alert.threshold_response_time,
-        notification_channels: alert.notification_channels ? [...alert.notification_channels] : [],
-        custom_message: alert.custom_message || ''
-    };
-
-    console.log('Form populated with data:', editForm.value);
-
-    showConfigureDialog.value = true;
-};
-
-const closeConfigureDialog = () => {
-    showConfigureDialog.value = false;
-    configuringAlert.value = null;
-};
-
-const deleteAlert = (alertId: number) => {
-    console.log('Delete button clicked for alert ID:', alertId);
-
-    if (confirm('Are you sure you want to delete this alert configuration?')) {
-        console.log('User confirmed deletion, sending request...');
-
-        router.delete(`/settings/alerts/${alertId}`, {
-            onSuccess: () => {
-                console.log('Delete successful');
-                // Page will automatically refresh via Inertia
-            },
-            onError: (errors) => {
-                console.error('Delete failed:', errors);
-                alert('Failed to delete alert configuration: ' + JSON.stringify(errors));
-            }
-        });
-    } else {
-        console.log('User cancelled deletion');
+// Toggle global alert template
+const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, currentEnabled: boolean, alertId: number | null = null) => {
+    const formData = new FormData();
+    formData.append('alert_type', alertType);
+    if (thresholdDays !== null) {
+        formData.append('threshold_days', thresholdDays.toString());
     }
-};
+    formData.append('enabled', (!currentEnabled) ? '1' : '0');
+    if (alertId) {
+        formData.append('alert_id', alertId.toString());
+    }
 
-const submitConfigureForm = () => {
-    if (!configuringAlert.value) return;
-
-    console.log('Submitting form with data:', editForm.value);
-    console.log('Alert ID:', configuringAlert.value.id);
-
-    router.put(`/settings/alerts/${configuringAlert.value.id}`, editForm.value, {
+    router.post('/settings/alerts/global/update', formData, {
+        preserveScroll: true,
         onSuccess: () => {
-            console.log('Form submission successful');
-            showConfigureDialog.value = false;
-            configuringAlert.value = null;
+            // Page will reload with updated data
         },
         onError: (errors) => {
-            console.error('Update failed:', errors);
-            alert('Failed to update alert configuration: ' + JSON.stringify(errors));
+            console.error('Failed to update global alert template:', errors);
         }
     });
-};
-
-// Advanced Alert System Event Handlers
-const handleAlertAcknowledged = (alert) => {
-    console.log('Alert acknowledged:', alert);
-    // In production, this would send an API request to acknowledge the alert
-};
-
-const handleAlertDismissed = (alert) => {
-    console.log('Alert dismissed:', alert);
-    // In production, this would send an API request to dismiss the alert
-};
-
-const handleCreateRuleFromAlert = (alert) => {
-    console.log('Creating rule from alert:', alert);
-    // This would pre-populate the rule builder with data from the alert
-};
-
-const handleRuleCreated = (rule) => {
-    console.log('New alert rule created:', rule);
-    // In production, this would send an API request to save the rule
-};
-
-const handleRuleUpdated = (rule) => {
-    console.log('Alert rule updated:', rule);
-    // In production, this would send an API request to update the rule
-};
-
-const handleRuleDeleted = (ruleId) => {
-    console.log('Alert rule deleted:', ruleId);
-    // In production, this would send an API request to delete the rule
 };
 </script>
 
 <template>
-    <Head title="Alert Settings" />
+    <Head title="Global Alert Templates" />
 
-    <ModernSettingsLayout title="Alert Settings">
-            <div class="space-y-6">
-                <!-- SSL Certificate Alert Levels - Simple Checkboxes -->
-                <Card class="p-6">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-foreground mb-2">SSL Certificate Expiry Alerts</h3>
-                        <p class="text-sm text-muted-foreground">
-                            Choose which alert levels you want to receive. Alerts are sent when certificates are approaching expiration.
-                        </p>
-                    </div>
+    <ModernSettingsLayout>
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="space-y-1">
+                <HeadingSmall title="Global Alert Templates" />
+                <p class="text-sm text-muted-foreground">
+                    Configure default alert settings that will be applied to new websites
+                </p>
+            </div>
 
-                    <div class="space-y-3">
-                        <div
-                            v-for="item in sslExpiryAlerts"
-                            :key="item.level"
-                            class="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-                        >
-                            <div class="flex items-center space-x-4">
-                                <Checkbox
-                                    :checked="item.enabled"
-                                    @update:checked="() => item.alert && toggleSslExpiryLevel(item.alert.id, item.enabled)"
-                                    :disabled="!item.alert"
-                                />
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <Badge :class="getAlertLevelColor(item.level)">
-                                            {{ item.level.toUpperCase() }}
-                                        </Badge>
-                                        <span class="font-medium text-foreground">{{ item.days }} days before expiry</span>
-                                    </div>
-                                    <p class="text-sm text-muted-foreground mt-1">
-                                        {{ item.level === 'info' ? 'Early warning - certificate will expire in a month' :
-                                           item.level === 'warning' ? 'Moderate urgency - certificate expires in 2 weeks' :
-                                           item.level === 'urgent' ? 'High priority - certificate expires in 1 week' :
-                                           'Critical - certificate expires in 3 days' }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="text-sm text-muted-foreground">
-                                {{ item.enabled ? 'Enabled' : 'Disabled' }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p class="text-sm text-blue-800 dark:text-blue-300">
-                            <strong>Tip:</strong> Most users enable only <strong>Urgent (7 days)</strong> and <strong>Critical (3 days)</strong> alerts to avoid notification fatigue while staying informed of important certificate expirations.
-                        </p>
-                    </div>
-                </Card>
-
-                <!-- Real-time Alert Dashboard -->
-                <AlertDashboard
-                    @alert-acknowledged="handleAlertAcknowledged"
-                    @alert-dismissed="handleAlertDismissed"
-                    @create-rule="handleCreateRuleFromAlert"
-                />
-
-                <!-- Advanced Alert Rule Builder -->
-                <AdvancedAlertRuleBuilder
-                    :available-websites="websites"
-                    @rule-created="handleRuleCreated"
-                    @rule-updated="handleRuleUpdated"
-                    @rule-deleted="handleRuleDeleted"
-                />
-
-                <!-- Alert Configurations Overview -->
-                <Card class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <HeadingSmall title="Alert Configurations" />
-                            <p class="text-gray-600 dark:text-gray-400">
-                                Manage your SSL certificate and website monitoring alerts.
+            <!-- Info Card -->
+            <Card class="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                <div class="p-6">
+                    <div class="flex items-start gap-3">
+                        <Info class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <div class="text-sm text-blue-800 dark:text-blue-200">
+                            <h3 class="font-medium mb-1">Template Settings</h3>
+                            <p class="text-blue-700 dark:text-blue-300">
+                                These settings are templates only. When you add a new website, it will inherit these default alert configurations.
+                                Existing websites keep their current alert settings and can be configured individually via the websites page.
                             </p>
                         </div>
-                        <Dialog v-model:open="showAddAlertDialog">
-                            <DialogTrigger as-child>
-                                <Button class="h-11 px-6">
-                                    <Plus class="h-4 w-4 mr-2" />
-                                    Add Alert
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent class="sm:max-w-md">
-                                <DialogHeader>
-                                    <DialogTitle>Create New Alert</DialogTitle>
-                                </DialogHeader>
-                                <Form action="/settings/alerts" method="post" class="space-y-4" #default="{ errors, processing }">
-                                    <div class="space-y-2">
-                                        <Label for="alert_type">Alert Type</Label>
-                                        <select
-                                            id="alert_type"
-                                            name="alert_type"
-                                            required
-                                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                                        >
-                                            <option value="">Select alert type...</option>
-                                            <option v-for="(label, type) in alertTypes" :key="type" :value="type">
-                                                {{ label }}
-                                            </option>
-                                        </select>
-                                        <p v-if="errors.alert_type" class="text-sm text-red-600">{{ errors.alert_type }}</p>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <Label for="alert_level">Alert Level</Label>
-                                        <select
-                                            id="alert_level"
-                                            name="alert_level"
-                                            required
-                                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                                        >
-                                            <option value="">Select alert level...</option>
-                                            <option v-for="(label, level) in alertLevels" :key="level" :value="level">
-                                                {{ label }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <Label for="threshold_days">Threshold Days (optional)</Label>
-                                        <Input
-                                            id="threshold_days"
-                                            name="threshold_days"
-                                            type="number"
-                                            placeholder="e.g., 7 days before expiry"
-                                            class="w-full"
-                                        />
-                                    </div>
-                                    <div class="flex justify-end gap-2">
-                                        <Button type="button" variant="outline" @click="showAddAlertDialog = false">
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" :disabled="processing">
-                                            {{ processing ? 'Creating...' : 'Create Alert' }}
-                                        </Button>
-                                    </div>
-                                </Form>
-                            </DialogContent>
-                        </Dialog>
-
-                        <!-- Configure Alert Dialog -->
-                        <Dialog v-model:open="showConfigureDialog">
-                            <DialogContent class="sm:max-w-lg">
-                                <DialogHeader>
-                                    <DialogTitle>Configure Alert: {{ configuringAlert?.alert_type_label }}</DialogTitle>
-                                </DialogHeader>
-                                <form
-                                    v-if="configuringAlert"
-                                    @submit.prevent="submitConfigureForm"
-                                    class="space-y-4"
-                                >
-                                    <div class="space-y-2">
-                                        <Label class="flex items-center space-x-2">
-                                            <Checkbox
-                                                v-model:checked="editForm.enabled"
-                                                name="enabled"
-                                                :value="1"
-                                            />
-                                            <span>Enable this alert</span>
-                                        </Label>
-                                        <input type="hidden" name="enabled" :value="editForm.enabled ? 1 : 0" />
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <Label for="alert_level">Alert Level</Label>
-                                        <select
-                                            id="alert_level"
-                                            name="alert_level"
-                                            v-model="editForm.alert_level"
-                                            required
-                                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                                        >
-                                            <option v-for="(label, level) in alertLevels" :key="level" :value="level">
-                                                {{ label }}
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div v-if="configuringAlert.alert_type !== 'uptime_down' && configuringAlert.alert_type !== 'ssl_invalid'" class="space-y-2">
-                                        <Label for="threshold_days">Threshold Days</Label>
-                                        <Input
-                                            id="threshold_days"
-                                            name="threshold_days"
-                                            type="number"
-                                            v-model="editForm.threshold_days"
-                                            placeholder="e.g., 7 days before expiry"
-                                            class="w-full"
-                                        />
-                                        <p class="text-xs text-gray-500">Days before expiry to trigger alert</p>
-                                    </div>
-
-                                    <div v-if="configuringAlert.alert_type === 'response_time'" class="space-y-2">
-                                        <Label for="threshold_response_time">Response Time Threshold (ms)</Label>
-                                        <Input
-                                            id="threshold_response_time"
-                                            name="threshold_response_time"
-                                            type="number"
-                                            v-model="editForm.threshold_response_time"
-                                            placeholder="e.g., 5000 (5 seconds)"
-                                            class="w-full"
-                                        />
-                                        <p class="text-xs text-gray-500">Trigger alert when response time exceeds this value</p>
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <Label>Notification Channels</Label>
-                                        <div class="space-y-2">
-                                            <Label v-for="(label, channel) in notificationChannels" :key="channel" class="flex items-center space-x-2">
-                                                <Checkbox
-                                                    :checked="editForm.notification_channels.includes(channel)"
-                                                    @change="(checked) => {
-                                                        if (checked) {
-                                                            if (!editForm.notification_channels.includes(channel)) {
-                                                                editForm.notification_channels.push(channel);
-                                                            }
-                                                        } else {
-                                                            const index = editForm.notification_channels.indexOf(channel);
-                                                            if (index > -1) {
-                                                                editForm.notification_channels.splice(index, 1);
-                                                            }
-                                                        }
-                                                    }"
-                                                    :name="`notification_channels[]`"
-                                                    :value="channel"
-                                                />
-                                                <span>{{ label }}</span>
-                                            </Label>
-                                        </div>
-                                        <!-- Hidden inputs for notification channels -->
-                                        <input
-                                            v-for="channel in editForm.notification_channels"
-                                            :key="channel"
-                                            type="hidden"
-                                            name="notification_channels[]"
-                                            :value="channel"
-                                        />
-                                    </div>
-
-                                    <div class="space-y-2">
-                                        <Label for="custom_message">Custom Message (optional)</Label>
-                                        <Input
-                                            id="custom_message"
-                                            name="custom_message"
-                                            v-model="editForm.custom_message"
-                                            placeholder="Custom alert message..."
-                                            class="w-full"
-                                        />
-                                        <p class="text-xs text-gray-500">Use {website} and {days} as placeholders</p>
-                                    </div>
-
-                                    <div class="flex justify-end gap-2">
-                                        <Button type="button" variant="outline" @click="closeConfigureDialog">
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit">
-                                            Save Changes
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
                     </div>
+                </div>
+            </Card>
 
-                    <!-- Alert Statistics -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ alertConfigurations.length }}
-                            </div>
-                            <div class="text-sm text-gray-600 dark:text-gray-400">Total Alerts</div>
+            <!-- SSL Certificate Expiry Alerts -->
+            <Card>
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                            <Shield class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
-
-                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-green-700 dark:text-green-400">
-                                {{ alertConfigurations.filter(a => a.enabled).length }}
-                            </div>
-                            <div class="text-sm text-green-600 dark:text-green-400">Active Alerts</div>
-                        </div>
-
-                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                                {{ websites.length }}
-                            </div>
-                            <div class="text-sm text-blue-600 dark:text-blue-400">Monitored Websites</div>
-                        </div>
-
-                        <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
-                            <div class="text-2xl font-bold text-orange-700 dark:text-orange-400">
-                                {{ Object.keys(alertTypes).length }}
-                            </div>
-                            <div class="text-sm text-orange-600 dark:text-orange-400">Alert Types</div>
-                        </div>
-                    </div>
-
-                    <!-- Help Section -->
-                    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <h3 class="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">How Alerts Work</h3>
-                        <div class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-                            <p><strong>Default Alerts:</strong> Pre-configured alert templates that come with SSL Monitor</p>
-                            <p><strong>Custom Alerts:</strong> Your personalized configurations that override the defaults</p>
-                            <p><strong>Monitoring:</strong> Once created, alerts automatically monitor ALL your websites</p>
-                            <p><strong>Cooldown:</strong> Alerts have a 24-hour cooldown period to prevent spam</p>
-                        </div>
-                    </div>
-
-                    <!-- Default Configurations Display -->
-                    <div v-if="defaultConfigurations.length" class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Available Default Alert Types</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">These are preset alert configurations you can enable. Creating a custom alert will override the default.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div
-                                v-for="config in defaultConfigurations"
-                                :key="config.alert_type"
-                                class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                            >
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ config.alert_type_label || alertTypes[config.alert_type] || config.alert_type }}
-                                    </h4>
-                                    <Badge :class="getAlertLevelColor(config.alert_level)">
-                                        {{ config.alert_level }}
-                                    </Badge>
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    <span v-if="config.threshold_days">{{ config.threshold_days }} days threshold</span>
-                                    <span v-else>Immediate</span>
-                                </p>
-                                <div class="flex flex-wrap gap-1 mt-2">
-                                    <Badge
-                                        v-for="channel in config.notification_channels"
-                                        :key="channel"
-                                        variant="outline"
-                                        class="text-xs"
-                                    >
-                                        {{ notificationChannels[channel] || channel }}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Current Alert Configurations -->
-                    <div v-if="alertConfigurations.length" class="space-y-4">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Your Custom Alert Configurations</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">These are your personalized alerts that override the defaults and monitor all your websites.</p>
+                            <h3 class="text-lg font-semibold text-foreground">
+                                SSL Certificate Expiry Alerts
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Configure when to be notified about certificate expiration
+                            </p>
                         </div>
-                        <div class="space-y-2">
+                    </div>
+
+                    <div class="space-y-4">
+                        <div
+                            v-for="alert in sslExpiryAlerts"
+                            :key="`ssl-expiry-${alert.threshold_days}`"
+                            :class="[
+                                'group relative p-4 rounded-lg border transition-colors duration-200 cursor-pointer',
+                                alert.enabled
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                                    : 'bg-card border-border hover:bg-accent/50'
+                            ]"
+                            @click="toggleGlobalAlert('ssl_expiry', alert.threshold_days, alert.enabled, alert.id)"
+                        >
+                            <!-- Enabled indicator line -->
                             <div
-                                v-for="alert in alertConfigurations"
-                                :key="alert.id"
-                                class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
-                            >
-                                <div class="flex items-center space-x-4">
-                                    <Checkbox :checked="alert.enabled" disabled />
+                                v-if="alert.enabled"
+                                class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-xl"
+                            ></div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div :class="[
+                                        'w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200',
+                                        alert.enabled
+                                            ? 'bg-emerald-500 text-white'
+                                            : getAlertLevelColor(alert.level)
+                                    ]">
+                                        <Shield class="h-5 w-5" />
+                                    </div>
                                     <div>
-                                        <div class="font-medium text-gray-900 dark:text-white">
-                                            {{ alert.alert_type_label }}
-                                        </div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-400">
-                                            <span v-if="alert.threshold_days">{{ alert.threshold_days }} days threshold</span>
-                                            <span v-if="alert.threshold_response_time"> • {{ alert.threshold_response_time }}ms max response</span>
-                                            <span v-if="alert.notification_channels?.length"> • {{ alert.notification_channels.length }} channel{{ alert.notification_channels.length !== 1 ? 's' : '' }}</span>
-                                            <span v-if="alert.last_triggered_at" class="text-orange-600 dark:text-orange-400"> • Last: {{ new Date(alert.last_triggered_at).toLocaleDateString() }}</span>
-                                        </div>
+                                        <h4 class="font-medium text-foreground flex items-center gap-2">
+                                            {{ alert.label }}
+                                            <span v-if="alert.enabled" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-100">
+                                                Active
+                                            </span>
+                                        </h4>
+                                        <p class="text-sm text-muted-foreground">
+                                            {{ alert.level.charAt(0).toUpperCase() + alert.level.slice(1) }} priority
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <Badge :class="getAlertLevelColor(alert.alert_level)">
-                                        {{ alert.alert_level }}
-                                    </Badge>
-                                    <div class="flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            @click="openConfigureDialog(alert)"
-                                        >
-                                            <Settings class="h-4 w-4 mr-1" />
-                                            Configure
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            class="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            @click="deleteAlert(alert.id)"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
+
+                                <!-- Toggle Switch -->
+                                <div class="flex items-center gap-2">
+                                    <span :class="[
+                                        'text-sm font-medium',
+                                        alert.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'
+                                    ]">
+                                        {{ alert.enabled ? 'On' : 'Off' }}
+                                    </span>
+                                    <button
+                                        :class="[
+                                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none',
+                                            alert.enabled
+                                                ? 'bg-emerald-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
+                                        ]"
+                                        role="switch"
+                                        :aria-checked="alert.enabled"
+                                    >
+                                        <span
+                                            :class="[
+                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                alert.enabled ? 'translate-x-6' : 'translate-x-1'
+                                            ]"
+                                        />
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </Card>
 
-                    <!-- Empty State -->
-                    <div v-else class="text-center py-12">
-                        <div class="text-gray-400 text-6xl mb-4">🔔</div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Alert Configurations</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">
-                            Start monitoring your websites by adding some alert configurations.
-                        </p>
-                        <Button @click="showAddAlertDialog = true">
-                            <Plus class="h-4 w-4 mr-2" />
-                            Add First Alert
-                        </Button>
+            <!-- Uptime Alerts -->
+            <Card>
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                            <Zap class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground">
+                                Uptime Monitoring Alerts
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Get notified when websites go down or recover
+                            </p>
+                        </div>
                     </div>
-                </Card>
-            </div>
+
+                    <div class="space-y-4">
+                        <div
+                            v-for="alert in uptimeAlerts"
+                            :key="`uptime-${alert.alert_type}-${alert.id}`"
+                            :class="[
+                                'group relative p-4 rounded-lg border transition-colors duration-200 cursor-pointer',
+                                alert.enabled
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                                    : 'bg-card border-border hover:bg-accent/50'
+                            ]"
+                            @click="toggleGlobalAlert(alert.alert_type, alert.threshold_days, alert.enabled, alert.id)"
+                        >
+                            <!-- Enabled indicator line -->
+                            <div
+                                v-if="alert.enabled"
+                                class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-xl"
+                            ></div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div :class="[
+                                        'w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200',
+                                        alert.enabled
+                                            ? 'bg-blue-500 text-white'
+                                            : getAlertLevelColor(alert.alert_level)
+                                    ]">
+                                        <Zap class="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-foreground flex items-center gap-2">
+                                            {{ alert.alert_type_label }}
+                                            <span v-if="alert.enabled" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                                                Active
+                                            </span>
+                                        </h4>
+                                        <p class="text-sm text-muted-foreground">
+                                            {{ alert.alert_level.charAt(0).toUpperCase() + alert.alert_level.slice(1) }} priority
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Toggle Switch -->
+                                <div class="flex items-center gap-2">
+                                    <span :class="[
+                                        'text-sm font-medium',
+                                        alert.enabled ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+                                    ]">
+                                        {{ alert.enabled ? 'On' : 'Off' }}
+                                    </span>
+                                    <button
+                                        :class="[
+                                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none',
+                                            alert.enabled
+                                                ? 'bg-blue-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
+                                        ]"
+                                        role="switch"
+                                        :aria-checked="alert.enabled"
+                                    >
+                                        <span
+                                            :class="[
+                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                alert.enabled ? 'translate-x-6' : 'translate-x-1'
+                                            ]"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+
+            <!-- Response Time Alerts -->
+            <Card v-if="responseTimeAlerts.length > 0">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 bg-orange-50 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                            <Clock class="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-foreground">
+                                Response Time Alerts
+                            </h3>
+                            <p class="text-sm text-muted-foreground">
+                                Get notified when response times exceed thresholds
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div
+                            v-for="alert in responseTimeAlerts"
+                            :key="`response-time-${alert.threshold_response_time}-${alert.id}`"
+                            :class="[
+                                'group relative p-4 rounded-lg border transition-colors duration-200 cursor-pointer',
+                                alert.enabled
+                                    ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                                    : 'bg-card border-border hover:bg-accent/50'
+                            ]"
+                            @click="toggleGlobalAlert(alert.alert_type, alert.threshold_days, alert.enabled, alert.id)"
+                        >
+                            <!-- Enabled indicator line -->
+                            <div
+                                v-if="alert.enabled"
+                                class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500 rounded-l-xl"
+                            ></div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div :class="[
+                                        'w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200',
+                                        alert.enabled
+                                            ? 'bg-orange-500 text-white'
+                                            : getAlertLevelColor(alert.alert_level)
+                                    ]">
+                                        <Clock class="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-foreground flex items-center gap-2">
+                                            {{ alert.alert_type_label }}
+                                            <span v-if="alert.enabled" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+                                                Active
+                                            </span>
+                                        </h4>
+                                        <p class="text-sm text-muted-foreground">
+                                            Threshold: {{ alert.threshold_response_time }}ms
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Toggle Switch -->
+                                <div class="flex items-center gap-2">
+                                    <span :class="[
+                                        'text-sm font-medium',
+                                        alert.enabled ? 'text-orange-600 dark:text-orange-400' : 'text-muted-foreground'
+                                    ]">
+                                        {{ alert.enabled ? 'On' : 'Off' }}
+                                    </span>
+                                    <button
+                                        :class="[
+                                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none',
+                                            alert.enabled
+                                                ? 'bg-orange-500'
+                                                : 'bg-gray-300 dark:bg-gray-600'
+                                        ]"
+                                        role="switch"
+                                        :aria-checked="alert.enabled"
+                                    >
+                                        <span
+                                            :class="[
+                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                alert.enabled ? 'translate-x-6' : 'translate-x-1'
+                                            ]"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+
+            <!-- Next Steps Card -->
+            <Card class="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                <div class="p-6">
+                    <div class="flex items-start gap-4">
+                        <!-- Simple icon -->
+                        <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012 2v10a2 2 0 01-2 2H9a2 2 0 01-2-2V5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h8M3 17h8" />
+                            </svg>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-foreground mb-2">
+                                Ready to Configure Specific Websites?
+                            </h3>
+                            <p class="text-muted-foreground mb-4">
+                                Override these global templates for individual websites with custom alert settings. Each website can have its own unique notification preferences while inheriting the defaults you've configured here.
+                            </p>
+
+                            <!-- Simple CTA Button -->
+                            <Button
+                                @click="router.visit('/ssl/websites')"
+                                variant="default"
+                                size="lg"
+                                class="inline-flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                Configure Website Alerts
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+        </div>
     </ModernSettingsLayout>
 </template>

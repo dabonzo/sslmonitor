@@ -11,9 +11,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Run the TestUserSeeder which sets up our real test data
-        $this->call(TestUserSeeder::class);
+        // Create global alert templates for all existing users
+        $this->call([
+            GlobalAlertTemplatesSeeder::class,
+        ]);
 
-        $this->command->info('Database seeded successfully with real test data!');
+        $this->command->info('Database seeded successfully!');
+        $this->command->info('Global alert templates have been created for all existing users.');
+        $this->command->info('');
+        $this->command->info('For development with test data, run:');
+        $this->command->info('  php artisan db:seed --class=TestUserSeeder');
     }
 }

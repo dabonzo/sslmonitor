@@ -1606,6 +1606,111 @@ bulkTransferToPersonalForm.post = (options?: RouteQueryOptions): RouteFormDefini
 
 bulkTransferToPersonal.form = bulkTransferToPersonalForm
 
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+export const alerts = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: alerts.url(args, options),
+    method: 'get',
+})
+
+alerts.definition = {
+    methods: ["get","head"],
+    url: '/ssl/websites/{website}/alerts',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+alerts.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { website: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { website: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            website: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        website: typeof args.website === 'object'
+        ? args.website.id
+        : args.website,
+    }
+
+    return alerts.definition.url
+            .replace('{website}', parsedArgs.website.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+alerts.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: alerts.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+alerts.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: alerts.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+const alertsForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: alerts.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+alertsForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: alerts.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\Settings\AlertsController::alerts
+* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @route '/ssl/websites/{website}/alerts'
+*/
+alertsForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: alerts.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+alerts.form = alertsForm
+
 const websites = {
     index: Object.assign(index, index),
     create: Object.assign(create, create),
@@ -1626,6 +1731,7 @@ const websites = {
     transferOptions: Object.assign(transferOptions, transferOptions),
     bulkTransferToTeam: Object.assign(bulkTransferToTeam, bulkTransferToTeam),
     bulkTransferToPersonal: Object.assign(bulkTransferToPersonal, bulkTransferToPersonal),
+    alerts: Object.assign(alerts, alerts),
 }
 
 export default websites

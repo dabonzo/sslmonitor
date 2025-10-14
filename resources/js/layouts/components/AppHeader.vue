@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { useThemeStore } from '@/stores/theme'
 import ThemeCustomizer from '@/components/ThemeCustomizer.vue'
@@ -19,7 +19,7 @@ import {
   BarChart3,
   Users
 } from 'lucide-vue-next'
-import { horizontalMenuItems } from '@/config/navigation'
+import { mainMenuItems, getDebugMenuItems } from '@/config/navigation'
 
 interface Props {
   title?: string
@@ -32,6 +32,15 @@ const page = usePage()
 const user = page.props.auth.user
 
 const themeStore = useThemeStore()
+
+// Get horizontal menu items including debug menu items
+const horizontalMenuItems = computed(() => {
+  const auth = page.props.auth as any
+  const config = page.props.config as any
+  const debugItems = getDebugMenuItems(auth, config)
+
+  return [...mainMenuItems, ...debugItems]
+})
 
 // Dropdown states
 const showNotifications = ref(false)

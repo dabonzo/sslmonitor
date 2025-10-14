@@ -128,6 +128,17 @@ return [
          * the next number of given days.
          */
         'fire_expiring_soon_event_if_certificate_expires_within_days' => 10,
+
+        /*
+         * An SSL certificate check will be performed if the last check was performed more than the
+         * given number of minutes ago. This allows SSL certificates to be checked less frequently
+         * than uptime checks, since SSL certificates don't change as often.
+         *
+         * Default: 720 minutes (12 hours) - reasonable for SSL certificate monitoring
+         * When an SSL check fails we'll check the SSL certificate for that monitor every time `monitor:check-uptime`
+         * runs regardless of this setting.
+         */
+        'run_interval_in_minutes' => env('SSL_CHECK_INTERVAL_MINUTES', 720),
     ],
 
     /*

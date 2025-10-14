@@ -8,6 +8,7 @@ import {
   Users,
   HelpCircle,
   TrendingUp,
+  Bug,
 } from 'lucide-vue-next'
 
 export interface MenuItem {
@@ -151,4 +152,48 @@ export function findActiveMenuItem(pathname: string): MenuItem | null {
   }
 
   return null
+}
+
+// Debug menu items - only visible to authorized users
+export function getDebugMenuItems(auth: any, config: any): MenuItem[] {
+  // Check if debug menu is enabled and user has access
+  if (!config?.debug?.menu_enabled) {
+    return []
+  }
+
+  const user = auth.user
+  if (!user) {
+    return []
+  }
+
+  // Check email-based access
+  const allowedUsers = config.debug.menu_users ?
+    config.debug.menu_users.split(',').map((email: string) => email.trim()) : []
+
+  // Check role-based access
+  const allowedRoles = config.debug.menu_roles ?
+    config.debug.menu_roles.split(',').map((role: string) => role.trim()) : []
+
+  const hasEmailAccess = allowedUsers.includes(user.email)
+  const hasRoleAccess = allowedRoles.includes(user.primary_role)
+
+  if (!hasEmailAccess && !hasRoleAccess) {
+    return []
+  }
+
+  return [
+    {
+      key: 'debug',
+      title: 'Debug',
+      icon: Bug,
+      description: 'Development & testing tools',
+      children: [
+        { title: 'SSL Overrides', href: '/debug/ssl-overrides' },
+        { title: 'Alert Testing', href: '/debug/alerts' },
+        // Future debug modules can be added here
+        // { title: 'Monitor Inspector', href: '/debug/monitor-inspector' },
+        // { title: 'Queue Monitor', href: '/debug/queue' },
+      ]
+    }
+  ]
 }

@@ -36,8 +36,8 @@ class AlertConfiguration extends Model
     public const ALERT_SSL_EXPIRY = 'ssl_expiry';
     public const ALERT_SSL_INVALID = 'ssl_invalid';
     public const ALERT_UPTIME_DOWN = 'uptime_down';
+    public const ALERT_UPTIME_UP = 'uptime_up';
     public const ALERT_RESPONSE_TIME = 'response_time';
-    public const ALERT_LETS_ENCRYPT_RENEWAL = 'lets_encrypt_renewal';
 
     // Alert levels (Let's Encrypt focused)
     public const LEVEL_INFO = 'info';           // 30 days
@@ -97,12 +97,10 @@ class AlertConfiguration extends Model
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
-
-            // Let's Encrypt Renewal - Separate from general SSL expiry
             [
-                'alert_type' => self::ALERT_LETS_ENCRYPT_RENEWAL,
-                'enabled' => true,
-                'threshold_days' => 3,
+                'alert_type' => self::ALERT_SSL_EXPIRY,
+                'enabled' => true, // Enabled - expired certificate alert
+                'threshold_days' => 0,
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
@@ -124,33 +122,56 @@ class AlertConfiguration extends Model
                 'alert_level' => self::LEVEL_CRITICAL,
                 'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
-
-            // Response Time
             [
-                'alert_type' => self::ALERT_RESPONSE_TIME,
+                'alert_type' => self::ALERT_UPTIME_UP,
                 'enabled' => true,
                 'threshold_days' => null,
-                'threshold_response_time' => 5000, // 5 seconds
+                'alert_level' => self::LEVEL_INFO,
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
+            ],
+
+            // Response Time - Disabled by default per your specifications
+            [
+                'alert_type' => self::ALERT_RESPONSE_TIME,
+                'enabled' => false, // Disabled by default
+                'threshold_days' => null,
+                'threshold_response_time' => 5000, // 5 seconds - Warning level
                 'alert_level' => self::LEVEL_WARNING,
-                'notification_channels' => [self::CHANNEL_DASHBOARD],
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
+            ],
+            [
+                'alert_type' => self::ALERT_RESPONSE_TIME,
+                'enabled' => false, // Disabled by default
+                'threshold_days' => null,
+                'threshold_response_time' => 10000, // 10 seconds - Critical level
+                'alert_level' => self::LEVEL_CRITICAL,
+                'notification_channels' => [self::CHANNEL_EMAIL, self::CHANNEL_DASHBOARD],
             ],
         ];
     }
 
-    public function shouldTrigger(array $checkData): bool
+    public function shouldTrigger(array $checkData, bool $bypassCooldown = false): bool
     {
         if (!$this->enabled) {
             return false;
         }
 
-        // Cooldown check - don't spam alerts (24 hour minimum)
-        if ($this->last_triggered_at && $this->last_triggered_at->diffInHours(now()) < 24) {
-            return false;
+        // Hybrid alert logic: immediate critical alerts, daily warnings
+        if (!$bypassCooldown) {
+            // Check if we should trigger based on alert urgency
+            if ($this->isImmediateAlert($checkData)) {
+                // Critical alerts - no cooldown (expired SSL, uptime down)
+                // Always trigger these immediately
+            } else {
+                // Daily warnings - check if already sent today
+                if ($this->alreadySentToday()) {
+                    return false;
+                }
+            }
         }
 
         return match($this->alert_type) {
             self::ALERT_SSL_EXPIRY => $this->shouldTriggerSslExpiry($checkData),
-            self::ALERT_LETS_ENCRYPT_RENEWAL => $this->shouldTriggerLetsEncryptRenewal($checkData),
             self::ALERT_SSL_INVALID => $this->shouldTriggerSslInvalid($checkData),
             self::ALERT_UPTIME_DOWN => $this->shouldTriggerUptimeDown($checkData),
             self::ALERT_RESPONSE_TIME => $this->shouldTriggerResponseTime($checkData),
@@ -166,6 +187,12 @@ class AlertConfiguration extends Model
             return false;
         }
 
+        // For 0-day threshold (expired certificates), trigger when days <= 0
+        if ($this->threshold_days === 0) {
+            return $daysRemaining <= 0;
+        }
+
+        // For positive thresholds, trigger when days <= threshold and still valid
         return $daysRemaining <= $this->threshold_days && $daysRemaining >= 0;
     }
 
@@ -224,11 +251,40 @@ class AlertConfiguration extends Model
     {
         return match($this->alert_type) {
             self::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
-            self::ALERT_LETS_ENCRYPT_RENEWAL => 'Let\'s Encrypt Renewal',
             self::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
             self::ALERT_UPTIME_DOWN => 'Website Down',
+            self::ALERT_UPTIME_UP => 'Website Recovered',
             self::ALERT_RESPONSE_TIME => 'Slow Response Time',
             default => 'Unknown Alert',
         };
+    }
+
+    /**
+     * Check if this alert should be sent immediately (critical alerts)
+     */
+    private function isImmediateAlert(array $checkData): bool
+    {
+        return match($this->alert_type) {
+            self::ALERT_UPTIME_DOWN => true, // Always immediate
+            self::ALERT_SSL_INVALID => true, // Always immediate
+            self::ALERT_SSL_EXPIRY => $this->shouldTriggerSslExpiry($checkData) &&
+                                      ($checkData['ssl_days_remaining'] ?? null) <= 0, // Only immediate if expired
+            self::ALERT_LETS_ENCRYPT_RENEWAL => false, // Never immediate (warnings only)
+            self::ALERT_RESPONSE_TIME => false, // Never immediate (warnings only)
+            default => false,
+        };
+    }
+
+    /**
+     * Check if this alert was already sent within the last 24 hours
+     */
+    private function alreadySentToday(): bool
+    {
+        if (!$this->last_triggered_at) {
+            return false;
+        }
+
+        // Check if last trigger was within the last 24 hours
+        return $this->last_triggered_at->gt(now()->subHours(24));
     }
 }

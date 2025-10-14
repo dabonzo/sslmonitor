@@ -134,12 +134,12 @@ return [
     |
     */
 
-    'debug' => [
-        'menu_enabled' => env('DEBUG_MENU_ENABLED', false),
-        'menu_users' => env('DEBUG_MENU_USERS', ''),
-        'menu_roles' => env('DEBUG_MENU_ROLES', 'OWNER,ADMIN'),
-        'menu_audit' => env('DEBUG_MENU_AUDIT', true),
-        'overrides_expire_hours' => env('DEBUG_OVERRIDES_EXPIRE_HOURS', 24),
+    'debug_menu' => [
+        'menu_enabled' => true, // Hardcoded for testing
+        'menu_users' => 'bonzo@konjscina.com', // Hardcoded for testing
+        'menu_roles' => 'OWNER,ADMIN',
+        'menu_audit' => true,
+        'overrides_expire_hours' => 24,
     ],
 
 ];

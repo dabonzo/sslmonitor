@@ -8,6 +8,13 @@ use App\Models\Website;
 use App\Models\Team;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * DEVELOPMENT ONLY - Creates test data for local development
+ *
+ * Run with: php artisan db:seed --class=TestUserSeeder
+ *
+ * DO NOT run in production!
+ */
 class TestUserSeeder extends Seeder
 {
     public function run(): void
@@ -118,23 +125,15 @@ class TestUserSeeder extends Seeder
         }
 
         // Create default alert configurations for the user
+        // Note: These will be supplemented by AlertService::createDefaultAlerts() when websites are created
         $alertConfigurations = [
-            [
-                'user_id' => $user->id,
-                'alert_type' => \App\Models\AlertConfiguration::ALERT_SSL_EXPIRY,
-                'enabled' => true,
-                'threshold_days' => 7,
-                'alert_level' => \App\Models\AlertConfiguration::LEVEL_URGENT,
-                'notification_channels' => [\App\Models\AlertConfiguration::CHANNEL_EMAIL, \App\Models\AlertConfiguration::CHANNEL_DASHBOARD],
-                'custom_message' => 'SSL certificate for {website} expires in {days} days!',
-            ],
             [
                 'user_id' => $user->id,
                 'alert_type' => \App\Models\AlertConfiguration::ALERT_UPTIME_DOWN,
                 'enabled' => true,
                 'alert_level' => \App\Models\AlertConfiguration::LEVEL_CRITICAL,
                 'notification_channels' => [\App\Models\AlertConfiguration::CHANNEL_EMAIL, \App\Models\AlertConfiguration::CHANNEL_DASHBOARD],
-                'custom_message' => 'Website {website} is down!',
+                'custom_message' => null, // No custom messages - professional templates only
             ],
         ];
 

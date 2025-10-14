@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('settings/alerts', [AlertsController::class, 'edit'])->name('settings.alerts.edit');
     Route::post('settings/alerts', [AlertsController::class, 'store'])->name('settings.alerts.store');
+    Route::post('settings/alerts/global/update', [AlertsController::class, 'updateGlobal'])->name('settings.alerts.global.update');
     Route::put('settings/alerts/{alertConfiguration}', [AlertsController::class, 'update'])->name('settings.alerts.update');
+    Route::patch('settings/alerts/{alertConfiguration}', [AlertsController::class, 'update'])->name('settings.alerts.patch');
     Route::delete('settings/alerts/{alertConfiguration}', [AlertsController::class, 'destroy'])->name('settings.alerts.destroy');
+    Route::post('settings/alerts/{alertConfiguration}/test', [AlertsController::class, 'testAlert'])->name('settings.alerts.test');
 });

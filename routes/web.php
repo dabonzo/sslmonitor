@@ -46,6 +46,9 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     // Bulk transfer routes
     Route::post('websites/bulk-transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToTeam'])->name('websites.bulk-transfer-to-team');
     Route::post('websites/bulk-transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'bulkTransferToPersonal'])->name('websites.bulk-transfer-to-personal');
+
+    // Website alerts routes
+    Route::get('websites/{website}/alerts', [App\Http\Controllers\Settings\AlertsController::class, 'getWebsiteAlerts'])->name('websites.alerts');
 });
 
 // Analytics Routes
@@ -92,13 +95,22 @@ Route::prefix('team/invitations')->name('team.invitations.')->group(function () 
 });
 
 // Debug Routes (Development & Testing Only)
-Route::middleware(['auth', 'verified'])->prefix('debug')->name('debug.')->group(function () {
+Route::middleware(['auth', 'verified', 'debug.access'])->prefix('debug')->name('debug.')->group(function () {
     // SSL Overrides
     Route::get('/ssl-overrides', [App\Http\Controllers\Debug\SslOverridesController::class, 'index'])->name('ssl-overrides.index');
     Route::post('/ssl-overrides', [App\Http\Controllers\Debug\SslOverridesController::class, 'store'])->name('ssl-overrides.store');
+    Route::put('/ssl-overrides/{id}', [App\Http\Controllers\Debug\SslOverridesController::class, 'update'])->name('ssl-overrides.update');
     Route::delete('/ssl-overrides/{id}', [App\Http\Controllers\Debug\SslOverridesController::class, 'destroy'])->name('ssl-overrides.destroy');
     Route::post('/ssl-overrides/bulk', [App\Http\Controllers\Debug\SslOverridesController::class, 'bulkStore'])->name('ssl-overrides.bulk-store');
     Route::delete('/ssl-overrides/bulk', [App\Http\Controllers\Debug\SslOverridesController::class, 'bulkDestroy'])->name('ssl-overrides.bulk-destroy');
+    Route::post('/ssl-overrides/test', [App\Http\Controllers\Debug\SslOverridesController::class, 'testAlerts'])->name('ssl-overrides.test');
+
+    // Alert Testing
+    Route::get('/alerts', [App\Http\Controllers\Debug\AlertTestingController::class, 'index'])->name('alerts.index');
+    Route::post('/alerts/test-all', [App\Http\Controllers\Debug\AlertTestingController::class, 'testAllAlerts'])->name('alerts.test-all');
+    Route::post('/alerts/test-ssl', [App\Http\Controllers\Debug\AlertTestingController::class, 'testSslAlerts'])->name('alerts.test-ssl');
+    Route::post('/alerts/test-uptime', [App\Http\Controllers\Debug\AlertTestingController::class, 'testUptimeAlerts'])->name('alerts.test-uptime');
+    Route::post('/alerts/test-response-time', [App\Http\Controllers\Debug\AlertTestingController::class, 'testResponseTimeAlerts'])->name('alerts.test-response-time');
 });
 
 require __DIR__.'/settings.php';
