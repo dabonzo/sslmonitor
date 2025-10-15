@@ -47,30 +47,4 @@ claude.md
 
 # Development-only documentation
 old_docs/
-
-# Backup files
-*.backup
-*.bak
-*.swp
-*.swo
-*~
-
-# Development documentation (not for production)
-*_PLAN.md
-*_SUMMARY.md
-*_REPORT.md
-*_SPECIFICATION*.md
-*_WORKFLOW.md
-*_STRATEGY.md
-DEVELOPMENT_*.md
-MIGRATION_*.md
-MANUAL_*.md
-TESTING_OPTIMIZATION_GUIDE.md
-PLUGIN_ARCHITECTURE.md
-PRODUCTION_AUTOMATION_*.md
-AUTOMATION_*.md
-TECH_STACK.md
-VRISTO_*.md
-CURRENT_STATE_*.md
-CONSOLE_*.md
 services/js-content-fetcher/node_modules/
