@@ -2,8 +2,8 @@
 
 **Purpose**: This document provides essential information for Claude Code to understand the codebase structure, development flow, and where to start when adding new features or debugging.
 
-**Last Updated**: October 12, 2025
-**Test Suite Status**: 494 tests passing, 10 failing (98.0% success rate)
+**Last Updated**: October 17, 2025
+**Test Suite Status**: 530 tests passing, 13 skipped (100% success rate) ✅
 
 ---
 
@@ -14,9 +14,24 @@
 ### Core Functionality
 - **SSL Certificate Monitoring**: Automated daily checks with expiry alerts
 - **Uptime Monitoring**: Real-time availability and response time tracking
+- **Alert System**: Multi-level alerting (INFO → WARNING → URGENT → CRITICAL) with website-specific configurations
 - **Team Management**: Role-based collaboration (OWNER, ADMIN, VIEWER)
 - **JavaScript Content Validation**: Dynamic content checking with BrowserShot
 - **Advanced Notifications**: Toast system with Laravel flash message integration
+- **Debug Menu**: Comprehensive debug tools for SSL overrides and alert testing
+- **Modern Styling**: Tailwind CSS v4 with semantic token system (see `docs/TAILWIND_V4_STYLING_GUIDE.md`)
+
+### Alert System (Recently Fixed ✅)
+**Status**: Production ready with 5 alert types
+- `ssl_expiry` - SSL certificate expiring soon (7d, 3d, 0d thresholds)
+- `ssl_invalid` - SSL certificate invalid or error
+- `uptime_down` - Website unreachable
+- `uptime_up` - Website recovered
+- `response_time` - Slow response time detected
+
+**Critical Fix Applied**: The alert system was sending duplicate alerts (6 emails instead of 1) due to fetching both global templates and website-specific configurations. Fixed by using ONLY website-specific configurations during monitoring.
+
+**Documentation**: See `docs/ALERT_SYSTEM_ARCHITECTURE.md` and `docs/ALERT_TESTING_FIX_DOCUMENTATION.md` for complete details.
 
 ### 🔍 **Before Starting: Ask Clarifying Questions**
 
@@ -145,9 +160,11 @@ npm run dev
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        LARAVEL 12 BACKEND                              │
 │                                                                         │
-│  ├── Models (9 total)                                                   │
+│  ├── Models (11 total)                                                  │
 │  │   ├── Monitor.php (EXTENDED Spatie model)                           │
 │  │   ├── Website.php (Team-aware website management)                   │
+│  │   ├── AlertConfiguration.php (Multi-level alert system)             │
+│  │   ├── DebugOverride.php (Debug SSL/uptime testing)                  │
 │  │   ├── User.php (2FA enabled, team relationships)                    │
 │  │   ├── Team.php (Team management)                                     │
 │  │   └── TeamMember.php (Role-based permissions)                       │
@@ -155,8 +172,15 @@ npm run dev
 │  ├── Controllers                                                        │
 │  │   ├── SSL/WebsiteController.php (CRUD operations)                    │
 │  │   ├── Settings/TeamController.php (Team management)                 │
+│  │   ├── Settings/AlertsController.php (Alert management)              │
+│  │   ├── Debug/AlertTestingController.php (Alert testing)              │
 │  │   ├── Auth/ (2FA, login, registration)                             │
 │  │   └── DashboardController.php (Main dashboard)                      │
+│  │                                                                       │
+│  ├── Services                                                           │
+│  │   ├── AlertService.php (Alert checking & triggering)                │
+│  │   ├── MonitorIntegrationService.php (Spatie integration)            │
+│  │   └── SslCertificateAnalysisService.php (SSL validation)            │
 │  │                                                                       │
 │  ├── Jobs                                                               │
 │  │   ├── ImmediateWebsiteCheckJob.php (Manual "Check Now")              │
@@ -399,13 +423,20 @@ npm run build
 
 ## 🧪 **Testing Strategy**
 
-### **Test Structure (534 total tests)**
+### **Test Structure (530 passing tests, 13 skipped)**
 ```
 tests/
 ├── Unit/           - Unit tests for services and utilities
 ├── Feature/        - Feature tests for application flows
 └── Browser/        - Playwright browser tests for UI interactions
 ```
+
+**Current Test Results**:
+- ✅ 530 tests passing (100% pass rate)
+- ⏭️ 13 tests skipped (conditional tests)
+- 🚫 0 failures
+- ⚡ ~6.4s execution time (parallel mode with 24 processes)
+- 📊 2,200+ assertions verified
 
 ### **Common Test Patterns**
 ```bash
@@ -425,13 +456,18 @@ tests/
 
 ### **🚀 Performance Testing Best Practices**
 
-#### **Parallel Testing (77% faster)**
+#### **Parallel Testing (Significantly Faster - RECOMMENDED)**
 ```bash
-# Sequential: ~70 seconds
+# Sequential: ~25-30 seconds
 ./vendor/bin/sail artisan test
 
-# Parallel: ~16 seconds (RECOMMENDED)
+# Parallel: ~6.7 seconds (RECOMMENDED) - 4x faster!
 ./vendor/bin/sail artisan test --parallel
+
+# Results:
+# Tests:    1 warning, 13 skipped, 508 passed (2155 assertions)
+# Duration: 6.71s
+# Parallel: 24 processes
 ```
 
 #### **Test Data Management**
@@ -467,16 +503,26 @@ if ($websites->count() < 4) {
 ```
 
 ### **📊 Test Suite Health**
-- **Current Status**: 494 passing, 10 failing (98.0% success rate)
-- **Recent Achievement**: Fixed 479 failing tests (96% reduction) + Performance optimizations
-- **Key Fixes**: Database setup, type casting, observer logic, data count issues, Monitor model imports
-- **Performance**: Individual tests under 1 second, full suite in 17.0s parallel
+- **Current Status**: 530 passing, 13 skipped (100% success rate) ✅
+- **Recent Achievement**: Fixed ALL test failures + Alert system bugs resolved
+- **Key Fixes**: Database setup, type casting, observer logic, data count issues, Monitor model imports, alert system duplicate bugs
+- **Performance**: Individual tests under 1 second, full suite in ~6.4s parallel
+- **Alert System**: All 530 tests passing after fixing duplicate alert bug and removing Let's Encrypt feature
 
 ### **📚 Testing Documentation**
 - **Comprehensive Guide**: See `docs/TESTING_INSIGHTS.md` for detailed patterns
 - **Performance Analysis**: Parallel testing impact and optimization strategies
 - **Debugging Strategies**: Common failure patterns and solutions
 - **Test Architecture**: Modern Pest 4 setup with centralized data management
+
+### **📖 Documentation Index**
+For a complete overview of all available documentation, see **[docs/README.md](README.md)**:
+- 23 active documentation files organized by category
+- Quick reference guide by task and role
+- Architecture documentation (Alert System, Queue System, Teams)
+- Tailwind v4 styling guides (complete reference, quick reference, conversion summary)
+- Feature documentation and planning docs
+- Deployment guides and workflows
 
 ---
 
@@ -580,9 +626,13 @@ class Website extends Model
 |---------------|---------------|
 | **Navigation menus** | `resources/js/config/navigation.ts` |
 | **Theme functionality** | `resources/js/components/ThemeCustomizer.vue` |
+| **Tailwind v4 styling** | `docs/TAILWIND_V4_STYLING_GUIDE.md`, `docs/TAILWIND_V4_QUICK_REFERENCE.md` |
+| **Color definitions** | `resources/css/app.css` (Tailwind v4 semantic tokens) |
 | **Toast notifications** | `resources/js/composables/useToast.ts` |
 | **Website management** | `app/Http/Controllers/SSL/WebsiteController.php` |
 | **Team management** | `app/Http/Controllers/Settings/TeamController.php` |
+| **Alert system** | `app/Services/AlertService.php`, `app/Models/AlertConfiguration.php` |
+| **Alert testing/debug** | `app/Http/Controllers/Debug/AlertTestingController.php` |
 | **Monitoring logic** | `app/Models/Monitor.php` (CUSTOM extended Spatie model) |
 | **Scheduler tasks** | `routes/console.php` |
 | **Queue configuration** | `config/horizon.php` |
@@ -591,7 +641,7 @@ class Website extends Model
 
 ### **Database Schema**
 - Use **Laravel Boost MCP**: `mcp__laravel-boost__database-schema` with `database: "mariadb"`
-- Key tables: `websites`, `monitors`, `teams`, `team_members`, `users`
+- Key tables: `websites`, `monitors`, `alert_configurations`, `debug_overrides`, `teams`, `team_members`, `users`
 - **Quick schema check**: `mcp__laravel-boost__database-schema(database: "mariadb", filter: "table_name")`
 
 ### **Frontend Routes**

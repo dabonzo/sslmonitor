@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "playwright-extension": {
+      "disabled": true
+    }
+  }
+}

@@ -2,6 +2,8 @@
 
 This guide establishes consistent styling patterns for the SSL Monitor v4 application to ensure visual cohesion across all pages and components.
 
+> **Technical Implementation Guide**: For technical details about Tailwind v4 semantic tokens, CSS variable usage, and troubleshooting, see [TAILWIND_V4_STYLING_GUIDE.md](./TAILWIND_V4_STYLING_GUIDE.md) and [TAILWIND_V4_QUICK_REFERENCE.md](./TAILWIND_V4_QUICK_REFERENCE.md).
+
 ## Table of Contents
 - [Core Principles](#core-principles)
 - [Layout Structure](#layout-structure)
@@ -70,6 +72,8 @@ All pages should follow this basic structure:
 - `flex items-center space-x-2` - Horizontal button/link groups
 
 ## Semantic Color System
+
+> **Important**: This project uses Tailwind v4 semantic tokens. Numeric color scales (e.g., `bg-gray-300`, `text-blue-600`) are NOT supported. See [TAILWIND_V4_STYLING_GUIDE.md](./TAILWIND_V4_STYLING_GUIDE.md) for technical details.
 
 ### Core Semantic Classes
 

@@ -1,6 +1,7 @@
 # Teams and Roles Documentation
 
 ## Table of Contents
+- [Quick Reference](#quick-reference) ⚡ **Start Here**
 - [Overview](#overview)
 - [Roles](#roles)
 - [Permissions Matrix](#permissions-matrix)
@@ -8,6 +9,117 @@
 - [Website Management](#website-management)
 - [API Endpoints](#api-endpoints)
 - [Common Workflows](#common-workflows)
+
+---
+
+## Quick Reference
+
+### 🎯 Quick Role Overview
+
+| Role | Key Abilities | Cannot Do |
+|------|---------------|-----------|
+| **OWNER** | Everything | Change own role without another owner |
+| **ADMIN** | Manage websites, invite members, change VIEWER/ADMIN roles | Touch OWNER role, delete team |
+| **VIEWER** | View everything | Modify anything |
+
+### 🔑 Permission Cheatsheet
+
+#### Team Management
+```
+Create team          → Anyone (becomes OWNER)
+Update team name     → OWNER only
+Delete team          → OWNER only
+Transfer ownership   → OWNER only
+```
+
+#### Member Management
+```
+Invite members       → OWNER, ADMIN
+Remove members       → OWNER only
+Change roles         → See table below
+```
+
+#### Website Management
+```
+View websites        → OWNER, ADMIN, VIEWER
+Add/Edit/Delete      → OWNER, ADMIN
+Transfer to/from     → OWNER, ADMIN
+```
+
+### 👥 Who Can Change Roles?
+
+| From → To | OWNER | ADMIN | VIEWER |
+|-----------|-------|-------|--------|
+| **VIEWER → ADMIN** | ✓ | ✓ | ✗ |
+| **VIEWER → OWNER** | ✓ | ✗ | ✗ |
+| **ADMIN → VIEWER** | ✓ | ✓ | ✗ |
+| **ADMIN → OWNER** | ✓ | ✗ | ✗ |
+| **OWNER → ADMIN** | ✓ | ✗ | ✗ |
+| **OWNER → VIEWER** | ✓ | ✗ | ✗ |
+
+**Golden Rule:** ✗ Nobody can change their own role
+
+### ⚡ Quick Scenarios
+
+#### Scenario: New Team Member
+```javascript
+// 1. Owner invites as VIEWER first
+POST /settings/team/1/invite { email: "...", role: "VIEWER" }
+
+// 2. Member accepts invitation (via email link)
+
+// 3. Later, Owner or Admin promotes to ADMIN
+PATCH /settings/team/1/members/10/role { role: "ADMIN" }
+```
+
+#### Scenario: Transfer Leadership
+```javascript
+// Old owner transfers to new owner
+POST /settings/team/1/transfer-ownership { new_owner_id: 42 }
+
+// Result: New owner is OWNER, old owner becomes ADMIN
+```
+
+#### Scenario: Share Website with Team
+```javascript
+// Transfer personal website to team
+POST /ssl/websites/100/transfer-to-team { team_id: 1 }
+
+// All team members can now see it
+// OWNER and ADMIN can edit it
+```
+
+### 💡 Pro Tips
+
+1. **Start restrictive, upgrade later**
+   - New members → VIEWER
+   - Proven contributors → ADMIN
+   - Team leads → OWNER
+
+2. **Always have 2+ OWNERs**
+   - Prevents lockout if primary owner unavailable
+   - Enables ownership transfer if needed
+
+3. **ADMIN is the sweet spot**
+   - Can manage day-to-day operations
+   - Can't accidentally delete the team
+   - Can handle most tasks independently
+
+4. **Use teams for shared responsibility**
+   - Production monitoring → Team
+   - Personal projects → Personal
+   - Client sites → Separate teams per client
+
+### 🚀 Getting Started Checklist
+
+- [ ] Create team with descriptive name
+- [ ] Add team description
+- [ ] Invite initial members (start with VIEWER)
+- [ ] Promote trusted members to ADMIN
+- [ ] Assign second OWNER for redundancy
+- [ ] Transfer relevant websites to team
+- [ ] Configure team alert settings
+- [ ] Set up email notifications
 
 ---
 
