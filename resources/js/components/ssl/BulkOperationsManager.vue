@@ -15,7 +15,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Operation Selection -->
           <div class="space-y-4">
-            <h4 class="font-medium text-gray-900 dark:text-gray-100">Available Operations</h4>
+            <h4 class="font-medium text-foreground dark:text-foreground">Available Operations</h4>
             <div class="space-y-2">
               <div v-for="operation in availableOperations" :key="operation.id" class="flex items-center space-x-3">
                 <Checkbox
@@ -24,7 +24,7 @@
                 />
                 <div class="flex items-center space-x-2">
                   <component :is="operation.icon" class="h-4 w-4" :class="operation.iconColor" />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ operation.name }}</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ operation.name }}</span>
                 </div>
               </div>
             </div>
@@ -32,7 +32,7 @@
 
           <!-- Scheduling Options -->
           <div class="space-y-4">
-            <h4 class="font-medium text-gray-900 dark:text-gray-100">Schedule Options</h4>
+            <h4 class="font-medium text-foreground dark:text-foreground">Schedule Options</h4>
             <div class="space-y-3">
               <div class="flex items-center space-x-3">
                 <input
@@ -42,7 +42,7 @@
                   id="immediate"
                   class="text-primary focus:ring-primary"
                 />
-                <label for="immediate" class="text-sm text-gray-700 dark:text-gray-300">Execute immediately</label>
+                <label for="immediate" class="text-sm text-foreground dark:text-muted-foreground">Execute immediately</label>
               </div>
               <div class="flex items-center space-x-3">
                 <input
@@ -52,7 +52,7 @@
                   id="scheduled"
                   class="text-primary focus:ring-primary"
                 />
-                <label for="scheduled" class="text-sm text-gray-700 dark:text-gray-300">Schedule for later</label>
+                <label for="scheduled" class="text-sm text-foreground dark:text-muted-foreground">Schedule for later</label>
               </div>
               <div v-if="schedulingMode === 'scheduled'" class="ml-6 space-y-2">
                 <input
@@ -66,28 +66,28 @@
 
           <!-- Notification Settings -->
           <div class="space-y-4">
-            <h4 class="font-medium text-gray-900 dark:text-gray-100">Notifications</h4>
+            <h4 class="font-medium text-foreground dark:text-foreground">Notifications</h4>
             <div class="space-y-3">
               <div class="flex items-center space-x-3">
                 <Checkbox
                   :checked="notificationSettings.email"
                   @update:checked="notificationSettings.email = $event"
                 />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Email notifications</span>
+                <span class="text-sm text-foreground dark:text-muted-foreground">Email notifications</span>
               </div>
               <div class="flex items-center space-x-3">
                 <Checkbox
                   :checked="notificationSettings.slack"
                   @update:checked="notificationSettings.slack = $event"
                 />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Slack notifications</span>
+                <span class="text-sm text-foreground dark:text-muted-foreground">Slack notifications</span>
               </div>
               <div class="flex items-center space-x-3">
                 <Checkbox
                   :checked="notificationSettings.dashboard"
                   @update:checked="notificationSettings.dashboard = $event"
                 />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Dashboard alerts</span>
+                <span class="text-sm text-foreground dark:text-muted-foreground">Dashboard alerts</span>
               </div>
             </div>
           </div>
@@ -128,8 +128,8 @@
               <div class="flex items-center space-x-3">
                 <component :is="getOperationIcon(operation.type)" class="h-4 w-4" :class="getOperationIconColor(operation.status)" />
                 <div>
-                  <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ operation.name }}</h4>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ operation.description }}</p>
+                  <h4 class="font-medium text-foreground dark:text-foreground">{{ operation.name }}</h4>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ operation.description }}</p>
                 </div>
               </div>
               <Badge :variant="getStatusVariant(operation.status)">
@@ -140,10 +140,10 @@
             <!-- Progress Bar -->
             <div v-if="operation.status === 'executing'" class="space-y-2">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Progress</span>
-                <span class="text-gray-900 dark:text-gray-100">{{ operation.progress.current }}/{{ operation.progress.total }}</span>
+                <span class="text-foreground dark:text-muted-foreground">Progress</span>
+                <span class="text-foreground dark:text-foreground">{{ operation.progress.current }}/{{ operation.progress.total }}</span>
               </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="w-full bg-muted dark:bg-muted rounded-full h-2">
                 <div
                   class="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   :style="{ width: `${(operation.progress.current / operation.progress.total) * 100}%` }"
@@ -152,7 +152,7 @@
             </div>
 
             <!-- Operation Details -->
-            <div class="mt-3 text-xs text-gray-500 dark:text-gray-500">
+            <div class="mt-3 text-xs text-muted-foreground dark:text-muted-foreground">
               <div>Scheduled: {{ formatDateTime(operation.scheduledAt) }}</div>
               <div v-if="operation.startedAt">Started: {{ formatDateTime(operation.startedAt) }}</div>
               <div v-if="operation.completedAt">Completed: {{ formatDateTime(operation.completedAt) }}</div>
@@ -204,13 +204,13 @@
                 <component :is="template.icon" class="h-4 w-4" :class="template.iconColor" />
               </div>
               <div class="flex-1">
-                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ template.name }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ template.description }}</p>
+                <h4 class="font-medium text-foreground dark:text-foreground">{{ template.name }}</h4>
+                <p class="text-sm text-foreground dark:text-muted-foreground mt-1">{{ template.description }}</p>
                 <div class="flex items-center space-x-4 mt-3">
                   <Button size="sm" @click="loadTemplate(template)">
                     Load Template
                   </Button>
-                  <span class="text-xs text-gray-500 dark:text-gray-500">
+                  <span class="text-xs text-muted-foreground dark:text-muted-foreground">
                     {{ template.operations.length }} operations
                   </span>
                 </div>
@@ -219,11 +219,11 @@
           </div>
 
           <!-- Create New Template -->
-          <div class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 transition-colors cursor-pointer" @click="createNewTemplate">
+          <div class="p-4 border-2 border-dashed border-border dark:border-border rounded-lg hover:border-blue-500 transition-colors cursor-pointer" @click="createNewTemplate">
             <div class="text-center">
-              <Plus class="h-6 w-6 mx-auto text-gray-400 mb-2" />
-              <h4 class="font-medium text-gray-900 dark:text-gray-100">Create Template</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Save current configuration</p>
+              <Plus class="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+              <h4 class="font-medium text-foreground dark:text-foreground">Create Template</h4>
+              <p class="text-sm text-foreground dark:text-muted-foreground mt-1">Save current configuration</p>
             </div>
           </div>
         </div>
@@ -313,7 +313,7 @@ const availableOperations = [
     id: 'certificate_check',
     name: 'Certificate Status Check',
     icon: Shield,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: 'force_renewal',
@@ -325,7 +325,7 @@ const availableOperations = [
     id: 'security_scan',
     name: 'Security Vulnerability Scan',
     icon: AlertTriangle,
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: 'backup_certificates',
@@ -379,7 +379,7 @@ const operationTemplates = ref<OperationTemplate[]>([
     operations: ['certificate_check', 'security_scan', 'backup_certificates'],
     icon: RefreshCw,
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: '2',
@@ -388,7 +388,7 @@ const operationTemplates = ref<OperationTemplate[]>([
     operations: ['certificate_check', 'force_renewal', 'security_scan'],
     icon: AlertTriangle,
     iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: '3',
@@ -479,8 +479,8 @@ const handleTemplateCreate = (templateData: any) => {
     description: templateData.description,
     operations: [...selectedOperations.value],
     icon: Bookmark,
-    iconBg: 'bg-gray-100 dark:bg-gray-800',
-    iconColor: 'text-gray-600 dark:text-gray-400'
+    iconBg: 'bg-muted dark:bg-gray-800',
+    iconColor: 'text-foreground dark:text-muted-foreground'
   };
 
   operationTemplates.value.push(newTemplate);
@@ -503,13 +503,13 @@ const getOperationIcon = (type: string) => {
 const getOperationIconColor = (status: string): string => {
   switch (status) {
     case 'executing':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'text-primary dark:text-blue-400';
     case 'completed':
       return 'text-green-600 dark:text-green-400';
     case 'failed':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'cancelled':
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
     default:
       return 'text-yellow-600 dark:text-yellow-400';
   }

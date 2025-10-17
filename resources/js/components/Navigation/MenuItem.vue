@@ -109,41 +109,41 @@ function handleClick() {
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: rgb(55 65 81);
+  color: hsl(var(--foreground));
 }
 
 .dark .nav-link.horizontal {
-  color: rgb(209 213 219);
+  color: hsl(var(--muted-foreground));
 }
 
 .nav-link.sidebar:hover {
-  background-color: rgb(248 250 252);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--primary));
 }
 
 .dark .nav-link.sidebar:hover {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--card));
+  color: hsl(var(--primary));
 }
 
 .nav-link.horizontal:hover {
-  color: rgb(37 99 235);
-  background-color: rgba(255, 255, 255, 0.6);
+  color: hsl(var(--primary));
+  background-color: hsl(var(--background) / 0.6);
 }
 
 .dark .nav-link.horizontal:hover {
-  color: rgb(96 165 250);
-  background-color: rgba(255, 255, 255, 0.1);
+  color: hsl(var(--primary));
+  background-color: hsl(var(--background) / 0.1);
 }
 
 .nav-link.active.sidebar {
-  background-color: rgb(243 244 246);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--primary));
 }
 
 .dark .nav-link.active.sidebar {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--card));
+  color: hsl(var(--primary));
 }
 
 /* Disabled state */

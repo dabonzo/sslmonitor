@@ -99,7 +99,7 @@ function scrollToTop() {
     <div class="fixed bottom-6 right-6 z-50">
       <button
         type="button"
-        class="btn btn-outline-primary animate-pulse rounded-full bg-white p-2 shadow-lg hover:bg-primary hover:text-white dark:bg-gray-800 dark:hover:bg-primary"
+        class="btn btn-outline-primary animate-pulse rounded-full bg-card p-2 shadow-lg hover:bg-primary hover:text-white"
         @click="scrollToTop"
       >
         <svg
@@ -126,10 +126,10 @@ function scrollToTop() {
 <style scoped>
 /* Semi-dark mode */
 .semi-dark .sidebar {
-  background: linear-gradient(135deg, #191e3a 0%, #0e1726 100%);
+  background: linear-gradient(to bottom right, rgb(30 41 59), rgb(15 23 42));
 }
 
 .semi-dark .header {
-  background: linear-gradient(135deg, #191e3a 0%, #0e1726 100%);
+  background: linear-gradient(to bottom right, rgb(30 41 59), rgb(15 23 42));
 }
 </style>

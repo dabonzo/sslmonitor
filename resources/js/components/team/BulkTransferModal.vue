@@ -184,27 +184,27 @@ const closeModal = () => {
       role="dialog"
       aria-modal="true"
       :aria-labelledby="'bulk-transfer-title'"
-      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+      class="bg-background dark:bg-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       @click.stop
     >
       <!-- Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between p-6 border-b border-border dark:border-border">
         <div class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <ArrowRightLeft class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <ArrowRightLeft class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <h2 id="bulk-transfer-title" class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h2 id="bulk-transfer-title" class="text-xl font-semibold text-foreground dark:text-foreground">
               {{ confirmationStep ? 'Confirm Transfer' : 'Bulk Website Transfer' }}
             </h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-foreground dark:text-muted-foreground">
               {{ confirmationStep ? 'Review and confirm your transfer' : `Transfer ${selectedWebsites.length} selected websites` }}
             </p>
           </div>
         </div>
         <button
           @click="closeModal"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          class="text-muted-foreground hover:text-foreground dark:hover:text-gray-300 transition-colors"
         >
           <X class="h-6 w-6" />
         </button>
@@ -216,7 +216,7 @@ const closeModal = () => {
         <div v-if="!confirmationStep">
           <!-- Transfer Mode Selection -->
           <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer Options</h3>
+            <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Transfer Options</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Transfer to Team -->
@@ -225,7 +225,7 @@ const closeModal = () => {
                 class="p-4 rounded-lg border-2 transition-all duration-200"
                 :class="{
                   'border-blue-500 bg-blue-50 dark:bg-blue-900/20': transferMode === 'to-team',
-                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-team',
+                  'border-border dark:border-border hover:border-border dark:hover:border-border': transferMode !== 'to-team',
                   'opacity-50 cursor-not-allowed pointer-events-none': personalWebsites.length === 0
                 }"
                 :disabled="personalWebsites.length === 0"
@@ -233,11 +233,11 @@ const closeModal = () => {
               >
                 <div class="flex items-center space-x-3">
                   <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                    <Users class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <Users class="h-5 w-5 text-primary dark:text-blue-400" />
                   </div>
                   <div class="text-left">
-                    <p class="font-semibold text-gray-900 dark:text-gray-100">Transfer to Team</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <p class="font-semibold text-foreground dark:text-foreground">Transfer to Team</p>
+                    <p class="text-sm text-foreground dark:text-muted-foreground">
                       {{ personalWebsites.length }} personal sites available
                     </p>
                   </div>
@@ -250,7 +250,7 @@ const closeModal = () => {
                 class="p-4 rounded-lg border-2 transition-all duration-200"
                 :class="{
                   'border-green-500 bg-green-50 dark:bg-green-900/20': transferMode === 'to-personal',
-                  'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600': transferMode !== 'to-personal',
+                  'border-border dark:border-border hover:border-border dark:hover:border-border': transferMode !== 'to-personal',
                   'opacity-50 cursor-not-allowed pointer-events-none': teamWebsites.length === 0
                 }"
                 :disabled="teamWebsites.length === 0"
@@ -261,8 +261,8 @@ const closeModal = () => {
                     <ArrowRightLeft class="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div class="text-left">
-                    <p class="font-semibold text-gray-900 dark:text-gray-100">Transfer to Personal</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <p class="font-semibold text-foreground dark:text-foreground">Transfer to Personal</p>
+                    <p class="text-sm text-foreground dark:text-muted-foreground">
                       {{ teamWebsites.length }} team sites available
                     </p>
                   </div>
@@ -273,7 +273,7 @@ const closeModal = () => {
 
           <!-- Team Selection (only for to-team transfers) -->
           <div v-if="transferMode === 'to-team'" class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Select Target Team</h3>
+            <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Select Target Team</h3>
             <SmartTeamPicker
               :teams="availableTeams"
               v-model:selectedTeamId="selectedTeamId"
@@ -285,28 +285,28 @@ const closeModal = () => {
 
           <!-- Preview of websites to transfer -->
           <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h3 class="text-lg font-semibold text-foreground dark:text-foreground">
               Websites to Transfer
-              <span class="text-sm font-normal text-gray-600 dark:text-gray-400">
+              <span class="text-sm font-normal text-foreground dark:text-muted-foreground">
                 ({{ selectedCount }} selected)
               </span>
             </h3>
 
-            <div class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+            <div class="max-h-64 overflow-y-auto border border-border dark:border-border rounded-lg">
               <div
                 v-for="website in (transferMode === 'to-team' ? personalWebsites : teamWebsites)"
                 :key="website.id"
-                class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+                class="flex items-center justify-between p-3 border-b border-border dark:border-border last:border-b-0"
               >
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ website.name }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ website.url }}</p>
+                  <p class="font-medium text-foreground dark:text-foreground">{{ website.name }}</p>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ website.url }}</p>
                 </div>
                 <span
                   class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                   :class="{
                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
-                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                    'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.team_badge.type === 'personal'
                   }"
                 >
                   {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
@@ -321,7 +321,7 @@ const closeModal = () => {
           <!-- Transfer Summary -->
           <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
             <div class="flex items-center space-x-3 mb-4">
-              <CheckCircle class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <CheckCircle class="h-6 w-6 text-primary dark:text-blue-400" />
               <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100">Transfer Summary</h3>
             </div>
 
@@ -357,16 +357,16 @@ const closeModal = () => {
 
           <!-- Final Website List -->
           <div class="space-y-3">
-            <h4 class="font-semibold text-gray-900 dark:text-gray-100">Websites being transferred:</h4>
+            <h4 class="font-semibold text-foreground dark:text-foreground">Websites being transferred:</h4>
             <div class="space-y-2">
               <div
                 v-for="website in transferSummary.websites"
                 :key="website.id"
-                class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                class="flex items-center justify-between p-3 bg-muted dark:bg-muted rounded-lg"
               >
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ website.name }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ website.url }}</p>
+                  <p class="font-medium text-foreground dark:text-foreground">{{ website.name }}</p>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ website.url }}</p>
                 </div>
               </div>
             </div>
@@ -375,11 +375,11 @@ const closeModal = () => {
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between p-6 border-t border-border dark:border-border">
         <div v-if="confirmationStep" class="flex space-x-3">
           <button
             @click="goBack"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground dark:text-muted-foreground bg-background dark:bg-muted border border-border dark:border-border rounded-md hover:bg-muted dark:hover:bg-gray-600 transition-colors"
           >
             Back
           </button>
@@ -389,7 +389,7 @@ const closeModal = () => {
         <div class="flex space-x-3">
           <button
             @click="closeModal"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground dark:text-muted-foreground bg-background dark:bg-muted border border-border dark:border-border rounded-md hover:bg-muted dark:hover:bg-gray-600 transition-colors"
           >
             Cancel
           </button>

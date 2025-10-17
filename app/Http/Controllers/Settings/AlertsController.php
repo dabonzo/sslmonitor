@@ -29,6 +29,38 @@ class AlertsController extends Controller
                 ->get();
         }
 
+        // Get all user's websites
+        $websites = Website::where('user_id', $user->id)->get();
+
+        // Get all website-specific alert configurations
+        $websiteAlerts = AlertConfiguration::where('user_id', $user->id)
+            ->whereNotNull('website_id')
+            ->get();
+
+        // Group alerts by website
+        $alertsByWebsite = $websites->map(function ($website) use ($websiteAlerts) {
+            return [
+                'website' => [
+                    'id' => $website->id,
+                    'name' => $website->name,
+                    'url' => $website->url,
+                ],
+                'alerts' => $websiteAlerts->where('website_id', $website->id)->map(function ($alert) {
+                    return [
+                        'id' => $alert->id,
+                        'alert_type' => $alert->alert_type,
+                        'alert_type_label' => $alert->getAlertTypeLabel(),
+                        'enabled' => $alert->enabled,
+                        'alert_level' => $alert->alert_level,
+                        'threshold_days' => $alert->threshold_days,
+                        'threshold_response_time' => $alert->threshold_response_time,
+                        'notification_channels' => $alert->notification_channels ?? [],
+                        'custom_message' => $alert->custom_message,
+                    ];
+                })->values()->toArray(),
+            ];
+        })->values()->toArray();
+
         // Group global alerts by type for the UI
         $globalAlertsData = [
             'sslExpiryAlerts' => $globalAlerts->filter(function ($alert) {
@@ -86,8 +118,59 @@ class AlertsController extends Controller
             })->values()->toArray(),
         ];
 
+        // Get default configurations
+        $defaultConfigurations = AlertConfiguration::getDefaultConfigurations();
+
+        // Define alert types
+        $alertTypes = [
+            AlertConfiguration::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
+            AlertConfiguration::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
+            AlertConfiguration::ALERT_UPTIME_DOWN => 'Website Down',
+            AlertConfiguration::ALERT_RESPONSE_TIME => 'Response Time Monitoring',
+        ];
+
+        // Define notification channels
+        $notificationChannels = [
+            AlertConfiguration::CHANNEL_EMAIL => 'Email',
+            AlertConfiguration::CHANNEL_SLACK => 'Slack',
+            AlertConfiguration::CHANNEL_DASHBOARD => 'Dashboard',
+        ];
+
+        // Define alert levels
+        $alertLevels = [
+            AlertConfiguration::LEVEL_CRITICAL => 'Critical',
+            AlertConfiguration::LEVEL_URGENT => 'Urgent',
+            AlertConfiguration::LEVEL_WARNING => 'Warning',
+            AlertConfiguration::LEVEL_INFO => 'Info',
+        ];
+
         return Inertia::render('Settings/Alerts', [
             'globalAlerts' => $globalAlertsData,
+            'alertConfigurations' => $globalAlerts->map(function ($alert) {
+                return [
+                    'id' => $alert->id,
+                    'alert_type' => $alert->alert_type,
+                    'alert_type_label' => $alert->getAlertTypeLabel(),
+                    'enabled' => $alert->enabled,
+                    'alert_level' => $alert->alert_level,
+                    'threshold_days' => $alert->threshold_days,
+                    'threshold_response_time' => $alert->threshold_response_time,
+                    'notification_channels' => $alert->notification_channels ?? [],
+                    'custom_message' => $alert->custom_message,
+                ];
+            })->toArray(),
+            'defaultConfigurations' => $defaultConfigurations,
+            'websites' => $websites->map(function ($website) {
+                return [
+                    'id' => $website->id,
+                    'name' => $website->name,
+                    'url' => $website->url,
+                ];
+            })->toArray(),
+            'alertsByWebsite' => $alertsByWebsite,
+            'alertTypes' => $alertTypes,
+            'notificationChannels' => $notificationChannels,
+            'alertLevels' => $alertLevels,
         ]);
     }
 
@@ -98,7 +181,6 @@ class AlertsController extends Controller
         $validated = $request->validate([
             'alert_type' => 'required|string|in:' . implode(',', [
                 AlertConfiguration::ALERT_SSL_EXPIRY,
-                AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL,
                 AlertConfiguration::ALERT_SSL_INVALID,
                 AlertConfiguration::ALERT_UPTIME_DOWN,
                 AlertConfiguration::ALERT_RESPONSE_TIME,
@@ -261,7 +343,6 @@ class AlertsController extends Controller
     {
         return match($type) {
             AlertConfiguration::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
-            AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL => 'Let\'s Encrypt Renewal',
             AlertConfiguration::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
             AlertConfiguration::ALERT_UPTIME_DOWN => 'Website Down',
             AlertConfiguration::ALERT_RESPONSE_TIME => 'Response Time Monitoring',

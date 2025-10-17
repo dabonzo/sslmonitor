@@ -25,14 +25,14 @@ const showConfirmPassword = ref(false);
     <ModernSettingsLayout title="Password Settings">
         <div class="space-y-8">
             <!-- Password Update Section -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center space-x-3 mb-6">
-                    <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-                        <Key class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    <div class="rounded-lg bg-muted dark:bg-card p-2">
+                        <Key class="h-5 w-5 text-foreground dark:text-muted-foreground" />
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Update Password</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Ensure your account uses a strong, unique password to stay secure</p>
+                        <h2 class="text-xl font-bold text-foreground dark:text-foreground">Update Password</h2>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">Ensure your account uses a strong, unique password to stay secure</p>
                     </div>
                 </div>
 
@@ -49,11 +49,11 @@ const showConfirmPassword = ref(false);
                     <div class="space-y-6">
                         <!-- Current Password -->
                         <div class="space-y-2">
-                            <Label for="current_password" class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <Label for="current_password" class="text-sm font-semibold text-foreground dark:text-muted-foreground">
                                 Current Password
                             </Label>
                             <div class="relative">
-                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="current_password"
                                     ref="currentPasswordInput"
@@ -65,7 +65,7 @@ const showConfirmPassword = ref(false);
                                 />
                                 <button
                                     type="button"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground dark:hover:text-gray-300"
                                     @click="showCurrentPassword = !showCurrentPassword"
                                 >
                                     <Eye v-if="showCurrentPassword" class="h-4 w-4" />
@@ -77,11 +77,11 @@ const showConfirmPassword = ref(false);
 
                         <!-- New Password -->
                         <div class="space-y-2">
-                            <Label for="password" class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <Label for="password" class="text-sm font-semibold text-foreground dark:text-muted-foreground">
                                 New Password
                             </Label>
                             <div class="relative">
-                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="password"
                                     ref="passwordInput"
@@ -93,7 +93,7 @@ const showConfirmPassword = ref(false);
                                 />
                                 <button
                                     type="button"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground dark:hover:text-gray-300"
                                     @click="showNewPassword = !showNewPassword"
                                 >
                                     <Eye v-if="showNewPassword" class="h-4 w-4" />
@@ -105,11 +105,11 @@ const showConfirmPassword = ref(false);
 
                         <!-- Confirm Password -->
                         <div class="space-y-2">
-                            <Label for="password_confirmation" class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <Label for="password_confirmation" class="text-sm font-semibold text-foreground dark:text-muted-foreground">
                                 Confirm New Password
                             </Label>
                             <div class="relative">
-                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="password_confirmation"
                                     name="password_confirmation"
@@ -120,7 +120,7 @@ const showConfirmPassword = ref(false);
                                 />
                                 <button
                                     type="button"
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground dark:hover:text-gray-300"
                                     @click="showConfirmPassword = !showConfirmPassword"
                                 >
                                     <Eye v-if="showConfirmPassword" class="h-4 w-4" />
@@ -143,7 +143,7 @@ const showConfirmPassword = ref(false);
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between pt-4 border-t border-border dark:border-border">
                         <div class="flex items-center space-x-4">
                             <Button
                                 :disabled="processing"

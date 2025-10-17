@@ -5,7 +5,7 @@ const currentYear = computed(() => new Date().getFullYear())
 </script>
 
 <template>
-  <footer class="mt-auto p-6 text-center text-sm text-gray-500 dark:text-gray-400 sm:text-left">
+  <footer class="mt-auto p-6 text-center text-sm text-muted-foreground sm:text-left">
     <div class="flex flex-col items-center justify-between sm:flex-row">
       <div>
         © {{ currentYear }} SSL Monitor. All rights reserved.

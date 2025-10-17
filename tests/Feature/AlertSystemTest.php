@@ -133,24 +133,19 @@ test('alert service creates default alerts for new websites', function () {
     // Count how many default configs should be created for a website
     $expectedCount = 0;
     $sslExpiryCount = 0;
-    $letsEncryptCount = 0;
 
     foreach ($defaultConfigs as $config) {
         if (in_array($config['alert_type'], [
             AlertConfiguration::ALERT_SSL_EXPIRY,
-            AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL,
             AlertConfiguration::ALERT_SSL_INVALID,
             AlertConfiguration::ALERT_UPTIME_DOWN,
+            AlertConfiguration::ALERT_UPTIME_UP,
             AlertConfiguration::ALERT_RESPONSE_TIME
         ])) {
             $expectedCount++;
 
             if ($config['alert_type'] === AlertConfiguration::ALERT_SSL_EXPIRY) {
                 $sslExpiryCount++;
-            }
-
-            if ($config['alert_type'] === AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL) {
-                $letsEncryptCount++;
             }
         }
     }
@@ -159,9 +154,6 @@ test('alert service creates default alerts for new websites', function () {
 
     // Check that SSL expiry alerts exist (there are multiple with different thresholds)
     expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY))->toHaveCount($sslExpiryCount);
-
-    // Check that Let's Encrypt renewal alert exists
-    expect($alertConfigs->where('alert_type', AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL))->toHaveCount($letsEncryptCount);
 });
 
 test('alert service checks and triggers alerts correctly', function () {
@@ -265,40 +257,6 @@ test('alert service respects threshold days', function () {
     Mail::assertNotSent(SslCertificateExpiryAlert::class);
 });
 
-test('alert service handles lets encrypt renewal alerts', function () {
-    Mail::fake();
-
-    $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
-
-    $alertConfig = AlertConfiguration::factory()->create([
-        'user_id' => $user->id,
-        'website_id' => $website->id,
-        'alert_type' => AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL,
-        'threshold_days' => 3,
-        'enabled' => true,
-        'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
-    ]);
-
-    // Create monitor with Let's Encrypt certificate expiring in 2 days
-    Monitor::updateOrCreate(
-        ['url' => $website->url],
-        [
-            'certificate_check_enabled' => true,
-            'certificate_status' => 'valid',
-            'certificate_expiration_date' => now()->addDays(2),
-            'certificate_issuer' => "Let's Encrypt Authority X3",
-        ]
-    );
-
-    $alertService = new AlertService(app(\App\Services\SslCertificateAnalysisService::class));
-    $triggeredAlerts = $alertService->checkAndTriggerAlerts($website);
-
-    expect($triggeredAlerts)->toHaveCount(1);
-    expect($triggeredAlerts[0]['type'])->toBe(AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL);
-
-    Mail::assertSent(SslCertificateExpiryAlert::class);
-});
 
 test('alert service can test alerts', function () {
     Mail::fake();
@@ -358,7 +316,6 @@ test('alert types are defined correctly', function () {
         AlertConfiguration::ALERT_SSL_INVALID,
         AlertConfiguration::ALERT_UPTIME_DOWN,
         AlertConfiguration::ALERT_RESPONSE_TIME,
-        AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL,
     ];
 
     foreach ($types as $type) {
@@ -415,11 +372,6 @@ test('default alert configurations are properly defined', function () {
     });
     expect($sevenDaySslAlert)->not->toBeNull();
     expect($sevenDaySslAlert['threshold_days'])->toBe(7);
-
-    // Check that Let's Encrypt renewal alert is included
-    $letsEncryptAlert = collect($defaults)->firstWhere('alert_type', AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL);
-    expect($letsEncryptAlert)->not->toBeNull();
-    expect($letsEncryptAlert['threshold_days'])->toBe(3);
 });
 
 // Alert Triggering Logic Tests
@@ -464,38 +416,31 @@ test('alert cooldown prevents spam', function () {
     expect($alertConfig->shouldTrigger($checkData))->toBeTrue();
 });
 
-// Global Alert Configuration Tests
-test('global alert configurations apply to all websites', function () {
+// Website-Specific Alert Configuration Tests
+test('alert configurations are website-specific', function () {
     $user = User::factory()->create();
     $website1 = Website::factory()->create(['user_id' => $user->id]);
     $website2 = Website::factory()->create(['user_id' => $user->id]);
 
-    // Create global alert (no website_id)
-    $globalAlert = AlertConfiguration::factory()->create([
+    // Create alert for website1 only
+    $website1Alert = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
-        'website_id' => null,
+        'website_id' => $website1->id,
         'alert_type' => AlertConfiguration::ALERT_SSL_EXPIRY,
     ]);
 
     $alertService = new AlertService(app(\App\Services\SslCertificateAnalysisService::class));
 
-    // Check that global alert applies to both websites
+    // Check that alert only applies to website1
     $alerts1 = AlertConfiguration::where('user_id', $user->id)
-        ->where(function ($query) use ($website1) {
-            $query->where('website_id', $website1->id)
-                  ->orWhereNull('website_id');
-        })
+        ->where('website_id', $website1->id)
         ->get();
 
     $alerts2 = AlertConfiguration::where('user_id', $user->id)
-        ->where(function ($query) use ($website2) {
-            $query->where('website_id', $website2->id)
-                  ->orWhereNull('website_id');
-        })
+        ->where('website_id', $website2->id)
         ->get();
 
     expect($alerts1)->toHaveCount(1);
-    expect($alerts2)->toHaveCount(1);
-    expect($alerts1->first()->id)->toBe($globalAlert->id);
-    expect($alerts2->first()->id)->toBe($globalAlert->id);
+    expect($alerts2)->toHaveCount(0);
+    expect($alerts1->first()->id)->toBe($website1Alert->id);
 });

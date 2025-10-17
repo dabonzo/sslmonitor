@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Shield class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Shield class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Certificate Details
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-foreground dark:text-muted-foreground">
               {{ websiteName || 'Loading...' }}
             </div>
           </div>
@@ -22,14 +22,14 @@
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <div class="text-center space-y-4">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Analyzing certificate...</p>
+            <p class="text-sm text-foreground dark:text-muted-foreground">Analyzing certificate...</p>
           </div>
         </div>
 
         <!-- Error State -->
         <div v-else-if="error" class="text-center py-12">
           <div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-6 border border-red-200 dark:border-red-800">
-            <AlertTriangle class="h-12 w-12 text-red-600 dark:text-red-400 mx-auto mb-4" />
+            <AlertTriangle class="h-12 w-12 text-destructive dark:text-red-400 mx-auto mb-4" />
             <h3 class="text-lg font-semibold text-red-900 dark:text-red-100 mb-2">Analysis Failed</h3>
             <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
             <Button @click="performAnalysis" variant="outline" class="mt-4">
@@ -81,23 +81,23 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Subject:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Subject:</span>
                   <span class="col-span-2 text-sm break-all">{{ analysis.basic_info.subject }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Issuer:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Issuer:</span>
                   <span class="col-span-2 text-sm break-all">{{ analysis.basic_info.issuer }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Serial:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Serial:</span>
                   <span class="col-span-2 text-sm font-mono">{{ analysis.basic_info.serial_number }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Algorithm:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Algorithm:</span>
                   <span class="col-span-2 text-sm">{{ analysis.basic_info.signature_algorithm }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Version:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Version:</span>
                   <span class="col-span-2 text-sm">{{ analysis.basic_info.version }}</span>
                 </div>
               </CardContent>
@@ -113,15 +113,15 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Valid From:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Valid From:</span>
                   <span class="col-span-2 text-sm">{{ formatDate(analysis.validity.valid_from) }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Valid Until:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Valid Until:</span>
                   <span class="col-span-2 text-sm">{{ formatDate(analysis.validity.valid_until) }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Days Remaining:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Days Remaining:</span>
                   <span class="col-span-2">
                     <Badge :variant="daysRemainingVariant" class="text-sm">
                       {{ analysis.validity.days_remaining }} days
@@ -129,7 +129,7 @@
                   </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Status:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Status:</span>
                   <span class="col-span-2">
                     <Badge :variant="validityVariant">
                       {{ analysis.validity.is_expired ? 'Expired' : 'Valid' }}
@@ -149,17 +149,17 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Primary:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Primary:</span>
                   <span class="col-span-2 text-sm break-all">{{ analysis.domains.primary_domain }}</span>
                 </div>
                 <div v-if="analysis.domains.wildcard_cert" class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Type:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Type:</span>
                   <span class="col-span-2">
                     <Badge variant="secondary">Wildcard Certificate</Badge>
                   </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Coverage:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Coverage:</span>
                   <span class="col-span-2">
                     <Badge :variant="analysis.domains.covers_requested_domain ? 'default' : 'destructive'">
                       {{ analysis.domains.covers_requested_domain ? 'Covers Domain' : 'Domain Mismatch' }}
@@ -167,7 +167,7 @@
                   </span>
                 </div>
                 <div v-if="analysis.domains.subject_alt_names.length > 0">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400 block mb-2">Alternative Names:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground block mb-2">Alternative Names:</span>
                   <div class="flex flex-wrap gap-1">
                     <Badge
                       v-for="san in analysis.domains.subject_alt_names"
@@ -192,28 +192,28 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Key Algorithm:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Key Algorithm:</span>
                   <span class="col-span-2 text-sm">{{ analysis.security.key_algorithm }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Key Size:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Key Size:</span>
                   <span class="col-span-2">
                     <span class="text-sm">{{ analysis.security.key_size }} bits</span>
                     <Badge v-if="analysis.security.weak_key" variant="destructive" class="ml-2">Weak</Badge>
                   </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Signature:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Signature:</span>
                   <span class="col-span-2">
                     <span class="text-sm">{{ analysis.security.signature_algorithm }}</span>
                     <Badge v-if="analysis.security.weak_signature" variant="destructive" class="ml-2">Weak</Badge>
                   </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Security Score:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Security Score:</span>
                   <span class="col-span-2">
                     <div class="flex items-center space-x-2">
-                      <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div class="w-20 bg-muted dark:bg-muted rounded-full h-2">
                         <div
                           class="h-2 rounded-full"
                           :class="securityScoreClass"
@@ -237,15 +237,15 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">CA Name:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">CA Name:</span>
                   <span class="col-span-2 text-sm">{{ analysis.certificate_authority.ca_name }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Organization:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Organization:</span>
                   <span class="col-span-2 text-sm">{{ analysis.certificate_authority.ca_organization }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Type:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Type:</span>
                   <span class="col-span-2">
                     <Badge :variant="analysis.certificate_authority.is_lets_encrypt ? 'secondary' : 'outline'">
                       {{ analysis.certificate_authority.is_lets_encrypt ? 'Let\'s Encrypt (Free)' : 'Commercial CA' }}
@@ -265,11 +265,11 @@
               </CardHeader>
               <CardContent class="space-y-3">
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Chain Length:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Chain Length:</span>
                   <span class="col-span-2 text-sm">{{ analysis.chain_info.length }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Trusted Root:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Trusted Root:</span>
                   <span class="col-span-2">
                     <Badge :variant="analysis.chain_info.trusted_root ? 'default' : 'destructive'">
                       {{ analysis.chain_info.trusted_root ? 'Trusted' : 'Untrusted' }}
@@ -277,7 +277,7 @@
                   </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                  <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Chain Valid:</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Chain Valid:</span>
                   <span class="col-span-2">
                     <Badge :variant="analysis.chain_info.chain_valid ? 'default' : 'destructive'">
                       {{ analysis.chain_info.chain_valid ? 'Valid' : 'Invalid' }}
@@ -473,7 +473,7 @@ const riskIconClass = computed(() => {
 
   switch (analysis.value.risk_assessment.level) {
     case 'critical':
-      return 'h-6 w-6 text-red-600 dark:text-red-400';
+      return 'h-6 w-6 text-destructive dark:text-red-400';
     case 'high':
       return 'h-6 w-6 text-orange-600 dark:text-orange-400';
     case 'medium':

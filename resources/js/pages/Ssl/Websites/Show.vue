@@ -153,7 +153,7 @@ onMounted(() => {
               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.ssl_status === 'valid',
               'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.ssl_status === 'expired',
               'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.ssl_status === 'expiring_soon',
-              'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.ssl_status === 'unknown'
+              'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.ssl_status === 'unknown'
             }"
           >
             {{ website.ssl_status }}
@@ -162,43 +162,43 @@ onMounted(() => {
 
         <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
           <h3 class="text-lg font-semibold mb-2">SSL Monitoring</h3>
-          <span :class="website.ssl_monitoring_enabled ? 'text-green-600' : 'text-gray-500'">
+          <span :class="website.ssl_monitoring_enabled ? 'text-green-600' : 'text-muted-foreground'">
             {{ website.ssl_monitoring_enabled ? 'Enabled' : 'Disabled' }}
           </span>
         </div>
 
         <div class="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
           <h3 class="text-lg font-semibold mb-2">Uptime Monitoring</h3>
-          <span :class="website.uptime_monitoring_enabled ? 'text-green-600' : 'text-gray-500'">
+          <span :class="website.uptime_monitoring_enabled ? 'text-green-600' : 'text-muted-foreground'">
             {{ website.uptime_monitoring_enabled ? 'Enabled' : 'Disabled' }}
           </span>
         </div>
       </div>
 
       <!-- Team Management Section -->
-      <Card class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 border border-gray-200 dark:border-gray-700">
+      <Card class="bg-muted dark:bg-card border border-border dark:border-border">
         <CardHeader>
           <div class="flex items-center space-x-3">
-            <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-              <Users class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            <div class="rounded-lg bg-muted dark:bg-card p-2">
+              <Users class="h-5 w-5 text-foreground dark:text-muted-foreground" />
             </div>
             <div>
-              <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Management</CardTitle>
+              <CardTitle class="text-xl font-bold text-foreground dark:text-foreground">Team Management</CardTitle>
               <CardDescription>Transfer website ownership between personal and team accounts</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent class="space-y-6">
           <!-- Current Owner Display -->
-          <div v-if="transferOptions" class="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <div v-if="transferOptions" class="flex items-center justify-between p-4 rounded-lg bg-background dark:bg-card border border-border dark:border-border">
             <div class="flex items-center space-x-3">
-              <div class="rounded-lg p-2" :class="transferOptions.current_owner.type === 'team' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-700'">
-                <Users v-if="transferOptions.current_owner.type === 'team'" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <User v-else class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div class="rounded-lg p-2" :class="transferOptions.current_owner.type === 'team' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-muted dark:bg-muted'">
+                <Users v-if="transferOptions.current_owner.type === 'team'" class="h-4 w-4 text-primary dark:text-blue-400" />
+                <User v-else class="h-4 w-4 text-foreground dark:text-muted-foreground" />
               </div>
               <div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Current Owner</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ transferOptions.current_owner.name }}</p>
+                <p class="text-sm font-semibold text-foreground dark:text-foreground">Current Owner</p>
+                <p class="text-sm text-foreground dark:text-muted-foreground">{{ transferOptions.current_owner.name }}</p>
               </div>
             </div>
             <Badge
@@ -214,8 +214,8 @@ onMounted(() => {
             <!-- Transfer to Team -->
             <div class="space-y-4">
               <div class="flex items-center space-x-2">
-                <ArrowRightLeft class="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer to Team</h3>
+                <ArrowRightLeft class="h-4 w-4 text-primary dark:text-blue-400" />
+                <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Transfer to Team</h3>
               </div>
 
               <div v-if="transferOptions && transferOptions.teams.length > 0" class="space-y-4">
@@ -236,7 +236,7 @@ onMounted(() => {
                   <div v-if="selectedTeam" class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div class="flex items-center space-x-3">
                       <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                        <Users class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <Users class="h-4 w-4 text-primary dark:text-blue-400" />
                       </div>
                       <div class="flex-1">
                         <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
@@ -261,10 +261,10 @@ onMounted(() => {
               </div>
 
               <div v-else-if="transferOptions" class="text-center py-4">
-                <div class="rounded-lg bg-gray-100 dark:bg-gray-700 p-4">
-                  <Shield class="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p class="text-sm text-gray-600 dark:text-gray-400">No teams available for transfer</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">You need OWNER, ADMIN, or MANAGER role in a team</p>
+                <div class="rounded-lg bg-muted dark:bg-muted p-4">
+                  <Shield class="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p class="text-sm text-foreground dark:text-muted-foreground">No teams available for transfer</p>
+                  <p class="text-xs text-muted-foreground dark:text-muted-foreground mt-1">You need OWNER, ADMIN, or MANAGER role in a team</p>
                 </div>
               </div>
             </div>
@@ -273,11 +273,11 @@ onMounted(() => {
             <div class="space-y-4">
               <div class="flex items-center space-x-2">
                 <ArrowRightLeft class="h-4 w-4 text-green-600 dark:text-green-400" />
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Transfer to Personal</h3>
+                <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Transfer to Personal</h3>
               </div>
 
               <div class="space-y-3">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
+                <p class="text-sm text-foreground dark:text-muted-foreground">
                   Move this website back to your personal account
                 </p>
 
@@ -291,7 +291,7 @@ onMounted(() => {
                   {{ isTransferring ? 'Transferring...' : 'Transfer to Personal' }}
                 </Button>
 
-                <p v-if="transferOptions && transferOptions.current_owner.type === 'personal'" class="text-xs text-gray-500 dark:text-gray-500 text-center">
+                <p v-if="transferOptions && transferOptions.current_owner.type === 'personal'" class="text-xs text-muted-foreground dark:text-muted-foreground text-center">
                   Already owned personally
                 </p>
               </div>
@@ -300,8 +300,8 @@ onMounted(() => {
 
           <!-- Loading State -->
           <div v-if="isLoadingTransferOptions" class="text-center py-4">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading transfer options...</p>
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-border mx-auto"></div>
+            <p class="text-sm text-foreground dark:text-muted-foreground mt-2">Loading transfer options...</p>
           </div>
         </CardContent>
       </Card>
@@ -375,7 +375,7 @@ onMounted(() => {
                 <div class="text-sm font-medium">
                   {{ new Date(check.checked_at).toLocaleString() }}
                 </div>
-                <div v-if="check.error_message" class="text-xs text-red-600">
+                <div v-if="check.error_message" class="text-xs text-destructive">
                   {{ check.error_message }}
                 </div>
               </div>

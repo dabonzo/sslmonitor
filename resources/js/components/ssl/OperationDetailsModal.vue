@@ -7,10 +7,10 @@
             <component :is="getOperationIcon(operation?.type)" class="h-5 w-5" :class="getStatusIconColor(operation?.status)" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               {{ operation?.name }}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Operation Details & Results
             </div>
           </div>
@@ -24,11 +24,11 @@
             <CardContent class="p-4">
               <div class="flex items-center space-x-3">
                 <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                  <Clock class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <Clock class="h-5 w-5 text-primary dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Duration</p>
-                  <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ operation.duration }}</p>
+                  <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Duration</p>
+                  <p class="text-lg font-bold text-foreground dark:text-foreground">{{ operation.duration }}</p>
                 </div>
               </div>
             </CardContent>
@@ -41,8 +41,8 @@
                   <Globe class="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Websites</p>
-                  <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ operation.websiteCount }}</p>
+                  <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Websites</p>
+                  <p class="text-lg font-bold text-foreground dark:text-foreground">{{ operation.websiteCount }}</p>
                 </div>
               </div>
             </CardContent>
@@ -55,8 +55,8 @@
                   <BarChart3 class="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Success Rate</p>
-                  <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ getSuccessRate() }}%</p>
+                  <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Success Rate</p>
+                  <p class="text-lg font-bold text-foreground dark:text-foreground">{{ getSuccessRate() }}%</p>
                 </div>
               </div>
             </CardContent>
@@ -74,12 +74,12 @@
           <CardContent>
             <div class="space-y-4">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Overall Progress</span>
-                <span class="text-gray-900 dark:text-gray-100">
+                <span class="text-foreground dark:text-muted-foreground">Overall Progress</span>
+                <span class="text-foreground dark:text-foreground">
                   {{ operation.progress.current }} / {{ operation.progress.total }}
                 </span>
               </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div class="w-full bg-muted dark:bg-muted rounded-full h-3">
                 <div
                   class="bg-blue-600 h-3 rounded-full transition-all duration-300"
                   :style="{ width: `${(operation.progress.current / operation.progress.total) * 100}%` }"
@@ -90,7 +90,7 @@
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div v-for="status in statusBreakdown" :key="status.label" class="text-center p-3 border rounded-lg">
                   <div class="text-2xl font-bold" :class="status.color">{{ status.count }}</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">{{ status.label }}</div>
+                  <div class="text-sm text-foreground dark:text-muted-foreground">{{ status.label }}</div>
                 </div>
               </div>
             </div>
@@ -128,18 +128,18 @@
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center space-x-2">
                     <component :is="getResultIcon(result.status)" class="h-4 w-4" :class="getResultIconColor(result.status)" />
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ result.website }}</h4>
+                    <h4 class="font-medium text-foreground dark:text-foreground">{{ result.website }}</h4>
                   </div>
                   <Badge :variant="getResultVariant(result.status)">
                     {{ result.status }}
                   </Badge>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ result.message }}</p>
-                <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-500 mt-2">
+                <p class="text-sm text-foreground dark:text-muted-foreground">{{ result.message }}</p>
+                <div class="flex items-center space-x-4 text-xs text-muted-foreground dark:text-muted-foreground mt-2">
                   <span>Duration: {{ result.duration }}</span>
                   <span>Completed: {{ formatTime(result.completedAt) }}</span>
                 </div>
-                <div v-if="result.details" class="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
+                <div v-if="result.details" class="mt-2 p-2 bg-muted dark:bg-card rounded text-xs">
                   <pre class="whitespace-pre-wrap">{{ result.details }}</pre>
                 </div>
               </div>
@@ -151,7 +151,7 @@
         <Card v-if="operation.status === 'failed' || errorLog.length > 0">
           <CardHeader>
             <CardTitle class="flex items-center space-x-2">
-              <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <AlertTriangle class="h-5 w-5 text-destructive dark:text-red-400" />
               <span>Error Log</span>
             </CardTitle>
           </CardHeader>
@@ -159,10 +159,10 @@
             <div class="space-y-2 max-h-48 overflow-y-auto bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
               <div v-for="error in errorLog" :key="error.id" class="text-sm">
                 <div class="flex items-center space-x-2">
-                  <span class="text-red-600 dark:text-red-400 font-medium">{{ formatTime(error.timestamp) }}</span>
-                  <span class="text-gray-700 dark:text-gray-300">{{ error.message }}</span>
+                  <span class="text-destructive dark:text-red-400 font-medium">{{ formatTime(error.timestamp) }}</span>
+                  <span class="text-foreground dark:text-muted-foreground">{{ error.message }}</span>
                 </div>
-                <div v-if="error.details" class="text-xs text-gray-600 dark:text-gray-400 ml-4 mt-1">
+                <div v-if="error.details" class="text-xs text-foreground dark:text-muted-foreground ml-4 mt-1">
                   {{ error.details }}
                 </div>
               </div>
@@ -182,7 +182,7 @@
             <div class="space-y-3">
               <div v-for="recommendation in recommendations" :key="recommendation.id" class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div class="flex items-start space-x-3">
-                  <Lightbulb class="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <Lightbulb class="h-4 w-4 text-primary dark:text-blue-400 mt-0.5" />
                   <div class="flex-1">
                     <h4 class="font-medium text-blue-900 dark:text-blue-100">{{ recommendation.title }}</h4>
                     <p class="text-sm text-blue-800 dark:text-blue-200 mt-1">{{ recommendation.description }}</p>
@@ -350,8 +350,8 @@ const recommendations: Recommendation[] = [
 const statusBreakdown = computed(() => [
   { label: 'Success', count: 1, color: 'text-green-600 dark:text-green-400' },
   { label: 'Warning', count: 1, color: 'text-yellow-600 dark:text-yellow-400' },
-  { label: 'Failed', count: 1, color: 'text-red-600 dark:text-red-400' },
-  { label: 'Pending', count: 0, color: 'text-gray-600 dark:text-gray-400' }
+  { label: 'Failed', count: 1, color: 'text-destructive dark:text-red-400' },
+  { label: 'Pending', count: 0, color: 'text-foreground dark:text-muted-foreground' }
 ]);
 
 const filteredResults = computed(() => {
@@ -380,7 +380,7 @@ const getStatusBackgroundClass = (status?: string): string => {
     case 'running':
       return 'bg-blue-100 dark:bg-blue-900/30';
     default:
-      return 'bg-gray-100 dark:bg-gray-800';
+      return 'bg-muted dark:bg-gray-800';
   }
 };
 
@@ -389,11 +389,11 @@ const getStatusIconColor = (status?: string): string => {
     case 'completed':
       return 'text-green-600 dark:text-green-400';
     case 'failed':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'running':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'text-primary dark:text-blue-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 
@@ -415,11 +415,11 @@ const getResultIconColor = (status: string): string => {
     case 'success':
       return 'text-green-600 dark:text-green-400';
     case 'failed':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'warning':
       return 'text-yellow-600 dark:text-yellow-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 

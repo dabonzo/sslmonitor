@@ -4,7 +4,7 @@
     <div v-if="isLoading" class="flex items-center justify-center py-8">
       <div class="text-center space-y-4">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Generating security summary...</p>
+        <p class="text-sm text-foreground dark:text-muted-foreground">Generating security summary...</p>
       </div>
     </div>
 
@@ -20,7 +20,7 @@
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
-                class="text-gray-200 dark:text-gray-700"
+                class="text-muted-foreground dark:text-foreground"
               />
               <!-- Progress circle -->
               <path
@@ -34,14 +34,14 @@
             </svg>
             <div class="absolute inset-0 flex items-center justify-center">
               <div class="text-center">
-                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ overallScore }}</div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">Overall</div>
+                <div class="text-3xl font-bold text-foreground dark:text-foreground">{{ overallScore }}</div>
+                <div class="text-xs text-foreground dark:text-muted-foreground">Overall</div>
               </div>
             </div>
           </div>
         </div>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Security Summary</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <h3 class="text-xl font-bold text-foreground dark:text-foreground mb-2">Security Summary</h3>
+        <p class="text-sm text-foreground dark:text-muted-foreground">
           Analysis of {{ websites.length }} websites
         </p>
       </div>
@@ -52,28 +52,28 @@
           <CardContent class="p-4 text-center">
             <Shield class="h-8 w-8 mx-auto mb-2 text-green-600 dark:text-green-400" />
             <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ securityMetrics.secure }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Secure</div>
+            <div class="text-sm text-foreground dark:text-muted-foreground">Secure</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent class="p-4 text-center">
             <AlertTriangle class="h-8 w-8 mx-auto mb-2 text-yellow-600 dark:text-yellow-400" />
             <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ securityMetrics.warnings }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Warnings</div>
+            <div class="text-sm text-foreground dark:text-muted-foreground">Warnings</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent class="p-4 text-center">
-            <XCircle class="h-8 w-8 mx-auto mb-2 text-red-600 dark:text-red-400" />
-            <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ securityMetrics.critical }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Critical</div>
+            <XCircle class="h-8 w-8 mx-auto mb-2 text-destructive dark:text-red-400" />
+            <div class="text-2xl font-bold text-destructive dark:text-red-400">{{ securityMetrics.critical }}</div>
+            <div class="text-sm text-foreground dark:text-muted-foreground">Critical</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent class="p-4 text-center">
-            <Zap class="h-8 w-8 mx-auto mb-2 text-blue-600 dark:text-blue-400" />
-            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ securityMetrics.letsEncrypt }}</div>
-            <div class="text-sm text-gray-600 dark:text-gray-400">Let's Encrypt</div>
+            <Zap class="h-8 w-8 mx-auto mb-2 text-primary dark:text-blue-400" />
+            <div class="text-2xl font-bold text-primary dark:text-blue-400">{{ securityMetrics.letsEncrypt }}</div>
+            <div class="text-sm text-foreground dark:text-muted-foreground">Let's Encrypt</div>
           </CardContent>
         </Card>
       </div>
@@ -83,7 +83,7 @@
         <!-- Critical Issues -->
         <Card v-if="criticalIssues.length > 0">
           <CardHeader>
-            <CardTitle class="flex items-center space-x-2 text-red-600 dark:text-red-400">
+            <CardTitle class="flex items-center space-x-2 text-destructive dark:text-red-400">
               <AlertTriangle class="h-5 w-5" />
               <span>Critical Issues</span>
             </CardTitle>
@@ -96,7 +96,7 @@
             >
               <div class="font-medium text-red-900 dark:text-red-100">{{ issue.website_name }}</div>
               <div class="text-sm text-red-700 dark:text-red-300">{{ issue.description }}</div>
-              <div class="text-xs text-red-600 dark:text-red-400 mt-1">{{ issue.recommendation }}</div>
+              <div class="text-xs text-destructive dark:text-red-400 mt-1">{{ issue.recommendation }}</div>
             </div>
           </CardContent>
         </Card>
@@ -131,7 +131,7 @@
         <!-- Security Recommendations -->
         <Card>
           <CardHeader>
-            <CardTitle class="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
+            <CardTitle class="flex items-center space-x-2 text-primary dark:text-blue-400">
               <Lightbulb class="h-5 w-5" />
               <span>Recommendations</span>
             </CardTitle>
@@ -166,11 +166,11 @@
               >
                 <div>
                   <div class="font-medium">{{ ca.name }}</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">{{ ca.type }}</div>
+                  <div class="text-sm text-foreground dark:text-muted-foreground">{{ ca.type }}</div>
                 </div>
                 <div class="text-right">
                   <div class="font-semibold">{{ ca.count }}</div>
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                  <div class="text-xs text-foreground dark:text-muted-foreground">
                     {{ Math.round((ca.count / websites.length) * 100) }}%
                   </div>
                 </div>
@@ -199,11 +199,11 @@
             <div
               v-for="website in websites"
               :key="website.id"
-              class="flex justify-between items-center p-3 rounded border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              class="flex justify-between items-center p-3 rounded border hover:bg-muted dark:hover:bg-gray-800 transition-colors"
             >
               <div class="flex-1">
                 <div class="font-medium">{{ website.name }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ website.url }}</div>
+                <div class="text-sm text-foreground dark:text-muted-foreground">{{ website.url }}</div>
               </div>
               <div class="flex items-center space-x-3">
                 <Badge :variant="getWebsiteStatusVariant(website)">
@@ -211,7 +211,7 @@
                 </Badge>
                 <div class="text-right">
                   <div class="font-semibold">{{ getWebsiteSecurityScore(website) }}/100</div>
-                  <div class="text-xs text-gray-600 dark:text-gray-400">Security Score</div>
+                  <div class="text-xs text-foreground dark:text-muted-foreground">Security Score</div>
                 </div>
               </div>
             </div>

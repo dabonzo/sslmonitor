@@ -3,8 +3,8 @@
     <!-- Historical Trends Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Historical Trends</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Long-term SSL certificate and performance analysis</p>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Historical Trends</h3>
+        <p class="text-sm text-foreground dark:text-muted-foreground">Long-term SSL certificate and performance analysis</p>
       </div>
 
       <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
@@ -44,8 +44,8 @@
         <CardContent class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Overall Trend</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Overall Trend</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ trendSummary.direction }}
               </p>
             </div>
@@ -57,7 +57,7 @@
               />
             </div>
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-xs text-foreground dark:text-muted-foreground mt-2">
             {{ formatTrendPercentage(trendSummary.trend) }} change over {{ selectedPeriod }}
           </p>
         </CardContent>
@@ -67,8 +67,8 @@
         <CardContent class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Best Period</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Best Period</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ trendSummary.bestPeriod.label }}
               </p>
             </div>
@@ -76,7 +76,7 @@
               <Trophy class="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-xs text-foreground dark:text-muted-foreground mt-2">
             {{ trendSummary.bestPeriod.value }} {{ getMetricUnit() }}
           </p>
         </CardContent>
@@ -86,16 +86,16 @@
         <CardContent class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Data Points</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Data Points</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ trendData.length }}
               </p>
             </div>
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <BarChart3 class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <BarChart3 class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-xs text-foreground dark:text-muted-foreground mt-2">
             Collected over {{ selectedPeriod }}
           </p>
         </CardContent>
@@ -114,8 +114,8 @@
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div class="h-80 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div v-if="isLoadingTrends" class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+        <div class="h-80 flex items-center justify-center bg-muted dark:bg-card rounded-lg">
+          <div v-if="isLoadingTrends" class="flex items-center space-x-2 text-muted-foreground dark:text-muted-foreground">
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
             <span>Loading historical data...</span>
           </div>
@@ -123,7 +123,7 @@
             <!-- Simulated Chart Area -->
             <div class="relative w-full h-full">
               <!-- Y-axis labels -->
-              <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-muted-foreground dark:text-muted-foreground">
                 <span>{{ getMaxValue() }}{{ getMetricUnit() }}</span>
                 <span>{{ Math.round(getMaxValue() * 0.75) }}{{ getMetricUnit() }}</span>
                 <span>{{ Math.round(getMaxValue() * 0.5) }}{{ getMetricUnit() }}</span>
@@ -132,7 +132,7 @@
               </div>
 
               <!-- Chart area -->
-              <div class="ml-8 mr-4 h-full border-l-2 border-b-2 border-gray-300 dark:border-gray-600 relative">
+              <div class="ml-8 mr-4 h-full border-l-2 border-b-2 border-border dark:border-border relative">
                 <!-- Data visualization -->
                 <div class="absolute inset-0 flex items-end justify-between px-2">
                   <div
@@ -145,7 +145,7 @@
                       :style="{ height: `${(point.value / getMaxValue()) * 100}%` }"
                       :title="`${point.date}: ${point.value}${getMetricUnit()}`"
                     ></div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 transform -rotate-45 origin-center whitespace-nowrap">
+                    <span class="text-xs text-muted-foreground dark:text-muted-foreground transform -rotate-45 origin-center whitespace-nowrap">
                       {{ formatDate(point.date) }}
                     </span>
                   </div>
@@ -171,10 +171,10 @@
           <div class="space-y-4">
             <div v-for="month in monthlyComparison" :key="month.month" class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
-                <div class="w-12 text-sm text-gray-600 dark:text-gray-400">{{ month.month }}</div>
+                <div class="w-12 text-sm text-foreground dark:text-muted-foreground">{{ month.month }}</div>
                 <div class="flex-1">
                   <div class="flex items-center space-x-2">
-                    <span class="font-medium text-gray-900 dark:text-gray-100">
+                    <span class="font-medium text-foreground dark:text-foreground">
                       {{ month.value }}{{ getMetricUnit() }}
                     </span>
                     <component
@@ -188,7 +188,7 @@
                   </div>
                 </div>
               </div>
-              <div class="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="w-20 h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                 <div
                   class="h-full bg-blue-500 transition-all duration-300"
                   :style="{ width: `${(month.value / getMaxValue()) * 100}%` }"
@@ -209,19 +209,19 @@
         </CardHeader>
         <CardContent>
           <div class="space-y-4">
-            <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <div class="text-sm text-foreground dark:text-muted-foreground mb-4">
               Identified patterns in {{ getMetricLabel().toLowerCase() }} based on historical data
             </div>
 
             <div v-for="pattern in seasonalityPatterns" :key="pattern.period" class="p-3 rounded-lg border">
               <div class="flex items-center justify-between mb-2">
-                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ pattern.period }}</h4>
+                <h4 class="font-medium text-foreground dark:text-foreground">{{ pattern.period }}</h4>
                 <Badge :variant="pattern.impact > 0 ? 'destructive' : 'default'">
                   {{ pattern.impact > 0 ? 'Higher' : pattern.impact < 0 ? 'Lower' : 'Stable' }}
                 </Badge>
               </div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ pattern.description }}</p>
-              <div class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+              <p class="text-sm text-foreground dark:text-muted-foreground">{{ pattern.description }}</p>
+              <div class="mt-2 text-xs text-muted-foreground dark:text-muted-foreground">
                 Average impact: {{ formatTrendPercentage(pattern.impact) }}
               </div>
             </div>
@@ -242,7 +242,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="anomalies.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div v-if="anomalies.length === 0" class="text-center py-8 text-muted-foreground dark:text-muted-foreground">
           <CheckCircle class="h-12 w-12 mx-auto mb-2" />
           <p>No significant anomalies detected in the selected time period</p>
           <p class="text-sm mt-1">Your {{ getMetricLabel().toLowerCase() }} patterns appear normal</p>
@@ -425,27 +425,27 @@ const getMaxValue = (): number => {
 const getTrendClass = (trend: number): string => {
   if (selectedMetric.value === 'response_time' || selectedMetric.value === 'alert_frequency') {
     // For these metrics, lower is better
-    if (trend > 0) return 'text-red-600 dark:text-red-400';
+    if (trend > 0) return 'text-destructive dark:text-red-400';
     if (trend < 0) return 'text-green-600 dark:text-green-400';
   } else {
     // For uptime and ssl_score, higher is better
     if (trend > 0) return 'text-green-600 dark:text-green-400';
-    if (trend < 0) return 'text-red-600 dark:text-red-400';
+    if (trend < 0) return 'text-destructive dark:text-red-400';
   }
-  return 'text-gray-600 dark:text-gray-400';
+  return 'text-foreground dark:text-muted-foreground';
 };
 
 const getTrendIconClass = (trend: number): string => {
   if (selectedMetric.value === 'response_time' || selectedMetric.value === 'alert_frequency') {
     // For these metrics, lower is better
-    if (trend > 0) return 'text-red-600 dark:text-red-400';
+    if (trend > 0) return 'text-destructive dark:text-red-400';
     if (trend < 0) return 'text-green-600 dark:text-green-400';
   } else {
     // For uptime and ssl_score, higher is better
     if (trend > 0) return 'text-green-600 dark:text-green-400';
-    if (trend < 0) return 'text-red-600 dark:text-red-400';
+    if (trend < 0) return 'text-destructive dark:text-red-400';
   }
-  return 'text-gray-600 dark:text-gray-400';
+  return 'text-foreground dark:text-muted-foreground';
 };
 
 const getTrendBackgroundClass = (trend: number): string => {
@@ -458,7 +458,7 @@ const getTrendBackgroundClass = (trend: number): string => {
     if (trend > 0) return 'bg-green-100 dark:bg-green-900/30';
     if (trend < 0) return 'bg-red-100 dark:bg-red-900/30';
   }
-  return 'bg-gray-100 dark:bg-gray-800';
+  return 'bg-muted dark:bg-gray-800';
 };
 
 const formatTrendPercentage = (trend: number): string => {

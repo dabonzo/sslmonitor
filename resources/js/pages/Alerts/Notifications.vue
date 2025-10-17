@@ -33,7 +33,7 @@ defineProps<Props>();
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center space-x-3 mb-4">
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <Mail class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Mail class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
             <div>
               <h3 class="font-semibold text-foreground">Email</h3>
@@ -58,7 +58,7 @@ defineProps<Props>();
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-muted-foreground">Status:</span>
-            <span class="text-sm font-medium text-gray-500">Coming Soon</span>
+            <span class="text-sm font-medium text-muted-foreground">Coming Soon</span>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ defineProps<Props>();
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-muted-foreground">Status:</span>
-            <span class="text-sm font-medium text-gray-500">Coming Soon</span>
+            <span class="text-sm font-medium text-muted-foreground">Coming Soon</span>
           </div>
         </div>
       </div>

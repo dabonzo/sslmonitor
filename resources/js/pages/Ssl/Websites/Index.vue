@@ -369,8 +369,8 @@ const formatDate = (dateString: string) => {
 };
 
 const getDaysRemainingColor = (days: number | null) => {
-  if (!days) return 'text-gray-500';
-  if (days <= 7) return 'text-red-600';
+  if (!days) return 'text-muted-foreground';
+  if (days <= 7) return 'text-destructive';
   if (days <= 30) return 'text-yellow-600';
   return 'text-green-600';
 };
@@ -914,7 +914,7 @@ watch(activeTeam, () => {
                       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                             :class="{
                               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
-                              'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                              'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.team_badge.type === 'personal'
                             }">
                         {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
                       </span>
@@ -929,7 +929,7 @@ watch(activeTeam, () => {
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.ssl_status === 'valid',
                       'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.ssl_status === 'expired',
                       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.ssl_status === 'expiring_soon',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.ssl_status === 'unknown'
+                      'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.ssl_status === 'unknown'
                     }"
                   >
                     {{ website.ssl_status }}
@@ -942,7 +942,7 @@ watch(activeTeam, () => {
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
                       'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
                       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                      'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.uptime_status === 'not yet checked' || !website.uptime_status
                     }"
                   >
                     {{ website.uptime_status === 'up' ? 'Online' :
@@ -961,13 +961,13 @@ watch(activeTeam, () => {
                   >
                     {{ website.ssl_days_remaining }} days
                   </span>
-                  <span v-else class="text-gray-500 text-sm">N/A</span>
+                  <span v-else class="text-muted-foreground text-sm">N/A</span>
                 </td>
                 <td class="p-4">
                   <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                         :class="{
                           'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
-                          'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                          'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.team_badge.type === 'personal'
                         }">
                     {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
                   </span>
@@ -1001,7 +1001,7 @@ watch(activeTeam, () => {
                   <div class="flex items-center space-x-2">
                     <button
                       @click="viewWebsite(website)"
-                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
                     >
                       <Eye class="h-3 w-3 mr-1" />
                       View
@@ -1105,7 +1105,7 @@ watch(activeTeam, () => {
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0"
                       :class="{
                         'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.team_badge.type === 'team',
-                        'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.team_badge.type === 'personal'
+                        'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.team_badge.type === 'personal'
                       }">
                       {{ website.team_badge.type === 'team' ? website.team_badge.name : 'Personal' }}
                     </span>
@@ -1124,7 +1124,7 @@ watch(activeTeam, () => {
                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.ssl_status === 'valid',
                     'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.ssl_status === 'expired',
                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.ssl_status === 'expiring',
-                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': !website.ssl_status || website.ssl_status === 'unknown'
+                    'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': !website.ssl_status || website.ssl_status === 'unknown'
                   }">
                   {{ website.ssl_status }}
                 </span>
@@ -1137,7 +1137,7 @@ watch(activeTeam, () => {
                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': website.uptime_status === 'up',
                     'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': website.uptime_status === 'down',
                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': website.uptime_status === 'slow' || website.uptime_status === 'content_mismatch',
-                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': website.uptime_status === 'not yet checked' || !website.uptime_status
+                    'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': website.uptime_status === 'not yet checked' || !website.uptime_status
                   }"
                 >
                   {{ website.uptime_status === 'up' ? 'Online' :
@@ -1200,7 +1200,7 @@ watch(activeTeam, () => {
               <!-- Actions -->
               <button
                 @click="viewWebsite(website)"
-                class="flex items-center px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                class="flex items-center px-3 py-2 text-xs font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
               >
                 <Eye class="h-4 w-4 mr-1.5" />
                 View
@@ -1308,7 +1308,7 @@ watch(activeTeam, () => {
               <div class="text-sm text-muted-foreground">Success Rate</div>
             </div>
             <div class="bg-muted/30 rounded-lg p-4 text-center">
-              <div class="text-2xl font-bold text-blue-600">{{ Math.round(selectedWebsite.stats.avg_response_time) }}</div>
+              <div class="text-2xl font-bold text-primary">{{ Math.round(selectedWebsite.stats.avg_response_time) }}</div>
               <div class="text-sm text-muted-foreground">Avg Response (ms)</div>
             </div>
             <div class="bg-muted/30 rounded-lg p-4 text-center">
@@ -1340,7 +1340,7 @@ watch(activeTeam, () => {
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': selectedWebsite.ssl.status === 'valid',
                       'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': selectedWebsite.ssl.status === 'expired',
                       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': selectedWebsite.ssl.status === 'expiring_soon',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': selectedWebsite.ssl.status === 'unknown'
+                      'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground': selectedWebsite.ssl.status === 'unknown'
                     }"
                   >
                     {{ selectedWebsite.ssl.status }}
@@ -1455,7 +1455,7 @@ watch(activeTeam, () => {
                       <div class="text-sm font-medium">
                         {{ new Date(check.checked_at).toLocaleString() }}
                       </div>
-                      <div v-if="check.error_message" class="text-xs text-red-600">
+                      <div v-if="check.error_message" class="text-xs text-destructive">
                         {{ check.error_message }}
                       </div>
                     </div>
@@ -1518,7 +1518,7 @@ watch(activeTeam, () => {
                   <span class="text-sm text-muted-foreground">SSL Monitoring:</span>
                   <span
                     class="text-sm font-medium"
-                    :class="selectedWebsite.monitoring.ssl_enabled ? 'text-green-600' : 'text-gray-500'"
+                    :class="selectedWebsite.monitoring.ssl_enabled ? 'text-green-600' : 'text-muted-foreground'"
                   >
                     {{ selectedWebsite.monitoring.ssl_enabled ? 'Enabled' : 'Disabled' }}
                   </span>
@@ -1527,7 +1527,7 @@ watch(activeTeam, () => {
                   <span class="text-sm text-muted-foreground">Uptime Monitoring:</span>
                   <span
                     class="text-sm font-medium"
-                    :class="selectedWebsite.monitoring.uptime_enabled ? 'text-green-600' : 'text-gray-500'"
+                    :class="selectedWebsite.monitoring.uptime_enabled ? 'text-green-600' : 'text-muted-foreground'"
                   >
                     {{ selectedWebsite.monitoring.uptime_enabled ? 'Enabled' : 'Disabled' }}
                   </span>
@@ -1555,14 +1555,14 @@ watch(activeTeam, () => {
               <Eye class="h-4 w-4 mr-2" />
               {{ analysisLoading ? 'Analyzing...' : 'Certificate Analysis' }}
             </button>
-            <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors">
+            <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground bg-muted border border-border rounded-md hover:bg-muted transition-colors">
               <Edit class="h-4 w-4 mr-2" />
               Edit Settings
             </button>
           </div>
           <div class="flex space-x-3">
             <button
-              class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
               @click="closeModal"
             >
               Close
@@ -1687,7 +1687,7 @@ watch(activeTeam, () => {
                   <span
                     class="text-sm font-medium"
                     :class="{
-                      'text-red-600': certificateAnalysis.analysis.validity?.days_remaining <= 7,
+                      'text-destructive': certificateAnalysis.analysis.validity?.days_remaining <= 7,
                       'text-yellow-600': certificateAnalysis.analysis.validity?.days_remaining > 7 && certificateAnalysis.analysis.validity?.days_remaining <= 30,
                       'text-green-600': certificateAnalysis.analysis.validity?.days_remaining > 30
                     }"
@@ -1715,7 +1715,7 @@ watch(activeTeam, () => {
                   <span
                     class="text-sm font-medium"
                     :class="{
-                      'text-red-600': certificateAnalysis.analysis.security?.security_score < 70,
+                      'text-destructive': certificateAnalysis.analysis.security?.security_score < 70,
                       'text-yellow-600': certificateAnalysis.analysis.security?.security_score >= 70 && certificateAnalysis.analysis.security?.security_score < 90,
                       'text-green-600': certificateAnalysis.analysis.security?.security_score >= 90
                     }"
@@ -1742,7 +1742,7 @@ watch(activeTeam, () => {
                   <span class="text-sm text-muted-foreground">Covers Requested Domain:</span>
                   <span
                     class="text-sm font-medium"
-                    :class="certificateAnalysis.analysis.domains?.covers_requested_domain ? 'text-green-600' : 'text-red-600'"
+                    :class="certificateAnalysis.analysis.domains?.covers_requested_domain ? 'text-green-600' : 'text-destructive'"
                   >
                     {{ certificateAnalysis.analysis.domains?.covers_requested_domain ? 'Yes' : 'No' }}
                   </span>
@@ -1778,7 +1778,7 @@ watch(activeTeam, () => {
 
         <div class="flex justify-end space-x-3 p-6 border-t border-border">
           <button
-            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
             @click="closeCertificateAnalysis"
           >
             Close Analysis

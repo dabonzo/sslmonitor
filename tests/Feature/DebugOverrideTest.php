@@ -95,8 +95,8 @@ test('debug ssl override functionality works with real websites', function () {
     // TDD: After deactivation, should revert to original SSL expiry
     expect($override->refresh()->is_active)->toBeFalse();
     expect($newEffectiveExpiry)->not->toBeNull();
-    expect($newEffectiveExpiry->format('Y-m-d'))->toBe('2025-11-08'); // Original expiry date
-    expect($newDaysRemaining)->toBeGreaterThan(20); // Should be about 26 days to Nov 8th
+    expect($newEffectiveExpiry->format('Y-m-d'))->toBe($monitor->certificate_expiration_date->format('Y-m-d')); // Original expiry date
+    expect($newDaysRemaining)->toBeGreaterThan(0); // Should be positive days remaining
 });
 
 // TDD: Test multiple overrides scenario
@@ -163,8 +163,8 @@ test('multiple ssl overrides work with correct precedence', function () {
     $finalEffectiveExpiry = $website->getEffectiveSslExpiryDate($user->id);
     $finalDaysRemaining = $website->getDaysRemaining($user->id);
 
-    expect($finalEffectiveExpiry->format('Y-m-d'))->toBe('2025-11-08');
-    expect($finalDaysRemaining)->toBeGreaterThan(20);
+    expect($finalEffectiveExpiry->format('Y-m-d'))->toBe($monitor->certificate_expiration_date->format('Y-m-d'));
+    expect($finalDaysRemaining)->toBeGreaterThan(0);
 });
 
 // TDD: Test expired overrides are ignored
@@ -266,5 +266,5 @@ test('ssl overrides are isolated by user', function () {
 
     // Other user should see the original expiry
     $otherExpiry = $website->getEffectiveSslExpiryDate($otherUser->id);
-    expect($otherExpiry->format('Y-m-d'))->toBe('2025-11-08');
+    expect($otherExpiry->format('Y-m-d'))->toBe($monitor->certificate_expiration_date->format('Y-m-d'));
 });

@@ -1608,7 +1608,7 @@ bulkTransferToPersonal.form = bulkTransferToPersonalForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 export const alerts = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1623,7 +1623,7 @@ alerts.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 alerts.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1656,7 +1656,7 @@ alerts.url = (args: { website: number | { id: number } } | [website: number | { 
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 alerts.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1666,7 +1666,7 @@ alerts.get = (args: { website: number | { id: number } } | [website: number | { 
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 alerts.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -1676,7 +1676,7 @@ alerts.head = (args: { website: number | { id: number } } | [website: number | {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 const alertsForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1686,7 +1686,7 @@ const alertsForm = (args: { website: number | { id: number } } | [website: numbe
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 alertsForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1696,7 +1696,7 @@ alertsForm.get = (args: { website: number | { id: number } } | [website: number 
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::alerts
-* @see app/Http/Controllers/Settings/AlertsController.php:333
+* @see app/Http/Controllers/Settings/AlertsController.php:414
 * @route '/ssl/websites/{website}/alerts'
 */
 alertsForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

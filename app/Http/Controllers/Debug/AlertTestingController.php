@@ -278,21 +278,19 @@ class AlertTestingController extends Controller
                 'expires_at' => now()->addMinutes(30), // Auto-expire after 30 minutes
             ]);
 
-            // Get only SSL expiry alert configurations
+            // Get only SSL expiry alert configurations for this specific website
+            // Note: For debug testing, we DON'T filter by 'enabled' - users should be able to test disabled alerts
             $sslAlertConfigs = AlertConfiguration::where('user_id', $website->user_id)
-                ->where(function ($query) use ($website) {
-                    $query->where('website_id', $website->id)
-                          ->orWhereNull('website_id'); // Global user alerts
-                })
+                ->where('website_id', $website->id)
                 ->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY)
-                ->where('enabled', true)
-                ->where('threshold_days', '>=', $days) // Only trigger alerts that should fire for this day count
+                ->where('threshold_days', '=', $days) // Only trigger the alert for this exact threshold
                 ->get();
 
             $triggeredAlerts = 0;
             foreach ($sslAlertConfigs as $alertConfig) {
                 $checkData = $this->prepareSslCheckData($website, $days);
-                if ($alertConfig->shouldTrigger($checkData, true)) {
+                // For debug testing: bypass both cooldown AND enabled check
+                if ($alertConfig->shouldTrigger($checkData, $bypassCooldown = true, $bypassEnabledCheck = true)) {
                     $this->triggerAlert($alertConfig, $website, $checkData);
                     $triggeredAlerts++;
                 }
@@ -462,21 +460,19 @@ class AlertTestingController extends Controller
                 'expires_at' => now()->addMinutes(30),
             ]);
 
-            // Get only response time alert configurations
+            // Get only response time alert configurations for this specific website
+            // Note: For debug testing, we DON'T filter by 'enabled' - users should be able to test disabled alerts
             $responseTimeAlertConfigs = AlertConfiguration::where('user_id', $website->user_id)
-                ->where(function ($query) use ($website) {
-                    $query->where('website_id', $website->id)
-                          ->orWhereNull('website_id'); // Global user alerts
-                })
+                ->where('website_id', $website->id)
                 ->where('alert_type', AlertConfiguration::ALERT_RESPONSE_TIME)
-                ->where('enabled', true)
-                ->where('threshold_response_time', '<=', $responseTime) // Only trigger alerts that should fire for this response time
+                ->where('threshold_response_time', '=', $responseTime) // Only trigger the alert for this exact threshold
                 ->get();
 
             $triggeredAlerts = 0;
             foreach ($responseTimeAlertConfigs as $alertConfig) {
                 $checkData = $this->prepareResponseTimeCheckData($website, $responseTime);
-                if ($alertConfig->shouldTrigger($checkData, true)) {
+                // For debug testing: bypass both cooldown AND enabled check
+                if ($alertConfig->shouldTrigger($checkData, $bypassCooldown = true, $bypassEnabledCheck = true)) {
                     $this->triggerAlert($alertConfig, $website, $checkData);
                     $triggeredAlerts++;
                 }

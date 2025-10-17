@@ -8,6 +8,7 @@ beforeEach(function () {
     $this->setUpCleanDatabase();
 });
 
+use App\Models\AlertConfiguration;
 use App\Models\User;
 use App\Models\Website;
 
@@ -43,7 +44,6 @@ it('includes comprehensive alert types in response', function () {
         ->where('alertTypes.uptime_down', 'Website Down')
         ->where('alertTypes.response_time', 'Response Time Monitoring')
         ->where('alertTypes.ssl_invalid', 'SSL Certificate Invalid')
-        ->where('alertTypes.lets_encrypt_renewal', 'Let\'s Encrypt Renewal')
     );
 });
 
@@ -75,6 +75,11 @@ it('includes all alert levels with proper labels', function () {
 it('can create new alert configuration', function () {
     $user = User::factory()->create();
 
+    // Ensure no existing alerts of this type exist (they might be auto-created)
+    AlertConfiguration::where('user_id', $user->id)
+        ->where('alert_type', 'ssl_expiry')
+        ->delete();
+
     $alertData = [
         'alert_type' => 'ssl_expiry',
         'alert_level' => 'critical',
@@ -89,6 +94,11 @@ it('can create new alert configuration', function () {
 
 it('can create alert without threshold days', function () {
     $user = User::factory()->create();
+
+    // Ensure no existing alerts of this type exist (they might be auto-created)
+    AlertConfiguration::where('user_id', $user->id)
+        ->where('alert_type', 'uptime_down')
+        ->delete();
 
     $alertData = [
         'alert_type' => 'uptime_down',

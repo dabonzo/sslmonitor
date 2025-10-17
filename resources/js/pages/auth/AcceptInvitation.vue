@@ -36,7 +36,7 @@ const getRoleColor = (role: string) => {
         'OWNER': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
         'ADMIN': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
         'MANAGER': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-        'VIEWER': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        'VIEWER': 'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground'
     };
     return colors[role] || colors['VIEWER'];
 };
@@ -73,11 +73,11 @@ const timeUntilExpiry = computed(() => {
 <template>
     <Head title="Accept Team Invitation" />
 
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-muted dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <div class="text-center">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">🔒 SSL Monitor</h1>
-                <h2 class="mt-4 text-xl text-gray-600 dark:text-gray-300">Team Invitation</h2>
+                <h1 class="text-3xl font-bold text-foreground dark:text-white">🔒 SSL Monitor</h1>
+                <h2 class="mt-4 text-xl text-foreground dark:text-muted-foreground">Team Invitation</h2>
             </div>
         </div>
 
@@ -85,16 +85,16 @@ const timeUntilExpiry = computed(() => {
             <Card class="px-8 py-8">
                 <!-- Expired Invitation -->
                 <div v-if="isExpired" class="text-center">
-                    <div class="text-red-600 mb-4">
+                    <div class="text-destructive mb-4">
                         <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 48 48">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Invitation Expired</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    <h3 class="text-lg font-medium text-foreground dark:text-white mb-2">Invitation Expired</h3>
+                    <p class="text-sm text-muted-foreground dark:text-muted-foreground mb-6">
                         This invitation to join <strong>{{ invitation.team.name }}</strong> has expired.
                     </p>
-                    <Link href="/" class="text-blue-600 hover:text-blue-500">
+                    <Link href="/" class="text-primary hover:text-blue-500">
                         Return to Home
                     </Link>
                 </div>
@@ -103,29 +103,29 @@ const timeUntilExpiry = computed(() => {
                 <div v-else>
                     <!-- Invitation Details -->
                     <div class="text-center mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        <h3 class="text-lg font-medium text-foreground dark:text-white mb-2">
                             You're invited to join
                         </h3>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                        <h2 class="text-xl font-bold text-foreground dark:text-white">
                             {{ invitation.team.name }}
                         </h2>
-                        <p v-if="invitation.team.description" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        <p v-if="invitation.team.description" class="text-sm text-muted-foreground dark:text-muted-foreground mt-2">
                             {{ invitation.team.description }}
                         </p>
                     </div>
 
                     <!-- Role and Details -->
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+                    <div class="bg-muted dark:bg-card rounded-lg p-4 mb-6">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Your Role:</span>
+                            <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Your Role:</span>
                             <Badge :class="getRoleColor(invitation.role)">
                                 {{ invitation.role }}
                             </Badge>
                         </div>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                        <p class="text-xs text-foreground dark:text-muted-foreground mb-3">
                             {{ getRoleDescription(invitation.role) }}
                         </p>
-                        <div class="text-xs text-gray-500 dark:text-gray-500">
+                        <div class="text-xs text-muted-foreground dark:text-muted-foreground">
                             <div>Invited by: {{ invitation.invited_by }}</div>
                             <div>Email: {{ invitation.email }}</div>
                             <div>Expires in: {{ timeUntilExpiry }}</div>
@@ -135,7 +135,7 @@ const timeUntilExpiry = computed(() => {
                     <!-- Existing User - Login Prompt -->
                     <div v-if="showLoginPrompt" class="space-y-4">
                         <div class="text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <p class="text-sm text-foreground dark:text-muted-foreground mb-4">
                                 An account with this email already exists. Please log in to accept the invitation.
                             </p>
                             <div class="space-y-3">
@@ -174,7 +174,7 @@ const timeUntilExpiry = computed(() => {
                                     class="mt-1 w-full"
                                     placeholder="Enter your full name"
                                 />
-                                <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
+                                <p v-if="errors.name" class="mt-1 text-sm text-destructive">{{ errors.name }}</p>
                             </div>
 
                             <div>
@@ -185,7 +185,7 @@ const timeUntilExpiry = computed(() => {
                                     type="email"
                                     :value="invitation.email"
                                     disabled
-                                    class="mt-1 w-full bg-gray-100 dark:bg-gray-700"
+                                    class="mt-1 w-full bg-muted dark:bg-muted"
                                 />
                             </div>
 
@@ -199,7 +199,7 @@ const timeUntilExpiry = computed(() => {
                                     class="mt-1 w-full"
                                     placeholder="Create a secure password"
                                 />
-                                <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
+                                <p v-if="errors.password" class="mt-1 text-sm text-destructive">{{ errors.password }}</p>
                             </div>
 
                             <div>
@@ -247,7 +247,7 @@ const timeUntilExpiry = computed(() => {
                                 variant="ghost"
                                 size="sm"
                                 :disabled="processing"
-                                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                class="text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-muted-foreground"
                             >
                                 Decline Invitation
                             </Button>
@@ -258,7 +258,7 @@ const timeUntilExpiry = computed(() => {
 
             <!-- Footer -->
             <div class="mt-8 text-center">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
+                <p class="text-xs text-muted-foreground dark:text-muted-foreground">
                     SSL Monitor - Keeping your certificates secure and up to date
                 </p>
             </div>

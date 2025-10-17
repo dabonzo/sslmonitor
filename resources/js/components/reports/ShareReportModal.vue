@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Share class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Share class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Share Report
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Share "{{ report?.name }}" with others
             </div>
           </div>
@@ -20,23 +20,23 @@
       <div class="space-y-4 py-4">
         <!-- Share Link -->
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Share Link</label>
           <div class="flex space-x-2">
             <input
               :value="shareLink"
               readonly
-              class="flex-1 px-3 py-2 border border-border rounded-md bg-gray-50 dark:bg-gray-800 text-foreground focus:outline-none"
+              class="flex-1 px-3 py-2 border border-border rounded-md bg-muted dark:bg-card text-foreground focus:outline-none"
             />
             <Button @click="copyLink" size="sm">
               <Copy class="h-4 w-4" />
             </Button>
           </div>
-          <p class="text-xs text-gray-500 dark:text-gray-500">Link expires in 30 days</p>
+          <p class="text-xs text-muted-foreground dark:text-muted-foreground">Link expires in 30 days</p>
         </div>
 
         <!-- Email Sharing -->
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Email Recipients</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Email Recipients</label>
           <textarea
             v-model="emailRecipients"
             rows="3"
@@ -52,7 +52,7 @@
               :checked="shareOptions.allowDownload"
               @update:checked="shareOptions.allowDownload = $event"
             />
-            <span class="text-sm text-gray-700 dark:text-gray-300">Allow recipients to download report</span>
+            <span class="text-sm text-foreground dark:text-muted-foreground">Allow recipients to download report</span>
           </div>
 
           <div class="flex items-center space-x-3">
@@ -60,7 +60,7 @@
               :checked="shareOptions.requirePassword"
               @update:checked="shareOptions.requirePassword = $event"
             />
-            <span class="text-sm text-gray-700 dark:text-gray-300">Require password to view</span>
+            <span class="text-sm text-foreground dark:text-muted-foreground">Require password to view</span>
           </div>
 
           <div v-if="shareOptions.requirePassword" class="ml-6 space-y-2">
@@ -77,7 +77,7 @@
               :checked="shareOptions.trackViews"
               @update:checked="shareOptions.trackViews = $event"
             />
-            <span class="text-sm text-gray-700 dark:text-gray-300">Track who views the report</span>
+            <span class="text-sm text-foreground dark:text-muted-foreground">Track who views the report</span>
           </div>
         </div>
       </div>

@@ -72,8 +72,8 @@ const emptyStateMessage = computed(() =>
 
 const triggerClasses = computed(() => ({
   'w-full flex items-center justify-between px-4 py-3': true,
-  'bg-white dark:bg-gray-800': true,
-  'border border-gray-300 dark:border-gray-600': true,
+  'bg-background dark:bg-gray-800': true,
+  'border border-border dark:border-border': true,
   'rounded-lg shadow-sm': true,
   'hover:border-gray-400 dark:hover:border-gray-500': true,
   'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500': true,
@@ -180,30 +180,30 @@ const handleKeydown = (event: KeyboardEvent) => {
       <div class="flex items-center space-x-3 flex-1 text-left">
         <div v-if="selectedTeam" class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Users class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <Users class="h-4 w-4 text-primary dark:text-blue-400" />
           </div>
           <div class="flex-1">
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <p class="text-sm font-semibold text-foreground dark:text-foreground">
               {{ selectedTeam.name }}
             </p>
-            <p v-if="selectedTeam.description" class="text-xs text-gray-600 dark:text-gray-400 truncate">
+            <p v-if="selectedTeam.description" class="text-xs text-foreground dark:text-muted-foreground truncate">
               {{ selectedTeam.description }}
             </p>
             <div v-if="showMemberCount || showUserRole" class="flex items-center space-x-2 mt-1">
-              <span v-if="showMemberCount" class="text-xs text-gray-500 dark:text-gray-500">
+              <span v-if="showMemberCount" class="text-xs text-muted-foreground dark:text-muted-foreground">
                 {{ selectedTeam.member_count }} members
               </span>
-              <span v-if="showUserRole && selectedTeam.user_role" class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+              <span v-if="showUserRole && selectedTeam.user_role" class="text-xs px-2 py-0.5 bg-muted dark:bg-muted text-foreground dark:text-muted-foreground rounded">
                 {{ selectedTeam.user_role }}
               </span>
             </div>
           </div>
         </div>
         <div v-else class="flex items-center space-x-3">
-          <div class="rounded-lg bg-gray-100 dark:bg-gray-700 p-2">
-            <User class="h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <div class="rounded-lg bg-muted dark:bg-muted p-2">
+            <User class="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           </div>
-          <span class="text-gray-500 dark:text-gray-400">{{ placeholder }}</span>
+          <span class="text-muted-foreground dark:text-muted-foreground">{{ placeholder }}</span>
         </div>
       </div>
 
@@ -211,13 +211,13 @@ const handleKeydown = (event: KeyboardEvent) => {
         <button
           v-if="selectedTeam"
           @click.stop="clearSelection"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          class="text-muted-foreground hover:text-foreground dark:hover:text-gray-300 transition-colors"
           aria-label="Clear selection"
         >
           <X class="h-4 w-4" />
         </button>
         <ChevronDown
-          class="h-4 w-4 text-gray-400 transition-transform duration-200"
+          class="h-4 w-4 text-muted-foreground transition-transform duration-200"
           :class="{ 'transform rotate-180': isOpen }"
         />
       </div>
@@ -226,18 +226,18 @@ const handleKeydown = (event: KeyboardEvent) => {
     <!-- Dropdown Panel -->
     <div
       v-show="isOpen"
-      class="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden"
+      class="absolute z-50 w-full mt-2 bg-background dark:bg-card border border-border dark:border-border rounded-lg shadow-lg overflow-hidden"
     >
       <!-- Search Bar -->
-      <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+      <div class="p-3 border-b border-border dark:border-border">
         <div class="relative">
-          <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             ref="searchInputRef"
             v-model="searchQuery"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full pl-10 pr-4 py-2 bg-muted dark:bg-muted border border-border dark:border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             role="searchbox"
             aria-label="Search teams"
             :aria-controls="isOpen ? 'teams-listbox' : undefined"
@@ -248,8 +248,8 @@ const handleKeydown = (event: KeyboardEvent) => {
       <!-- Teams List -->
       <div class="max-h-64 overflow-y-auto">
         <div v-if="filteredTeams.length === 0" class="px-4 py-6 text-center">
-          <Users class="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <Users class="h-8 w-8 text-gray-300 dark:text-foreground mx-auto mb-2" />
+          <p class="text-sm text-muted-foreground dark:text-muted-foreground">
             {{ searchQuery ? 'No teams found matching your search' : 'No teams available' }}
           </p>
         </div>
@@ -258,7 +258,7 @@ const handleKeydown = (event: KeyboardEvent) => {
           v-for="team in filteredTeams"
           :key="team.id"
           @click="selectTeam(team)"
-          class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700"
+          class="w-full px-4 py-3 text-left hover:bg-muted dark:hover:bg-gray-700 transition-colors focus:outline-none focus:bg-muted dark:focus:bg-gray-700"
           :class="{
             'bg-blue-50 dark:bg-blue-900/20': selectedTeam?.id === team.id
           }"
@@ -266,20 +266,20 @@ const handleKeydown = (event: KeyboardEvent) => {
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3 flex-1">
               <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                <Users class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <Users class="h-4 w-4 text-primary dark:text-blue-400" />
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                <p class="text-sm font-semibold text-foreground dark:text-foreground truncate">
                   {{ team.name }}
                 </p>
-                <p v-if="team.description" class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                <p v-if="team.description" class="text-xs text-foreground dark:text-muted-foreground truncate">
                   {{ team.description }}
                 </p>
                 <div v-if="showMemberCount || showUserRole" class="flex items-center space-x-2 mt-1">
-                  <span v-if="showMemberCount" class="text-xs text-gray-500 dark:text-gray-500">
+                  <span v-if="showMemberCount" class="text-xs text-muted-foreground dark:text-muted-foreground">
                     {{ team.member_count }} members
                   </span>
-                  <span v-if="showUserRole && team.user_role" class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                  <span v-if="showUserRole && team.user_role" class="text-xs px-2 py-0.5 bg-muted dark:bg-muted text-foreground dark:text-muted-foreground rounded">
                     {{ team.user_role }}
                   </span>
                 </div>
@@ -287,15 +287,15 @@ const handleKeydown = (event: KeyboardEvent) => {
             </div>
             <Check
               v-if="selectedTeam?.id === team.id"
-              class="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0"
+              class="h-4 w-4 text-primary dark:text-blue-400 flex-shrink-0"
             />
           </div>
         </button>
       </div>
 
       <!-- Footer -->
-      <div v-if="filteredTeams.length > 0" class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
-        <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+      <div v-if="filteredTeams.length > 0" class="px-4 py-2 border-t border-border dark:border-border bg-muted dark:bg-gray-750">
+        <p class="text-xs text-muted-foreground dark:text-muted-foreground text-center">
           {{ filteredTeams.length }} {{ filteredTeams.length === 1 ? 'team' : 'teams' }} shown
           <span v-if="searchQuery && filteredTeams.length < teams.length">
             ({{ teams.length - filteredTeams.length }} filtered out)

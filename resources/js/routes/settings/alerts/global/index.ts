@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:139
+* @see app/Http/Controllers/Settings/AlertsController.php:221
 * @route '/settings/alerts/global/update'
 */
 export const update = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:139
+* @see app/Http/Controllers/Settings/AlertsController.php:221
 * @route '/settings/alerts/global/update'
 */
 update.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ update.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:139
+* @see app/Http/Controllers/Settings/AlertsController.php:221
 * @route '/settings/alerts/global/update'
 */
 update.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ update.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:139
+* @see app/Http/Controllers/Settings/AlertsController.php:221
 * @route '/settings/alerts/global/update'
 */
 const updateForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const updateForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =>
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:139
+* @see app/Http/Controllers/Settings/AlertsController.php:221
 * @route '/settings/alerts/global/update'
 */
 updateForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

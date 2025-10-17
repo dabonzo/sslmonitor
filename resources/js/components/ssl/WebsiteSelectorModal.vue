@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Globe class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Globe class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Select Websites
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Choose which websites to include in the bulk operation
             </div>
           </div>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Selection Actions -->
-        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div class="flex items-center justify-between p-3 bg-muted dark:bg-card rounded-lg">
           <div class="flex items-center space-x-4">
             <Button @click="selectAll" size="sm" variant="outline">
               <CheckSquare class="h-4 w-4 mr-2" />
@@ -56,7 +56,7 @@
               Invert
             </Button>
           </div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">
+          <div class="text-sm text-foreground dark:text-muted-foreground">
             {{ selectedWebsites.length }} of {{ filteredWebsites.length }} selected
           </div>
         </div>
@@ -66,7 +66,7 @@
           <div
             v-for="website in filteredWebsites"
             :key="website.id"
-            class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+            class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted dark:hover:bg-gray-800 cursor-pointer"
             :class="{ 'border-primary bg-primary/5': selectedWebsites.includes(website.id) }"
             @click="toggleWebsite(website.id)"
           >
@@ -78,13 +78,13 @@
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-2">
-                <h4 class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ website.name }}</h4>
+                <h4 class="font-medium text-foreground dark:text-foreground truncate">{{ website.name }}</h4>
                 <Badge :variant="getStatusVariant(website.sslStatus)">
                   {{ website.sslStatus }}
                 </Badge>
               </div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ website.url }}</p>
-              <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-500 mt-1">
+              <p class="text-sm text-foreground dark:text-muted-foreground truncate">{{ website.url }}</p>
+              <div class="flex items-center space-x-4 text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                 <span>SSL Score: {{ website.sslScore }}/100</span>
                 <span>Expires: {{ formatExpiryDate(website.expiresAt) }}</span>
                 <span v-if="website.team">Team: {{ website.team }}</span>
@@ -103,7 +103,7 @@
         </div>
 
         <!-- No Results -->
-        <div v-if="filteredWebsites.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div v-if="filteredWebsites.length === 0" class="text-center py-8 text-muted-foreground dark:text-muted-foreground">
           <Globe class="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p class="font-medium">No websites found</p>
           <p class="text-sm mt-1">Try adjusting your search or filter criteria</p>
@@ -111,7 +111,7 @@
       </div>
 
       <div class="flex justify-between items-center pt-4 border-t">
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-sm text-foreground dark:text-muted-foreground">
           {{ selectedWebsites.length }} website{{ selectedWebsites.length !== 1 ? 's' : '' }} selected
         </div>
         <div class="flex space-x-3">
@@ -279,11 +279,11 @@ const getSslStatusIconColor = (status: string): string => {
     case 'expiring':
       return 'text-yellow-600 dark:text-yellow-400';
     case 'expired':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'invalid':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 

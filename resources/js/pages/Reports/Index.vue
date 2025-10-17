@@ -3,10 +3,10 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-muted-foreground">
             Advanced Reporting Dashboard
           </h2>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-1 text-sm text-foreground dark:text-muted-foreground">
             Comprehensive SSL certificate and performance reporting
           </p>
         </div>
@@ -26,7 +26,7 @@
 
     <div class="space-y-8">
       <!-- Report Categories -->
-      <div class="border-b border-gray-200 dark:border-gray-700">
+      <div class="border-b border-border dark:border-border">
         <nav class="-mb-px flex space-x-8">
           <button
             v-for="category in reportCategories"
@@ -35,8 +35,8 @@
             :class="[
               'py-2 px-1 border-b-2 font-medium text-sm',
               activeCategory === category.id
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                ? 'border-blue-500 text-primary dark:text-blue-400'
+                : 'border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-gray-300 hover:border-border dark:hover:border-border'
             ]"
           >
             <component :is="category.icon" class="h-4 w-4 mr-2 inline" />
@@ -70,10 +70,10 @@
                   <component :is="template.icon" class="h-5 w-5" :class="template.iconColor" />
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ template.name }}</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ template.description }}</p>
+                  <h3 class="font-medium text-foreground dark:text-foreground">{{ template.name }}</h3>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ template.description }}</p>
                   <div class="flex items-center justify-between mt-2">
-                    <span class="text-xs text-gray-500 dark:text-gray-500">{{ template.estimatedTime }}</span>
+                    <span class="text-xs text-muted-foreground dark:text-muted-foreground">{{ template.estimatedTime }}</span>
                     <div v-if="template.generating" class="flex items-center space-x-1">
                       <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
                       <span class="text-xs text-primary">Generating...</span>
@@ -118,22 +118,22 @@
             <table class="w-full text-sm">
               <thead class="border-b border-border">
                 <tr class="text-left">
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Report Name</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Type</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Status</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Generated</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Size</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Actions</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Report Name</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Type</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Status</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Generated</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Size</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-border">
-                <tr v-for="report in filteredReports" :key="report.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr v-for="report in filteredReports" :key="report.id" class="hover:bg-muted dark:hover:bg-gray-800">
                   <td class="py-3">
                     <div class="flex items-center space-x-2">
                       <component :is="getReportIcon(report.type)" class="h-4 w-4" :class="getReportIconColor(report.type)" />
                       <div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ report.name }}</div>
-                        <div class="text-xs text-gray-600 dark:text-gray-400">{{ report.description }}</div>
+                        <div class="font-medium text-foreground dark:text-foreground">{{ report.name }}</div>
+                        <div class="text-xs text-foreground dark:text-muted-foreground">{{ report.description }}</div>
                       </div>
                     </div>
                   </td>
@@ -147,8 +147,8 @@
                       {{ report.status }}
                     </Badge>
                   </td>
-                  <td class="py-3 text-gray-700 dark:text-gray-300">{{ formatRelativeTime(report.generatedAt) }}</td>
-                  <td class="py-3 text-gray-700 dark:text-gray-300">{{ report.fileSize }}</td>
+                  <td class="py-3 text-foreground dark:text-muted-foreground">{{ formatRelativeTime(report.generatedAt) }}</td>
+                  <td class="py-3 text-foreground dark:text-muted-foreground">{{ report.fileSize }}</td>
                   <td class="py-3">
                     <div class="flex space-x-2">
                       <Button @click="viewReport(report)" size="sm" variant="outline">
@@ -181,7 +181,7 @@
           </div>
 
           <!-- Empty State -->
-          <div v-if="filteredReports.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-if="filteredReports.length === 0" class="text-center py-8 text-muted-foreground dark:text-muted-foreground">
             <FileText class="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p class="font-medium">No reports found</p>
             <p class="text-sm mt-1">Generate your first report using the quick templates above</p>
@@ -204,11 +204,11 @@
               <div v-for="stat in usageStats" :key="stat.type" class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                   <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: stat.color }"></div>
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ stat.type }}</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ stat.type }}</span>
                 </div>
                 <div class="flex items-center space-x-3">
-                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ stat.count }} reports</span>
-                  <div class="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <span class="text-sm text-foreground dark:text-muted-foreground">{{ stat.count }} reports</span>
+                  <div class="w-20 h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                     <div
                       class="h-full transition-all duration-300"
                       :style="{
@@ -217,7 +217,7 @@
                       }"
                     ></div>
                   </div>
-                  <span class="text-sm font-medium text-gray-900 dark:text-gray-100 w-8 text-right">
+                  <span class="text-sm font-medium text-foreground dark:text-foreground w-8 text-right">
                     {{ stat.percentage }}%
                   </span>
                 </div>
@@ -245,9 +245,9 @@
               <div v-for="schedule in scheduledReports" :key="schedule.id" class="p-3 border rounded-lg">
                 <div class="flex items-center justify-between">
                   <div>
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ schedule.name }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ schedule.description }}</p>
-                    <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    <h4 class="font-medium text-foreground dark:text-foreground">{{ schedule.name }}</h4>
+                    <p class="text-sm text-foreground dark:text-muted-foreground">{{ schedule.description }}</p>
+                    <div class="flex items-center space-x-4 text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                       <span>{{ schedule.frequency }}</span>
                       <span>Next run: {{ schedule.nextRun }}</span>
                     </div>
@@ -399,7 +399,7 @@ const quickReportTemplates = ref<QuickReportTemplate[]>([
     estimatedTime: '2 min',
     icon: Shield,
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: '2',
@@ -419,7 +419,7 @@ const quickReportTemplates = ref<QuickReportTemplate[]>([
     estimatedTime: '5 min',
     icon: AlertTriangle,
     iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: '4',
@@ -554,13 +554,13 @@ const getReportIcon = (type: string) => {
 
 const getReportIconColor = (type: string): string => {
   const colorMap = {
-    ssl: 'text-blue-600 dark:text-blue-400',
+    ssl: 'text-primary dark:text-blue-400',
     performance: 'text-green-600 dark:text-green-400',
-    security: 'text-red-600 dark:text-red-400',
+    security: 'text-destructive dark:text-red-400',
     compliance: 'text-purple-600 dark:text-purple-400',
-    custom: 'text-gray-600 dark:text-gray-400'
+    custom: 'text-foreground dark:text-muted-foreground'
   };
-  return colorMap[type] || 'text-gray-600 dark:text-gray-400';
+  return colorMap[type] || 'text-foreground dark:text-muted-foreground';
 };
 
 const getTypeVariant = (type: string) => {

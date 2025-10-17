@@ -3,8 +3,8 @@
     <!-- Security Insights Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Security Insights</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">SSL security analysis and recommendations</p>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Security Insights</h3>
+        <p class="text-sm text-foreground dark:text-muted-foreground">SSL security analysis and recommendations</p>
       </div>
 
       <div class="flex space-x-4">
@@ -25,15 +25,15 @@
         <CardContent class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Overall Security Score</p>
-              <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {{ securityOverview.overallScore }}<span class="text-lg text-gray-500">/100</span>
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Overall Security Score</p>
+              <p class="text-3xl font-bold text-foreground dark:text-foreground">
+                {{ securityOverview.overallScore }}<span class="text-lg text-muted-foreground">/100</span>
               </p>
             </div>
             <div class="relative w-16 h-16">
               <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
                 <path
-                  class="text-gray-300 dark:text-gray-700"
+                  class="text-gray-300 dark:text-foreground"
                   stroke="currentColor"
                   stroke-width="3"
                   fill="none"
@@ -51,7 +51,7 @@
               </svg>
             </div>
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+          <p class="text-xs text-foreground dark:text-muted-foreground mt-2">
             {{ getScoreDescription(securityOverview.overallScore) }}
           </p>
         </CardContent>
@@ -64,11 +64,11 @@
               <CheckCircle class="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Secure Certificates</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Secure Certificates</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ securityOverview.secureCerts }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">
+              <p class="text-xs text-foreground dark:text-muted-foreground">
                 {{ ((securityOverview.secureCerts / securityOverview.totalCerts) * 100).toFixed(1) }}% of total
               </p>
             </div>
@@ -83,11 +83,11 @@
               <AlertTriangle class="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Vulnerabilities</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Vulnerabilities</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ securityOverview.vulnerabilities }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">
+              <p class="text-xs text-foreground dark:text-muted-foreground">
                 {{ securityOverview.criticalVulns }} critical
               </p>
             </div>
@@ -99,14 +99,14 @@
         <CardContent class="p-4">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
-              <XCircle class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <XCircle class="h-5 w-5 text-destructive dark:text-red-400" />
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Expired/Invalid</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Expired/Invalid</p>
+              <p class="text-2xl font-bold text-foreground dark:text-foreground">
                 {{ securityOverview.expiredCerts }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">
+              <p class="text-xs text-foreground dark:text-muted-foreground">
                 Immediate attention needed
               </p>
             </div>
@@ -119,7 +119,7 @@
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center space-x-2">
-          <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+          <AlertTriangle class="h-5 w-5 text-destructive dark:text-red-400" />
           <span>Priority Security Issues</span>
         </CardTitle>
         <CardDescription>
@@ -127,7 +127,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="priorityIssues.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div v-if="priorityIssues.length === 0" class="text-center py-8 text-muted-foreground dark:text-muted-foreground">
           <CheckCircle class="h-12 w-12 mx-auto mb-2 text-green-500" />
           <p class="font-medium">No critical security issues found</p>
           <p class="text-sm mt-1">All certificates meet security standards</p>
@@ -145,10 +145,10 @@
                   <Badge :variant="getSeverityVariant(issue.severity)">
                     {{ issue.severity.toUpperCase() }}
                   </Badge>
-                  <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ issue.title }}</h4>
+                  <h4 class="font-medium text-foreground dark:text-foreground">{{ issue.title }}</h4>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ issue.description }}</p>
-                <div class="text-xs text-gray-500 dark:text-gray-500">
+                <p class="text-sm text-foreground dark:text-muted-foreground mb-2">{{ issue.description }}</p>
+                <div class="text-xs text-muted-foreground dark:text-muted-foreground">
                   Affected: {{ issue.affectedSites.length }} website{{ issue.affectedSites.length !== 1 ? 's' : '' }}
                   | Impact: {{ issue.impact }}
                 </div>
@@ -160,7 +160,7 @@
             </div>
 
             <!-- Affected Sites -->
-            <div v-if="issue.affectedSites.length > 0" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div v-if="issue.affectedSites.length > 0" class="mt-3 pt-3 border-t border-border dark:border-border">
               <div class="flex flex-wrap gap-2">
                 <Badge
                   v-for="site in issue.affectedSites.slice(0, 3)"
@@ -196,16 +196,16 @@
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-2">
                   <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: ca.color }"></div>
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ ca.name }}</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ ca.name }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ ca.count }}</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">{{ ca.count }}</span>
                   <Badge :variant="ca.trustScore >= 90 ? 'default' : ca.trustScore >= 80 ? 'secondary' : 'destructive'" class="text-xs">
                     Trust: {{ ca.trustScore }}%
                   </Badge>
                 </div>
               </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="w-full bg-muted dark:bg-muted rounded-full h-2">
                 <div
                   class="h-2 rounded-full transition-all duration-300"
                   :style="{
@@ -233,16 +233,16 @@
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-2">
                   <component :is="getEncryptionIcon(encryption.strength)" class="h-4 w-4" :class="getEncryptionIconClass(encryption.strength)" />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ encryption.type }}</span>
+                  <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ encryption.type }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ encryption.count }} certs</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">{{ encryption.count }} certs</span>
                   <Badge :variant="getStrengthVariant(encryption.strength)">
                     {{ encryption.strength }}
                   </Badge>
                 </div>
               </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="w-full bg-muted dark:bg-muted rounded-full h-2">
                 <div
                   class="h-2 rounded-full transition-all duration-300"
                   :class="getStrengthBarClass(encryption.strength)"
@@ -267,14 +267,14 @@
             <div v-for="compliance in complianceStatus" :key="compliance.standard">
               <div class="flex items-center justify-between">
                 <div>
-                  <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ compliance.standard }}</h4>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ compliance.description }}</p>
+                  <h4 class="font-medium text-foreground dark:text-foreground">{{ compliance.standard }}</h4>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ compliance.description }}</p>
                 </div>
                 <Badge :variant="compliance.compliant ? 'default' : 'destructive'">
                   {{ compliance.compliant ? 'Compliant' : 'Non-Compliant' }}
                 </Badge>
               </div>
-              <div class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+              <div class="mt-2 text-xs text-muted-foreground dark:text-muted-foreground">
                 {{ compliance.compliantSites }}/{{ compliance.totalSites }} websites compliant
               </div>
             </div>
@@ -298,13 +298,13 @@
                   <component :is="getRecommendationIcon(recommendation.type)" class="h-4 w-4" :class="getRecommendationIconClass(recommendation.priority)" />
                 </div>
                 <div class="flex-1">
-                  <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ recommendation.title }}</h4>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ recommendation.description }}</p>
+                  <h4 class="font-medium text-foreground dark:text-foreground">{{ recommendation.title }}</h4>
+                  <p class="text-sm text-foreground dark:text-muted-foreground mt-1">{{ recommendation.description }}</p>
                   <div class="flex items-center space-x-2 mt-2">
                     <Badge :variant="getPriorityVariant(recommendation.priority)" class="text-xs">
                       {{ recommendation.priority }}
                     </Badge>
-                    <span class="text-xs text-gray-500 dark:text-gray-500">
+                    <span class="text-xs text-muted-foreground dark:text-muted-foreground">
                       Impact: {{ recommendation.impact }}
                     </span>
                   </div>
@@ -547,7 +547,7 @@ const getIssueBorderClass = (severity: string): string => {
     case 'low':
       return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
     default:
-      return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/20';
+      return 'border-l-gray-500 bg-muted dark:bg-gray-900/20';
   }
 };
 
@@ -571,9 +571,9 @@ const getEncryptionIconClass = (strength: string): string => {
     case 'moderate':
       return 'text-yellow-600 dark:text-yellow-400';
     case 'weak':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 
@@ -627,20 +627,20 @@ const getRecommendationBgClass = (priority: string): string => {
     case 'low':
       return 'bg-blue-100 dark:bg-blue-900/30';
     default:
-      return 'bg-gray-100 dark:bg-gray-800';
+      return 'bg-muted dark:bg-gray-800';
   }
 };
 
 const getRecommendationIconClass = (priority: string): string => {
   switch (priority) {
     case 'high':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'medium':
       return 'text-yellow-600 dark:text-yellow-400';
     case 'low':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'text-primary dark:text-blue-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 

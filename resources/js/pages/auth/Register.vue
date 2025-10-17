@@ -23,8 +23,8 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
         >
             <!-- Name field -->
             <div>
-                <Label for="name" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="name" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Name</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="name"
                         type="text"
@@ -34,7 +34,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
                         :tabindex="1"
                         autocomplete="name"
                         placeholder="Enter Full Name"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <User class="h-[18px] w-[18px]" />
@@ -45,8 +45,8 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
 
             <!-- Email field -->
             <div>
-                <Label for="email" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="email" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Email</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="email"
                         type="email"
@@ -55,7 +55,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
                         :tabindex="2"
                         autocomplete="email"
                         placeholder="Enter Email"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Mail class="h-[18px] w-[18px]" />
@@ -66,8 +66,8 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
 
             <!-- Password field -->
             <div>
-                <Label for="password" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Password</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="password" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Password</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="password"
                         type="password"
@@ -76,7 +76,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
                         :tabindex="3"
                         autocomplete="new-password"
                         placeholder="Enter Password"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Lock class="h-[18px] w-[18px]" />
@@ -87,8 +87,8 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
 
             <!-- Confirm Password field -->
             <div>
-                <Label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="password_confirmation" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Confirm Password</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="password_confirmation"
                         type="password"
@@ -97,7 +97,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
                         :tabindex="4"
                         autocomplete="new-password"
                         placeholder="Confirm Password"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Lock class="h-[18px] w-[18px]" />
@@ -109,7 +109,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
             <!-- Register button -->
             <Button
                 type="submit"
-                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-blue-600/30"
                 :tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
@@ -119,7 +119,7 @@ import { LoaderCircle, User, Mail, Lock } from 'lucide-vue-next';
             </Button>
 
             <!-- Sign in link -->
-            <div class="text-center text-slate-600 dark:text-slate-400">
+            <div class="text-center text-foreground dark:text-muted-foreground">
                 Already have an account?
                 <TextLink :href="login()" class="font-semibold uppercase text-primary underline transition hover:text-black dark:hover:text-white" :tabindex="6">
                     SIGN IN

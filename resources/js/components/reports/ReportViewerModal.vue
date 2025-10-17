@@ -8,10 +8,10 @@
               <component :is="getReportIcon(report?.type)" class="h-5 w-5" :class="getReportIconColor(report?.type)" />
             </div>
             <div>
-              <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <div class="text-xl font-bold text-foreground dark:text-foreground">
                 {{ report?.name }}
               </div>
-              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
                 {{ report?.description }}
               </div>
             </div>
@@ -36,11 +36,11 @@
             <CardContent class="p-4">
               <div class="flex items-center space-x-3">
                 <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                  <Calendar class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <Calendar class="h-4 w-4 text-primary dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Generated</p>
-                  <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ formatDate(report.generatedAt) }}</p>
+                  <p class="text-xs font-medium text-foreground dark:text-muted-foreground">Generated</p>
+                  <p class="text-sm font-bold text-foreground dark:text-foreground">{{ formatDate(report.generatedAt) }}</p>
                 </div>
               </div>
             </CardContent>
@@ -53,8 +53,8 @@
                   <FileText class="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-600 dark:text-gray-400">File Size</p>
-                  <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ report.fileSize }}</p>
+                  <p class="text-xs font-medium text-foreground dark:text-muted-foreground">File Size</p>
+                  <p class="text-sm font-bold text-foreground dark:text-foreground">{{ report.fileSize }}</p>
                 </div>
               </div>
             </CardContent>
@@ -67,8 +67,8 @@
                   <BarChart3 class="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Data Points</p>
-                  <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ reportData.dataPoints }}</p>
+                  <p class="text-xs font-medium text-foreground dark:text-muted-foreground">Data Points</p>
+                  <p class="text-sm font-bold text-foreground dark:text-foreground">{{ reportData.dataPoints }}</p>
                 </div>
               </div>
             </CardContent>
@@ -81,8 +81,8 @@
                   <TrendingUp class="h-4 w-4 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Overall Score</p>
-                  <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ reportData.overallScore }}/100</p>
+                  <p class="text-xs font-medium text-foreground dark:text-muted-foreground">Overall Score</p>
+                  <p class="text-sm font-bold text-foreground dark:text-foreground">{{ reportData.overallScore }}/100</p>
                 </div>
               </div>
             </CardContent>
@@ -99,7 +99,7 @@
           </CardHeader>
           <CardContent>
             <div class="prose dark:prose-invert max-w-none">
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              <p class="text-foreground dark:text-muted-foreground leading-relaxed">
                 {{ reportData.executiveSummary }}
               </p>
             </div>
@@ -123,7 +123,7 @@
                   Strengths
                 </h4>
                 <ul class="space-y-2">
-                  <li v-for="finding in reportData.positiveFindings" :key="finding" class="text-sm text-gray-700 dark:text-gray-300 flex items-start">
+                  <li v-for="finding in reportData.positiveFindings" :key="finding" class="text-sm text-foreground dark:text-muted-foreground flex items-start">
                     <Check class="h-3 w-3 mr-2 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
                     {{ finding }}
                   </li>
@@ -137,7 +137,7 @@
                   Areas for Improvement
                 </h4>
                 <ul class="space-y-2">
-                  <li v-for="finding in reportData.improvementAreas" :key="finding" class="text-sm text-gray-700 dark:text-gray-300 flex items-start">
+                  <li v-for="finding in reportData.improvementAreas" :key="finding" class="text-sm text-foreground dark:text-muted-foreground flex items-start">
                     <AlertTriangle class="h-3 w-3 mr-2 text-orange-600 dark:text-orange-400 mt-1 flex-shrink-0" />
                     {{ finding }}
                   </li>
@@ -158,18 +158,18 @@
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div class="h-64 flex items-center justify-center bg-muted dark:bg-card rounded-lg">
                 <div class="text-center">
-                  <PieChart class="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                  <p class="text-sm text-gray-600 dark:text-gray-400">SSL Status Distribution Chart</p>
+                  <PieChart class="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <p class="text-sm text-foreground dark:text-muted-foreground">SSL Status Distribution Chart</p>
                   <div class="grid grid-cols-2 gap-4 mt-4 text-xs">
                     <div class="text-center">
                       <div class="text-2xl font-bold text-green-600 dark:text-green-400">85%</div>
-                      <div class="text-gray-500">Valid</div>
+                      <div class="text-muted-foreground">Valid</div>
                     </div>
                     <div class="text-center">
                       <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">12%</div>
-                      <div class="text-gray-500">Expiring</div>
+                      <div class="text-muted-foreground">Expiring</div>
                     </div>
                   </div>
                 </div>
@@ -186,18 +186,18 @@
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div class="h-64 flex items-center justify-center bg-muted dark:bg-card rounded-lg">
                 <div class="text-center">
-                  <LineChart class="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Response Time Trend Analysis</p>
+                  <LineChart class="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <p class="text-sm text-foreground dark:text-muted-foreground">Response Time Trend Analysis</p>
                   <div class="flex justify-center space-x-6 mt-4 text-xs">
                     <div class="text-center">
-                      <div class="text-lg font-bold text-blue-600 dark:text-blue-400">342ms</div>
-                      <div class="text-gray-500">Avg Response</div>
+                      <div class="text-lg font-bold text-primary dark:text-blue-400">342ms</div>
+                      <div class="text-muted-foreground">Avg Response</div>
                     </div>
                     <div class="text-center">
                       <div class="text-lg font-bold text-green-600 dark:text-green-400">99.2%</div>
-                      <div class="text-gray-500">Uptime</div>
+                      <div class="text-muted-foreground">Uptime</div>
                     </div>
                   </div>
                 </div>
@@ -223,13 +223,13 @@
                   </div>
                   <div class="flex-1">
                     <div class="flex items-center space-x-2 mb-2">
-                      <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ recommendation.title }}</h4>
+                      <h4 class="font-medium text-foreground dark:text-foreground">{{ recommendation.title }}</h4>
                       <Badge :variant="getPriorityVariant(recommendation.priority)">
                         {{ recommendation.priority }}
                       </Badge>
                     </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ recommendation.description }}</p>
-                    <div class="text-xs text-gray-500 dark:text-gray-500">
+                    <p class="text-sm text-foreground dark:text-muted-foreground mb-2">{{ recommendation.description }}</p>
+                    <div class="text-xs text-muted-foreground dark:text-muted-foreground">
                       Expected impact: {{ recommendation.impact }} | Effort: {{ recommendation.effort }}
                     </div>
                   </div>
@@ -252,24 +252,24 @@
               <table class="w-full text-sm">
                 <thead class="border-b border-border">
                   <tr class="text-left">
-                    <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Website</th>
-                    <th class="py-2 font-medium text-gray-900 dark:text-gray-100">SSL Status</th>
-                    <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Security Score</th>
-                    <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Response Time</th>
-                    <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Uptime</th>
+                    <th class="py-2 font-medium text-foreground dark:text-foreground">Website</th>
+                    <th class="py-2 font-medium text-foreground dark:text-foreground">SSL Status</th>
+                    <th class="py-2 font-medium text-foreground dark:text-foreground">Security Score</th>
+                    <th class="py-2 font-medium text-foreground dark:text-foreground">Response Time</th>
+                    <th class="py-2 font-medium text-foreground dark:text-foreground">Uptime</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
                   <tr v-for="row in reportData.detailedData" :key="row.website">
-                    <td class="py-2 font-medium text-gray-900 dark:text-gray-100">{{ row.website }}</td>
+                    <td class="py-2 font-medium text-foreground dark:text-foreground">{{ row.website }}</td>
                     <td class="py-2">
                       <Badge :variant="getStatusVariant(row.sslStatus)">
                         {{ row.sslStatus }}
                       </Badge>
                     </td>
-                    <td class="py-2 text-gray-700 dark:text-gray-300">{{ row.securityScore }}/100</td>
-                    <td class="py-2 text-gray-700 dark:text-gray-300">{{ row.responseTime }}ms</td>
-                    <td class="py-2 text-gray-700 dark:text-gray-300">{{ row.uptime }}%</td>
+                    <td class="py-2 text-foreground dark:text-muted-foreground">{{ row.securityScore }}/100</td>
+                    <td class="py-2 text-foreground dark:text-muted-foreground">{{ row.responseTime }}ms</td>
+                    <td class="py-2 text-foreground dark:text-muted-foreground">{{ row.uptime }}%</td>
                   </tr>
                 </tbody>
               </table>
@@ -418,17 +418,17 @@ const getReportIconBg = (type?: string): string => {
     security: 'bg-red-100 dark:bg-red-900/30',
     compliance: 'bg-purple-100 dark:bg-purple-900/30'
   };
-  return bgMap[type || ''] || 'bg-gray-100 dark:bg-gray-800';
+  return bgMap[type || ''] || 'bg-muted dark:bg-gray-800';
 };
 
 const getReportIconColor = (type?: string): string => {
   const colorMap = {
-    ssl: 'text-blue-600 dark:text-blue-400',
+    ssl: 'text-primary dark:text-blue-400',
     performance: 'text-green-600 dark:text-green-400',
-    security: 'text-red-600 dark:text-red-400',
+    security: 'text-destructive dark:text-red-400',
     compliance: 'text-purple-600 dark:text-purple-400'
   };
-  return colorMap[type || ''] || 'text-gray-600 dark:text-gray-400';
+  return colorMap[type || ''] || 'text-foreground dark:text-muted-foreground';
 };
 
 const getRecommendationBgClass = (priority: string): string => {
@@ -440,7 +440,7 @@ const getRecommendationBgClass = (priority: string): string => {
     case 'low':
       return 'bg-blue-100 dark:bg-blue-900/30';
     default:
-      return 'bg-gray-100 dark:bg-gray-800';
+      return 'bg-muted dark:bg-gray-800';
   }
 };
 
@@ -460,13 +460,13 @@ const getRecommendationIcon = (priority: string) => {
 const getRecommendationIconClass = (priority: string): string => {
   switch (priority) {
     case 'high':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'medium':
       return 'text-yellow-600 dark:text-yellow-400';
     case 'low':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'text-primary dark:text-blue-400';
     default:
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
   }
 };
 

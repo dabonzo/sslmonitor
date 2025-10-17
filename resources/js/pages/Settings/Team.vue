@@ -84,7 +84,7 @@ const getRoleColor = (role: string) => {
         'OWNER': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
         'ADMIN': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
         'MANAGER': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-        'VIEWER': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+        'VIEWER': 'bg-muted text-gray-800 dark:bg-gray-900 dark:text-muted-foreground'
     };
     return colors[role] || colors['VIEWER'];
 };
@@ -123,7 +123,7 @@ const deleteTeam = (teamId: number) => {
             <div class="flex items-center space-x-4 mb-6">
                 <button
                     @click="backToTeamList"
-                    class="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    class="flex items-center space-x-2 px-3 py-2 text-sm text-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-gray-100 transition-colors"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -133,11 +133,11 @@ const deleteTeam = (teamId: number) => {
             </div>
 
             <!-- Team Header -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ props.team?.name }}</h1>
-                        <p v-if="props.team?.description" class="text-gray-600 dark:text-gray-400 mt-1">{{ props.team?.description }}</p>
+                        <h1 class="text-2xl font-bold text-foreground dark:text-foreground">{{ props.team?.name }}</h1>
+                        <p v-if="props.team?.description" class="text-foreground dark:text-muted-foreground mt-1">{{ props.team?.description }}</p>
                     </div>
                     <div class="flex items-center space-x-3">
                         <Badge :class="getRoleColor(props.team?.user_role || '')">
@@ -157,15 +157,15 @@ const deleteTeam = (teamId: number) => {
                         </Button>
                     </div>
                 </div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">
+                <div class="text-sm text-muted-foreground dark:text-muted-foreground">
                     Created by {{ props.team?.created_by }} • {{ members?.length || 0 }} members • {{ websites?.length || 0 }} websites
                 </div>
             </div>
 
             <!-- Team Members -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Members</h3>
+                    <h3 class="text-xl font-bold text-foreground dark:text-foreground">Team Members</h3>
                     <Button
                         v-if="props.team?.is_owner"
                         @click="selectedTeam = props.team; showInviteMemberDialog = true"
@@ -177,15 +177,15 @@ const deleteTeam = (teamId: number) => {
                 </div>
 
                 <div class="space-y-3">
-                    <div v-for="member in members" :key="member.id" class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div v-for="member in members" :key="member.id" class="flex items-center justify-between p-4 bg-background dark:bg-card rounded-lg border border-border dark:border-border">
                         <div class="flex items-center space-x-4">
-                            <div class="rounded-full bg-gray-100 dark:bg-gray-700 p-2">
-                                <Users class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            <div class="rounded-full bg-muted dark:bg-muted p-2">
+                                <Users class="h-4 w-4 text-foreground dark:text-muted-foreground" />
                             </div>
                             <div>
-                                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ member.name }}</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ member.email }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-500">Joined {{ member.joined_at }}</p>
+                                <h4 class="font-medium text-foreground dark:text-foreground">{{ member.name }}</h4>
+                                <p class="text-sm text-foreground dark:text-muted-foreground">{{ member.email }}</p>
+                                <p class="text-xs text-muted-foreground dark:text-muted-foreground">Joined {{ member.joined_at }}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
@@ -196,14 +196,14 @@ const deleteTeam = (teamId: number) => {
             </div>
 
             <!-- Team Websites -->
-            <div v-if="websites && websites.length > 0" class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Team Websites</h3>
+            <div v-if="websites && websites.length > 0" class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
+                <h3 class="text-xl font-bold text-foreground dark:text-foreground mb-6">Team Websites</h3>
                 <div class="space-y-3">
-                    <div v-for="website in websites" :key="website.id" class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div v-for="website in websites" :key="website.id" class="flex items-center justify-between p-4 bg-background dark:bg-card rounded-lg border border-border dark:border-border">
                         <div>
-                            <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ website.name }}</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ website.url }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500">Assigned {{ website.assigned_at }} by {{ website.assigned_by }}</p>
+                            <h4 class="font-medium text-foreground dark:text-foreground">{{ website.name }}</h4>
+                            <p class="text-sm text-foreground dark:text-muted-foreground">{{ website.url }}</p>
+                            <p class="text-xs text-muted-foreground dark:text-muted-foreground">Assigned {{ website.assigned_at }} by {{ website.assigned_by }}</p>
                         </div>
                     </div>
                 </div>
@@ -213,15 +213,15 @@ const deleteTeam = (teamId: number) => {
         <!-- Team List View -->
         <div v-else class="space-y-8">
             <!-- Team Management Section -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center space-x-3">
-                        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-                            <Users class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <div class="rounded-lg bg-muted dark:bg-card p-2">
+                            <Users class="h-5 w-5 text-foreground dark:text-muted-foreground" />
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Management</h2>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Manage your team memberships and collaboration</p>
+                            <h2 class="text-xl font-bold text-foreground dark:text-foreground">Team Management</h2>
+                            <p class="text-sm text-foreground dark:text-muted-foreground">Manage your team memberships and collaboration</p>
                         </div>
                     </div>
                     <Dialog v-model:open="showCreateTeamDialog">
@@ -251,7 +251,7 @@ const deleteTeam = (teamId: number) => {
                                         required
                                         class="w-full"
                                     />
-                                    <p v-if="errors.name" class="text-sm text-red-600">{{ errors.name }}</p>
+                                    <p v-if="errors.name" class="text-sm text-destructive">{{ errors.name }}</p>
                                 </div>
                                 <div class="space-y-2">
                                     <Label for="description">Description (Optional)</Label>
@@ -261,7 +261,7 @@ const deleteTeam = (teamId: number) => {
                                         placeholder="Brief description of your team"
                                         class="w-full"
                                     />
-                                    <p v-if="errors.description" class="text-sm text-red-600">{{ errors.description }}</p>
+                                    <p v-if="errors.description" class="text-sm text-destructive">{{ errors.description }}</p>
                                 </div>
                                 <div class="flex justify-end gap-2">
                                     <Button type="button" variant="outline" @click="showCreateTeamDialog = false">
@@ -278,12 +278,12 @@ const deleteTeam = (teamId: number) => {
 
                 <!-- Empty State -->
                 <div v-if="userTeams.length === 0" class="text-center py-12">
-                    <div class="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-8 mx-auto max-w-md">
-                        <div class="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 mx-auto mb-4">
-                            <Users class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                    <div class="rounded-lg bg-muted dark:bg-gray-800/50 p-8 mx-auto max-w-md">
+                        <div class="rounded-full bg-muted dark:bg-muted p-3 w-12 h-12 mx-auto mb-4">
+                            <Users class="h-6 w-6 text-foreground dark:text-muted-foreground" />
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No teams yet</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                        <h3 class="text-lg font-semibold text-foreground dark:text-foreground mb-2">No teams yet</h3>
+                        <p class="text-sm text-foreground dark:text-muted-foreground mb-6">
                             Create your first team to collaborate with others on SSL monitoring.
                         </p>
                         <Button @click="showCreateTeamDialog = true" class="h-11 px-6">
@@ -295,7 +295,7 @@ const deleteTeam = (teamId: number) => {
 
                 <!-- Teams List -->
                 <div v-else class="space-y-4">
-                    <div v-for="team in userTeams" :key="team.id" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200">
+                    <div v-for="team in userTeams" :key="team.id" class="rounded-lg bg-background dark:bg-card border border-border dark:border-border p-6 hover:shadow-md transition-all duration-200">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -355,26 +355,26 @@ const deleteTeam = (teamId: number) => {
             </div>
 
             <!-- Role Permissions Info -->
-            <div v-if="userTeams.length > 0" class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div v-if="userTeams.length > 0" class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center space-x-3 mb-6">
-                    <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-                        <Shield class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    <div class="rounded-lg bg-muted dark:bg-card p-2">
+                        <Shield class="h-5 w-5 text-foreground dark:text-muted-foreground" />
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Team Role Permissions</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Understanding team member capabilities</p>
+                        <h2 class="text-xl font-bold text-foreground dark:text-foreground">Team Role Permissions</h2>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">Understanding team member capabilities</p>
                     </div>
                 </div>
                 <div class="grid gap-6 md:grid-cols-2">
-                    <div v-for="(description, role) in roleDescriptions" :key="role" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+                    <div v-for="(description, role) in roleDescriptions" :key="role" class="rounded-lg bg-background dark:bg-card border border-border dark:border-border p-4">
                         <div class="flex items-center gap-3 mb-3">
-                            <Crown v-if="role === 'OWNER'" class="h-4 w-4 text-red-600 dark:text-red-400" />
-                            <Shield v-else-if="role === 'ADMIN'" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <Crown v-if="role === 'OWNER'" class="h-4 w-4 text-destructive dark:text-red-400" />
+                            <Shield v-else-if="role === 'ADMIN'" class="h-4 w-4 text-primary dark:text-blue-400" />
                             <Users v-else-if="role === 'MANAGER'" class="h-4 w-4 text-green-600 dark:text-green-400" />
-                            <Eye v-else class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            <Eye v-else class="h-4 w-4 text-foreground dark:text-muted-foreground" />
                             <Badge :class="getRoleColor(role)">{{ role }}</Badge>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ description }}</p>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">{{ description }}</p>
                     </div>
                 </div>
             </div>
@@ -404,7 +404,7 @@ const deleteTeam = (teamId: number) => {
                             required
                             class="w-full"
                         />
-                        <p v-if="errors.email" class="text-sm text-red-600">{{ errors.email }}</p>
+                        <p v-if="errors.email" class="text-sm text-destructive">{{ errors.email }}</p>
                     </div>
                     <div class="space-y-2">
                         <Label for="role">Role</Label>
@@ -412,14 +412,14 @@ const deleteTeam = (teamId: number) => {
                             id="role"
                             name="role"
                             required
-                            class="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                            class="w-full px-3 py-2 border border-border bg-background rounded-md text-sm"
                         >
                             <option value="">Select a role...</option>
                             <option v-for="role in availableRoles.filter(r => r !== 'OWNER')" :key="role" :value="role">
                                 {{ role }}
                             </option>
                         </select>
-                        <p v-if="errors.role" class="text-sm text-red-600">{{ errors.role }}</p>
+                        <p v-if="errors.role" class="text-sm text-destructive">{{ errors.role }}</p>
                     </div>
                     <div class="flex justify-end gap-2">
                         <Button type="button" variant="outline" @click="showInviteMemberDialog = false">

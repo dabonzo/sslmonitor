@@ -121,10 +121,10 @@ const stats = computed(() => [
     change: `${props.sslStatistics.total_websites} monitored`,
     trend: 'up',
     icon: Globe,
-    color: 'text-gray-700 dark:text-gray-200',
-    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
-    iconBg: 'bg-gray-100 dark:bg-gray-700',
-    iconColor: 'text-gray-600 dark:text-gray-400'
+    color: 'text-foreground dark:text-muted-foreground',
+    bgGradient: 'bg-muted dark:bg-card',
+    iconBg: 'bg-muted dark:bg-muted',
+    iconColor: 'text-foreground dark:text-muted-foreground'
   },
   {
     title: 'SSL Certificates',
@@ -134,8 +134,8 @@ const stats = computed(() => [
       : '0% valid',
     trend: 'up',
     icon: Shield,
-    color: 'text-gray-700 dark:text-gray-200',
-    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    color: 'text-foreground dark:text-muted-foreground',
+    bgGradient: 'bg-muted dark:bg-card',
     iconBg: 'bg-green-100 dark:bg-green-900/30',
     iconColor: 'text-green-600 dark:text-green-400'
   },
@@ -145,10 +145,10 @@ const stats = computed(() => [
     change: `${props.uptimeStatistics.healthy_monitors}/${props.uptimeStatistics.total_monitors} healthy`,
     trend: props.uptimeStatistics.uptime_percentage >= 95 ? 'up' : 'down',
     icon: Zap,
-    color: 'text-gray-700 dark:text-gray-200',
-    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    color: 'text-foreground dark:text-muted-foreground',
+    bgGradient: 'bg-muted dark:bg-card',
     iconBg: props.uptimeStatistics.uptime_percentage >= 95 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30',
-    iconColor: props.uptimeStatistics.uptime_percentage >= 95 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+    iconColor: props.uptimeStatistics.uptime_percentage >= 95 ? 'text-green-600 dark:text-green-400' : 'text-destructive dark:text-red-400'
   },
   {
     title: 'Response Time',
@@ -160,10 +160,10 @@ const stats = computed(() => [
       : 'No data',
     trend: props.uptimeStatistics.avg_response_time < 1000 ? 'up' : 'down',
     icon: BarChart3,
-    color: 'text-gray-700 dark:text-gray-200',
-    bgGradient: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800',
+    color: 'text-foreground dark:text-muted-foreground',
+    bgGradient: 'bg-muted dark:bg-card',
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   }
 ]);
 
@@ -330,10 +330,10 @@ const handleCreateRuleFromAlert = (alert: any) => {
                 v-for="stat in stats"
                 :key="stat.title"
                 :class="stat.bgGradient"
-                class="group relative overflow-hidden rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl cursor-pointer"
+                class="group relative overflow-hidden rounded-2xl p-6 shadow-lg border border-border dark:border-border transition-all duration-300 hover:shadow-xl cursor-pointer"
             >
                 <!-- Subtle hover effect -->
-                <div class="absolute inset-0 bg-gray-50/50 dark:bg-gray-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="absolute inset-0 bg-muted/50 dark:bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <div class="relative flex items-center justify-between">
                     <div class="flex-1">
@@ -364,20 +364,20 @@ const handleCreateRuleFromAlert = (alert: any) => {
                     <div class="rounded-lg bg-red-500 p-2">
                         <AlertTriangle class="h-5 w-5 text-white" />
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    <h3 class="text-lg font-bold text-foreground dark:text-foreground">
                         {{ failedChecks.length }} Check{{ failedChecks.length === 1 ? '' : 's' }} Failed
                     </h3>
                 </div>
                 <div class="flex items-center space-x-2">
                     <Link
                         :href="ssl.websites.index().url + '?filter=critical'"
-                        class="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                        class="text-sm font-medium text-destructive hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                     >
                         View All
                     </Link>
                     <button
                         @click="dismissedFailures = true"
-                        class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 transition-colors"
+                        class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted dark:hover:bg-gray-800 hover:text-foreground transition-colors"
                         title="Dismiss all"
                     >
                         <X class="h-4 w-4" />
@@ -426,14 +426,14 @@ const handleCreateRuleFromAlert = (alert: any) => {
                             <p v-if="failure.failure_reason" class="text-xs font-mono bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2 py-1.5 rounded border-2 border-red-300 dark:border-red-700">
                                 {{ failure.failure_reason }}
                             </p>
-                            <p class="text-xs text-red-600 dark:text-red-400 font-medium">
+                            <p class="text-xs text-destructive dark:text-red-400 font-medium">
                                 <Clock class="h-3 w-3 inline mr-1" />
                                 {{ failure.time_ago }}
                             </p>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex items-center space-x-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center space-x-2 pt-3 border-t border-border dark:border-border">
                             <Link
                                 v-if="failure.website_id"
                                 :href="ssl.websites.edit(failure.website_id).url"
@@ -448,7 +448,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                 :disabled="checkingWebsiteId === failure.website_id"
                                 class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
                                 :class="checkingWebsiteId === failure.website_id
-                                    ? 'text-gray-400 bg-gray-50 dark:bg-gray-800 cursor-not-allowed'
+                                    ? 'text-muted-foreground bg-muted dark:bg-card cursor-not-allowed'
                                     : 'text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400'"
                             >
                                 <RefreshCw
@@ -477,18 +477,18 @@ const handleCreateRuleFromAlert = (alert: any) => {
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-10">
             <!-- Quick Actions -->
-            <div class="lg:col-span-7 rounded-2xl bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-900/50 dark:via-slate-900/50 dark:to-zinc-900/50 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+            <div class="lg:col-span-7 rounded-2xl bg-muted/50 dark:bg-card/50 p-6 shadow-xl border border-border dark:border-border">
                 <div class="mb-6 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="rounded-xl bg-gradient-to-br from-gray-700 to-slate-800 p-2.5">
+                        <div class="rounded-xl bg-slate-700 p-2.5">
                             <Zap class="h-6 w-6 text-white" />
                         </div>
-                        <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-foreground to-foreground dark:from-white dark:to-white bg-clip-text text-transparent">
                             Quick Actions
                         </h3>
                     </div>
                     <!-- Smart Transfer Suggestion -->
-                    <div v-if="transferSuggestions.should_show_suggestion" class="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                    <div v-if="transferSuggestions.should_show_suggestion" class="text-xs text-primary dark:text-blue-400 font-medium">
                         {{ transferSuggestions.personal_websites_count }} sites can be transferred
                     </div>
                 </div>
@@ -498,7 +498,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                                <ArrowRightLeft class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <ArrowRightLeft class="h-4 w-4 text-primary dark:text-blue-400" />
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-blue-900 dark:text-blue-100">
@@ -527,7 +527,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
                             <div class="rounded-lg bg-blue-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <Plus class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                <Plus class="h-6 w-6 text-primary dark:text-blue-400" />
                             </div>
                             <p class="text-sm font-bold text-blue-900 dark:text-blue-100">Add Website</p>
                         </div>
@@ -642,25 +642,25 @@ const handleCreateRuleFromAlert = (alert: any) => {
                     <!-- Import Sites -->
                     <Link
                         href="/ssl/websites/import"
-                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/30 dark:to-gray-900/30 p-4 text-center hover:from-slate-100 hover:to-gray-200 dark:hover:from-slate-900/50 dark:hover:to-gray-900/50 transition-all duration-300 border border-slate-200 dark:border-slate-800 hover:shadow-lg hover:scale-[1.02]"
+                        class="group relative overflow-hidden rounded-xl bg-muted dark:bg-card p-4 text-center hover:bg-muted dark:hover:bg-card transition-all duration-300 border border-border dark:border-border hover:shadow-lg hover:scale-[1.02]"
                     >
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-slate-500/5 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-muted/20 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500"></div>
                         <div class="relative">
-                            <div class="rounded-lg bg-slate-500/10 p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
-                                <Upload class="h-6 w-6 text-slate-600 dark:text-slate-400" />
+                            <div class="rounded-lg bg-muted p-3 inline-block mb-2 group-hover:scale-110 transition-transform duration-300">
+                                <Upload class="h-6 w-6 text-foreground dark:text-muted-foreground" />
                             </div>
-                            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">Import Sites</p>
+                            <p class="text-sm font-bold text-foreground dark:text-foreground">Import Sites</p>
                         </div>
                     </Link>
                 </div>
 
                 <!-- Quick Team Access (when available) -->
-                <div v-if="transferSuggestions.quick_transfer_teams.length > 0" class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div v-if="transferSuggestions.quick_transfer_teams.length > 0" class="mt-6 pt-4 border-t border-border dark:border-border">
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Team Access</h4>
+                        <h4 class="text-sm font-semibold text-foreground dark:text-muted-foreground">Quick Team Access</h4>
                         <Link
                             href="/settings/team"
-                            class="text-xs text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                            class="text-xs text-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-gray-300 transition-colors"
                         >
                             View All
                         </Link>
@@ -670,34 +670,34 @@ const handleCreateRuleFromAlert = (alert: any) => {
                             v-for="team in transferSuggestions.quick_transfer_teams"
                             :key="team.id"
                             :href="`/settings/team/${team.id}`"
-                            class="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors group"
+                            class="flex items-center justify-between p-2 rounded-lg bg-muted hover:bg-muted dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors group"
                         >
                             <div class="flex items-center space-x-2">
-                                <div class="rounded-md bg-gray-200 dark:bg-gray-700 p-1.5">
-                                    <Users class="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
+                                <div class="rounded-md bg-muted dark:bg-muted p-1.5">
+                                    <Users class="h-3.5 w-3.5 text-foreground dark:text-muted-foreground" />
                                 </div>
-                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300">{{ team.name }}</span>
+                                <span class="text-sm font-medium text-foreground dark:text-foreground group-hover:text-foreground dark:group-hover:text-gray-300">{{ team.name }}</span>
                             </div>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">({{ team.member_count }})</span>
+                            <span class="text-xs text-muted-foreground dark:text-muted-foreground">({{ team.member_count }})</span>
                         </Link>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="lg:col-span-3 rounded-2xl bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-800 dark:to-slate-800 p-5 shadow-xl border border-gray-200 dark:border-gray-700">
+            <div class="lg:col-span-3 rounded-2xl bg-muted dark:bg-card p-5 shadow-xl border border-border dark:border-border">
                 <div class="mb-4 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
-                        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-                            <Clock class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <div class="rounded-lg bg-muted dark:bg-card p-2">
+                            <Clock class="h-5 w-5 text-foreground dark:text-muted-foreground" />
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        <h3 class="text-lg font-bold text-foreground dark:text-foreground">
                             Recent Activity
                         </h3>
                     </div>
                     <button
                         @click="showActivityModal = true"
-                        class="text-sm font-medium text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                        class="text-sm font-medium text-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-muted dark:hover:bg-gray-800"
                     >
                         View All
                     </button>
@@ -707,7 +707,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                     <div
                         v-for="activity in dashboardActivity"
                         :key="activity.title + activity.time"
-                        class="group flex items-start space-x-4 p-3 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 border border-white/60 dark:border-white/10"
+                        class="group flex items-start space-x-4 p-3 rounded-xl bg-background/50 dark:bg-background/5 hover:bg-background/80 dark:hover:bg-background/10 transition-all duration-300 border border-white/60 dark:border-white/10"
                     >
                         <div class="flex items-center mt-1 space-x-2">
                             <div
@@ -723,17 +723,17 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                 'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
                             }">
                                 <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
-                                <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <Wifi v-else class="h-4 w-4 text-primary dark:text-blue-400" />
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                            <p class="text-sm font-semibold text-foreground dark:text-foreground group-hover:text-foreground dark:group-hover:text-gray-300 transition-colors">
                                 {{ activity.title }}
                             </p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5 truncate">
+                            <p class="text-sm text-foreground dark:text-muted-foreground mt-0.5 truncate">
                                 {{ activity.description }}
                             </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
+                            <p class="text-xs text-muted-foreground dark:text-muted-foreground mt-1 font-medium">
                                 {{ activity.time }}
                             </p>
                         </div>
@@ -749,7 +749,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                     <div class="rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-2.5">
                         <Clock class="h-6 w-6 text-white" />
                     </div>
-                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-foreground to-foreground dark:from-white dark:to-white bg-clip-text text-transparent">
                         Certificate Expiration Timeline
                     </h3>
                 </div>
@@ -764,18 +764,18 @@ const handleCreateRuleFromAlert = (alert: any) => {
 
                 <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Critical: Expiring in 7 days -->
-                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-red-200 dark:border-red-800">
+                    <div class="rounded-xl bg-background/60 dark:bg-gray-800/60 p-5 border-2 border-red-200 dark:border-red-800">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
                                 <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
-                                    <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+                                    <AlertTriangle class="h-5 w-5 text-destructive dark:text-red-400" />
                                 </div>
                                 <div>
                                     <h4 class="text-sm font-bold text-red-900 dark:text-red-100">Critical</h4>
                                     <p class="text-xs text-red-700 dark:text-red-300">Expiring in 7 days</p>
                                 </div>
                             </div>
-                            <div class="text-2xl font-bold text-red-600 dark:text-red-400">
+                            <div class="text-2xl font-bold text-destructive dark:text-red-400">
                                 {{ props.expirationTimeline.expiring_7_days.length }}
                             </div>
                         </div>
@@ -793,17 +793,17 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                     {{ cert.days_until_expiry }} day{{ cert.days_until_expiry === 1 ? '' : 's' }} remaining
                                 </p>
                             </Link>
-                            <p v-if="props.expirationTimeline.expiring_7_days.length > 3" class="text-xs text-red-600 dark:text-red-400 text-center pt-2">
+                            <p v-if="props.expirationTimeline.expiring_7_days.length > 3" class="text-xs text-destructive dark:text-red-400 text-center pt-2">
                                 +{{ props.expirationTimeline.expiring_7_days.length - 3 }} more
                             </p>
                         </div>
-                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        <p v-else class="text-sm text-muted-foreground dark:text-muted-foreground text-center py-4">
                             No certificates
                         </p>
                     </div>
 
                     <!-- Warning: Expiring in 30 days -->
-                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-amber-200 dark:border-amber-800">
+                    <div class="rounded-xl bg-background/60 dark:bg-gray-800/60 p-5 border-2 border-amber-200 dark:border-amber-800">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
                                 <div class="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
@@ -836,24 +836,24 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                 +{{ props.expirationTimeline.expiring_30_days.length - 3 }} more
                             </p>
                         </div>
-                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        <p v-else class="text-sm text-muted-foreground dark:text-muted-foreground text-center py-4">
                             No certificates
                         </p>
                     </div>
 
                     <!-- Info: Expiring in 90 days -->
-                    <div class="rounded-xl bg-white/60 dark:bg-gray-800/60 p-5 border-2 border-blue-200 dark:border-blue-800">
+                    <div class="rounded-xl bg-background/60 dark:bg-gray-800/60 p-5 border-2 border-blue-200 dark:border-blue-800">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center space-x-2">
                                 <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                                    <Shield class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <Shield class="h-5 w-5 text-primary dark:text-blue-400" />
                                 </div>
                                 <div>
                                     <h4 class="text-sm font-bold text-blue-900 dark:text-blue-100">Info</h4>
                                     <p class="text-xs text-blue-700 dark:text-blue-300">Expiring in 90 days</p>
                                 </div>
                             </div>
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <div class="text-2xl font-bold text-primary dark:text-blue-400">
                                 {{ props.expirationTimeline.expiring_90_days.length }}
                             </div>
                         </div>
@@ -871,11 +871,11 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                     {{ cert.days_until_expiry }} days remaining
                                 </p>
                             </Link>
-                            <p v-if="props.expirationTimeline.expiring_90_days.length > 3" class="text-xs text-blue-600 dark:text-blue-400 text-center pt-2">
+                            <p v-if="props.expirationTimeline.expiring_90_days.length > 3" class="text-xs text-primary dark:text-blue-400 text-center pt-2">
                                 +{{ props.expirationTimeline.expiring_90_days.length - 3 }} more
                             </p>
                         </div>
-                        <p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                        <p v-else class="text-sm text-muted-foreground dark:text-muted-foreground text-center py-4">
                             No certificates
                         </p>
                     </div>
@@ -910,37 +910,37 @@ const handleCreateRuleFromAlert = (alert: any) => {
                 <!-- Modal -->
                 <div class="flex min-h-full items-center justify-center p-4">
                     <div
-                        class="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[80vh] flex flex-col"
+                        class="relative w-full max-w-3xl rounded-2xl bg-background dark:bg-gray-900 shadow-2xl border border-border dark:border-border max-h-[80vh] flex flex-col"
                         @click.stop
                     >
                         <!-- Header -->
-                        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between border-b border-border dark:border-border p-6">
                             <div class="flex items-center space-x-3">
-                                <div class="rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5">
-                                    <Activity class="h-6 w-6 text-gray-600 dark:text-gray-400" />
+                                <div class="rounded-xl bg-muted dark:bg-card p-2.5">
+                                    <Activity class="h-6 w-6 text-foreground dark:text-muted-foreground" />
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                <h3 class="text-xl font-bold text-foreground dark:text-foreground">
                                     All Activity
                                 </h3>
                             </div>
                             <button
                                 @click="showActivityModal = false"
-                                class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 transition-colors"
+                                class="rounded-lg p-2 text-muted-foreground hover:bg-muted dark:hover:bg-gray-800 hover:text-muted-foreground transition-colors"
                             >
                                 <X class="h-5 w-5" />
                             </button>
                         </div>
 
                         <!-- Search and Filters -->
-                        <div class="border-b border-gray-200 dark:border-gray-700 p-6 space-y-4">
+                        <div class="border-b border-border dark:border-border p-6 space-y-4">
                             <!-- Search -->
                             <div class="relative">
-                                <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <input
                                     v-model="searchQuery"
                                     type="text"
                                     placeholder="Search activity..."
-                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    class="w-full pl-10 pr-4 py-2.5 bg-muted dark:bg-card border border-border dark:border-border rounded-lg text-sm text-foreground dark:text-foreground placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 />
                             </div>
 
@@ -958,7 +958,7 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                     class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
                                     :class="{
                                         'bg-blue-500 text-white': statusFilter === filter.value,
-                                        'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700': statusFilter !== filter.value
+                                        'bg-muted dark:bg-card text-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-gray-700': statusFilter !== filter.value
                                     }"
                                 >
                                     {{ filter.label }}
@@ -969,15 +969,15 @@ const handleCreateRuleFromAlert = (alert: any) => {
                         <!-- Activity List -->
                         <div class="flex-1 overflow-y-auto p-6">
                             <div v-if="filteredActivity.length === 0" class="text-center py-12">
-                                <Activity class="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                                <p class="text-gray-500 dark:text-gray-400">No activity found</p>
+                                <Activity class="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                                <p class="text-muted-foreground dark:text-muted-foreground">No activity found</p>
                             </div>
 
                             <div v-else class="space-y-3">
                                 <div
                                     v-for="(activity, index) in filteredActivity"
                                     :key="`${activity.category}-${activity.title}-${activity.time}-${index}`"
-                                    class="group flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                                    class="group flex items-start space-x-4 p-4 rounded-xl bg-muted dark:bg-gray-800/50 hover:bg-muted dark:hover:bg-gray-800 transition-all duration-200 border border-border dark:border-border"
                                 >
                                     <div class="flex items-center mt-1 space-x-2">
                                         <div
@@ -993,17 +993,17 @@ const handleCreateRuleFromAlert = (alert: any) => {
                                             'bg-blue-100 dark:bg-blue-900/30': activity.category === 'uptime'
                                         }">
                                             <Shield v-if="activity.category === 'ssl'" class="h-4 w-4 text-green-600 dark:text-green-400" />
-                                            <Wifi v-else class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                            <Wifi v-else class="h-4 w-4 text-primary dark:text-blue-400" />
                                         </div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        <p class="text-sm font-semibold text-foreground dark:text-foreground">
                                             {{ activity.title }}
                                         </p>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                                        <p class="text-sm text-foreground dark:text-muted-foreground mt-0.5">
                                             {{ activity.description }}
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">
+                                        <p class="text-xs text-muted-foreground dark:text-muted-foreground mt-1 font-medium">
                                             {{ activity.time }}
                                         </p>
                                     </div>
@@ -1012,8 +1012,8 @@ const handleCreateRuleFromAlert = (alert: any) => {
                         </div>
 
                         <!-- Footer -->
-                        <div class="border-t border-gray-200 dark:border-gray-700 p-4 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <div class="border-t border-border dark:border-border p-4 text-center">
+                            <p class="text-sm text-muted-foreground dark:text-muted-foreground">
                                 Showing {{ filteredActivity.length }} of {{ recentActivity.length }} activities
                             </p>
                         </div>

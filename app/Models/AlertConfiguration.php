@@ -150,9 +150,10 @@ class AlertConfiguration extends Model
         ];
     }
 
-    public function shouldTrigger(array $checkData, bool $bypassCooldown = false): bool
+    public function shouldTrigger(array $checkData, bool $bypassCooldown = false, bool $bypassEnabledCheck = false): bool
     {
-        if (!$this->enabled) {
+        // For debug testing, we can bypass the enabled check to test disabled alerts
+        if (!$bypassEnabledCheck && !$this->enabled) {
             return false;
         }
 
@@ -196,22 +197,12 @@ class AlertConfiguration extends Model
         return $daysRemaining <= $this->threshold_days && $daysRemaining >= 0;
     }
 
-    private function shouldTriggerLetsEncryptRenewal(array $checkData): bool
-    {
-        $isLetsEncrypt = $checkData['is_lets_encrypt'] ?? false;
-        $daysRemaining = $checkData['ssl_days_remaining'] ?? null;
-
-        if (!$isLetsEncrypt || $daysRemaining === null) {
-            return false;
-        }
-
-        return $daysRemaining <= $this->threshold_days && $daysRemaining >= 0;
-    }
-
     private function shouldTriggerSslInvalid(array $checkData): bool
     {
         $sslStatus = $checkData['ssl_status'] ?? '';
-        return in_array($sslStatus, ['invalid', 'expired', 'failed']);
+        // Only trigger for invalid certificates, not expired ones
+        // Expired certificates are handled by SSL Expiry alerts
+        return in_array($sslStatus, ['invalid', 'failed']);
     }
 
     private function shouldTriggerUptimeDown(array $checkData): bool
@@ -228,7 +219,7 @@ class AlertConfiguration extends Model
             return false;
         }
 
-        return $responseTime > $this->threshold_response_time;
+        return $responseTime >= $this->threshold_response_time;
     }
 
     public function markTriggered(): void
@@ -269,7 +260,6 @@ class AlertConfiguration extends Model
             self::ALERT_SSL_INVALID => true, // Always immediate
             self::ALERT_SSL_EXPIRY => $this->shouldTriggerSslExpiry($checkData) &&
                                       ($checkData['ssl_days_remaining'] ?? null) <= 0, // Only immediate if expired
-            self::ALERT_LETS_ENCRYPT_RENEWAL => false, // Never immediate (warnings only)
             self::ALERT_RESPONSE_TIME => false, // Never immediate (warnings only)
             default => false,
         };

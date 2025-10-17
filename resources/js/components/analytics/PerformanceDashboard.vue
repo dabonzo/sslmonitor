@@ -3,8 +3,8 @@
     <!-- Analytics Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Performance Analytics</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Monitor SSL certificate performance and trends</p>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Performance Analytics</h3>
+        <p class="text-sm text-foreground dark:text-muted-foreground">Monitor SSL certificate performance and trends</p>
       </div>
 
       <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
@@ -35,8 +35,8 @@
               <TrendingUp class="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Response Time</p>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Avg Response Time</p>
+              <p class="text-xl font-bold text-foreground dark:text-foreground">
                 {{ performanceMetrics.avgResponseTime }}ms
               </p>
               <p class="text-xs" :class="getTrendClass(performanceMetrics.responseTimeTrend)">
@@ -51,11 +51,11 @@
         <CardContent class="p-4">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <Activity class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Activity class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Uptime</p>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Uptime</p>
+              <p class="text-xl font-bold text-foreground dark:text-foreground">
                 {{ performanceMetrics.uptime }}%
               </p>
               <p class="text-xs" :class="getTrendClass(performanceMetrics.uptimeTrend)">
@@ -73,8 +73,8 @@
               <Shield class="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">SSL Health Score</p>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">SSL Health Score</p>
+              <p class="text-xl font-bold text-foreground dark:text-foreground">
                 {{ performanceMetrics.avgSslScore }}/100
               </p>
               <p class="text-xs" :class="getTrendClass(performanceMetrics.sslScoreTrend)">
@@ -89,11 +89,11 @@
         <CardContent class="p-4">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
-              <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <AlertTriangle class="h-5 w-5 text-destructive dark:text-red-400" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Critical Alerts</p>
-              <p class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <p class="text-sm font-medium text-foreground dark:text-muted-foreground">Critical Alerts</p>
+              <p class="text-xl font-bold text-foreground dark:text-foreground">
                 {{ performanceMetrics.criticalAlerts }}
               </p>
               <p class="text-xs" :class="getTrendClass(-performanceMetrics.alertsTrend)">
@@ -116,15 +116,15 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div v-if="isLoading" class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+          <div class="h-64 flex items-center justify-center bg-muted dark:bg-card rounded-lg">
+            <div v-if="isLoading" class="flex items-center space-x-2 text-muted-foreground dark:text-muted-foreground">
               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               <span class="text-sm">Loading chart data...</span>
             </div>
             <div v-else class="text-center space-y-2">
-              <LineChart class="h-8 w-8 mx-auto text-gray-400" />
-              <p class="text-sm text-gray-600 dark:text-gray-400">Response time chart visualization</p>
-              <p class="text-xs text-gray-500 dark:text-gray-500">
+              <LineChart class="h-8 w-8 mx-auto text-muted-foreground" />
+              <p class="text-sm text-foreground dark:text-muted-foreground">Response time chart visualization</p>
+              <p class="text-xs text-muted-foreground dark:text-muted-foreground">
                 Showing {{ responseTimeData.length }} data points over {{ selectedTimeRange }}
               </p>
             </div>
@@ -145,11 +145,11 @@
             <div v-for="status in sslStatusData" :key="status.name" class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
                 <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: status.color }"></div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ status.name }}</span>
+                <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ status.name }}</span>
               </div>
               <div class="flex items-center space-x-3">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ status.count }} sites</span>
-                <div class="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <span class="text-sm text-foreground dark:text-muted-foreground">{{ status.count }} sites</span>
+                <div class="w-20 h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                   <div
                     class="h-full transition-all duration-300"
                     :style="{
@@ -158,7 +158,7 @@
                     }"
                   ></div>
                 </div>
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100 w-12 text-right">
+                <span class="text-sm font-medium text-foreground dark:text-foreground w-12 text-right">
                   {{ status.percentage }}%
                 </span>
               </div>
@@ -176,26 +176,26 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div v-if="isLoading" class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
+          <div class="h-64 flex items-center justify-center bg-muted dark:bg-card rounded-lg">
+            <div v-if="isLoading" class="flex items-center space-x-2 text-muted-foreground dark:text-muted-foreground">
               <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               <span class="text-sm">Loading uptime data...</span>
             </div>
             <div v-else class="text-center space-y-2">
-              <BarChart class="h-8 w-8 mx-auto text-gray-400" />
-              <p class="text-sm text-gray-600 dark:text-gray-400">Uptime performance visualization</p>
+              <BarChart class="h-8 w-8 mx-auto text-muted-foreground" />
+              <p class="text-sm text-foreground dark:text-muted-foreground">Uptime performance visualization</p>
               <div class="grid grid-cols-3 gap-4 text-xs">
                 <div class="text-center">
                   <div class="font-medium text-green-600 dark:text-green-400">99.9%</div>
-                  <div class="text-gray-500">Best</div>
+                  <div class="text-muted-foreground">Best</div>
                 </div>
                 <div class="text-center">
-                  <div class="font-medium text-blue-600 dark:text-blue-400">{{ performanceMetrics.uptime }}%</div>
-                  <div class="text-gray-500">Average</div>
+                  <div class="font-medium text-primary dark:text-blue-400">{{ performanceMetrics.uptime }}%</div>
+                  <div class="text-muted-foreground">Average</div>
                 </div>
                 <div class="text-center">
                   <div class="font-medium text-orange-600 dark:text-orange-400">97.2%</div>
-                  <div class="text-gray-500">Lowest</div>
+                  <div class="text-muted-foreground">Lowest</div>
                 </div>
               </div>
             </div>
@@ -215,10 +215,10 @@
           <div class="space-y-4">
             <div v-for="alertType in alertFrequencyData" :key="alertType.type">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ alertType.label }}</span>
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ alertType.count }} alerts</span>
+                <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ alertType.label }}</span>
+                <span class="text-sm text-foreground dark:text-muted-foreground">{{ alertType.count }} alerts</span>
               </div>
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="w-full bg-muted dark:bg-muted rounded-full h-2">
                 <div
                   class="h-2 rounded-full transition-all duration-300"
                   :class="alertType.colorClass"
@@ -244,25 +244,25 @@
           <table class="w-full text-sm">
             <thead class="border-b border-border">
               <tr class="text-left">
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Website</th>
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Avg Response</th>
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Uptime</th>
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">SSL Score</th>
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Alerts</th>
-                <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Status</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">Website</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">Avg Response</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">Uptime</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">SSL Score</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">Alerts</th>
+                <th class="py-2 font-medium text-foreground dark:text-foreground">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               <tr v-for="website in websitePerformance" :key="website.id">
                 <td class="py-3">
                   <div>
-                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ website.name }}</div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400">{{ website.url }}</div>
+                    <div class="font-medium text-foreground dark:text-foreground">{{ website.name }}</div>
+                    <div class="text-xs text-foreground dark:text-muted-foreground">{{ website.url }}</div>
                   </div>
                 </td>
                 <td class="py-3">
                   <div class="flex items-center space-x-2">
-                    <span class="text-gray-900 dark:text-gray-100">{{ website.avgResponse }}ms</span>
+                    <span class="text-foreground dark:text-foreground">{{ website.avgResponse }}ms</span>
                     <component
                       :is="website.responseTimeTrend > 0 ? TrendingUp : TrendingDown"
                       class="h-3 w-3"
@@ -279,18 +279,18 @@
                 </td>
                 <td class="py-3">
                   <div class="flex items-center space-x-2">
-                    <div class="w-8 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="w-8 h-2 bg-muted dark:bg-muted rounded-full overflow-hidden">
                       <div
                         class="h-full rounded-full transition-all duration-300"
                         :class="getSslScoreColor(website.sslScore)"
                         :style="{ width: `${website.sslScore}%` }"
                       ></div>
                     </div>
-                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ website.sslScore }}</span>
+                    <span class="text-sm text-foreground dark:text-muted-foreground">{{ website.sslScore }}</span>
                   </div>
                 </td>
                 <td class="py-3">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ website.alertCount }}</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">{{ website.alertCount }}</span>
                 </td>
                 <td class="py-3">
                   <Badge :variant="getStatusVariant(website.status)">
@@ -433,8 +433,8 @@ const websitePerformance = ref<WebsitePerformance[]>([
 
 const getTrendClass = (trend: number): string => {
   if (trend > 0) return 'text-green-600 dark:text-green-400';
-  if (trend < 0) return 'text-red-600 dark:text-red-400';
-  return 'text-gray-600 dark:text-gray-400';
+  if (trend < 0) return 'text-destructive dark:text-red-400';
+  return 'text-foreground dark:text-muted-foreground';
 };
 
 const formatTrend = (trend: number): string => {

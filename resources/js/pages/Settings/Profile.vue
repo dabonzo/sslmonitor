@@ -29,25 +29,25 @@ const user = page.props.auth.user;
     <ModernSettingsLayout title="Profile Settings">
         <div class="space-y-8">
             <!-- Profile Information Section -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-gray-200 dark:border-gray-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-border dark:border-border">
                 <div class="flex items-center space-x-3 mb-6">
-                    <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
-                        <User class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    <div class="rounded-lg bg-muted dark:bg-card p-2">
+                        <User class="h-5 w-5 text-foreground dark:text-muted-foreground" />
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Profile Information</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Update your personal details and contact information</p>
+                        <h2 class="text-xl font-bold text-foreground dark:text-foreground">Profile Information</h2>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">Update your personal details and contact information</p>
                     </div>
                 </div>
 
                 <Form v-bind="ProfileController.update.form()" class="space-y-6" v-slot="{ errors, processing, recentlySuccessful }">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <Label for="name" class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <Label for="name" class="text-sm font-semibold text-foreground dark:text-muted-foreground">
                                 Full Name
                             </Label>
                             <div class="relative">
-                                <User class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <User class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="name"
                                     class="pl-10 h-11"
@@ -62,11 +62,11 @@ const user = page.props.auth.user;
                         </div>
 
                         <div class="space-y-2">
-                            <Label for="email" class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <Label for="email" class="text-sm font-semibold text-foreground dark:text-muted-foreground">
                                 Email Address
                             </Label>
                             <div class="relative">
-                                <Mail class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Mail class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="email"
                                     type="email"
@@ -108,7 +108,7 @@ const user = page.props.auth.user;
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between pt-4 border-t border-border dark:border-border">
                         <div class="flex items-center space-x-4">
                             <Button
                                 :disabled="processing"
@@ -138,14 +138,14 @@ const user = page.props.auth.user;
             </div>
 
             <!-- Account Deletion Section -->
-            <div class="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900 dark:to-slate-900 p-6 border border-red-200 dark:border-red-700">
+            <div class="rounded-xl bg-muted dark:bg-card p-6 border border-red-200 dark:border-red-700">
                 <div class="flex items-center space-x-3 mb-4">
                     <div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-2">
-                        <Trash2 class="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <Trash2 class="h-5 w-5 text-destructive dark:text-red-400" />
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Danger Zone</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Permanently delete your account and all associated data</p>
+                        <h2 class="text-xl font-bold text-foreground dark:text-foreground">Danger Zone</h2>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">Permanently delete your account and all associated data</p>
                     </div>
                 </div>
 

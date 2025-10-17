@@ -4,10 +4,10 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Layers class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Layers class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <CardTitle class="text-xl font-bold text-foreground dark:text-foreground">
               Bulk Certificate Operations
             </CardTitle>
             <CardDescription>
@@ -29,21 +29,21 @@
     <CardContent v-if="selectedWebsites.length > 0" class="space-y-6">
       <!-- Quick Stats -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border">
-          <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ selectedWebsites.length }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Selected</div>
+        <div class="text-center p-3 bg-background dark:bg-card rounded-lg border">
+          <div class="text-2xl font-bold text-primary dark:text-blue-400">{{ selectedWebsites.length }}</div>
+          <div class="text-sm text-foreground dark:text-muted-foreground">Selected</div>
         </div>
-        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border">
-          <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ bulkStats.expiring }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Expiring Soon</div>
+        <div class="text-center p-3 bg-background dark:bg-card rounded-lg border">
+          <div class="text-2xl font-bold text-destructive dark:text-red-400">{{ bulkStats.expiring }}</div>
+          <div class="text-sm text-foreground dark:text-muted-foreground">Expiring Soon</div>
         </div>
-        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border">
+        <div class="text-center p-3 bg-background dark:bg-card rounded-lg border">
           <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ bulkStats.healthy }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Healthy</div>
+          <div class="text-sm text-foreground dark:text-muted-foreground">Healthy</div>
         </div>
-        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border">
+        <div class="text-center p-3 bg-background dark:bg-card rounded-lg border">
           <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ bulkStats.letsEncrypt }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Let's Encrypt</div>
+          <div class="text-sm text-foreground dark:text-muted-foreground">Let's Encrypt</div>
         </div>
       </div>
 
@@ -51,8 +51,8 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- SSL Monitoring Actions -->
         <div class="space-y-3">
-          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
-            <Shield class="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+          <h3 class="font-semibold text-foreground dark:text-foreground flex items-center">
+            <Shield class="h-4 w-4 mr-2 text-primary dark:text-blue-400" />
             SSL Monitoring
           </h3>
           <div class="space-y-2">
@@ -91,7 +91,7 @@
 
         <!-- Analysis & Reporting -->
         <div class="space-y-3">
-          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <h3 class="font-semibold text-foreground dark:text-foreground flex items-center">
             <BarChart3 class="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
             Analysis
           </h3>
@@ -130,7 +130,7 @@
 
         <!-- Team & Transfer Actions -->
         <div class="space-y-3">
-          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <h3 class="font-semibold text-foreground dark:text-foreground flex items-center">
             <Users class="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
             Team Actions
           </h3>
@@ -226,12 +226,12 @@
 
     <!-- Empty State -->
     <CardContent v-else class="text-center py-8">
-      <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-6">
-        <Layers class="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div class="rounded-lg bg-muted dark:bg-card p-6">
+        <Layers class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground mb-2">
           No Websites Selected
         </h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p class="text-sm text-foreground dark:text-muted-foreground">
           Select websites from the table above to perform bulk operations
         </p>
       </div>
@@ -292,7 +292,7 @@
     <Dialog :open="showBulkDeleteConfirm" @update:open="showBulkDeleteConfirm = $event">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="flex items-center space-x-2 text-red-600 dark:text-red-400">
+          <DialogTitle class="flex items-center space-x-2 text-destructive dark:text-red-400">
             <AlertTriangle class="h-5 w-5" />
             <span>Confirm Bulk Deletion</span>
           </DialogTitle>
@@ -310,7 +310,7 @@
               <li v-for="website in selectedWebsites.slice(0, 5)" :key="website.id">
                 • {{ website.name }}
               </li>
-              <li v-if="selectedWebsites.length > 5" class="text-red-600 dark:text-red-400">
+              <li v-if="selectedWebsites.length > 5" class="text-destructive dark:text-red-400">
                 ... and {{ selectedWebsites.length - 5 }} more
               </li>
             </ul>

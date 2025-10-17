@@ -83,7 +83,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::store
-* @see app/Http/Controllers/Settings/AlertsController.php:94
+* @see app/Http/Controllers/Settings/AlertsController.php:177
 * @route '/settings/alerts'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -98,7 +98,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::store
-* @see app/Http/Controllers/Settings/AlertsController.php:94
+* @see app/Http/Controllers/Settings/AlertsController.php:177
 * @route '/settings/alerts'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -107,7 +107,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::store
-* @see app/Http/Controllers/Settings/AlertsController.php:94
+* @see app/Http/Controllers/Settings/AlertsController.php:177
 * @route '/settings/alerts'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -117,7 +117,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::store
-* @see app/Http/Controllers/Settings/AlertsController.php:94
+* @see app/Http/Controllers/Settings/AlertsController.php:177
 * @route '/settings/alerts'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -127,7 +127,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::store
-* @see app/Http/Controllers/Settings/AlertsController.php:94
+* @see app/Http/Controllers/Settings/AlertsController.php:177
 * @route '/settings/alerts'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -139,7 +139,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 export const update = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -154,7 +154,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 update.url = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -187,7 +187,7 @@ update.url = (args: { alertConfiguration: number | { id: number } } | [alertConf
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 update.put = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -197,7 +197,7 @@ update.put = (args: { alertConfiguration: number | { id: number } } | [alertConf
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 const updateForm = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -212,7 +212,7 @@ const updateForm = (args: { alertConfiguration: number | { id: number } } | [ale
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::update
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 updateForm.put = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -229,7 +229,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::patch
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 export const patch = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -244,7 +244,7 @@ patch.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::patch
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 patch.url = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -277,7 +277,7 @@ patch.url = (args: { alertConfiguration: number | { id: number } } | [alertConfi
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::patch
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 patch.patch = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -287,7 +287,7 @@ patch.patch = (args: { alertConfiguration: number | { id: number } } | [alertCon
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::patch
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 const patchForm = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -302,7 +302,7 @@ const patchForm = (args: { alertConfiguration: number | { id: number } } | [aler
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::patch
-* @see app/Http/Controllers/Settings/AlertsController.php:206
+* @see app/Http/Controllers/Settings/AlertsController.php:288
 * @route '/settings/alerts/{alertConfiguration}'
 */
 patchForm.patch = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -319,7 +319,7 @@ patch.form = patchForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::destroy
-* @see app/Http/Controllers/Settings/AlertsController.php:237
+* @see app/Http/Controllers/Settings/AlertsController.php:319
 * @route '/settings/alerts/{alertConfiguration}'
 */
 export const destroy = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -334,7 +334,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::destroy
-* @see app/Http/Controllers/Settings/AlertsController.php:237
+* @see app/Http/Controllers/Settings/AlertsController.php:319
 * @route '/settings/alerts/{alertConfiguration}'
 */
 destroy.url = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -367,7 +367,7 @@ destroy.url = (args: { alertConfiguration: number | { id: number } } | [alertCon
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::destroy
-* @see app/Http/Controllers/Settings/AlertsController.php:237
+* @see app/Http/Controllers/Settings/AlertsController.php:319
 * @route '/settings/alerts/{alertConfiguration}'
 */
 destroy.delete = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -377,7 +377,7 @@ destroy.delete = (args: { alertConfiguration: number | { id: number } } | [alert
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::destroy
-* @see app/Http/Controllers/Settings/AlertsController.php:237
+* @see app/Http/Controllers/Settings/AlertsController.php:319
 * @route '/settings/alerts/{alertConfiguration}'
 */
 const destroyForm = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -392,7 +392,7 @@ const destroyForm = (args: { alertConfiguration: number | { id: number } } | [al
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::destroy
-* @see app/Http/Controllers/Settings/AlertsController.php:237
+* @see app/Http/Controllers/Settings/AlertsController.php:319
 * @route '/settings/alerts/{alertConfiguration}'
 */
 destroyForm.delete = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -409,7 +409,7 @@ destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::test
-* @see app/Http/Controllers/Settings/AlertsController.php:378
+* @see app/Http/Controllers/Settings/AlertsController.php:459
 * @route '/settings/alerts/{alertConfiguration}/test'
 */
 export const test = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -424,7 +424,7 @@ test.definition = {
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::test
-* @see app/Http/Controllers/Settings/AlertsController.php:378
+* @see app/Http/Controllers/Settings/AlertsController.php:459
 * @route '/settings/alerts/{alertConfiguration}/test'
 */
 test.url = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -457,7 +457,7 @@ test.url = (args: { alertConfiguration: number | { id: number } } | [alertConfig
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::test
-* @see app/Http/Controllers/Settings/AlertsController.php:378
+* @see app/Http/Controllers/Settings/AlertsController.php:459
 * @route '/settings/alerts/{alertConfiguration}/test'
 */
 test.post = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -467,7 +467,7 @@ test.post = (args: { alertConfiguration: number | { id: number } } | [alertConfi
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::test
-* @see app/Http/Controllers/Settings/AlertsController.php:378
+* @see app/Http/Controllers/Settings/AlertsController.php:459
 * @route '/settings/alerts/{alertConfiguration}/test'
 */
 const testForm = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -477,7 +477,7 @@ const testForm = (args: { alertConfiguration: number | { id: number } } | [alert
 
 /**
 * @see \App\Http\Controllers\Settings\AlertsController::test
-* @see app/Http/Controllers/Settings/AlertsController.php:378
+* @see app/Http/Controllers/Settings/AlertsController.php:459
 * @route '/settings/alerts/{alertConfiguration}/test'
 */
 testForm.post = (args: { alertConfiguration: number | { id: number } } | [alertConfiguration: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Settings class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Settings class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Custom Report Builder
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Create a customized analytics report
             </div>
           </div>
@@ -20,11 +20,11 @@
       <div class="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
         <!-- Report Basic Information -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Report Configuration</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Report Configuration</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Name</label>
+              <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Report Name</label>
               <input
                 v-model="reportConfig.name"
                 type="text"
@@ -34,7 +34,7 @@
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Type</label>
+              <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Report Type</label>
               <select
                 v-model="reportConfig.type"
                 class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -49,7 +49,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Description</label>
             <textarea
               v-model="reportConfig.description"
               rows="2"
@@ -61,11 +61,11 @@
 
         <!-- Time Range Selection -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Time Range</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Time Range</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Period</label>
+              <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Period</label>
               <select
                 v-model="reportConfig.timeRange"
                 @change="updateDateRange"
@@ -81,7 +81,7 @@
             </div>
 
             <div v-if="reportConfig.timeRange === 'custom'" class="space-y-2">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Date Range</label>
+              <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Custom Date Range</label>
               <div class="flex space-x-2">
                 <input
                   v-model="reportConfig.startDate"
@@ -100,7 +100,7 @@
 
         <!-- Data Sources Selection -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Data Sources</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Data Sources</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div v-for="source in dataSources" :key="source.id" class="flex items-center space-x-3 p-3 border rounded-lg">
@@ -111,8 +111,8 @@
               <div class="flex items-center space-x-2 flex-1">
                 <component :is="source.icon" class="h-4 w-4" :class="source.iconColor" />
                 <div>
-                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ source.name }}</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">{{ source.description }}</div>
+                  <div class="font-medium text-foreground dark:text-foreground">{{ source.name }}</div>
+                  <div class="text-sm text-foreground dark:text-muted-foreground">{{ source.description }}</div>
                 </div>
               </div>
             </div>
@@ -121,7 +121,7 @@
 
         <!-- Metrics Selection -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Metrics to Include</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Metrics to Include</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div v-for="metric in availableMetrics" :key="metric.id" class="flex items-center space-x-3">
@@ -129,7 +129,7 @@
                 :checked="reportConfig.selectedMetrics.includes(metric.id)"
                 @update:checked="toggleMetric(metric.id, $event)"
               />
-              <label class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              <label class="text-sm text-foreground dark:text-muted-foreground cursor-pointer">
                 {{ metric.name }}
               </label>
             </div>
@@ -138,7 +138,7 @@
 
         <!-- Website Scope -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Website Scope</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Website Scope</h3>
 
           <div class="space-y-3">
             <div class="flex items-center space-x-3">
@@ -149,7 +149,7 @@
                 id="scope-all"
                 class="text-primary focus:ring-primary"
               />
-              <label for="scope-all" class="text-sm text-gray-700 dark:text-gray-300">All websites</label>
+              <label for="scope-all" class="text-sm text-foreground dark:text-muted-foreground">All websites</label>
             </div>
 
             <div class="flex items-center space-x-3">
@@ -160,7 +160,7 @@
                 id="scope-team"
                 class="text-primary focus:ring-primary"
               />
-              <label for="scope-team" class="text-sm text-gray-700 dark:text-gray-300">Team websites only</label>
+              <label for="scope-team" class="text-sm text-foreground dark:text-muted-foreground">Team websites only</label>
             </div>
 
             <div class="flex items-center space-x-3">
@@ -171,7 +171,7 @@
                 id="scope-specific"
                 class="text-primary focus:ring-primary"
               />
-              <label for="scope-specific" class="text-sm text-gray-700 dark:text-gray-300">Specific websites</label>
+              <label for="scope-specific" class="text-sm text-foreground dark:text-muted-foreground">Specific websites</label>
             </div>
 
             <div v-if="reportConfig.websiteScope === 'specific'" class="ml-6 space-y-2">
@@ -198,7 +198,7 @@
 
         <!-- Output Format -->
         <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Output Format</h3>
+          <h3 class="text-lg font-medium text-foreground dark:text-foreground">Output Format</h3>
 
           <div class="grid grid-cols-3 gap-4">
             <div v-for="format in outputFormats" :key="format.id" class="flex items-center space-x-3 p-3 border rounded-lg">
@@ -211,7 +211,7 @@
               />
               <div class="flex items-center space-x-2">
                 <component :is="format.icon" class="h-4 w-4" :class="format.iconColor" />
-                <label :for="`format-${format.id}`" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                <label :for="`format-${format.id}`" class="text-sm font-medium text-foreground dark:text-muted-foreground cursor-pointer">
                   {{ format.name }}
                 </label>
               </div>
@@ -222,7 +222,7 @@
         <!-- Schedule Options -->
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Schedule Options</h3>
+            <h3 class="text-lg font-medium text-foreground dark:text-foreground">Schedule Options</h3>
             <Checkbox
               :checked="reportConfig.enableSchedule"
               @update:checked="reportConfig.enableSchedule = $event"
@@ -232,7 +232,7 @@
           <div v-if="reportConfig.enableSchedule" class="space-y-4 pl-4 border-l-2 border-blue-200 dark:border-blue-800">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Frequency</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Frequency</label>
                 <select
                   v-model="reportConfig.scheduleFrequency"
                   class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -245,7 +245,7 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Email Recipients</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Email Recipients</label>
                 <input
                   v-model="reportConfig.emailRecipients"
                   type="email"
@@ -341,7 +341,7 @@ const dataSources = [
     name: 'SSL Certificates',
     description: 'Certificate status, expiry dates, and security scores',
     icon: Shield,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: 'uptime_monitoring',
@@ -355,7 +355,7 @@ const dataSources = [
     name: 'Security Analysis',
     description: 'Vulnerability scans and security insights',
     icon: AlertTriangle,
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: 'performance_metrics',
@@ -382,7 +382,7 @@ const outputFormats = [
     id: 'pdf',
     name: 'PDF',
     icon: FileText,
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: 'excel',
@@ -394,7 +394,7 @@ const outputFormats = [
     id: 'email',
     name: 'Email',
     icon: Mail,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   }
 ];
 

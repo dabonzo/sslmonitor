@@ -537,7 +537,6 @@ dataset('alert_types', [
     'ssl_invalid' => [\App\Models\AlertConfiguration::ALERT_SSL_INVALID],
     'uptime_down' => [\App\Models\AlertConfiguration::ALERT_UPTIME_DOWN],
     'response_time' => [\App\Models\AlertConfiguration::ALERT_RESPONSE_TIME],
-    'lets_encrypt_renewal' => [\App\Models\AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL],
 ]);
 
 dataset('notification_channels', [

@@ -7,7 +7,7 @@
             <Settings class="h-5 w-5 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
-            <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <CardTitle class="text-xl font-bold text-foreground dark:text-foreground">
               Advanced Alert Rule Builder
             </CardTitle>
             <CardDescription>
@@ -26,7 +26,7 @@
       <!-- Rule Name and Basic Settings -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Rule Name</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Rule Name</label>
           <input
             v-model="currentRule.name"
             type="text"
@@ -35,7 +35,7 @@
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Alert Priority</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Alert Priority</label>
           <select
             v-model="currentRule.priority"
             class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -51,7 +51,7 @@
       <!-- Rule Logic Builder -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Rule Conditions</h3>
+          <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Rule Conditions</h3>
           <Badge variant="outline">{{ currentRule.logic_operator.toUpperCase() }} Logic</Badge>
         </div>
 
@@ -78,17 +78,17 @@
           <div
             v-for="(condition, index) in currentRule.conditions"
             :key="index"
-            class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+            class="p-4 bg-background dark:bg-card rounded-lg border border-border dark:border-border"
           >
             <div class="flex items-center justify-between mb-3">
-              <span class="font-medium text-sm text-gray-600 dark:text-gray-400">
+              <span class="font-medium text-sm text-foreground dark:text-muted-foreground">
                 Condition {{ index + 1 }}
               </span>
               <Button
                 @click="removeCondition(index)"
                 variant="ghost"
                 size="sm"
-                class="text-red-600 hover:text-red-700"
+                class="text-destructive hover:text-red-700"
               >
                 <X class="h-4 w-4" />
               </Button>
@@ -148,7 +148,7 @@
             </div>
 
             <!-- Condition Preview -->
-            <div class="mt-3 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs font-mono text-gray-600 dark:text-gray-400">
+            <div class="mt-3 p-2 bg-muted dark:bg-muted rounded text-xs font-mono text-foreground dark:text-muted-foreground">
               {{ getConditionPreview(condition) }}
             </div>
           </div>
@@ -173,7 +173,7 @@
 
       <!-- Notification Settings -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Notification Settings</h3>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Notification Settings</h3>
 
         <!-- Notification Channels -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -183,7 +183,7 @@
             class="p-4 border border-border rounded-lg cursor-pointer transition-colors"
             :class="{
               'bg-primary/10 border-primary': currentRule.notification_channels.includes(channel.id),
-              'hover:bg-gray-50 dark:hover:bg-gray-800': !currentRule.notification_channels.includes(channel.id)
+              'hover:bg-muted dark:hover:bg-gray-800': !currentRule.notification_channels.includes(channel.id)
             }"
             @click="toggleNotificationChannel(channel.id)"
           >
@@ -191,7 +191,7 @@
               <component :is="channel.icon" class="h-5 w-5" />
               <div>
                 <div class="font-medium">{{ channel.name }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ channel.description }}</div>
+                <div class="text-sm text-foreground dark:text-muted-foreground">{{ channel.description }}</div>
               </div>
             </div>
           </div>
@@ -200,7 +200,7 @@
         <!-- Advanced Notification Options -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Cooldown Period</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Cooldown Period</label>
             <select
               v-model="currentRule.cooldown_minutes"
               class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -216,7 +216,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Max Alerts per Day</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Max Alerts per Day</label>
             <input
               v-model="currentRule.max_alerts_per_day"
               type="number"
@@ -230,14 +230,14 @@
 
         <!-- Custom Message Template -->
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Alert Message</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Custom Alert Message</label>
           <textarea
             v-model="currentRule.message_template"
             rows="3"
             placeholder="🚨 Alert: {website_name} - {condition_summary}"
             class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           ></textarea>
-          <div class="text-xs text-gray-600 dark:text-gray-400">
+          <div class="text-xs text-foreground dark:text-muted-foreground">
             Available variables: {website_name}, {website_url}, {condition_summary}, {timestamp}
           </div>
         </div>
@@ -245,11 +245,11 @@
 
       <!-- Scope and Targeting -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Rule Scope</h3>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Rule Scope</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Apply to Websites</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Apply to Websites</label>
             <select
               v-model="currentRule.website_scope"
               class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -262,7 +262,7 @@
           </div>
 
           <div class="space-y-2" v-if="currentRule.website_scope === 'specific'">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Select Websites</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Select Websites</label>
             <select
               v-model="currentRule.target_websites"
               multiple
@@ -299,17 +299,17 @@
     <!-- Existing Advanced Rules -->
     <CardContent v-if="!showRuleBuilder" class="space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Active Alert Rules</h3>
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground">Active Alert Rules</h3>
         <Badge variant="outline">{{ advancedRules.length }} rules configured</Badge>
       </div>
 
       <div v-if="advancedRules.length === 0" class="text-center py-8">
-        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-6">
-          <Zap class="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div class="rounded-lg bg-muted dark:bg-card p-6">
+          <Zap class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 class="text-lg font-semibold text-foreground dark:text-foreground mb-2">
             No Advanced Rules Yet
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-foreground dark:text-muted-foreground">
             Create sophisticated alert rules with multiple conditions and custom logic
           </p>
         </div>

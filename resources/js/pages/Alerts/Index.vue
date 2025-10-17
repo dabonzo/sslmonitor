@@ -30,7 +30,7 @@ defineProps<Props>();
         <a href="/alerts" class="group p-6 rounded-lg bg-card border border-border hover:bg-muted/50 transition-colors">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <Settings class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Settings class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
             <div>
               <h3 class="font-semibold text-foreground group-hover:text-primary">Alert Rules</h3>

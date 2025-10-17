@@ -72,19 +72,19 @@ defineExpose({
   <Transition name="slide-left">
     <div
       v-if="isOpen"
-      class="fixed right-0 top-0 z-50 h-full w-80 bg-white shadow-2xl dark:bg-[#0e1726]"
+      class="fixed right-0 top-0 z-50 h-full w-80 bg-background shadow-2xl dark:bg-[#0e1726]"
     >
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-600">
+      <div class="flex items-center justify-between border-b border-border p-4 dark:border-border">
         <div class="flex items-center space-x-2">
           <Settings class="h-5 w-5 text-primary" />
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 class="text-lg font-semibold text-foreground dark:text-white">
             Theme Customizer
           </h3>
         </div>
         <button
           type="button"
-          class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+          class="rounded-lg p-2 hover:bg-muted dark:hover:bg-gray-700"
           data-test="customizer-close"
           @click="isOpen = false"
         >
@@ -98,8 +98,8 @@ defineExpose({
         <!-- Theme Mode -->
         <div class="mb-6">
           <div class="mb-3 flex items-center space-x-2">
-            <Sun class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Theme Mode</h4>
+            <Sun class="h-4 w-4 text-foreground dark:text-muted-foreground" />
+            <h4 class="font-medium text-foreground dark:text-white">Theme Mode</h4>
           </div>
           <div class="grid grid-cols-1 gap-2">
             <div
@@ -108,7 +108,7 @@ defineExpose({
               class="relative cursor-pointer rounded-lg border p-3 transition-colors"
               :class="{
                 'border-primary bg-primary/5': themeStore.theme === option.value,
-                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.theme !== option.value
+                'border-border hover:border-border dark:border-border dark:hover:border-gray-500': themeStore.theme !== option.value
               }"
               :data-test="`theme-${option.value}`"
               @click="themeStore.setTheme(option.value)"
@@ -128,8 +128,8 @@ defineExpose({
         <!-- Navigation Mode -->
         <div class="mb-6">
           <div class="mb-3 flex items-center space-x-2">
-            <Layout class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Navigation Mode</h4>
+            <Layout class="h-4 w-4 text-foreground dark:text-muted-foreground" />
+            <h4 class="font-medium text-foreground dark:text-white">Navigation Mode</h4>
           </div>
           <div class="grid grid-cols-1 gap-2">
             <div
@@ -138,7 +138,7 @@ defineExpose({
               class="relative cursor-pointer rounded-lg border p-3 transition-colors"
               :class="{
                 'border-primary bg-primary/5': themeStore.menu === option.value,
-                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.menu !== option.value
+                'border-border hover:border-border dark:border-border dark:hover:border-gray-500': themeStore.menu !== option.value
               }"
               :data-test="`navigation-${option.value}`"
               @click="themeStore.setMenu(option.value)"
@@ -146,7 +146,7 @@ defineExpose({
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-medium">{{ option.name }}</div>
-                  <div class="text-sm text-gray-500">{{ option.description }}</div>
+                  <div class="text-sm text-muted-foreground">{{ option.description }}</div>
                 </div>
                 <Check
                   v-if="themeStore.menu === option.value"
@@ -160,8 +160,8 @@ defineExpose({
         <!-- Layout Mode -->
         <div class="mb-6">
           <div class="mb-3 flex items-center space-x-2">
-            <Layout class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Layout Mode</h4>
+            <Layout class="h-4 w-4 text-foreground dark:text-muted-foreground" />
+            <h4 class="font-medium text-foreground dark:text-white">Layout Mode</h4>
           </div>
           <div class="grid grid-cols-1 gap-2">
             <div
@@ -170,7 +170,7 @@ defineExpose({
               class="relative cursor-pointer rounded-lg border p-3 transition-colors"
               :class="{
                 'border-primary bg-primary/5': themeStore.layout === option.value,
-                'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500': themeStore.layout !== option.value
+                'border-border hover:border-border dark:border-border dark:hover:border-gray-500': themeStore.layout !== option.value
               }"
               :data-test="`layout-${option.value}`"
               @click="themeStore.setLayout(option.value)"
@@ -178,7 +178,7 @@ defineExpose({
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-medium">{{ option.name }}</div>
-                  <div class="text-sm text-gray-500">{{ option.description }}</div>
+                  <div class="text-sm text-muted-foreground">{{ option.description }}</div>
                 </div>
                 <Check
                   v-if="themeStore.layout === option.value"
@@ -192,16 +192,16 @@ defineExpose({
         <!-- Color Scheme -->
         <div class="mb-6">
           <div class="mb-3 flex items-center space-x-2">
-            <Palette class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <h4 class="font-medium text-gray-900 dark:text-white">Color Scheme</h4>
+            <Palette class="h-4 w-4 text-foreground dark:text-muted-foreground" />
+            <h4 class="font-medium text-foreground dark:text-white">Color Scheme</h4>
           </div>
           <div class="grid grid-cols-3 gap-2">
             <div
               v-for="scheme in colorSchemes"
               :key="scheme.value"
-              class="cursor-pointer rounded-lg border p-2 transition-colors hover:border-gray-300"
+              class="cursor-pointer rounded-lg border p-2 transition-colors hover:border-border"
               :class="[
-                'border-gray-200 dark:border-gray-600',
+                'border-border dark:border-border',
                 { 'ring-2 ring-primary': scheme.value === 'blue' }
               ]"
               @click="() => {/* Color scheme functionality to be implemented */}"
@@ -217,10 +217,10 @@ defineExpose({
       </div>
 
       <!-- Footer -->
-      <div class="absolute bottom-0 left-0 right-0 border-t border-gray-200 p-4 dark:border-gray-600">
+      <div class="absolute bottom-0 left-0 right-0 border-t border-border p-4 dark:border-border">
         <button
           type="button"
-          class="w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          class="w-full rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted dark:bg-muted dark:text-muted-foreground dark:hover:bg-gray-600"
           data-test="reset-defaults"
           @click="resetToDefaults"
         >

@@ -8,7 +8,7 @@ const getVariantClass = (variant: string) => {
     const baseClasses = 'pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-xl border px-4 py-4 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:scale-[1.02]';
 
     const variantClasses = {
-        default: 'border-gray-200 bg-white/95 dark:border-gray-700 dark:bg-gray-800/95',
+        default: 'border-border bg-background/95 dark:border-border dark:bg-gray-800/95',
         success: 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 dark:border-green-700 dark:from-green-950/95 dark:to-emerald-950/95',
         error: 'border-red-300 bg-gradient-to-r from-red-50 to-rose-50 dark:border-red-700 dark:from-red-950/95 dark:to-rose-950/95',
         warning: 'border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50 dark:border-yellow-700 dark:from-yellow-950/95 dark:to-amber-950/95',
@@ -32,10 +32,10 @@ const getIconComponent = (variant: string) => {
 const getIconClass = (variant: string) => {
     const classes = {
         success: 'text-green-600 dark:text-green-400 animate-bounce-subtle',
-        error: 'text-red-600 dark:text-red-400 animate-shake',
+        error: 'text-destructive dark:text-red-400 animate-shake',
         warning: 'text-yellow-600 dark:text-yellow-400 animate-pulse',
-        info: 'text-blue-600 dark:text-blue-400 animate-bounce-subtle',
-        default: 'text-gray-600 dark:text-gray-400',
+        info: 'text-primary dark:text-blue-400 animate-bounce-subtle',
+        default: 'text-foreground dark:text-muted-foreground',
     };
 
     return classes[variant as keyof typeof classes];
@@ -64,13 +64,13 @@ const getIconClass = (variant: string) => {
                 />
 
                 <div class="flex-1 space-y-1">
-                    <div class="text-sm font-bold text-gray-900 dark:text-white tracking-tight">
+                    <div class="text-sm font-bold text-foreground dark:text-white tracking-tight">
                         {{ toast.title }}
                     </div>
 
                     <div
                         v-if="toast.description"
-                        class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                        class="text-sm text-foreground dark:text-muted-foreground leading-relaxed"
                     >
                         {{ toast.description }}
                     </div>
@@ -78,7 +78,7 @@ const getIconClass = (variant: string) => {
 
                 <button
                     @click="removeToast(toast.id)"
-                    class="flex-shrink-0 rounded-lg p-1.5 text-gray-500 transition-all hover:bg-white/50 hover:text-gray-700 hover:rotate-90 dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-gray-200"
+                    class="flex-shrink-0 rounded-lg p-1.5 text-muted-foreground transition-all hover:bg-background/50 hover:text-foreground hover:rotate-90 dark:text-muted-foreground dark:hover:bg-gray-700/50 dark:hover:text-muted-foreground"
                 >
                     <X class="h-4 w-4" />
                 </button>

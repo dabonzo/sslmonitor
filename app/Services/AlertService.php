@@ -26,12 +26,9 @@ class AlertService
     {
         $triggeredAlerts = [];
 
-        // Get all alert configurations for this website and user
+        // Get alert configurations for this specific website only
         $alertConfigs = AlertConfiguration::where('user_id', $website->user_id)
-            ->where(function ($query) use ($website) {
-                $query->where('website_id', $website->id)
-                      ->orWhereNull('website_id'); // Global user alerts
-            })
+            ->where('website_id', $website->id)
             ->where('enabled', true)
             ->get();
 

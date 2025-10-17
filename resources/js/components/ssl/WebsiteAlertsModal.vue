@@ -117,25 +117,25 @@ const getExpiryColor = (days: number | null) => {
     <div class="flex min-h-screen items-center justify-center p-4">
       <div class="fixed inset-0 bg-black/50" @click="emit('close')"></div>
 
-      <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div class="relative bg-background dark:bg-gray-900 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between p-6 border-b border-border dark:border-border">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
               <Bell class="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <h2 class="text-xl font-semibold text-foreground dark:text-foreground">
                 Configure Alerts
               </h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+              <p class="text-sm text-muted-foreground dark:text-muted-foreground">
                 {{ website?.name || 'Website' }} Alert Settings
               </p>
             </div>
           </div>
           <button
             @click="emit('close')"
-            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="p-2 text-muted-foreground hover:text-foreground dark:hover:text-gray-300 rounded-lg hover:bg-muted dark:hover:bg-gray-800 transition-colors"
           >
             <X class="h-5 w-5" />
           </button>
@@ -146,14 +146,14 @@ const getExpiryColor = (days: number | null) => {
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
 
-        <div v-else-if="!website" class="text-center py-20 text-gray-500 dark:text-gray-400">
+        <div v-else-if="!website" class="text-center py-20 text-muted-foreground dark:text-muted-foreground">
           No website selected
         </div>
 
         <div v-else class="p-6 space-y-8 max-h-[calc(90vh-120px)] overflow-y-auto">
           <!-- SSL Certificate Expiry Alerts -->
           <div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <h3 class="text-lg font-medium text-foreground dark:text-foreground mb-4 flex items-center gap-2">
               <Shield class="h-5 w-5 text-green-600" />
               SSL Certificate Expiry Alerts
             </h3>
@@ -161,17 +161,17 @@ const getExpiryColor = (days: number | null) => {
               <div
                 v-for="({ days, alert } in sslExpiryAlerts"
                 :key="alert.id"
-                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-4 bg-muted dark:bg-card rounded-lg border border-border dark:border-border"
               >
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 rounded-lg flex items-center justify-center" :class="getExpiryColor(days)">
                     <Shield class="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                    <h4 class="font-medium text-foreground dark:text-foreground">
                       {{ getDaysLabel(days) }}{{ days > 0 ? ' before expiry' : '' }}
                     </h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-sm text-muted-foreground dark:text-muted-foreground">
                       {{ alert.alert_level_label }}
                     </p>
                   </div>
@@ -194,7 +194,7 @@ const getExpiryColor = (days: number | null) => {
                   >
                     <span
                       :class="[
-                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                        'inline-block h-4 w-4 transform rounded-full bg-background transition-transform',
                         alert.enabled ? 'translate-x-6' : 'translate-x-1'
                       ]"
                     />
@@ -206,25 +206,25 @@ const getExpiryColor = (days: number | null) => {
 
           <!-- Uptime Alerts -->
           <div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-              <Zap class="h-5 w-5 text-blue-600" />
+            <h3 class="text-lg font-medium text-foreground dark:text-foreground mb-4 flex items-center gap-2">
+              <Zap class="h-5 w-5 text-primary" />
               Uptime Monitoring Alerts
             </h3>
             <div class="space-y-3">
               <div
                 v-for="alert in uptimeAlerts"
                 :key="alert.id"
-                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-4 bg-muted dark:bg-card rounded-lg border border-border dark:border-border"
               >
                 <div class="flex items-center gap-3">
                   <div :class="['w-12 h-12 rounded-lg flex items-center justify-center', alert.alert_level_color]">
                     <component :is="getAlertIcon(alert.alert_type)" class="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                    <h4 class="font-medium text-foreground dark:text-foreground">
                       {{ alert.alert_type_label }}
                     </h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-sm text-muted-foreground dark:text-muted-foreground">
                       {{ alert.alert_level_label }}
                     </p>
                   </div>
@@ -247,7 +247,7 @@ const getExpiryColor = (days: number | null) => {
                   >
                     <span
                       :class="[
-                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                        'inline-block h-4 w-4 transform rounded-full bg-background transition-transform',
                         alert.enabled ? 'translate-x-6' : 'translate-x-1'
                       ]"
                     />
@@ -259,7 +259,7 @@ const getExpiryColor = (days: number | null) => {
 
           <!-- Response Time Alerts -->
           <div v-if="responseTimeAlerts.length > 0">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <h3 class="text-lg font-medium text-foreground dark:text-foreground mb-4 flex items-center gap-2">
               <Clock class="h-5 w-5 text-orange-600" />
               Response Time Alerts
             </h3>
@@ -267,17 +267,17 @@ const getExpiryColor = (days: number | null) => {
               <div
                 v-for="alert in responseTimeAlerts"
                 :key="alert.id"
-                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-4 bg-muted dark:bg-card rounded-lg border border-border dark:border-border"
               >
                 <div class="flex items-center gap-3">
                   <div :class="['w-12 h-12 rounded-lg flex items-center justify-center', alert.alert_level_color]">
                     <component :is="getAlertIcon(alert.alert_type)" class="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                    <h4 class="font-medium text-foreground dark:text-foreground">
                       {{ alert.alert_type_label }}
                     </h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-sm text-muted-foreground dark:text-muted-foreground">
                       Threshold: {{ alert.threshold_response_time }}ms
                     </p>
                   </div>
@@ -300,7 +300,7 @@ const getExpiryColor = (days: number | null) => {
                   >
                     <span
                       :class="[
-                        'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                        'inline-block h-4 w-4 transform rounded-full bg-background transition-transform',
                         alert.enabled ? 'translate-x-6' : 'translate-x-1'
                       ]"
                     />
@@ -313,7 +313,7 @@ const getExpiryColor = (days: number | null) => {
           <!-- Info Section -->
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <div class="flex items-start gap-3">
-              <Info class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              <Info class="h-5 w-5 text-primary dark:text-blue-400 mt-0.5" />
               <div class="text-sm text-blue-800 dark:text-blue-200">
                 <h4 class="font-medium mb-1">About Alert Configuration</h4>
                 <p class="text-blue-700 dark:text-blue-300">
@@ -326,10 +326,10 @@ const getExpiryColor = (days: number | null) => {
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <div class="flex items-center justify-end gap-3 p-6 border-t border-border dark:border-border bg-muted dark:bg-gray-800">
           <button
             @click="emit('close')"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground dark:text-muted-foreground bg-background dark:bg-muted border border-border dark:border-border rounded-md hover:bg-muted dark:hover:bg-gray-600 transition-colors"
           >
             Done
           </button>

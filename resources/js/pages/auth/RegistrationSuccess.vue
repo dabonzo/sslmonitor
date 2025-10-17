@@ -25,10 +25,10 @@ defineProps<{
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
                     Account created successfully!
                 </h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">
+                <p class="text-sm text-foreground dark:text-muted-foreground">
                     We've sent a verification email to <strong class="text-slate-900 dark:text-white">{{ email }}</strong>
                 </p>
-                <p class="text-sm text-slate-600 dark:text-slate-400">
+                <p class="text-sm text-foreground dark:text-muted-foreground">
                     Please check your inbox and click the verification link to activate your account.
                 </p>
             </div>

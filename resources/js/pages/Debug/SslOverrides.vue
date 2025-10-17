@@ -74,7 +74,7 @@ const hasActiveOverrides = computed(() => props.stats.active_overrides > 0);
 const hasUrgentAlerts = computed(() => props.stats.urgent_alerts > 0);
 
 const getDaysClass = (days: number) => {
-  if (days < 0) return 'text-red-600 bg-red-50 border-red-200';
+  if (days < 0) return 'text-destructive bg-red-50 border-red-200';
   if (days <= 7) return 'text-orange-600 bg-orange-50 border-orange-200';
   if (days <= 30) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
   return 'text-green-600 bg-green-50 border-green-200';
@@ -287,7 +287,7 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-muted-foreground">Active Overrides</p>
-                <p class="text-2xl font-bold text-blue-600">{{ stats.active_overrides }}</p>
+                <p class="text-2xl font-bold text-primary">{{ stats.active_overrides }}</p>
               </div>
               <Settings class="w-8 h-8 text-blue-500" />
             </div>
@@ -410,7 +410,7 @@ onMounted(() => {
                         selectedWebsites = selectedWebsites.filter(id => id !== website.id);
                       }
                     }"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    class="w-4 h-4 text-primary border-border rounded focus:ring-blue-500"
                   />
 
                   <div>
@@ -431,7 +431,7 @@ onMounted(() => {
 
                   <!-- Override Info -->
                   <div v-if="website.override" class="flex items-center space-x-2">
-                    <span class="text-blue-600">Override:</span>
+                    <span class="text-primary">Override:</span>
                     <span class="font-medium text-blue-900">
                       {{ formatDate(website.override.override_data.expiry_date) }}
                     </span>
@@ -514,12 +514,12 @@ onMounted(() => {
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex items-center space-x-1 border-l border-gray-300 pl-2">
+                <div class="flex items-center space-x-1 border-l border-border pl-2">
                   <button
                     v-if="website.override"
                     @click="clearOverride(website.id)"
                     :disabled="processing.includes(website.id)"
-                    class="p-1 text-gray-500 hover:text-red-600 disabled:opacity-50 transition-colors"
+                    class="p-1 text-muted-foreground hover:text-destructive disabled:opacity-50 transition-colors"
                     title="Remove override"
                   >
                     <X class="w-4 h-4" />
@@ -528,7 +528,7 @@ onMounted(() => {
                   <button
                     @click="testAlerts(website.id)"
                     :disabled="!website.can_override || processing.includes(website.id)"
-                    class="p-1 text-gray-500 hover:text-green-600 disabled:opacity-50 transition-colors"
+                    class="p-1 text-muted-foreground hover:text-green-600 disabled:opacity-50 transition-colors"
                     title="Test alerts"
                   >
                     <Play class="w-4 h-4" />
@@ -537,7 +537,7 @@ onMounted(() => {
 
                 <!-- Loading Indicator -->
                 <div v-if="processing.includes(website.id)" class="flex items-center">
-                  <RefreshCw class="w-4 h-4 text-blue-600 animate-spin" />
+                  <RefreshCw class="w-4 h-4 text-primary animate-spin" />
                 </div>
               </div>
             </div>
@@ -545,9 +545,9 @@ onMounted(() => {
 
           <!-- Empty State -->
           <div v-if="websites.length === 0" class="p-8 text-center">
-            <Bug class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No websites found</h3>
-            <p class="text-gray-500">You don't have any websites with SSL monitoring enabled.</p>
+            <Bug class="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 class="text-lg font-medium text-foreground mb-2">No websites found</h3>
+            <p class="text-muted-foreground">You don't have any websites with SSL monitoring enabled.</p>
           </div>
         </div>
       </div>

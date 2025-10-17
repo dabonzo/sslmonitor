@@ -44,24 +44,24 @@ const toggleRecoveryForm = () => {
 <template>
     <Head title="Two-Factor Challenge" />
 
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+    <div class="min-h-screen bg-background dark:bg-background flex items-center justify-center p-4">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
                     <Shield class="w-8 h-8 text-white" />
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 class="text-2xl font-bold text-foreground dark:text-white mb-2">
                     Two-Factor Authentication
                 </h1>
-                <p class="text-gray-600 dark:text-gray-400">
+                <p class="text-foreground dark:text-muted-foreground">
                     Please confirm access to your account by entering one of your emergency recovery codes or the authentication code provided by your authenticator application.
                 </p>
             </div>
 
-            <Card class="shadow-xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <Card class="shadow-xl border-0 bg-background/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <CardHeader class="text-center pb-4">
                     <CardTitle class="flex items-center justify-center space-x-2">
-                        <component :is="showRecoveryForm ? Key : Smartphone" class="w-5 h-5 text-blue-600" />
+                        <component :is="showRecoveryForm ? Key : Smartphone" class="w-5 h-5 text-primary" />
                         <span>{{ showRecoveryForm ? 'Recovery Code' : 'Authentication Code' }}</span>
                     </CardTitle>
                     <CardDescription>
@@ -78,7 +78,7 @@ const toggleRecoveryForm = () => {
                         <div class="space-y-2">
                             <Label for="code">Authentication Code</Label>
                             <div class="relative">
-                                <Smartphone class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Smartphone class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     id="code"
                                     v-model="form.code"
@@ -92,7 +92,7 @@ const toggleRecoveryForm = () => {
                                     autocomplete="one-time-code"
                                 />
                             </div>
-                            <p v-if="form.errors.code" class="text-sm text-red-600 dark:text-red-400">
+                            <p v-if="form.errors.code" class="text-sm text-destructive dark:text-red-400">
                                 {{ form.errors.code }}
                             </p>
                         </div>
@@ -113,7 +113,7 @@ const toggleRecoveryForm = () => {
                         <div class="space-y-2">
                             <Label for="recovery_code">Recovery Code</Label>
                             <div class="relative">
-                                <Key class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Key class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     id="recovery_code"
                                     v-model="recoveryForm.recovery_code"
@@ -126,7 +126,7 @@ const toggleRecoveryForm = () => {
                                     autocomplete="off"
                                 />
                             </div>
-                            <p v-if="recoveryForm.errors.recovery_code" class="text-sm text-red-600 dark:text-red-400">
+                            <p v-if="recoveryForm.errors.recovery_code" class="text-sm text-destructive dark:text-red-400">
                                 {{ recoveryForm.errors.recovery_code }}
                             </p>
                         </div>
@@ -143,11 +143,11 @@ const toggleRecoveryForm = () => {
                     </form>
 
                     <!-- Toggle between forms -->
-                    <div class="text-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div class="text-center border-t border-border dark:border-border pt-4">
                         <button
                             type="button"
                             @click="toggleRecoveryForm"
-                            class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                            class="text-sm text-primary dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                         >
                             {{ showRecoveryForm
                                 ? 'Use authenticator app instead'
@@ -162,7 +162,7 @@ const toggleRecoveryForm = () => {
             <div class="mt-8 text-center">
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                     <div class="flex items-start space-x-3">
-                        <Shield class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <Shield class="w-5 h-5 text-primary dark:text-blue-400 mt-0.5" />
                         <div class="text-left">
                             <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
                                 Need help?

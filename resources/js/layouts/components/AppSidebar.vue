@@ -32,7 +32,7 @@ function toggleDropdown(key: string) {
 <template>
   <nav
     v-if="themeStore.menu !== 'horizontal'"
-    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 bg-sidebar text-sidebar-foreground"
+    class="sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-lg transition-all duration-300 bg-sidebar text-sidebar-foreground"
     :class="{
       'ltr:-left-[260px] rtl:right-[260px]': !themeStore.sidebarOpen,
       'ltr:left-0 rtl:right-0': themeStore.sidebarOpen
@@ -68,7 +68,7 @@ function toggleDropdown(key: string) {
 
               <!-- Sub-menu for dropdown items -->
               <Transition v-if="item.children" name="slide-down">
-                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
+                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-muted-foreground">
                   <li v-for="child in item.children" :key="child.href">
                     <Link
                       :href="child.href"
@@ -95,7 +95,7 @@ function toggleDropdown(key: string) {
 
               <!-- Sub-menu for dropdown items -->
               <Transition v-if="item.children" name="slide-down">
-                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-gray-500">
+                <ul v-show="!item.disabled && activeDropdown === item.key && shouldShowSubMenus" class="sub-menu text-muted-foreground">
                   <li v-for="child in item.children" :key="child.href">
                     <Link
                       :href="child.href"
@@ -110,7 +110,7 @@ function toggleDropdown(key: string) {
           </template>
 
           <!-- Separator -->
-          <li class="h-px w-full bg-white-light dark:bg-[#1b2e4b] my-4"></li>
+          <li class="h-px w-full bg-border my-4"></li>
 
           <!-- Bottom menu items -->
           <template v-for="item in bottomMenuItems" :key="item.key">
@@ -148,23 +148,13 @@ function toggleDropdown(key: string) {
 }
 
 .sub-menu a:hover {
-  background-color: rgb(243 244 246);
-  color: rgb(67 97 238);
-}
-
-.dark .sub-menu a:hover {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--primary));
 }
 
 .sub-menu a.active {
-  background-color: rgb(243 244 246);
-  color: rgb(67 97 238);
-}
-
-.dark .sub-menu a.active {
-  background-color: rgb(24 31 50);
-  color: rgb(67 97 238);
+  background-color: hsl(var(--muted));
+  color: hsl(var(--primary));
 }
 
 /* Slide down animation */
@@ -196,11 +186,7 @@ function toggleDropdown(key: string) {
 }
 
 .perfect-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background-color: hsl(var(--muted));
   border-radius: 3px;
-}
-
-.dark .perfect-scrollbar::-webkit-scrollbar-thumb {
-  background: #475569;
 }
 </style>

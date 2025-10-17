@@ -69,7 +69,6 @@ class AlertConfigurationController extends Controller
             'defaultConfigurations' => AlertConfiguration::getDefaultConfigurations(),
             'alertTypes' => [
                 AlertConfiguration::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
-                AlertConfiguration::ALERT_LETS_ENCRYPT_RENEWAL => 'Let\'s Encrypt Renewal',
                 AlertConfiguration::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
                 AlertConfiguration::ALERT_UPTIME_DOWN => 'Website Down',
                 AlertConfiguration::ALERT_RESPONSE_TIME => 'Slow Response Time',

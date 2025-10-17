@@ -34,8 +34,8 @@ defineProps<{
         >
             <!-- Email field -->
             <div>
-                <Label for="email" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="email" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Email</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="email"
                         type="email"
@@ -45,7 +45,7 @@ defineProps<{
                         :tabindex="1"
                         autocomplete="email"
                         placeholder="Enter Email"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Mail class="h-[18px] w-[18px]" />
@@ -56,8 +56,8 @@ defineProps<{
 
             <!-- Password field -->
             <div>
-                <Label for="password" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Password</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="password" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Password</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="password"
                         type="password"
@@ -66,7 +66,7 @@ defineProps<{
                         :tabindex="2"
                         autocomplete="current-password"
                         placeholder="Enter Password"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Lock class="h-[18px] w-[18px]" />
@@ -78,8 +78,8 @@ defineProps<{
             <!-- Remember me & Forgot password -->
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex cursor-pointer items-center space-x-2">
-                    <Checkbox id="remember" name="remember" :tabindex="3" class="form-checkbox bg-white dark:bg-black" />
-                    <span class="text-sm text-slate-600 dark:text-slate-400">Remember me</span>
+                    <Checkbox id="remember" name="remember" :tabindex="3" class="form-checkbox bg-background dark:bg-black" />
+                    <span class="text-sm text-foreground dark:text-muted-foreground">Remember me</span>
                 </Label>
                 <TextLink v-if="canResetPassword" :href="request()" class="text-sm text-primary hover:text-primary/80" :tabindex="5">
                     Forgot password?
@@ -89,7 +89,7 @@ defineProps<{
             <!-- Login button -->
             <Button
                 type="submit"
-                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-blue-600/30"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -100,8 +100,8 @@ defineProps<{
 
             <!-- Divider -->
             <div class="relative my-7 text-center">
-                <span class="absolute inset-x-0 top-1/2 h-px w-full -translate-y-1/2 bg-slate-200 dark:bg-slate-700"></span>
-                <span class="relative bg-white px-4 text-sm font-bold uppercase text-slate-500 dark:bg-black dark:text-slate-400">or</span>
+                <span class="absolute inset-x-0 top-1/2 h-px w-full -translate-y-1/2 bg-border dark:bg-border"></span>
+                <span class="relative bg-background px-4 text-sm font-bold uppercase text-muted-foreground dark:bg-black dark:text-muted-foreground">or</span>
             </div>
 
             <!-- Social login buttons -->
@@ -133,7 +133,7 @@ defineProps<{
             </div>
 
             <!-- Sign up link -->
-            <div class="text-center text-slate-600 dark:text-slate-400">
+            <div class="text-center text-foreground dark:text-muted-foreground">
                 Don't have an account?
                 <TextLink :href="register()" class="font-semibold uppercase text-primary underline transition hover:text-black dark:hover:text-white" :tabindex="5">
                     SIGN UP

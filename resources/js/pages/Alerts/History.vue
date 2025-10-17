@@ -62,7 +62,7 @@ defineProps<Props>();
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <AlertTriangle class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <AlertTriangle class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
             <div>
               <div class="text-2xl font-bold text-foreground">0</div>
@@ -74,7 +74,7 @@ defineProps<Props>();
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
-              <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <AlertTriangle class="h-5 w-5 text-destructive dark:text-red-400" />
             </div>
             <div>
               <div class="text-2xl font-bold text-foreground">0</div>

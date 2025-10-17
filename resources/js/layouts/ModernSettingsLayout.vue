@@ -72,16 +72,16 @@ function isActiveRoute(href: string): boolean {
     <div class="max-w-7xl mx-auto">
       <!-- Header Section -->
       <div class="mb-8">
-        <div class="rounded-2xl bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900/30 dark:to-indigo-900/30 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
+        <div class="rounded-2xl bg-gradient-to-r from-background via-primary/5 to-accent/5 p-6 shadow-xl border border-border">
           <div class="flex items-center space-x-4">
-            <div class="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-3 shadow-lg">
+            <div class="rounded-xl bg-gradient-to-br from-primary to-primary/80 p-3 shadow-lg">
               <SettingsIcon class="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+              <h1 class="text-3xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
                 Settings
               </h1>
-              <p class="text-blue-600 dark:text-blue-300 font-medium">
+              <p class="text-primary font-medium">
                 Manage your account preferences and configurations
               </p>
             </div>
@@ -92,8 +92,8 @@ function isActiveRoute(href: string): boolean {
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Settings Navigation -->
         <aside class="lg:col-span-1">
-          <div class="rounded-2xl bg-gradient-to-br from-white via-gray-50 to-slate-50 dark:from-gray-900 dark:via-slate-800 dark:to-gray-900 p-6 shadow-xl border border-gray-100 dark:border-gray-800">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <div class="rounded-2xl bg-card p-6 shadow-xl border border-border">
+            <h2 class="text-lg font-bold text-foreground mb-4">
               Account Settings
             </h2>
             <nav class="space-y-2">
@@ -101,30 +101,30 @@ function isActiveRoute(href: string): boolean {
                 v-for="item in settingsNavItems"
                 :key="item.key"
                 :href="item.href"
-                class="group flex items-start space-x-3 p-3 rounded-xl transition-all duration-300 hover:bg-white/60 dark:hover:bg-white/5"
+                class="group flex items-start space-x-3 p-3 rounded-xl transition-all duration-300 hover:bg-muted/50"
                 :class="{
-                  'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800': isActiveRoute(item.href)
+                  'bg-primary/10 border border-primary': isActiveRoute(item.href)
                 }"
               >
                 <div class="rounded-lg p-2 transition-all duration-300"
                      :class="{
-                       'bg-blue-500 text-white': isActiveRoute(item.href),
-                       'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400': !isActiveRoute(item.href)
+                       'bg-primary text-white': isActiveRoute(item.href),
+                       'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary': !isActiveRoute(item.href)
                      }">
                   <component :is="item.icon" class="h-4 w-4" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-semibold transition-colors duration-300"
                      :class="{
-                       'text-blue-900 dark:text-blue-100': isActiveRoute(item.href),
-                       'text-gray-900 dark:text-gray-100 group-hover:text-blue-900 dark:group-hover:text-blue-100': !isActiveRoute(item.href)
+                       'text-foreground': isActiveRoute(item.href),
+                       'text-foreground group-hover:text-primary': !isActiveRoute(item.href)
                      }">
                     {{ item.title }}
                   </p>
                   <p class="text-xs transition-colors duration-300"
                      :class="{
-                       'text-blue-600 dark:text-blue-300': isActiveRoute(item.href),
-                       'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-300': !isActiveRoute(item.href)
+                       'text-primary': isActiveRoute(item.href),
+                       'text-muted-foreground group-hover:text-primary': !isActiveRoute(item.href)
                      }">
                     {{ item.description }}
                   </p>
@@ -136,7 +136,7 @@ function isActiveRoute(href: string): boolean {
 
         <!-- Settings Content -->
         <main class="lg:col-span-3">
-          <div class="rounded-2xl bg-gradient-to-br from-white via-gray-50 to-slate-50 dark:from-gray-900 dark:via-slate-800 dark:to-gray-900 p-8 shadow-xl border border-gray-100 dark:border-gray-800">
+          <div class="rounded-2xl bg-card p-8 shadow-xl border border-border">
             <slot />
           </div>
         </main>

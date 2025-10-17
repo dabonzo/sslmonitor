@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <FileText class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <FileText class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Advanced Report Builder
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Create comprehensive custom reports with advanced configuration
             </div>
           </div>
@@ -27,7 +27,7 @@
             </CardHeader>
             <CardContent class="space-y-4">
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Name</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Report Name</label>
                 <input
                   v-model="reportConfig.name"
                   type="text"
@@ -37,7 +37,7 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Description</label>
                 <textarea
                   v-model="reportConfig.description"
                   rows="3"
@@ -47,7 +47,7 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Category</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Report Category</label>
                 <select
                   v-model="reportConfig.category"
                   class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -69,7 +69,7 @@
             </CardHeader>
             <CardContent class="space-y-4">
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Period</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Period</label>
                 <select
                   v-model="reportConfig.timePeriod"
                   @change="updateDateRange"
@@ -86,7 +86,7 @@
 
               <div v-if="reportConfig.timePeriod === 'custom'" class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                  <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Start Date</label>
                   <input
                     v-model="reportConfig.startDate"
                     type="date"
@@ -94,7 +94,7 @@
                   />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                  <label class="text-sm font-medium text-foreground dark:text-muted-foreground">End Date</label>
                   <input
                     v-model="reportConfig.endDate"
                     type="date"
@@ -104,7 +104,7 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Data Grouping</label>
+                <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Data Grouping</label>
                 <select
                   v-model="reportConfig.grouping"
                   class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -135,8 +135,8 @@
                 <div class="flex items-center space-x-2 flex-1">
                   <component :is="source.icon" class="h-4 w-4" :class="source.iconColor" />
                   <div>
-                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ source.name }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ source.description }}</div>
+                    <div class="font-medium text-foreground dark:text-foreground">{{ source.name }}</div>
+                    <div class="text-sm text-foreground dark:text-muted-foreground">{{ source.description }}</div>
                   </div>
                 </div>
               </div>
@@ -153,14 +153,14 @@
           <CardContent>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div v-for="category in metricCategories" :key="category.name">
-                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">{{ category.name }}</h4>
+                <h4 class="font-medium text-foreground dark:text-foreground mb-3">{{ category.name }}</h4>
                 <div class="space-y-2">
                   <div v-for="metric in category.metrics" :key="metric.id" class="flex items-center space-x-2">
                     <Checkbox
                       :checked="reportConfig.selectedMetrics.includes(metric.id)"
                       @update:checked="toggleMetric(metric.id, $event)"
                     />
-                    <label class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                    <label class="text-sm text-foreground dark:text-muted-foreground cursor-pointer">
                       {{ metric.name }}
                     </label>
                   </div>
@@ -180,8 +180,8 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div v-for="visualization in visualizations" :key="visualization.id" class="flex flex-col items-center p-3 border rounded-lg cursor-pointer hover:shadow-md transition-shadow" :class="{ 'border-primary bg-primary/5': reportConfig.selectedVisualizations.includes(visualization.id) }" @click="toggleVisualization(visualization.id)">
                 <component :is="visualization.icon" class="h-8 w-8 mb-2" :class="visualization.iconColor" />
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ visualization.name }}</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400 text-center mt-1">{{ visualization.description }}</span>
+                <span class="text-sm font-medium text-foreground dark:text-foreground">{{ visualization.name }}</span>
+                <span class="text-xs text-foreground dark:text-muted-foreground text-center mt-1">{{ visualization.description }}</span>
               </div>
             </div>
           </CardContent>
@@ -203,8 +203,8 @@
                   />
                   <div class="flex items-center space-x-2">
                     <component :is="format.icon" class="h-4 w-4" :class="format.iconColor" />
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ format.name }}</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-500">({{ format.size }})</span>
+                    <span class="text-sm font-medium text-foreground dark:text-muted-foreground">{{ format.name }}</span>
+                    <span class="text-xs text-muted-foreground dark:text-muted-foreground">({{ format.size }})</span>
                   </div>
                 </div>
               </div>
@@ -223,7 +223,7 @@
                     :checked="reportConfig.emailReport"
                     @update:checked="reportConfig.emailReport = $event"
                   />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Email report upon completion</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">Email report upon completion</span>
                 </div>
 
                 <div v-if="reportConfig.emailReport" class="ml-6 space-y-2">
@@ -240,7 +240,7 @@
                     :checked="reportConfig.slackNotification"
                     @update:checked="reportConfig.slackNotification = $event"
                   />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Send Slack notification</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">Send Slack notification</span>
                 </div>
 
                 <div class="flex items-center space-x-3">
@@ -248,7 +248,7 @@
                     :checked="reportConfig.dashboardPublication"
                     @update:checked="reportConfig.dashboardPublication = $event"
                   />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Publish to team dashboard</span>
+                  <span class="text-sm text-foreground dark:text-muted-foreground">Publish to team dashboard</span>
                 </div>
               </div>
             </CardContent>
@@ -257,7 +257,7 @@
       </div>
 
       <div class="flex justify-between items-center pt-4 border-t">
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-sm text-foreground dark:text-muted-foreground">
           Estimated generation time: {{ estimatedTime }}
         </div>
         <div class="flex space-x-3">
@@ -334,7 +334,7 @@ const dataSources = [
     name: 'SSL Certificates',
     description: 'Certificate status, expiry, security scores',
     icon: Shield,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: 'uptime_monitoring',
@@ -348,7 +348,7 @@ const dataSources = [
     name: 'Security Analysis',
     description: 'Vulnerability scans and security insights',
     icon: AlertTriangle,
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: 'performance_metrics',
@@ -395,7 +395,7 @@ const visualizations = [
     name: 'Bar Chart',
     description: 'Compare values',
     icon: BarChart3,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: 'line_chart',
@@ -426,7 +426,7 @@ const outputFormats = [
     name: 'PDF Document',
     size: '~2-5MB',
     icon: FileText,
-    iconColor: 'text-red-600 dark:text-red-400'
+    iconColor: 'text-destructive dark:text-red-400'
   },
   {
     id: 'excel',
@@ -440,7 +440,7 @@ const outputFormats = [
     name: 'HTML Dashboard',
     size: '~500KB',
     icon: Globe,
-    iconColor: 'text-blue-600 dark:text-blue-400'
+    iconColor: 'text-primary dark:text-blue-400'
   },
   {
     id: 'email',

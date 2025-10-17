@@ -112,7 +112,7 @@ document.addEventListener('click', handleDocumentClick)
 </script>
 
 <template>
-  <header class="z-40 bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900/30 dark:to-indigo-900/30 shadow-lg border-b border-blue-100 dark:border-blue-800">
+  <header class="z-40 bg-gradient-to-r from-background via-primary/5 to-accent/5 shadow-lg border-b border-border">
     <div class="flex items-center justify-between p-4">
 
       <!-- Left side: Sidebar toggle + Title -->
@@ -120,7 +120,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Sidebar toggle button -->
         <button
           type="button"
-          class="block rounded-xl bg-white/60 backdrop-blur-sm p-2.5 hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 lg:hidden transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
+          class="block rounded-xl bg-card/60 backdrop-blur-sm p-2.5 hover:bg-card/80 hover:text-primary lg:hidden transition-all duration-300 shadow-sm border border-border"
           data-sidebar-toggle
           @click="themeStore.toggleSidebar()"
         >
@@ -130,7 +130,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Page title/breadcrumb -->
         <div class="hidden sm:block">
           <div class="flex items-center space-x-3">
-            <div class="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 shadow-lg">
+            <div class="rounded-xl bg-gradient-to-br from-primary to-primary/80 p-2.5 shadow-lg">
               <BarChart3 v-if="title === 'Dashboard'" class="h-6 w-6 text-white" />
               <Shield v-else-if="title?.includes('SSL')" class="h-6 w-6 text-white" />
               <Users v-else-if="title?.includes('Team')" class="h-6 w-6 text-white" />
@@ -138,10 +138,10 @@ document.addEventListener('click', handleDocumentClick)
               <BarChart3 v-else class="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+              <h1 class="text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
                 {{ title || 'Dashboard' }}
               </h1>
-              <p class="text-sm text-blue-600 dark:text-blue-300 font-medium">
+              <p class="text-sm text-primary font-medium">
                 SSL Monitor v4
                 <span v-if="title === 'Dashboard'">• Overview</span>
                 <span v-else-if="title?.includes('SSL')">• Certificate Management</span>
@@ -160,7 +160,7 @@ document.addEventListener('click', handleDocumentClick)
         <div class="dropdown relative">
           <button
             type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-blue-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-blue-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-card/60 backdrop-blur-sm hover:bg-card/80 hover:text-primary transition-all duration-300 shadow-sm border border-border"
             @click="showSearch = !showSearch"
           >
             <Search class="h-4 w-4" />
@@ -168,14 +168,14 @@ document.addEventListener('click', handleDocumentClick)
 
           <div
             v-show="showSearch"
-            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg p-4 shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
+            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-card/90 backdrop-blur-lg p-4 shadow-xl border border-border"
           >
             <div class="relative">
-              <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" />
+              <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" />
               <input
                 type="text"
                 placeholder="Search certificates, monitors..."
-                class="w-full rounded-xl border border-blue-200 dark:border-blue-700 py-3 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 dark:bg-gray-800 dark:text-white bg-white/80"
+                class="w-full rounded-xl border border-border py-3 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 bg-background text-foreground"
               />
             </div>
           </div>
@@ -184,7 +184,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Theme toggle -->
         <button
           type="button"
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-amber-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-amber-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:text-amber-600 dark:bg-background/10 dark:hover:bg-background/20 dark:hover:text-amber-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
           @click="themeStore.toggleTheme(themeStore.theme === 'dark' ? 'light' : 'dark')"
         >
           <Sun v-if="themeStore.resolvedTheme === 'dark'" class="h-4 w-4" />
@@ -194,7 +194,7 @@ document.addEventListener('click', handleDocumentClick)
         <!-- Theme customizer toggle -->
         <button
           type="button"
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-purple-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-purple-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:text-purple-600 dark:bg-background/10 dark:hover:bg-background/20 dark:hover:text-purple-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
           data-test="theme-customizer-toggle"
           @click="toggleCustomizer"
         >
@@ -205,7 +205,7 @@ document.addEventListener('click', handleDocumentClick)
         <div class="dropdown relative">
           <button
             type="button"
-            class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm hover:bg-white/80 hover:text-red-600 dark:bg-white/10 dark:hover:bg-white/20 dark:hover:text-red-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
+            class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-background/60 backdrop-blur-sm hover:bg-background/80 hover:text-destructive dark:bg-background/10 dark:hover:bg-background/20 dark:hover:text-red-400 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10"
             @click="showNotifications = !showNotifications"
           >
             <Bell class="h-4 w-4" />
@@ -217,17 +217,17 @@ document.addEventListener('click', handleDocumentClick)
 
           <div
             v-show="showNotifications"
-            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
+            class="absolute top-12 right-0 z-50 w-80 rounded-xl bg-card/90 backdrop-blur-lg shadow-xl border border-border"
           >
-            <div class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl">
-              <h3 class="font-bold text-blue-900 dark:text-blue-100">Notifications</h3>
+            <div class="border-b border-border p-4 bg-primary/5 rounded-t-xl">
+              <h3 class="font-bold text-foreground">Notifications</h3>
             </div>
 
             <div class="max-h-64 overflow-y-auto">
               <div
                 v-for="notification in notifications"
                 :key="notification.id"
-                class="border-b border-gray-100/60 dark:border-gray-700/60 p-4 hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300"
+                class="border-b border-border p-4 hover:bg-muted/50 transition-all duration-300"
               >
                 <div class="flex items-start space-x-3">
                   <div
@@ -239,13 +239,13 @@ document.addEventListener('click', handleDocumentClick)
                     }"
                   />
                   <div class="flex-1">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p class="text-sm font-semibold text-foreground">
                       {{ notification.title }}
                     </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    <p class="text-sm text-muted-foreground mt-1">
                       {{ notification.message }}
                     </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">
+                    <p class="text-xs text-muted-foreground mt-1 font-medium">
                       {{ notification.time }}
                     </p>
                   </div>
@@ -253,8 +253,8 @@ document.addEventListener('click', handleDocumentClick)
               </div>
             </div>
 
-            <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-b-xl">
-              <Link href="/notifications" class="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+            <div class="p-4 bg-primary/5 rounded-b-xl">
+              <Link href="/notifications" class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
                 View all notifications →
               </Link>
             </div>
@@ -265,31 +265,31 @@ document.addEventListener('click', handleDocumentClick)
         <div class="dropdown relative">
           <button
             type="button"
-            class="flex items-center space-x-3 rounded-xl p-2.5 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-sm border border-white/40 dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/20"
+            class="flex items-center space-x-3 rounded-xl p-2.5 bg-card/60 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 shadow-sm border border-border"
             @click="showUserMenu = !showUserMenu"
           >
-            <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
               <User class="h-5 w-5 text-white" />
             </div>
             <div class="hidden sm:block text-left">
-              <p class="text-sm font-bold text-gray-900 dark:text-white">{{ user?.name }}</p>
-              <p class="text-xs text-blue-600 dark:text-blue-300">{{ user?.primary_role || 'User' }}</p>
+              <p class="text-sm font-bold text-foreground">{{ user?.name }}</p>
+              <p class="text-xs text-primary">{{ user?.primary_role || 'User' }}</p>
             </div>
-            <ChevronDown class="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            <ChevronDown class="h-4 w-4 text-muted-foreground" />
           </button>
 
           <div
             v-show="showUserMenu"
-            class="absolute top-12 right-0 z-50 w-64 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
+            class="absolute top-12 right-0 z-50 w-64 rounded-xl bg-card/90 backdrop-blur-lg shadow-xl border border-border"
           >
-            <div class="border-b border-blue-100 dark:border-blue-800 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-t-xl">
+            <div class="border-b border-border p-4 bg-primary/5 rounded-t-xl">
               <div class="flex items-center space-x-3">
-                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                   <User class="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p class="text-sm font-bold text-blue-900 dark:text-blue-100">{{ user?.name }}</p>
-                  <p class="text-xs text-blue-600 dark:text-blue-300">{{ user?.email }}</p>
+                  <p class="text-sm font-bold text-foreground">{{ user?.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ user?.email }}</p>
                 </div>
               </div>
             </div>
@@ -297,21 +297,21 @@ document.addEventListener('click', handleDocumentClick)
             <div class="py-2">
               <Link
                 href="/settings/profile"
-                class="flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
+                class="flex items-center space-x-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-all duration-300"
               >
-                <div class="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
-                  <Settings class="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div class="rounded-lg bg-accent/20 p-2">
+                  <Settings class="h-4 w-4 text-accent" />
                 </div>
                 <span>Profile Settings</span>
               </Link>
 
               <button
                 type="button"
-                class="flex w-full items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
+                class="flex w-full items-center space-x-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-all duration-300"
                 @click="logout"
               >
-                <div class="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
-                  <LogOut class="h-4 w-4 text-red-600 dark:text-red-400" />
+                <div class="rounded-lg bg-destructive/20 p-2">
+                  <LogOut class="h-4 w-4 text-destructive" />
                 </div>
                 <span>Sign out</span>
               </button>
@@ -325,7 +325,7 @@ document.addEventListener('click', handleDocumentClick)
     <!-- Horizontal Navigation Menu (shown only in horizontal mode) -->
     <div
       v-if="themeStore.menu === 'horizontal'"
-      class="horizontal-menu border-t border-blue-200 dark:border-blue-800 bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20 px-6 py-2 backdrop-blur-sm"
+      class="horizontal-menu border-t border-border bg-gradient-to-r from-background via-primary/5 to-accent/5 px-6 py-2 backdrop-blur-sm"
     >
       <nav class="flex space-x-6">
         <div
@@ -343,14 +343,14 @@ document.addEventListener('click', handleDocumentClick)
           <!-- Dropdown menu -->
           <div
             v-if="item.children && !item.disabled && activeHorizontalDropdown === item.key"
-            class="absolute top-full left-0 z-50 mt-2 w-56 rounded-xl bg-white/90 backdrop-blur-lg shadow-xl border border-white/60 dark:bg-gray-900/90 dark:border-gray-700"
+            class="absolute top-full left-0 z-50 mt-2 w-56 rounded-xl bg-card/90 backdrop-blur-lg shadow-xl border border-border"
           >
             <div class="py-2">
               <Link
                 v-for="child in item.children"
                 :key="child.title"
                 :href="child.href"
-                class="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 dark:text-gray-300 dark:hover:bg-white/5 transition-all duration-300"
+                class="block px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-all duration-300"
               >
                 {{ child.title }}
               </Link>

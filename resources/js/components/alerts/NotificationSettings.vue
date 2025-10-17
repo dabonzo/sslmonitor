@@ -6,7 +6,7 @@
           <Bell class="h-5 w-5 text-green-600 dark:text-green-400" />
         </div>
         <div>
-          <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">
+          <CardTitle class="text-xl font-bold text-foreground dark:text-foreground">
             Notification Settings
           </CardTitle>
           <CardDescription>
@@ -19,14 +19,14 @@
     <CardContent class="space-y-6">
       <!-- Email Notifications -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
-          <Mail class="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground flex items-center">
+          <Mail class="h-4 w-4 mr-2 text-primary dark:text-blue-400" />
           Email Notifications
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Email Address</label>
             <input
               v-model="notificationSettings.email.address"
               type="email"
@@ -36,7 +36,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Email Frequency</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Email Frequency</label>
             <select
               v-model="notificationSettings.email.frequency"
               class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -54,7 +54,7 @@
             :checked="notificationSettings.email.enabled"
             @update:checked="notificationSettings.email.enabled = $event"
           />
-          <label class="text-sm text-gray-700 dark:text-gray-300">
+          <label class="text-sm text-foreground dark:text-muted-foreground">
             Enable email notifications
           </label>
         </div>
@@ -62,16 +62,16 @@
 
       <!-- Slack Integration -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground flex items-center">
           <MessageSquare class="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
           Slack Integration
         </h3>
 
-        <div v-if="!notificationSettings.slack.connected" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+        <div v-if="!notificationSettings.slack.connected" class="p-4 bg-muted dark:bg-card rounded-lg border">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Connect Slack Workspace</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Receive alerts directly in your Slack channels</p>
+              <p class="font-medium text-foreground dark:text-foreground">Connect Slack Workspace</p>
+              <p class="text-sm text-foreground dark:text-muted-foreground">Receive alerts directly in your Slack channels</p>
             </div>
             <Button @click="connectSlack" class="flex items-center space-x-2">
               <MessageSquare class="h-4 w-4" />
@@ -95,7 +95,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Slack Channel</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Slack Channel</label>
             <input
               v-model="notificationSettings.slack.channel"
               type="text"
@@ -109,7 +109,7 @@
               :checked="notificationSettings.slack.enabled"
               @update:checked="notificationSettings.slack.enabled = $event"
             />
-            <label class="text-sm text-gray-700 dark:text-gray-300">
+            <label class="text-sm text-foreground dark:text-muted-foreground">
               Enable Slack notifications
             </label>
           </div>
@@ -118,14 +118,14 @@
 
       <!-- Webhook Notifications -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground flex items-center">
           <Webhook class="h-4 w-4 mr-2 text-orange-600 dark:text-orange-400" />
           Webhook Integration
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Webhook URL</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Webhook URL</label>
             <input
               v-model="notificationSettings.webhook.url"
               type="url"
@@ -135,7 +135,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">HTTP Method</label>
+            <label class="text-sm font-medium text-foreground dark:text-muted-foreground">HTTP Method</label>
             <select
               v-model="notificationSettings.webhook.method"
               class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -148,7 +148,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Custom Headers (JSON)</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Custom Headers (JSON)</label>
           <textarea
             v-model="notificationSettings.webhook.headers"
             rows="3"
@@ -163,7 +163,7 @@
               :checked="notificationSettings.webhook.enabled"
               @update:checked="notificationSettings.webhook.enabled = $event"
             />
-            <label class="text-sm text-gray-700 dark:text-gray-300">
+            <label class="text-sm text-foreground dark:text-muted-foreground">
               Enable webhook notifications
             </label>
           </div>
@@ -177,7 +177,7 @@
 
       <!-- Dashboard Notifications -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+        <h3 class="text-lg font-semibold text-foreground dark:text-foreground flex items-center">
           <Monitor class="h-4 w-4 mr-2 text-indigo-600 dark:text-indigo-400" />
           Dashboard Notifications
         </h3>
@@ -185,8 +185,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex items-center justify-between p-3 border rounded-lg">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Browser Notifications</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Show browser push notifications</p>
+              <p class="font-medium text-foreground dark:text-foreground">Browser Notifications</p>
+              <p class="text-sm text-foreground dark:text-muted-foreground">Show browser push notifications</p>
             </div>
             <Checkbox
               :checked="notificationSettings.dashboard.browser_notifications"
@@ -196,8 +196,8 @@
 
           <div class="flex items-center justify-between p-3 border rounded-lg">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Sound Alerts</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Play sound for critical alerts</p>
+              <p class="font-medium text-foreground dark:text-foreground">Sound Alerts</p>
+              <p class="text-sm text-foreground dark:text-muted-foreground">Play sound for critical alerts</p>
             </div>
             <Checkbox
               :checked="notificationSettings.dashboard.sound_alerts"
@@ -207,8 +207,8 @@
 
           <div class="flex items-center justify-between p-3 border rounded-lg">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Desktop Badges</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Show alert count on browser tab</p>
+              <p class="font-medium text-foreground dark:text-foreground">Desktop Badges</p>
+              <p class="text-sm text-foreground dark:text-muted-foreground">Show alert count on browser tab</p>
             </div>
             <Checkbox
               :checked="notificationSettings.dashboard.desktop_badges"
@@ -218,8 +218,8 @@
 
           <div class="flex items-center justify-between p-3 border rounded-lg">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Auto-refresh</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Automatically refresh alert data</p>
+              <p class="font-medium text-foreground dark:text-foreground">Auto-refresh</p>
+              <p class="text-sm text-foreground dark:text-muted-foreground">Automatically refresh alert data</p>
             </div>
             <Checkbox
               :checked="notificationSettings.dashboard.auto_refresh"
@@ -229,7 +229,7 @@
         </div>
 
         <div v-if="notificationSettings.dashboard.auto_refresh" class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Refresh Interval</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Refresh Interval</label>
           <select
             v-model="notificationSettings.dashboard.refresh_interval"
             class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"

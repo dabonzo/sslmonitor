@@ -175,7 +175,7 @@ const handleClick = async () => {
         iconClasses,
         checkState.isChecking ? 'animate-spin' : '',
         checkState.status === 'completed' ? 'text-green-600' : '',
-        checkState.status === 'error' || checkState.status === 'timeout' ? 'text-red-600' : ''
+        checkState.status === 'error' || checkState.status === 'timeout' ? 'text-destructive' : ''
       ]"
     />
     {{ buttonText }}
@@ -195,7 +195,7 @@ const handleClick = async () => {
   <!-- Error message -->
   <div
     v-if="checkState.error && (checkState.status === 'error' || checkState.status === 'timeout')"
-    class="mt-1 text-xs text-red-600"
+    class="mt-1 text-xs text-destructive"
   >
     {{ checkState.error }}
   </div>

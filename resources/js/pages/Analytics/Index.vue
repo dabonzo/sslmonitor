@@ -3,10 +3,10 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-muted-foreground">
             Analytics & Insights
           </h2>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-1 text-sm text-foreground dark:text-muted-foreground">
             Comprehensive SSL certificate performance and security analytics
           </p>
         </div>
@@ -26,7 +26,7 @@
 
     <div class="space-y-8">
       <!-- Analytics Navigation Tabs -->
-      <div class="border-b border-gray-200 dark:border-gray-700">
+      <div class="border-b border-border dark:border-border">
         <nav class="-mb-px flex space-x-8">
           <button
             v-for="tab in analyticsTabs"
@@ -35,8 +35,8 @@
             :class="[
               'py-2 px-1 border-b-2 font-medium text-sm',
               activeTab === tab.id
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                ? 'border-blue-500 text-primary dark:text-blue-400'
+                : 'border-transparent text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-gray-300 hover:border-border dark:hover:border-border'
             ]"
           >
             <component :is="tab.icon" class="h-4 w-4 mr-2 inline" />
@@ -83,38 +83,38 @@
                       <component :is="template.icon" class="h-5 w-5" :class="template.iconColor" />
                     </div>
                     <div class="flex-1">
-                      <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ template.name }}</h3>
-                      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ template.description }}</p>
+                      <h3 class="font-medium text-foreground dark:text-foreground">{{ template.name }}</h3>
+                      <p class="text-sm text-foreground dark:text-muted-foreground mt-1">{{ template.description }}</p>
                       <div class="flex items-center space-x-4 mt-3">
                         <Button size="sm" @click="generateReport(template)">
                           Generate
                         </Button>
-                        <span class="text-xs text-gray-500 dark:text-gray-500">{{ template.frequency }}</span>
+                        <span class="text-xs text-muted-foreground dark:text-muted-foreground">{{ template.frequency }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Custom Report Builder -->
-                <div class="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 transition-colors cursor-pointer" @click="openReportBuilder">
+                <div class="p-4 border-2 border-dashed border-border dark:border-border rounded-lg hover:border-blue-500 transition-colors cursor-pointer" @click="openReportBuilder">
                   <div class="text-center">
-                    <Plus class="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <h3 class="font-medium text-gray-900 dark:text-gray-100">Create Custom Report</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Build your own analytics report</p>
+                    <Plus class="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <h3 class="font-medium text-foreground dark:text-foreground">Create Custom Report</h3>
+                    <p class="text-sm text-foreground dark:text-muted-foreground mt-1">Build your own analytics report</p>
                   </div>
                 </div>
               </div>
 
               <!-- Recent Reports -->
               <div class="mt-8">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Reports</h3>
+                <h3 class="text-lg font-medium text-foreground dark:text-foreground mb-4">Recent Reports</h3>
                 <div class="space-y-3">
                   <div v-for="report in recentReports" :key="report.id" class="flex items-center justify-between p-3 border rounded-lg">
                     <div class="flex items-center space-x-3">
-                      <component :is="getReportIcon(report.type)" class="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                      <component :is="getReportIcon(report.type)" class="h-4 w-4 text-foreground dark:text-muted-foreground" />
                       <div>
-                        <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ report.name }}</h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ report.generatedAt }}</p>
+                        <h4 class="font-medium text-foreground dark:text-foreground">{{ report.name }}</h4>
+                        <p class="text-sm text-foreground dark:text-muted-foreground">{{ report.generatedAt }}</p>
                       </div>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -212,7 +212,7 @@ const reportTemplates = ref<ReportTemplate[]>([
     frequency: 'Weekly',
     icon: Award,
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400',
+    iconColor: 'text-primary dark:text-blue-400',
     type: 'ssl_summary'
   },
   {
@@ -232,7 +232,7 @@ const reportTemplates = ref<ReportTemplate[]>([
     frequency: 'Monthly',
     icon: Shield,
     iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400',
+    iconColor: 'text-destructive dark:text-red-400',
     type: 'security_audit'
   },
   {
@@ -388,8 +388,8 @@ const handleReportCreate = (reportConfig: any) => {
     description: 'Custom generated report',
     frequency: 'Custom',
     icon: FileText,
-    iconBg: 'bg-gray-100',
-    iconColor: 'text-gray-600',
+    iconBg: 'bg-muted',
+    iconColor: 'text-foreground',
     type: 'custom'
   });
 };

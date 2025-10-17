@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Clock class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Clock class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Schedule Report
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Set up automated report generation
             </div>
           </div>
@@ -19,7 +19,7 @@
 
       <div class="space-y-4 py-4">
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Name</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Report Name</label>
           <input
             v-model="scheduleConfig.name"
             type="text"
@@ -29,7 +29,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Description</label>
           <textarea
             v-model="scheduleConfig.description"
             rows="2"
@@ -39,7 +39,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Frequency</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Frequency</label>
           <select
             v-model="scheduleConfig.frequency"
             class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -52,7 +52,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Next Run</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Next Run</label>
           <input
             v-model="scheduleConfig.nextRun"
             type="datetime-local"

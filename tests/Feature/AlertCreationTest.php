@@ -15,6 +15,11 @@ class AlertCreationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // Ensure no existing alerts of this type exist (they might be auto-created)
+        AlertConfiguration::where('user_id', $user->id)
+            ->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY)
+            ->delete();
+
         $response = $this->actingAs($user)->post('/settings/alerts', [
             'alert_type' => AlertConfiguration::ALERT_SSL_EXPIRY,
             'alert_level' => AlertConfiguration::LEVEL_WARNING,
@@ -37,6 +42,11 @@ class AlertCreationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // Ensure no existing alerts of this type exist (they might be auto-created)
+        AlertConfiguration::where('user_id', $user->id)
+            ->where('alert_type', AlertConfiguration::ALERT_RESPONSE_TIME)
+            ->delete();
+
         $response = $this->actingAs($user)->post('/settings/alerts', [
             'alert_type' => AlertConfiguration::ALERT_RESPONSE_TIME,
             'alert_level' => AlertConfiguration::LEVEL_CRITICAL,
@@ -58,6 +68,11 @@ class AlertCreationTest extends TestCase
     public function test_can_create_alert_with_threshold_days_only()
     {
         $user = User::factory()->create();
+
+        // Ensure no existing alerts of this type exist (they might be auto-created)
+        AlertConfiguration::where('user_id', $user->id)
+            ->where('alert_type', AlertConfiguration::ALERT_SSL_EXPIRY)
+            ->delete();
 
         $response = $this->actingAs($user)->post('/settings/alerts', [
             'alert_type' => AlertConfiguration::ALERT_SSL_EXPIRY,

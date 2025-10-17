@@ -4,13 +4,13 @@
       <DialogHeader>
         <DialogTitle class="flex items-center space-x-3">
           <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-            <Bookmark class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <Bookmark class="h-5 w-5 text-primary dark:text-blue-400" />
           </div>
           <div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="text-xl font-bold text-foreground dark:text-foreground">
               Create Operation Template
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div class="text-sm text-foreground dark:text-muted-foreground mt-1">
               Save this configuration for future use
             </div>
           </div>
@@ -19,7 +19,7 @@
 
       <div class="space-y-4 py-4">
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Template Name</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Template Name</label>
           <input
             v-model="templateData.name"
             type="text"
@@ -29,7 +29,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Description</label>
           <textarea
             v-model="templateData.description"
             rows="2"
@@ -39,9 +39,9 @@
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Operations Included</label>
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+          <label class="text-sm font-medium text-foreground dark:text-muted-foreground">Operations Included</label>
+          <div class="p-3 bg-muted dark:bg-card rounded-lg">
+            <div class="text-sm text-foreground dark:text-muted-foreground">
               {{ operations.length }} operation{{ operations.length !== 1 ? 's' : '' }} selected
             </div>
           </div>
@@ -53,7 +53,7 @@
               :checked="templateData.includeNotifications"
               @update:checked="templateData.includeNotifications = $event"
             />
-            <label class="text-sm text-gray-700 dark:text-gray-300">
+            <label class="text-sm text-foreground dark:text-muted-foreground">
               Include notification settings
             </label>
           </div>

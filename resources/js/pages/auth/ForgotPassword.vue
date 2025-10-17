@@ -26,8 +26,8 @@ defineProps<{
         <Form v-bind="PasswordResetLinkController.store.form()" v-slot="{ errors, processing }" class="space-y-5 dark:text-white">
             <!-- Email field -->
             <div>
-                <Label for="email" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
-                <div class="relative text-slate-500 dark:text-slate-400">
+                <Label for="email" class="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground">Email</Label>
+                <div class="relative text-muted-foreground dark:text-muted-foreground">
                     <Input
                         id="email"
                         type="email"
@@ -36,7 +36,7 @@ defineProps<{
                         autofocus
                         autocomplete="email"
                         placeholder="Enter Email"
-                        class="form-input ps-10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        class="form-input ps-10 placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     />
                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                         <Mail class="h-[18px] w-[18px]" />
@@ -48,7 +48,7 @@ defineProps<{
             <!-- Reset button -->
             <Button
                 type="submit"
-                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                class="btn-gradient !mt-6 w-full border-0 py-3 text-sm font-semibold uppercase tracking-wide shadow-blue-600/30"
                 :disabled="processing"
                 data-test="email-password-reset-link-button"
             >
@@ -57,7 +57,7 @@ defineProps<{
             </Button>
 
             <!-- Back to login link -->
-            <div class="text-center text-slate-600 dark:text-slate-400">
+            <div class="text-center text-foreground dark:text-muted-foreground">
                 Remember your password?
                 <TextLink :href="login()" class="font-semibold uppercase text-primary underline transition hover:text-black dark:hover:text-white">
                     SIGN IN

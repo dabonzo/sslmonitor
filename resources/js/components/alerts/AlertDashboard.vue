@@ -6,12 +6,12 @@
         <CardContent class="p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-red-600 dark:text-red-400">Critical Alerts</p>
+              <p class="text-sm font-medium text-destructive dark:text-red-400">Critical Alerts</p>
               <p class="text-3xl font-bold text-red-700 dark:text-red-300">{{ alertStats.critical }}</p>
               <p class="text-xs text-red-500 dark:text-red-400 mt-1">Last 24 hours</p>
             </div>
             <div class="rounded-lg bg-red-500/10 p-3">
-              <AlertTriangle class="h-8 w-8 text-red-600 dark:text-red-400" />
+              <AlertTriangle class="h-8 w-8 text-destructive dark:text-red-400" />
             </div>
           </div>
         </CardContent>
@@ -69,10 +69,10 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-              <Activity class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Activity class="h-5 w-5 text-primary dark:text-blue-400" />
             </div>
             <div>
-              <CardTitle class="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <CardTitle class="text-xl font-bold text-foreground dark:text-foreground">
                 Real-time Alert Feed
               </CardTitle>
               <CardDescription>
@@ -83,7 +83,7 @@
           <div class="flex items-center space-x-2">
             <div class="flex items-center space-x-1">
               <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span class="text-sm text-gray-600 dark:text-gray-400">Live</span>
+              <span class="text-sm text-foreground dark:text-muted-foreground">Live</span>
             </div>
             <Button @click="clearAllAlerts" variant="outline" size="sm">
               <Trash2 class="h-4 w-4 mr-2" />
@@ -97,8 +97,8 @@
         <!-- Alert Filters -->
         <div class="flex flex-wrap items-center gap-3 mb-6">
           <div class="flex items-center space-x-2">
-            <Filter class="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</span>
+            <Filter class="h-4 w-4 text-foreground dark:text-muted-foreground" />
+            <span class="text-sm font-medium text-foreground dark:text-muted-foreground">Filter by:</span>
           </div>
           <Button
             v-for="filter in alertFilters"
@@ -134,31 +134,31 @@
                 <!-- Alert Content -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center space-x-2 mb-1">
-                    <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ alert.title }}</h4>
+                    <h4 class="font-semibold text-foreground dark:text-foreground">{{ alert.title }}</h4>
                     <Badge :variant="getSeverityVariant(alert.severity)" class="text-xs">
                       {{ alert.severity.toUpperCase() }}
                     </Badge>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                    <span class="text-xs text-muted-foreground dark:text-muted-foreground">
                       {{ formatAlertTime(alert.created_at) }}
                     </span>
                   </div>
 
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <p class="text-sm text-foreground dark:text-muted-foreground mb-2">
                     {{ alert.message }}
                   </p>
 
                   <div class="flex flex-wrap items-center gap-2 text-xs">
                     <div class="flex items-center space-x-1">
-                      <Globe class="h-3 w-3 text-gray-400" />
-                      <span class="text-gray-600 dark:text-gray-400">{{ alert.website_name }}</span>
+                      <Globe class="h-3 w-3 text-muted-foreground" />
+                      <span class="text-foreground dark:text-muted-foreground">{{ alert.website_name }}</span>
                     </div>
                     <div v-if="alert.rule_name" class="flex items-center space-x-1">
-                      <Settings class="h-3 w-3 text-gray-400" />
-                      <span class="text-gray-600 dark:text-gray-400">{{ alert.rule_name }}</span>
+                      <Settings class="h-3 w-3 text-muted-foreground" />
+                      <span class="text-foreground dark:text-muted-foreground">{{ alert.rule_name }}</span>
                     </div>
                     <div class="flex items-center space-x-1">
-                      <Clock class="h-3 w-3 text-gray-400" />
-                      <span class="text-gray-600 dark:text-gray-400">{{ alert.created_at }}</span>
+                      <Clock class="h-3 w-3 text-muted-foreground" />
+                      <span class="text-foreground dark:text-muted-foreground">{{ alert.created_at }}</span>
                     </div>
                   </div>
                 </div>
@@ -197,7 +197,7 @@
                       Create Rule
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="dismissAlert(alert)" class="text-red-600 dark:text-red-400">
+                    <DropdownMenuItem @click="dismissAlert(alert)" class="text-destructive dark:text-red-400">
                       <Trash2 class="h-4 w-4 mr-2" />
                       Dismiss
                     </DropdownMenuItem>
@@ -209,18 +209,18 @@
             <!-- Expanded Details -->
             <div v-if="alert.expanded" class="mt-4 pt-4 border-t space-y-3">
               <div v-if="alert.details">
-                <h5 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Alert Details</h5>
+                <h5 class="font-medium text-foreground dark:text-foreground mb-2">Alert Details</h5>
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div v-for="(value, key) in alert.details" :key="key">
-                    <span class="text-gray-600 dark:text-gray-400">{{ formatDetailKey(key) }}:</span>
+                    <span class="text-foreground dark:text-muted-foreground">{{ formatDetailKey(key) }}:</span>
                     <span class="ml-2 font-medium">{{ value }}</span>
                   </div>
                 </div>
               </div>
 
               <div v-if="alert.suggested_actions && alert.suggested_actions.length > 0">
-                <h5 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Suggested Actions</h5>
-                <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <h5 class="font-medium text-foreground dark:text-foreground mb-2">Suggested Actions</h5>
+                <ul class="list-disc list-inside space-y-1 text-sm text-foreground dark:text-muted-foreground">
                   <li v-for="action in alert.suggested_actions" :key="action">{{ action }}</li>
                 </ul>
               </div>
@@ -229,12 +229,12 @@
 
           <!-- Empty State -->
           <div v-if="filteredAlerts.length === 0" class="text-center py-12">
-            <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-8">
-              <component :is="getEmptyStateIcon()" class="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <div class="rounded-lg bg-muted dark:bg-card p-8">
+              <component :is="getEmptyStateIcon()" class="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-foreground dark:text-foreground mb-2">
                 {{ getEmptyStateTitle() }}
               </h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
+              <p class="text-sm text-foreground dark:text-muted-foreground">
                 {{ getEmptyStateMessage() }}
               </p>
             </div>
@@ -453,20 +453,20 @@ const getAlertCardClass = (severity: string): string => {
     case 'warning':
       return `${baseClasses} border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/10`;
     default:
-      return `${baseClasses} border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800`;
+      return `${baseClasses} border-border dark:border-border bg-background dark:bg-gray-800`;
   }
 };
 
 const getAlertIconClass = (severity: string): string => {
   switch (severity) {
     case 'critical':
-      return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+      return 'bg-red-100 dark:bg-red-900/30 text-destructive dark:text-red-400';
     case 'high':
       return 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400';
     case 'warning':
       return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400';
     default:
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+      return 'bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400';
   }
 };
 

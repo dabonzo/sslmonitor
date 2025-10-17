@@ -169,15 +169,15 @@ test('immediate check job updates website last checked timestamp', function () {
         ->shouldReceive('analyzeWebsite')
         ->andReturn(['status' => 'valid', 'expires_at' => now()->addDays(30)]);
 
-    // Add a tiny delay to ensure timestamp difference (much shorter than sleep)
-    usleep(100000); // 0.1 seconds
+    // Travel forward in time to ensure timestamp difference
+    $this->travel(2)->seconds();
 
     $job = new ImmediateWebsiteCheckJob($this->website);
     app()->call([$job, 'handle']);
 
     $this->website->refresh();
 
-    // The updated_at should be different from the original
+    // The updated_at should be different from the original (at least 2 seconds later)
     expect($this->website->updated_at->format('Y-m-d H:i:s'))
         ->not->toBe($originalTimestamp->format('Y-m-d H:i:s'));
 });

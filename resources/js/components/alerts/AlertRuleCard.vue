@@ -4,7 +4,7 @@
       <!-- Rule Info -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center space-x-3 mb-2">
-          <h4 class="font-semibold text-gray-900 dark:text-gray-100 truncate">
+          <h4 class="font-semibold text-foreground dark:text-foreground truncate">
             {{ rule.name }}
           </h4>
           <Badge :variant="priorityVariant" class="flex-shrink-0">
@@ -16,12 +16,12 @@
         </div>
 
         <!-- Rule Summary -->
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+        <p class="text-sm text-foreground dark:text-muted-foreground mb-3 line-clamp-2">
           {{ ruleSummary }}
         </p>
 
         <!-- Rule Metrics -->
-        <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <div class="flex flex-wrap items-center gap-4 text-xs text-muted-foreground dark:text-muted-foreground">
           <div class="flex items-center space-x-1">
             <component :is="LogicIcon" class="h-3 w-3" />
             <span>{{ rule.logic_operator.toUpperCase() }} logic</span>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Last Triggered -->
-        <div v-if="rule.last_triggered" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <div v-if="rule.last_triggered" class="mt-2 text-xs text-muted-foreground dark:text-muted-foreground">
           Last triggered: {{ formatLastTriggered(rule.last_triggered) }}
         </div>
       </div>
@@ -93,7 +93,7 @@
               Duplicate
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem @click="$emit('delete', rule.id)" class="text-red-600 dark:text-red-400">
+            <DropdownMenuItem @click="$emit('delete', rule.id)" class="text-destructive dark:text-red-400">
               <Trash2 class="h-4 w-4 mr-2" />
               Delete Rule
             </DropdownMenuItem>
@@ -108,14 +108,14 @@
         <div class="mt-4 pt-4 border-t space-y-4">
           <!-- Conditions Detail -->
           <div>
-            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h5 class="text-sm font-medium text-foreground dark:text-foreground mb-2">
               Rule Conditions ({{ rule.logic_operator.toUpperCase() }} logic)
             </h5>
             <div class="space-y-2">
               <div
                 v-for="(condition, index) in rule.conditions"
                 :key="index"
-                class="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono"
+                class="p-2 bg-muted dark:bg-card rounded text-sm font-mono"
               >
                 {{ getConditionText(condition) }}
               </div>
@@ -124,12 +124,12 @@
 
           <!-- Notification Settings -->
           <div>
-            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h5 class="text-sm font-medium text-foreground dark:text-foreground mb-2">
               Notification Settings
             </h5>
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span class="text-gray-600 dark:text-gray-400">Channels:</span>
+                <span class="text-foreground dark:text-muted-foreground">Channels:</span>
                 <div class="flex flex-wrap gap-1 mt-1">
                   <Badge
                     v-for="channel in rule.notification_channels"
@@ -142,10 +142,10 @@
                 </div>
               </div>
               <div>
-                <div class="text-gray-600 dark:text-gray-400">
+                <div class="text-foreground dark:text-muted-foreground">
                   Cooldown: <span class="font-medium">{{ getCooldownText(rule.cooldown_minutes) }}</span>
                 </div>
-                <div class="text-gray-600 dark:text-gray-400">
+                <div class="text-foreground dark:text-muted-foreground">
                   Max per day: <span class="font-medium">{{ rule.max_alerts_per_day }}</span>
                 </div>
               </div>
@@ -154,20 +154,20 @@
 
           <!-- Custom Message -->
           <div v-if="rule.message_template">
-            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h5 class="text-sm font-medium text-foreground dark:text-foreground mb-2">
               Custom Message Template
             </h5>
-            <div class="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+            <div class="p-2 bg-muted dark:bg-card rounded text-sm">
               {{ rule.message_template }}
             </div>
           </div>
 
           <!-- Website Scope -->
           <div v-if="rule.website_scope !== 'all'">
-            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            <h5 class="text-sm font-medium text-foreground dark:text-foreground mb-2">
               Website Scope
             </h5>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
+            <div class="text-sm text-foreground dark:text-muted-foreground">
               {{ getWebsiteScopeDescription() }}
             </div>
           </div>
@@ -245,10 +245,10 @@ const emit = defineEmits<{
 const showDetails = ref(false);
 
 const cardClass = computed(() => {
-  const baseClasses = 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+  const baseClasses = 'bg-background dark:bg-card border-border dark:border-border';
 
   if (!props.rule.enabled) {
-    return `${baseClasses} border-gray-300 dark:border-gray-600 opacity-75`;
+    return `${baseClasses} border-border dark:border-border opacity-75`;
   }
 
   switch (props.rule.priority) {

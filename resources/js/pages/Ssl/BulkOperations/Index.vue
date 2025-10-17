@@ -3,10 +3,10 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+          <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-muted-foreground">
             Bulk Certificate Operations
           </h2>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-1 text-sm text-foreground dark:text-muted-foreground">
             Manage multiple SSL certificates with advanced batch operations
           </p>
         </div>
@@ -44,8 +44,8 @@
                   <component :is="quickAction.icon" class="h-5 w-5" :class="quickAction.iconColor" />
                 </div>
                 <div>
-                  <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ quickAction.name }}</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ quickAction.description }}</p>
+                  <h3 class="font-medium text-foreground dark:text-foreground">{{ quickAction.name }}</h3>
+                  <p class="text-sm text-foreground dark:text-muted-foreground">{{ quickAction.description }}</p>
                 </div>
               </div>
             </div>
@@ -67,7 +67,7 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div v-if="activeOperations.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-if="activeOperations.length === 0" class="text-center py-8 text-muted-foreground dark:text-muted-foreground">
             <Activity class="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p class="font-medium">No active operations</p>
             <p class="text-sm mt-1">All bulk operations have completed</p>
@@ -76,10 +76,10 @@
             <div v-for="operation in activeOperations" :key="operation.id" class="p-4 border rounded-lg">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center space-x-3">
-                  <component :is="getOperationIcon(operation.type)" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <component :is="getOperationIcon(operation.type)" class="h-5 w-5 text-primary dark:text-blue-400" />
                   <div>
-                    <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ operation.name }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ operation.description }}</p>
+                    <h4 class="font-medium text-foreground dark:text-foreground">{{ operation.name }}</h4>
+                    <p class="text-sm text-foreground dark:text-muted-foreground">{{ operation.description }}</p>
                   </div>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -96,18 +96,18 @@
               <!-- Progress Section -->
               <div class="space-y-2">
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600 dark:text-gray-400">Progress</span>
-                  <span class="text-gray-900 dark:text-gray-100">
+                  <span class="text-foreground dark:text-muted-foreground">Progress</span>
+                  <span class="text-foreground dark:text-foreground">
                     {{ operation.progress.current }} / {{ operation.progress.total }}
                   </span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="w-full bg-muted dark:bg-muted rounded-full h-2">
                   <div
                     class="bg-blue-600 h-2 rounded-full transition-all duration-500"
                     :style="{ width: `${(operation.progress.current / operation.progress.total) * 100}%` }"
                   ></div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-500">
+                <div class="text-xs text-muted-foreground dark:text-muted-foreground">
                   ETA: {{ operation.eta }} | Rate: {{ operation.rate }}/min
                 </div>
               </div>
@@ -154,22 +154,22 @@
             <table class="w-full text-sm">
               <thead class="border-b border-border">
                 <tr class="text-left">
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Operation</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Status</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Websites</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Duration</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Completed</th>
-                  <th class="py-2 font-medium text-gray-900 dark:text-gray-100">Actions</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Operation</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Status</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Websites</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Duration</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Completed</th>
+                  <th class="py-2 font-medium text-foreground dark:text-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-border">
-                <tr v-for="operation in filteredHistory" :key="operation.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr v-for="operation in filteredHistory" :key="operation.id" class="hover:bg-muted dark:hover:bg-gray-800">
                   <td class="py-3">
                     <div class="flex items-center space-x-2">
                       <component :is="getOperationIcon(operation.type)" class="h-4 w-4" :class="getStatusIconColor(operation.status)" />
                       <div>
-                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ operation.name }}</div>
-                        <div class="text-xs text-gray-600 dark:text-gray-400">{{ operation.type }}</div>
+                        <div class="font-medium text-foreground dark:text-foreground">{{ operation.name }}</div>
+                        <div class="text-xs text-foreground dark:text-muted-foreground">{{ operation.type }}</div>
                       </div>
                     </div>
                   </td>
@@ -178,9 +178,9 @@
                       {{ operation.status }}
                     </Badge>
                   </td>
-                  <td class="py-3 text-gray-700 dark:text-gray-300">{{ operation.websiteCount }}</td>
-                  <td class="py-3 text-gray-700 dark:text-gray-300">{{ operation.duration }}</td>
-                  <td class="py-3 text-gray-700 dark:text-gray-300">{{ formatRelativeTime(operation.completedAt) }}</td>
+                  <td class="py-3 text-foreground dark:text-muted-foreground">{{ operation.websiteCount }}</td>
+                  <td class="py-3 text-foreground dark:text-muted-foreground">{{ operation.duration }}</td>
+                  <td class="py-3 text-foreground dark:text-muted-foreground">{{ formatRelativeTime(operation.completedAt) }}</td>
                   <td class="py-3">
                     <div class="flex space-x-2">
                       <Button @click="viewOperationDetails(operation)" size="sm" variant="outline">
@@ -293,7 +293,7 @@ const quickActions: QuickAction[] = [
     description: 'Verify SSL status for all websites',
     icon: Shield,
     iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-    iconColor: 'text-blue-600 dark:text-blue-400',
+    iconColor: 'text-primary dark:text-blue-400',
     type: 'certificate_check'
   },
   {
@@ -302,7 +302,7 @@ const quickActions: QuickAction[] = [
     description: 'Run vulnerability scan on all sites',
     icon: AlertTriangle,
     iconBg: 'bg-red-100 dark:bg-red-900/30',
-    iconColor: 'text-red-600 dark:text-red-400',
+    iconColor: 'text-destructive dark:text-red-400',
     type: 'security_scan'
   },
   {
@@ -399,13 +399,13 @@ const getOperationIcon = (type: string) => {
 const getStatusIconColor = (status: string): string => {
   switch (status) {
     case 'running':
-      return 'text-blue-600 dark:text-blue-400';
+      return 'text-primary dark:text-blue-400';
     case 'completed':
       return 'text-green-600 dark:text-green-400';
     case 'failed':
-      return 'text-red-600 dark:text-red-400';
+      return 'text-destructive dark:text-red-400';
     case 'cancelled':
-      return 'text-gray-600 dark:text-gray-400';
+      return 'text-foreground dark:text-muted-foreground';
     default:
       return 'text-yellow-600 dark:text-yellow-400';
   }

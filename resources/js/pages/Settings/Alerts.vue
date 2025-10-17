@@ -136,7 +136,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
             <Card class="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                 <div class="p-6">
                     <div class="flex items-start gap-3">
-                        <Info class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                        <Info class="h-5 w-5 text-primary dark:text-blue-400 mt-0.5" />
                         <div class="text-sm text-blue-800 dark:text-blue-200">
                             <h3 class="font-medium mb-1">Template Settings</h3>
                             <p class="text-blue-700 dark:text-blue-300">
@@ -226,7 +226,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
                                     >
                                         <span
                                             :class="[
-                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                'inline-block h-4 w-4 transform rounded-full bg-background transition-transform duration-200',
                                                 alert.enabled ? 'translate-x-6' : 'translate-x-1'
                                             ]"
                                         />
@@ -243,7 +243,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
                 <div class="p-6">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-9 h-9 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <Zap class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <Zap class="h-4 w-4 text-primary dark:text-blue-400" />
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-foreground">
@@ -300,7 +300,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
                                 <div class="flex items-center gap-2">
                                     <span :class="[
                                         'text-sm font-medium',
-                                        alert.enabled ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+                                        alert.enabled ? 'text-primary dark:text-blue-400' : 'text-muted-foreground'
                                     ]">
                                         {{ alert.enabled ? 'On' : 'Off' }}
                                     </span>
@@ -316,7 +316,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
                                     >
                                         <span
                                             :class="[
-                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                'inline-block h-4 w-4 transform rounded-full bg-background transition-transform duration-200',
                                                 alert.enabled ? 'translate-x-6' : 'translate-x-1'
                                             ]"
                                         />
@@ -406,7 +406,7 @@ const toggleGlobalAlert = (alertType: string, thresholdDays: number | null, curr
                                     >
                                         <span
                                             :class="[
-                                                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200',
+                                                'inline-block h-4 w-4 transform rounded-full bg-background transition-transform duration-200',
                                                 alert.enabled ? 'translate-x-6' : 'translate-x-1'
                                             ]"
                                         />
