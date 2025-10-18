@@ -125,7 +125,9 @@ class TestUserSeeder extends Seeder
         }
 
         // Create default alert configurations for the user
-        // Note: These will be supplemented by AlertService::createDefaultAlerts() when websites are created
+        // Note: Alert configurations are now created automatically when the user is created
+        // Keeping this code commented for future reference if manual configuration is needed
+        /*
         $alertConfigurations = [
             [
                 'user_id' => $user->id,
@@ -146,6 +148,7 @@ class TestUserSeeder extends Seeder
                 $alertData
             );
         }
+        */
 
         $this->command->info('Created test user: bonzo@konjscina.com (password: to16ro12)');
         $this->command->info('Created team: Development Team');
@@ -154,6 +157,5 @@ class TestUserSeeder extends Seeder
         $this->command->info('- https://www.redgas.at (valid, expires in 7 days) [TEAM]');
         $this->command->info('- https://www.fairnando.at (invalid/expired) [PERSONAL]');
         $this->command->info('- https://www.gebrauchte.at (valid, expires in 30 days) [PERSONAL]');
-        $this->command->info('Created alert configurations: SSL Expiry (7 days) + Website Down');
     }
 }
