@@ -5,19 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWebsiteRequest;
 use App\Http\Requests\UpdateWebsiteRequest;
 use App\Jobs\ImmediateWebsiteCheckJob;
+use App\Models\Monitor;
 use App\Models\Website;
-use App\Models\SslCertificate;
-use App\Models\SslCheck;
 use App\Services\MonitorIntegrationService;
 use App\Services\SslCertificateAnalysisService;
 use App\Support\AutomationLogger;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Monitor;
 
 class WebsiteController extends Controller
 {
@@ -31,13 +29,13 @@ class WebsiteController extends Controller
         $userTeamIds = cache()->remember(
             "user_team_ids_{$user->id}",
             now()->addMinutes(10),
-            fn() => $user->teams()->pluck('teams.id')
+            fn () => $user->teams()->pluck('teams.id')
         );
 
         // Query websites owned personally OR assigned to user's teams
         $query = Website::where(function ($q) use ($user, $userTeamIds) {
             $q->where('user_id', $user->id) // Personal websites
-              ->orWhereIn('team_id', $userTeamIds); // Team websites
+                ->orWhereIn('team_id', $userTeamIds); // Team websites
         });
 
         // Search functionality
@@ -45,7 +43,7 @@ class WebsiteController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('url', 'like', "%{$search}%");
+                    ->orWhere('url', 'like', "%{$search}%");
             });
         }
 
@@ -70,16 +68,16 @@ class WebsiteController extends Controller
                 $query->whereIn('monitors.uptime_status', ['down', 'slow', 'content_mismatch']);
             } elseif ($filter === 'expiring_soon') {
                 $query->whereNotNull('monitors.certificate_expiration_date')
-                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 30')
-                      ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) >= 0');
+                    ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 30')
+                    ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) >= 0');
             } elseif ($filter === 'critical') {
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     $q->where('monitors.certificate_status', 'expired')
-                      ->orWhere('monitors.uptime_status', 'down')
-                      ->orWhere(function($subQ) {
-                          $subQ->whereNotNull('monitors.certificate_expiration_date')
-                               ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 3');
-                      });
+                        ->orWhere('monitors.uptime_status', 'down')
+                        ->orWhere(function ($subQ) {
+                            $subQ->whereNotNull('monitors.certificate_expiration_date')
+                                ->whereRaw('DATEDIFF(monitors.certificate_expiration_date, NOW()) <= 3');
+                        });
                 });
             }
 
@@ -93,8 +91,8 @@ class WebsiteController extends Controller
         $websiteUrls = $websites->pluck('url')->toArray();
         $monitors = Monitor::whereIn('url', $websiteUrls)
             ->select(['url', 'certificate_status', 'certificate_expiration_date', 'certificate_issuer',
-                     'uptime_status', 'uptime_last_check_date', 'uptime_check_failure_reason',
-                     'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at'])
+                'uptime_status', 'uptime_last_check_date', 'uptime_check_failure_reason',
+                'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at'])
             ->get()
             ->keyBy('url');
 
@@ -131,7 +129,7 @@ class WebsiteController extends Controller
                 $sslData = [
                     'status' => $monitor->certificate_status,
                     'expires_at' => $monitor->certificate_expiration_date,
-                    'days_remaining' => $daysRemaining ? (int)$daysRemaining : null,
+                    'days_remaining' => $daysRemaining ? (int) $daysRemaining : null,
                     'urgency_level' => $urgencyLevel,
                     'issuer' => $monitor->certificate_issuer,
                     'is_valid' => $monitor->certificate_status === 'valid',
@@ -148,7 +146,7 @@ class WebsiteController extends Controller
             $uptimeData = [
                 'status' => $uptimeStatus,
                 'response_time' => $responseTime,
-                'response_time_display' => $responseTime ? $responseTime . 'ms' : null,
+                'response_time_display' => $responseTime ? $responseTime.'ms' : null,
                 'last_checked' => $monitor?->uptime_last_check_date,
                 'failure_reason' => $monitor?->uptime_check_failure_reason,
                 'times_failed' => $monitor?->uptime_check_times_failed_in_a_row ?? 0,
@@ -175,7 +173,7 @@ class WebsiteController extends Controller
                 'ssl_status' => $sslStatus,
                 'uptime_status' => $uptimeStatus,
                 'overall_status' => $overallStatus,
-                'ssl_days_remaining' => $daysRemaining ? (int)$daysRemaining : null,
+                'ssl_days_remaining' => $daysRemaining ? (int) $daysRemaining : null,
                 'ssl_urgency_level' => $urgencyLevel,
                 'ssl_data' => $sslData,
                 'uptime_data' => $uptimeData,
@@ -208,11 +206,11 @@ class WebsiteController extends Controller
         ];
 
         // Calculate filter statistics with caching for better performance
-        $cacheKey = "filter_stats_user_{$user->id}_" . md5(implode(',', $userTeamIds->toArray()));
+        $cacheKey = "filter_stats_user_{$user->id}_".md5(implode(',', $userTeamIds->toArray()));
         $filterStats = cache()->remember($cacheKey, now()->addMinutes(5), function () use ($user, $userTeamIds) {
             $allWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
                 $q->where('user_id', $user->id) // Personal websites
-                  ->orWhereIn('team_id', $userTeamIds); // Team websites
+                    ->orWhereIn('team_id', $userTeamIds); // Team websites
             })->select(['id', 'url'])->get(); // Only select needed columns
 
             return $this->calculateFilterStatistics($allWebsites);
@@ -251,7 +249,7 @@ class WebsiteController extends Controller
     {
         $user = $request->user();
 
-        AutomationLogger::info("Creating new website", [
+        AutomationLogger::info('Creating new website', [
             'user_id' => $user->id,
             'url' => $request->validated('url'),
             'name' => $request->validated('name'),
@@ -269,7 +267,7 @@ class WebsiteController extends Controller
             'monitoring_config' => $request->validated('monitoring_config', []),
         ]);
 
-        AutomationLogger::info("Website created successfully", [
+        AutomationLogger::info('Website created successfully', [
             'website_id' => $website->id,
             'user_id' => $user->id,
             'url' => $website->url,
@@ -280,15 +278,15 @@ class WebsiteController extends Controller
         try {
             $monitor = $monitorService->createOrUpdateMonitorForWebsite($website);
 
-            AutomationLogger::info("Monitor created/updated for new website", [
+            AutomationLogger::info('Monitor created/updated for new website', [
                 'website_id' => $website->id,
                 'monitor_id' => $monitor->id,
-                'content_validation_enabled' => !empty($website->monitoring_config['content_expected_strings']) ||
-                                               !empty($website->monitoring_config['content_forbidden_strings']) ||
-                                               !empty($website->monitoring_config['content_regex_patterns']),
+                'content_validation_enabled' => ! empty($website->monitoring_config['content_expected_strings']) ||
+                                               ! empty($website->monitoring_config['content_forbidden_strings']) ||
+                                               ! empty($website->monitoring_config['content_regex_patterns']),
             ]);
         } catch (\Exception $e) {
-            AutomationLogger::error("Failed to create monitor for new website", [
+            AutomationLogger::error('Failed to create monitor for new website', [
                 'website_id' => $website->id,
                 'error' => $e->getMessage(),
             ]);
@@ -298,7 +296,7 @@ class WebsiteController extends Controller
         if ($request->validated('immediate_check', false)) {
             $dispatched = $this->dispatchImmediateCheck($website);
 
-            AutomationLogger::info("Immediate check requested for new website", [
+            AutomationLogger::info('Immediate check requested for new website', [
                 'website_id' => $website->id,
                 'dispatched' => $dispatched,
                 'user_id' => $user->id,
@@ -308,7 +306,7 @@ class WebsiteController extends Controller
         $message = "Website '{$website->name}' has been added successfully.";
 
         if ($request->validated('immediate_check', false)) {
-            $message .= " Initial checks are being performed in the background.";
+            $message .= ' Initial checks are being performed in the background.';
         }
 
         return redirect()
@@ -330,7 +328,7 @@ class WebsiteController extends Controller
                 ->onQueue(env('QUEUE_DEFAULT', 'default'));
 
             AutomationLogger::immediateCheck(
-                "Immediate check job dispatched successfully",
+                'Immediate check job dispatched successfully',
                 ['website_id' => $website->id, 'queue' => env('QUEUE_DEFAULT', 'default')]
             );
 
@@ -472,12 +470,12 @@ class WebsiteController extends Controller
 
             return redirect()
                 ->back()
-                ->with('success', implode(' and ', $messages) . ' for ' . $website->name);
+                ->with('success', implode(' and ', $messages).' for '.$website->name);
 
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Check failed: ' . $e->getMessage());
+                ->with('error', 'Check failed: '.$e->getMessage());
         }
     }
 
@@ -490,7 +488,7 @@ class WebsiteController extends Controller
 
         $user = $request->user();
 
-        AutomationLogger::info("API immediate check requested", [
+        AutomationLogger::info('API immediate check requested', [
             'website_id' => $website->id,
             'website_url' => $website->url,
             'user_id' => $user->id,
@@ -500,8 +498,8 @@ class WebsiteController extends Controller
 
         try {
             // Ensure at least one monitoring type is enabled
-            if (!$website->ssl_monitoring_enabled && !$website->uptime_monitoring_enabled) {
-                AutomationLogger::warning("Immediate check blocked - no monitoring enabled", [
+            if (! $website->ssl_monitoring_enabled && ! $website->uptime_monitoring_enabled) {
+                AutomationLogger::warning('Immediate check blocked - no monitoring enabled', [
                     'website_id' => $website->id,
                     'website_url' => $website->url,
                     'user_id' => $user->id,
@@ -516,8 +514,8 @@ class WebsiteController extends Controller
             // Dispatch the immediate check job
             $dispatched = $this->dispatchImmediateCheck($website);
 
-            if (!$dispatched) {
-                AutomationLogger::error("Failed to dispatch immediate check", [
+            if (! $dispatched) {
+                AutomationLogger::error('Failed to dispatch immediate check', [
                     'website_id' => $website->id,
                     'website_url' => $website->url,
                     'user_id' => $user->id,
@@ -529,7 +527,7 @@ class WebsiteController extends Controller
                 ], 500);
             }
 
-            AutomationLogger::info("API immediate check job dispatched successfully", [
+            AutomationLogger::info('API immediate check job dispatched successfully', [
                 'website_id' => $website->id,
                 'dispatched' => $dispatched,
                 'user_id' => $user->id,
@@ -545,14 +543,14 @@ class WebsiteController extends Controller
 
         } catch (\Exception $e) {
             AutomationLogger::error(
-                "Failed to trigger immediate check via API",
+                'Failed to trigger immediate check via API',
                 ['website_id' => $website->id, 'url' => $website->url, 'user_id' => $user->id],
                 $e
             );
 
             return response()->json([
                 'success' => false,
-                'message' => 'Immediate check failed: ' . $e->getMessage(),
+                'message' => 'Immediate check failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -566,7 +564,7 @@ class WebsiteController extends Controller
 
         $user = $request->user();
 
-        AutomationLogger::debug("Check status API requested", [
+        AutomationLogger::debug('Check status API requested', [
             'website_id' => $website->id,
             'website_url' => $website->url,
             'user_id' => $user->id,
@@ -589,7 +587,7 @@ class WebsiteController extends Controller
                 'checked_at' => now()->toISOString(),
             ];
 
-            AutomationLogger::debug("Check status API response", [
+            AutomationLogger::debug('Check status API response', [
                 'website_id' => $website->id,
                 'ssl_status' => $response['ssl_status'],
                 'uptime_status' => $response['uptime_status'],
@@ -601,14 +599,14 @@ class WebsiteController extends Controller
 
         } catch (\Exception $e) {
             AutomationLogger::error(
-                "Failed to get check status via API",
+                'Failed to get check status via API',
                 ['website_id' => $website->id, 'url' => $website->url, 'user_id' => $user->id],
                 $e
             );
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get check status: ' . $e->getMessage(),
+                'message' => 'Failed to get check status: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -647,7 +645,7 @@ class WebsiteController extends Controller
             ->whereIn('id', $websiteIds)
             ->where(function ($query) {
                 $query->where('ssl_monitoring_enabled', true)
-                      ->orWhere('uptime_monitoring_enabled', true);
+                    ->orWhere('uptime_monitoring_enabled', true);
             })
             ->get();
 
@@ -674,13 +672,19 @@ class WebsiteController extends Controller
         }
 
         $message = [];
-        if ($sslChecked > 0) $message[] = "{$sslChecked} SSL checks";
-        if ($uptimeChecked > 0) $message[] = "{$uptimeChecked} uptime checks";
-        if ($errors > 0) $message[] = "{$errors} errors";
+        if ($sslChecked > 0) {
+            $message[] = "{$sslChecked} SSL checks";
+        }
+        if ($uptimeChecked > 0) {
+            $message[] = "{$uptimeChecked} uptime checks";
+        }
+        if ($errors > 0) {
+            $message[] = "{$errors} errors";
+        }
 
         return redirect()
             ->route('ssl.websites.index')
-            ->with('success', "Completed: " . implode(', ', $message));
+            ->with('success', 'Completed: '.implode(', ', $message));
     }
 
     public function details(Website $website): \Illuminate\Http\JsonResponse
@@ -709,7 +713,7 @@ class WebsiteController extends Controller
             // SSL Information from Spatie monitor
             'ssl' => [
                 'status' => $monitor?->certificate_status ?? 'not yet checked',
-                'days_remaining' => $daysRemaining ? (int)$daysRemaining : null,
+                'days_remaining' => $daysRemaining ? (int) $daysRemaining : null,
                 'certificate' => $monitor && $monitor->certificate_status !== 'not yet checked' ? [
                     'issuer' => $monitor->certificate_issuer,
                     'subject' => null, // Not available in Spatie monitor
@@ -787,12 +791,12 @@ class WebsiteController extends Controller
         $team = \App\Models\Team::findOrFail($request->team_id);
 
         // Check if user is a member of the team with appropriate permissions
-        if (!$user->isMemberOf($team)) {
+        if (! $user->isMemberOf($team)) {
             abort(403, 'You are not a member of this team.');
         }
 
         $userRole = $user->getRoleInTeam($team);
-        if (!in_array($userRole, ['OWNER', 'ADMIN'])) {
+        if (! in_array($userRole, ['OWNER', 'ADMIN'])) {
             abort(403, 'You do not have permission to transfer websites to this team.');
         }
 
@@ -802,7 +806,7 @@ class WebsiteController extends Controller
             return redirect()->back()->with('success', "Website transferred to {$team->name} successfully!");
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to transfer website: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to transfer website: '.$e->getMessage());
         }
     }
 
@@ -816,12 +820,12 @@ class WebsiteController extends Controller
             $team = $website->team;
             $user = $request->user();
 
-            if (!$user->isMemberOf($team)) {
+            if (! $user->isMemberOf($team)) {
                 abort(403, 'You are not a member of this team.');
             }
 
             $userRole = $user->getRoleInTeam($team);
-            if (!in_array($userRole, ['OWNER', 'ADMIN'])) {
+            if (! in_array($userRole, ['OWNER', 'ADMIN'])) {
                 abort(403, 'You do not have permission to transfer team websites.');
             }
         } else {
@@ -834,7 +838,7 @@ class WebsiteController extends Controller
             return redirect()->back()->with('success', 'Website transferred to personal ownership successfully!');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to transfer website: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to transfer website: '.$e->getMessage());
         }
     }
 
@@ -959,12 +963,11 @@ class WebsiteController extends Controller
             $color = 'yellow';
         }
         // Check for success states
-        elseif ($sslStatus === 'valid' && ($uptimeStatus === 'up' || !$website->uptime_monitoring_enabled)) {
+        elseif ($sslStatus === 'valid' && ($uptimeStatus === 'up' || ! $website->uptime_monitoring_enabled)) {
             $status = 'success';
             $label = 'Healthy';
             $color = 'green';
-        }
-        elseif ($uptimeStatus === 'up' && (!$website->ssl_monitoring_enabled || $sslStatus === 'valid')) {
+        } elseif ($uptimeStatus === 'up' && (! $website->ssl_monitoring_enabled || $sslStatus === 'valid')) {
             $status = 'success';
             $label = 'Up';
             $color = 'green';
@@ -1004,7 +1007,7 @@ class WebsiteController extends Controller
             ->where('teams.id', $request->team_id)
             ->first();
 
-        if (!$team) {
+        if (! $team) {
             return redirect()->back()->with('error', 'You do not have permission to transfer websites to this team.');
         }
 
@@ -1047,7 +1050,7 @@ class WebsiteController extends Controller
         $websites = Website::whereIn('id', $request->website_ids)
             ->where(function ($q) use ($user, $userTeamIds) {
                 $q->where('user_id', $user->id) // User owns the website
-                  ->orWhereIn('team_id', $userTeamIds); // Or website is in user's team with permissions
+                    ->orWhereIn('team_id', $userTeamIds); // Or website is in user's team with permissions
             })
             ->whereNotNull('team_id')
             ->get();

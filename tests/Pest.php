@@ -32,7 +32,6 @@ pest()->extend(Tests\TestCase::class)
     })
     ->in('Feature');
 
-
 /*
 |--------------------------------------------------------------------------
 | Expectations
@@ -63,6 +62,7 @@ expect()->extend('toBeValidPluginStatus', function () {
 
 expect()->extend('toBeValidUrl', function () {
     $url = $this->value;
+
     return expect(filter_var($url, FILTER_VALIDATE_URL))->not->toBeFalse()
         ->and(parse_url($url, PHP_URL_SCHEME))->toBeIn(['http', 'https']);
 });
@@ -100,8 +100,8 @@ function createUserWithSslData(): \App\Models\User
     $website = \App\Models\Website::factory()->create(['user_id' => $user->id]);
 
     // Create Spatie monitor for SSL monitoring
-    $timestamp = time() . '-' . rand(1000, 9999);
-    $testUrl = 'https://test-user-' . $timestamp . '.example.com';
+    $timestamp = time().'-'.rand(1000, 9999);
+    $testUrl = 'https://test-user-'.$timestamp.'.example.com';
     $website->update(['url' => $testUrl]);
 
     \App\Models\Monitor::create([
@@ -116,14 +116,14 @@ function createUserWithSslData(): \App\Models\User
 /**
  * Create a test website with SSL certificate and checks
  */
-function createWebsiteWithSslData(\App\Models\User $user = null): \App\Models\Website
+function createWebsiteWithSslData(?\App\Models\User $user = null): \App\Models\Website
 {
     $user = $user ?? \App\Models\User::factory()->create();
     $website = \App\Models\Website::factory()->create(['user_id' => $user->id]);
 
     // Create Spatie monitor for SSL monitoring
-    $timestamp = time() . '-' . rand(1000, 9999);
-    $testUrl = 'https://test-website-' . $timestamp . '.example.com';
+    $timestamp = time().'-'.rand(1000, 9999);
+    $testUrl = 'https://test-website-'.$timestamp.'.example.com';
     $website->update(['url' => $testUrl]);
 
     \App\Models\Monitor::create([
@@ -138,7 +138,7 @@ function createWebsiteWithSslData(\App\Models\User $user = null): \App\Models\We
 /**
  * Create test plugin configuration
  */
-function createTestPlugin(\App\Models\User $user = null, string $type = 'agent'): \App\Models\PluginConfiguration
+function createTestPlugin(?\App\Models\User $user = null, string $type = 'agent'): \App\Models\PluginConfiguration
 {
     $user = $user ?? \App\Models\User::factory()->create();
 
@@ -157,11 +157,11 @@ function assertValidSslCheck(array $sslCheck): void
 {
     expect($sslCheck)->toHaveKeys([
         'status', 'checked_at', 'expires_at', 'issuer', 'subject',
-        'is_valid', 'days_until_expiry'
+        'is_valid', 'days_until_expiry',
     ])
-    ->and($sslCheck['status'])->toBeValidSslStatus()
-    ->and($sslCheck['checked_at'])->toBeInstanceOf(\Carbon\Carbon::class)
-    ->and($sslCheck['is_valid'])->toBeBoolean();
+        ->and($sslCheck['status'])->toBeValidSslStatus()
+        ->and($sslCheck['checked_at'])->toBeInstanceOf(\Carbon\Carbon::class)
+        ->and($sslCheck['is_valid'])->toBeBoolean();
 }
 
 /**
@@ -205,11 +205,11 @@ function mockSslCheckResult(string $status = 'valid', array $overrides = []): ar
 function createSslTestScenarios(\App\Models\User $user): array
 {
     $scenarios = [];
-    $timestamp = time() . '-' . rand(1000, 9999);
+    $timestamp = time().'-'.rand(1000, 9999);
 
     // Valid certificate
     $validWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    $validUrl = 'https://test-valid-' . $timestamp . '.example.com';
+    $validUrl = 'https://test-valid-'.$timestamp.'.example.com';
     $validWebsite->update(['url' => $validUrl]);
     \App\Models\Monitor::create([
         'url' => $validUrl,
@@ -221,7 +221,7 @@ function createSslTestScenarios(\App\Models\User $user): array
 
     // Expiring soon certificate
     $expiringSoonWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    $expiringSoonUrl = 'https://test-expiring-' . $timestamp . '.example.com';
+    $expiringSoonUrl = 'https://test-expiring-'.$timestamp.'.example.com';
     $expiringSoonWebsite->update(['url' => $expiringSoonUrl]);
     \App\Models\Monitor::create([
         'url' => $expiringSoonUrl,
@@ -233,7 +233,7 @@ function createSslTestScenarios(\App\Models\User $user): array
 
     // Expired certificate
     $expiredWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    $expiredUrl = 'https://test-expired-' . $timestamp . '.example.com';
+    $expiredUrl = 'https://test-expired-'.$timestamp.'.example.com';
     $expiredWebsite->update(['url' => $expiredUrl]);
     \App\Models\Monitor::create([
         'url' => $expiredUrl,
@@ -245,7 +245,7 @@ function createSslTestScenarios(\App\Models\User $user): array
 
     // Invalid certificate
     $invalidWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    $invalidUrl = 'https://test-invalid-' . $timestamp . '.example.com';
+    $invalidUrl = 'https://test-invalid-'.$timestamp.'.example.com';
     $invalidWebsite->update(['url' => $invalidUrl]);
     \App\Models\Monitor::create([
         'url' => $invalidUrl,
@@ -256,7 +256,7 @@ function createSslTestScenarios(\App\Models\User $user): array
 
     // Error case
     $errorWebsite = \App\Models\Website::factory()->create(['user_id' => $user->id]);
-    $errorUrl = 'https://test-error-' . $timestamp . '.example.com';
+    $errorUrl = 'https://test-error-'.$timestamp.'.example.com';
     $errorWebsite->update(['url' => $errorUrl]);
     \App\Models\Monitor::create([
         'url' => $errorUrl,
@@ -482,7 +482,7 @@ function setupTestData(): array
                 \App\Models\AlertConfiguration::updateOrCreate(
                     [
                         'user_id' => $alertData['user_id'],
-                        'alert_type' => $alertData['alert_type']
+                        'alert_type' => $alertData['alert_type'],
                     ],
                     $alertData
                 );
@@ -514,9 +514,9 @@ dataset('real_websites', [
     'omp' => ['https://omp.office-manager-pro.com'],
 ]);
 
-dataset('real_user', fn() => \App\Models\User::where('email', 'bonzo@konjscina.com')->first());
+dataset('real_user', fn () => \App\Models\User::where('email', 'bonzo@konjscina.com')->first());
 
-dataset('real_team', fn() => \App\Models\Team::where('name', 'Intermedien')->first());
+dataset('real_team', fn () => \App\Models\Team::where('name', 'Intermedien')->first());
 
 dataset('ssl_statuses', [
     'valid' => ['valid'],

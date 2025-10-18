@@ -20,7 +20,7 @@ class MonitorFactory extends Factory
         $counter++;
 
         return [
-            'url' => 'https://example' . $counter . '.com',
+            'url' => 'https://example'.$counter.'.com',
             'uptime_check_enabled' => true,
             'certificate_check_enabled' => true,
             'uptime_status' => 'up',

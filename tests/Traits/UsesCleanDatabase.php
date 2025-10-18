@@ -2,15 +2,16 @@
 
 namespace Tests\Traits;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
 use App\Models\Website;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 trait UsesCleanDatabase
 {
     use RefreshDatabase;
 
     protected User $testUser;
+
     protected $realWebsites;
 
     protected function setUpCleanDatabase(): void

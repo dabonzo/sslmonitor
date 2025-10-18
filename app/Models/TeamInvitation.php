@@ -73,7 +73,7 @@ class TeamInvitation extends Model
      */
     public function isValid(): bool
     {
-        return !$this->isExpired() && !$this->isAccepted();
+        return ! $this->isExpired() && ! $this->isAccepted();
     }
 
     /**
@@ -97,7 +97,7 @@ class TeamInvitation extends Model
      */
     public function accept(User $user): TeamMember
     {
-        if (!$this->isValid()) {
+        if (! $this->isValid()) {
             throw new \Exception('Invitation is no longer valid');
         }
 

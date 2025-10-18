@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use PragmaRX\Google2FA\Google2FA;
-use BaconQrCode\Renderer\ImageRenderer;
+use App\Models\User;
 use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthService
 {
@@ -16,7 +16,7 @@ class TwoFactorAuthService
 
     public function __construct()
     {
-        $this->google2fa = new Google2FA();
+        $this->google2fa = new Google2FA;
     }
 
     /**
@@ -49,7 +49,7 @@ class TwoFactorAuthService
         $writer = new Writer(
             new ImageRenderer(
                 new RendererStyle(200),
-                new ImagickImageBackEnd()
+                new ImagickImageBackEnd
             )
         );
 
@@ -91,7 +91,7 @@ class TwoFactorAuthService
      */
     public function hashRecoveryCodes(Collection $codes): array
     {
-        return $codes->map(fn($code) => bcrypt($code))->toArray();
+        return $codes->map(fn ($code) => bcrypt($code))->toArray();
     }
 
     /**
@@ -99,12 +99,12 @@ class TwoFactorAuthService
      */
     public function enableTwoFactorAuth(User $user, string $code): bool
     {
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             return false;
         }
 
         // Verify the code before enabling
-        if (!$this->verifyKey($user->two_factor_secret, $code)) {
+        if (! $this->verifyKey($user->two_factor_secret, $code)) {
             return false;
         }
 
@@ -138,7 +138,7 @@ class TwoFactorAuthService
      */
     public function isEnabled(User $user): bool
     {
-        return !is_null($user->two_factor_confirmed_at) && !is_null($user->two_factor_secret);
+        return ! is_null($user->two_factor_confirmed_at) && ! is_null($user->two_factor_secret);
     }
 
     /**
@@ -146,13 +146,13 @@ class TwoFactorAuthService
      */
     public function verifyRecoveryCode(User $user, string $code): bool
     {
-        if (!$user->two_factor_recovery_codes) {
+        if (! $user->two_factor_recovery_codes) {
             return false;
         }
 
         $recoveryCodes = json_decode($user->two_factor_recovery_codes, true);
 
-        if (!is_array($recoveryCodes)) {
+        if (! is_array($recoveryCodes)) {
             return false;
         }
 
@@ -163,8 +163,9 @@ class TwoFactorAuthService
                 // Remove used recovery code
                 unset($recoveryCodes[$index]);
                 $user->update([
-                    'two_factor_recovery_codes' => json_encode(array_values($recoveryCodes))
+                    'two_factor_recovery_codes' => json_encode(array_values($recoveryCodes)),
                 ]);
+
                 return true;
             }
         }
@@ -177,11 +178,12 @@ class TwoFactorAuthService
      */
     public function getRecoveryCodesCount(User $user): int
     {
-        if (!$user->two_factor_recovery_codes) {
+        if (! $user->two_factor_recovery_codes) {
             return 0;
         }
 
         $codes = json_decode($user->two_factor_recovery_codes, true);
+
         return is_array($codes) ? count($codes) : 0;
     }
 }

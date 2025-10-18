@@ -5,15 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\AlertConfiguration;
 use App\Models\Website;
 use App\Services\AlertService;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AlertConfigurationController extends Controller
 {
     use AuthorizesRequests;
+
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -100,7 +101,7 @@ class AlertConfigurationController extends Controller
                 'email_enabled' => true,
                 'slack_enabled' => false,
                 'webhook_enabled' => false,
-            ]
+            ],
         ]);
     }
 
@@ -117,7 +118,7 @@ class AlertConfigurationController extends Controller
                 'type' => $request->get('type', 'all'),
                 'level' => $request->get('level', 'all'),
                 'date_range' => $request->get('date_range', '7_days'),
-            ]
+            ],
         ]);
     }
 
@@ -149,7 +150,7 @@ class AlertConfigurationController extends Controller
         $alertService = app(AlertService::class);
         $website = $alertConfiguration->website;
 
-        if (!$website) {
+        if (! $website) {
             return redirect()
                 ->back()
                 ->with('error', 'Cannot test alert: website not found.');
@@ -176,7 +177,7 @@ class AlertConfigurationController extends Controller
         // Get one of the user's websites to use for test alerts
         $website = Website::where('user_id', $user->id)->first();
 
-        if (!$website) {
+        if (! $website) {
             return redirect()
                 ->back()
                 ->with('error', 'You need at least one website to test alerts.');
@@ -234,7 +235,7 @@ class AlertConfigurationController extends Controller
 
                 $sentCount++;
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Failed to send SSL test alert for level {$testLevel['level']}: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Failed to send SSL test alert for level {$testLevel['level']}: ".$e->getMessage());
             }
         }
 
@@ -247,7 +248,7 @@ class AlertConfigurationController extends Controller
                 'enabled' => true,
                 'alert_level' => AlertConfiguration::LEVEL_CRITICAL,
                 'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
-                'custom_message' => "This is a test uptime down alert.",
+                'custom_message' => 'This is a test uptime down alert.',
             ]);
 
             $uptimeDownData = [
@@ -263,7 +264,7 @@ class AlertConfigurationController extends Controller
 
             $sentCount++;
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send uptime down test alert: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to send uptime down test alert: '.$e->getMessage());
         }
 
         // Send Uptime Recovered test alert
@@ -275,7 +276,7 @@ class AlertConfigurationController extends Controller
                 'enabled' => true,
                 'alert_level' => AlertConfiguration::LEVEL_INFO,
                 'notification_channels' => [AlertConfiguration::CHANNEL_EMAIL],
-                'custom_message' => "This is a test uptime recovered alert.",
+                'custom_message' => 'This is a test uptime recovered alert.',
             ]);
 
             $uptimeRecoveredData = [
@@ -291,7 +292,7 @@ class AlertConfigurationController extends Controller
 
             $sentCount++;
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send uptime recovered test alert: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Failed to send uptime recovered test alert: '.$e->getMessage());
         }
 
         if ($sentCount > 0) {

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Psr\Http\Message\ResponseInterface;
 use Spatie\UptimeMonitor\Models\Monitor as SpatieMonitor;
 
@@ -121,7 +120,7 @@ class Monitor extends SpatieMonitor
     public function removeExpectedString(string $string): void
     {
         $strings = $this->content_expected_strings ?? [];
-        $this->content_expected_strings = array_values(array_filter($strings, fn($s) => $s !== $string));
+        $this->content_expected_strings = array_values(array_filter($strings, fn ($s) => $s !== $string));
     }
 
     /**
@@ -130,7 +129,7 @@ class Monitor extends SpatieMonitor
     public function removeForbiddenString(string $string): void
     {
         $strings = $this->content_forbidden_strings ?? [];
-        $this->content_forbidden_strings = array_values(array_filter($strings, fn($s) => $s !== $string));
+        $this->content_forbidden_strings = array_values(array_filter($strings, fn ($s) => $s !== $string));
     }
 
     /**
@@ -139,7 +138,6 @@ class Monitor extends SpatieMonitor
     public function removeRegexPattern(string $pattern): void
     {
         $patterns = $this->content_regex_patterns ?? [];
-        $this->content_regex_patterns = array_values(array_filter($patterns, fn($p) => $p !== $pattern));
+        $this->content_regex_patterns = array_values(array_filter($patterns, fn ($p) => $p !== $pattern));
     }
-
 }

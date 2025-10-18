@@ -1,8 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Services\TwoFactorAuthService;
-use Illuminate\Support\Facades\RateLimiter;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);

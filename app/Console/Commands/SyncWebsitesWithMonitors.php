@@ -31,7 +31,7 @@ class SyncWebsitesWithMonitors extends Command
         try {
             $result = $monitorService->syncAllWebsitesWithMonitors();
 
-            $this->info("Synchronization completed!");
+            $this->info('Synchronization completed!');
             $this->info("Total websites processed: {$result['total_websites']}");
             $this->info("Successfully synced: {$result['synced_count']}");
 
@@ -41,10 +41,10 @@ class SyncWebsitesWithMonitors extends Command
                 if ($this->option('verbose')) {
                     $this->table(
                         ['Website ID', 'URL', 'Error'],
-                        collect($result['errors'])->map(fn($error) => [
+                        collect($result['errors'])->map(fn ($error) => [
                             $error['website_id'],
                             $error['url'],
-                            $error['error']
+                            $error['error'],
                         ])->toArray()
                     );
                 }
@@ -53,10 +53,10 @@ class SyncWebsitesWithMonitors extends Command
             if ($this->option('verbose')) {
                 $this->table(
                     ['Website ID', 'Monitor ID', 'URL'],
-                    collect($result['synced'])->map(fn($sync) => [
+                    collect($result['synced'])->map(fn ($sync) => [
                         $sync['website_id'],
                         $sync['monitor_id'],
-                        $sync['url']
+                        $sync['url'],
                     ])->toArray()
                 );
             }

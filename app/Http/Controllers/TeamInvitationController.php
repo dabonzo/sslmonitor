@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\TeamInvitation;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class TeamInvitationController extends Controller
 {
@@ -22,7 +21,7 @@ class TeamInvitationController extends Controller
     {
         $invitation = TeamInvitation::findByToken($token);
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             return redirect('/')->with('error', 'This invitation is invalid or has expired.');
         }
 
@@ -53,14 +52,14 @@ class TeamInvitationController extends Controller
     {
         $invitation = TeamInvitation::findByToken($token);
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             return redirect('/')->with('error', 'This invitation is invalid or has expired.');
         }
 
         $user = Auth::user();
 
         // Check if user email matches invitation email
-        if (!$user || $user->email !== $invitation->email) {
+        if (! $user || $user->email !== $invitation->email) {
             return redirect()->back()->with('error', 'You must be logged in with the invited email address.');
         }
 
@@ -84,7 +83,7 @@ class TeamInvitationController extends Controller
     {
         $invitation = TeamInvitation::findByToken($token);
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             return redirect('/')->with('error', 'This invitation is invalid or has expired.');
         }
 
@@ -119,7 +118,7 @@ class TeamInvitationController extends Controller
                 ->with('success', "Welcome! You've successfully joined the {$invitation->team->name} team.");
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to create account: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create account: '.$e->getMessage());
         }
     }
 
@@ -130,7 +129,7 @@ class TeamInvitationController extends Controller
     {
         $invitation = TeamInvitation::findByToken($token);
 
-        if (!$invitation) {
+        if (! $invitation) {
             return redirect('/')->with('error', 'Invitation not found.');
         }
 

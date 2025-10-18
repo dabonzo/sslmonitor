@@ -73,8 +73,8 @@ function createDebugWebsite(\App\Models\User $user, array $overrides = []): \App
     ], $overrides));
 
     // Create corresponding monitor with real SSL data
-    $timestamp = time() . '-' . rand(1000, 9999);
-    $testUrl = 'https://debug-website-' . $timestamp . '.example.com';
+    $timestamp = time().'-'.rand(1000, 9999);
+    $testUrl = 'https://debug-website-'.$timestamp.'.example.com';
 
     $website->update(['url' => $testUrl]);
 
@@ -119,6 +119,7 @@ function isMailpitReady(): bool
 {
     try {
         $response = \Http::get('http://localhost:8025');
+
         return $response->successful();
     } catch (\Exception $e) {
         return false;
@@ -169,14 +170,14 @@ function assertMailpitEmailSent(string $subject, array $recipients = []): void
         }
 
         $emailRecipients = array_map('strtolower', $email['To'] ?? []);
-        $recipientMatch = !empty(array_intersect($emailRecipients, array_map('strtolower', $recipients)));
+        $recipientMatch = ! empty(array_intersect($emailRecipients, array_map('strtolower', $recipients)));
 
         return $subjectMatch && $recipientMatch;
     });
 
     expect($matchingEmails)->toHaveCountGreaterThan(0,
-        "Expected email with subject '{$subject}' to be sent to Mailpit, but found none. " .
-        "Available emails: " . json_encode(array_column($emails, 'Subject'))
+        "Expected email with subject '{$subject}' to be sent to Mailpit, but found none. ".
+        'Available emails: '.json_encode(array_column($emails, 'Subject'))
     );
 }
 

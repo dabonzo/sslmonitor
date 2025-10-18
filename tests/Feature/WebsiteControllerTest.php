@@ -32,7 +32,7 @@ test('website show page loads without sslCertificates relationship error', funct
     $user = User::factory()->create();
     $website = Website::factory()->create([
         'user_id' => $user->id,
-        'ssl_monitoring_enabled' => true
+        'ssl_monitoring_enabled' => true,
     ]);
 
     // Authenticate as the test user

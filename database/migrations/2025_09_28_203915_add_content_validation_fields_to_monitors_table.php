@@ -40,7 +40,7 @@ return new class extends Migration
                 'content_regex_patterns',
                 'javascript_enabled',
                 'javascript_wait_seconds',
-                'content_validation_failure_reason'
+                'content_validation_failure_reason',
             ]);
         });
     }

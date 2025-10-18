@@ -45,7 +45,7 @@ class PluginConfigurationFactory extends Factory
                 'cpu_performance_monitor',
                 'network_interface_monitor',
                 'ssl_certificate_scanner',
-            ]) . '_' . fake()->unique()->numberBetween(1000, 9999),
+            ]).'_'.fake()->unique()->numberBetween(1000, 9999),
             'configuration' => [
                 'collection_interval' => fake()->randomElement([60, 300, 600, 1800, 3600]),
                 'metrics_to_collect' => fake()->randomElements([
@@ -81,7 +81,7 @@ class PluginConfigurationFactory extends Factory
                 'microsoft_teams_webhook',
                 'custom_notification_webhook',
                 'pagerduty_integration',
-            ]) . '_' . fake()->unique()->numberBetween(1000, 9999),
+            ]).'_'.fake()->unique()->numberBetween(1000, 9999),
             'configuration' => [
                 'webhook_url' => fake()->url(),
                 'notification_events' => fake()->randomElements([
@@ -116,7 +116,7 @@ class PluginConfigurationFactory extends Factory
 
         return $this->state([
             'plugin_type' => 'external_service',
-            'plugin_name' => $serviceName . '_' . fake()->unique()->numberBetween(1000, 9999),
+            'plugin_name' => $serviceName.'_'.fake()->unique()->numberBetween(1000, 9999),
             'configuration' => [
                 'api_endpoint' => fake()->url(),
                 'data_format' => fake()->randomElement(['json', 'xml', 'prometheus', 'influxdb']),
@@ -127,7 +127,7 @@ class PluginConfigurationFactory extends Factory
             'endpoints' => [
                 'api_endpoint' => fake()->url(),
                 'auth_endpoint' => fake()->url(),
-                'metrics_endpoint' => fake()->url() . '/metrics',
+                'metrics_endpoint' => fake()->url().'/metrics',
             ],
         ]);
     }
@@ -221,7 +221,7 @@ class PluginConfigurationFactory extends Factory
             default => 'unknown_plugin',
         };
 
-        return $baseName . '_' . fake()->unique()->numberBetween(1000, 9999);
+        return $baseName.'_'.fake()->unique()->numberBetween(1000, 9999);
     }
 
     protected function generateConfiguration(string $pluginType): array
@@ -230,7 +230,7 @@ class PluginConfigurationFactory extends Factory
             'agent' => [
                 'collection_interval' => fake()->randomElement([60, 300, 600, 1800, 3600]),
                 'metrics_to_collect' => fake()->randomElements([
-                    'cpu_usage', 'memory_usage', 'disk_space', 'network_io'
+                    'cpu_usage', 'memory_usage', 'disk_space', 'network_io',
                 ], fake()->numberBetween(2, 4)),
                 'alert_thresholds' => [
                     'cpu_usage' => fake()->numberBetween(70, 90),
@@ -240,7 +240,7 @@ class PluginConfigurationFactory extends Factory
             'webhook' => [
                 'webhook_url' => fake()->url(),
                 'notification_events' => fake()->randomElements([
-                    'ssl_certificate_expiring', 'ssl_certificate_expired', 'website_down'
+                    'ssl_certificate_expiring', 'ssl_certificate_expired', 'website_down',
                 ], fake()->numberBetween(1, 3)),
                 'retry_attempts' => fake()->numberBetween(1, 5),
             ],

@@ -2,9 +2,9 @@
 
 namespace App\Services\UptimeMonitor;
 
+use App\Models\Monitor;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\Monitor;
 
 class JavaScriptContentFetcher
 {
@@ -15,6 +15,7 @@ class JavaScriptContentFetcher
         if ($this->serviceUrl === null) {
             $this->serviceUrl = config('browsershot.service_url', 'http://127.0.0.1:3000');
         }
+
         return $this->serviceUrl;
     }
 
@@ -36,7 +37,7 @@ class JavaScriptContentFetcher
 
             if (! $response->successful()) {
                 throw new \RuntimeException(
-                    $response->json('error') ?? 'HTTP service returned error: ' . $response->status()
+                    $response->json('error') ?? 'HTTP service returned error: '.$response->status()
                 );
             }
 
@@ -44,7 +45,7 @@ class JavaScriptContentFetcher
 
             // Save content to file for debugging
             try {
-                $filename = storage_path('logs/playwright-' . md5($url) . '.html');
+                $filename = storage_path('logs/playwright-'.md5($url).'.html');
                 file_put_contents($filename, $content);
                 try {
                     Log::info('JavaScript content fetched via HTTP service', [
@@ -108,7 +109,7 @@ class JavaScriptContentFetcher
     {
         try {
             // Try to create an instance to check if config is available
-            $fetcher = new self();
+            $fetcher = new self;
             $serviceUrl = $fetcher->getServiceUrl();
 
             $response = Http::timeout(5)->get("{$serviceUrl}/health");

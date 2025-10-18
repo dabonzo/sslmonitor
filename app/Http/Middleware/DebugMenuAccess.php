@@ -24,7 +24,7 @@ class DebugMenuAccess
         $user = $request->user();
 
         // User must be authenticated
-        if (!$user) {
+        if (! $user) {
             abort(403, 'Authentication required for debug access');
         }
 
@@ -35,7 +35,7 @@ class DebugMenuAccess
         $hasEmailAccess = in_array($user->email, $allowedUsers);
         $hasRoleAccess = in_array($user->primary_role, $allowedRoles);
 
-        if (!$hasEmailAccess && !$hasRoleAccess) {
+        if (! $hasEmailAccess && ! $hasRoleAccess) {
             abort(403, 'Access denied - insufficient debug privileges');
         }
 

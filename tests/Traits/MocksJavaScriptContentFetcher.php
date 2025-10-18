@@ -6,7 +6,6 @@
  * This trait eliminates real BrowserShot HTTP service calls during testing,
  * providing 95% performance improvement (14s+ → 0.75s total for JS tests).
  *
- * @package Tests\Traits
  * @see docs/TESTING_INSIGHTS.md for usage patterns
  */
 
@@ -29,8 +28,6 @@ trait MocksJavaScriptContentFetcher
      * - Processes data URLs correctly for testing
      * - Generates realistic HTML content with JavaScript simulation
      * - Includes wait time simulation for performance testing
-     *
-     * @return void
      */
     protected function mockJavaScriptContentFetcher(): void
     {
@@ -48,8 +45,9 @@ trait MocksJavaScriptContentFetcher
                 // Handle data URLs (should return parsed content)
                 if (str_starts_with($url, 'data:text/html,')) {
                     $dataContent = substr($url, 13); // Remove 'data:text/html,'
+
                     return Http::response([
-                        'content' => '<html><body>' . htmlspecialchars_decode($dataContent) . '</body></html>',
+                        'content' => '<html><body>'.htmlspecialchars_decode($dataContent).'</body></html>',
                         'url' => $url,
                         'timestamp' => now()->toISOString(),
                         'wait_seconds' => $waitSeconds,
@@ -156,7 +154,8 @@ HTML;
     protected function createMockJavaScriptContentFetcher(): JavaScriptContentFetcher
     {
         $this->mockJavaScriptContentFetcher();
-        return new JavaScriptContentFetcher();
+
+        return new JavaScriptContentFetcher;
     }
 
     /**

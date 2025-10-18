@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\TwoFactorAuthService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -22,7 +22,7 @@ class TwoFactorChallengeController extends Controller
      */
     public function create(Request $request): Response|RedirectResponse
     {
-        if (!$request->session()->has('login.id')) {
+        if (! $request->session()->has('login.id')) {
             return redirect()->route('login');
         }
 
@@ -34,7 +34,7 @@ class TwoFactorChallengeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (!$request->session()->has('login.id')) {
+        if (! $request->session()->has('login.id')) {
             return redirect()->route('login');
         }
 
@@ -64,7 +64,7 @@ class TwoFactorChallengeController extends Controller
             );
         }
 
-        if (!$authenticated) {
+        if (! $authenticated) {
             throw ValidationException::withMessages([
                 'code' => ['The provided two-factor authentication code was invalid.'],
             ]);

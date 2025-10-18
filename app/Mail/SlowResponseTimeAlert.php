@@ -21,8 +21,9 @@ class SlowResponseTimeAlert extends Mailable
     public function envelope(): Envelope
     {
         $level = $this->getResponseTimeLevel();
+
         return new Envelope(
-            subject: "[{$level}] Slow Response Time Alert - " . $this->website->name,
+            subject: "[{$level}] Slow Response Time Alert - ".$this->website->name,
         );
     }
 

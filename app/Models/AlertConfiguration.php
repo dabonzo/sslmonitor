@@ -34,20 +34,29 @@ class AlertConfiguration extends Model
 
     // Alert types
     public const ALERT_SSL_EXPIRY = 'ssl_expiry';
+
     public const ALERT_SSL_INVALID = 'ssl_invalid';
+
     public const ALERT_UPTIME_DOWN = 'uptime_down';
+
     public const ALERT_UPTIME_UP = 'uptime_up';
+
     public const ALERT_RESPONSE_TIME = 'response_time';
 
     // Alert levels (Let's Encrypt focused)
     public const LEVEL_INFO = 'info';           // 30 days
+
     public const LEVEL_WARNING = 'warning';     // 14 days
+
     public const LEVEL_URGENT = 'urgent';       // 7 days (Let's Encrypt focus)
+
     public const LEVEL_CRITICAL = 'critical';   // 3 days (Let's Encrypt critical)
 
     // Notification channels
     public const CHANNEL_EMAIL = 'email';
+
     public const CHANNEL_DASHBOARD = 'dashboard';
+
     public const CHANNEL_SLACK = 'slack';
 
     public function user(): BelongsTo
@@ -153,12 +162,12 @@ class AlertConfiguration extends Model
     public function shouldTrigger(array $checkData, bool $bypassCooldown = false, bool $bypassEnabledCheck = false): bool
     {
         // For debug testing, we can bypass the enabled check to test disabled alerts
-        if (!$bypassEnabledCheck && !$this->enabled) {
+        if (! $bypassEnabledCheck && ! $this->enabled) {
             return false;
         }
 
         // Hybrid alert logic: immediate critical alerts, daily warnings
-        if (!$bypassCooldown) {
+        if (! $bypassCooldown) {
             // Check if we should trigger based on alert urgency
             if ($this->isImmediateAlert($checkData)) {
                 // Critical alerts - no cooldown (expired SSL, uptime down)
@@ -171,7 +180,7 @@ class AlertConfiguration extends Model
             }
         }
 
-        return match($this->alert_type) {
+        return match ($this->alert_type) {
             self::ALERT_SSL_EXPIRY => $this->shouldTriggerSslExpiry($checkData),
             self::ALERT_SSL_INVALID => $this->shouldTriggerSslInvalid($checkData),
             self::ALERT_UPTIME_DOWN => $this->shouldTriggerUptimeDown($checkData),
@@ -200,6 +209,7 @@ class AlertConfiguration extends Model
     private function shouldTriggerSslInvalid(array $checkData): bool
     {
         $sslStatus = $checkData['ssl_status'] ?? '';
+
         // Only trigger for invalid certificates, not expired ones
         // Expired certificates are handled by SSL Expiry alerts
         return in_array($sslStatus, ['invalid', 'failed']);
@@ -208,6 +218,7 @@ class AlertConfiguration extends Model
     private function shouldTriggerUptimeDown(array $checkData): bool
     {
         $uptimeStatus = $checkData['uptime_status'] ?? '';
+
         return in_array($uptimeStatus, ['down', 'failed']);
     }
 
@@ -229,7 +240,7 @@ class AlertConfiguration extends Model
 
     public function getAlertLevelColor(): string
     {
-        return match($this->alert_level) {
+        return match ($this->alert_level) {
             self::LEVEL_CRITICAL => 'red',
             self::LEVEL_URGENT => 'orange',
             self::LEVEL_WARNING => 'yellow',
@@ -240,7 +251,7 @@ class AlertConfiguration extends Model
 
     public function getAlertTypeLabel(): string
     {
-        return match($this->alert_type) {
+        return match ($this->alert_type) {
             self::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
             self::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
             self::ALERT_UPTIME_DOWN => 'Website Down',
@@ -255,7 +266,7 @@ class AlertConfiguration extends Model
      */
     private function isImmediateAlert(array $checkData): bool
     {
-        return match($this->alert_type) {
+        return match ($this->alert_type) {
             self::ALERT_UPTIME_DOWN => true, // Always immediate
             self::ALERT_SSL_INVALID => true, // Always immediate
             self::ALERT_SSL_EXPIRY => $this->shouldTriggerSslExpiry($checkData) &&
@@ -270,7 +281,7 @@ class AlertConfiguration extends Model
      */
     private function alreadySentToday(): bool
     {
-        if (!$this->last_triggered_at) {
+        if (! $this->last_triggered_at) {
             return false;
         }
 

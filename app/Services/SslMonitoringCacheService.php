@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\Monitor;
 use App\Models\Website;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
-use App\Models\Monitor;
 
 class SslMonitoringCacheService
 {
     private const CACHE_TTL_SHORT = 300; // 5 minutes for frequently updated data
+
     private const CACHE_TTL_MEDIUM = 900; // 15 minutes for moderately updated data
+
     private const CACHE_TTL_LONG = 1800; // 30 minutes for rarely updated data
 
     /**
@@ -28,6 +30,7 @@ class SslMonitoringCacheService
     public function getCachedSslData(string $url): ?array
     {
         $key = $this->getSslDataCacheKey($url);
+
         return Cache::get($key);
     }
 
@@ -37,7 +40,7 @@ class SslMonitoringCacheService
     public function cacheMonitorsBulk(array $urls): array
     {
         sort($urls); // Sort for consistent cache keys
-        $cacheKey = 'monitors_bulk_' . md5(implode(',', $urls));
+        $cacheKey = 'monitors_bulk_'.md5(implode(',', $urls));
 
         // Use Redis tags for better cache management if available
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
@@ -65,7 +68,7 @@ class SslMonitoringCacheService
             ->select([
                 'url', 'certificate_status', 'certificate_expiration_date', 'certificate_issuer',
                 'uptime_status', 'uptime_last_check_date', 'uptime_check_failure_reason',
-                'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at'
+                'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at',
             ])
             ->get()
             ->keyBy('url');
@@ -77,6 +80,7 @@ class SslMonitoringCacheService
     public function cacheUserTeamIds(int $userId, \Closure $callback): \Illuminate\Support\Collection
     {
         $key = "user_team_ids_{$userId}";
+
         return Cache::remember($key, now()->addSeconds(self::CACHE_TTL_MEDIUM), $callback);
     }
 
@@ -86,7 +90,7 @@ class SslMonitoringCacheService
     public function cacheSslStatistics(array $websiteUrls, \Closure $callback): array
     {
         sort($websiteUrls); // Sort in place
-        $key = 'ssl_stats_' . md5(implode(',', $websiteUrls));
+        $key = 'ssl_stats_'.md5(implode(',', $websiteUrls));
 
         if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             return Cache::tags(['ssl_stats', 'dashboard_data'])->remember(
@@ -105,7 +109,8 @@ class SslMonitoringCacheService
     public function cacheFilterStatistics(int $userId, array $teamIds, \Closure $callback): array
     {
         sort($teamIds); // Sort in place
-        $key = "filter_stats_user_{$userId}_" . md5(implode(',', $teamIds));
+        $key = "filter_stats_user_{$userId}_".md5(implode(',', $teamIds));
+
         return Cache::remember($key, now()->addSeconds(self::CACHE_TTL_SHORT), $callback);
     }
 
@@ -115,7 +120,8 @@ class SslMonitoringCacheService
     public function cacheUptimeStatistics(array $websiteUrls, \Closure $callback): array
     {
         sort($websiteUrls); // Sort in place
-        $key = 'uptime_stats_' . md5(implode(',', $websiteUrls));
+        $key = 'uptime_stats_'.md5(implode(',', $websiteUrls));
+
         return Cache::remember($key, now()->addSeconds(self::CACHE_TTL_SHORT), $callback);
     }
 
@@ -125,6 +131,7 @@ class SslMonitoringCacheService
     public function cacheDashboardActivity(int $userId, string $type, \Closure $callback): array
     {
         $key = "dashboard_activity_{$type}_user_{$userId}";
+
         return Cache::remember($key, now()->addSeconds(self::CACHE_TTL_SHORT), $callback);
     }
 
@@ -144,7 +151,7 @@ class SslMonitoringCacheService
                 'uptime_stats_*',
                 'monitors_bulk_*',
                 'filter_stats_*',
-                'dashboard_activity_*'
+                'dashboard_activity_*',
             ];
 
             foreach ($patterns as $pattern) {
@@ -165,7 +172,7 @@ class SslMonitoringCacheService
         $patterns = [
             "user_team_ids_{$userId}",
             "filter_stats_user_{$userId}_*",
-            "dashboard_activity_*_user_{$userId}"
+            "dashboard_activity_*_user_{$userId}",
         ];
 
         foreach ($patterns as $pattern) {
@@ -189,7 +196,7 @@ class SslMonitoringCacheService
             'filter_stats_*',
             'dashboard_activity_*',
             'ssl_data_*',
-            'user_team_ids_*'
+            'user_team_ids_*',
         ];
 
         foreach ($patterns as $pattern) {
@@ -202,7 +209,7 @@ class SslMonitoringCacheService
      */
     public function warmupCacheForUsers(array $userIds): array
     {
-        if (!Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+        if (! Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             return ['status' => 'skipped', 'reason' => 'not_redis'];
         }
 
@@ -230,11 +237,12 @@ class SslMonitoringCacheService
      */
     public function bulkInvalidateWebsites(array $urls): void
     {
-        if (!Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+        if (! Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
             // Fallback for non-Redis
             foreach ($urls as $url) {
                 $this->invalidateWebsiteCache($url);
             }
+
             return;
         }
 
@@ -278,7 +286,7 @@ class SslMonitoringCacheService
 
     private function getSslDataCacheKey(string $url): string
     {
-        return 'ssl_data_' . md5($url);
+        return 'ssl_data_'.md5($url);
     }
 
     private function invalidateCacheByPattern(string $pattern): void
@@ -292,7 +300,7 @@ class SslMonitoringCacheService
             $keysToDelete = $redis->keys($searchPattern);
 
             // Delete keys in batches using Laravel's cache system
-            if (!empty($keysToDelete)) {
+            if (! empty($keysToDelete)) {
                 $this->deleteKeysInBatches($keysToDelete);
             }
         }
@@ -324,6 +332,6 @@ class SslMonitoringCacheService
     private function addCachePrefix(string $pattern): string
     {
         // Use simple wildcard pattern that works regardless of Redis prefix complexity
-        return '*' . $pattern;
+        return '*'.$pattern;
     }
 }

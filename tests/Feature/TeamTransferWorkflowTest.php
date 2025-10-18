@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Team;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\Team;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
@@ -56,16 +56,14 @@ describe('Dashboard Transfer Suggestions', function () {
         $response = $this->actingAs($this->testUser)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-            $page->has('transferSuggestions')
-                 ->where('transferSuggestions.personal_websites_count', 3)
-                 ->where('transferSuggestions.available_teams_count', 4) // Includes global test team
-                 ->where('transferSuggestions.should_show_suggestion', true)
-                 ->has('transferSuggestions.quick_transfer_teams.0', fn ($team) =>
-                     $team->where('id', $this->team->id)
-                          ->where('name', $this->team->name)
-                          ->etc()
-                 )
+        $response->assertInertia(fn ($page) => $page->has('transferSuggestions')
+            ->where('transferSuggestions.personal_websites_count', 3)
+            ->where('transferSuggestions.available_teams_count', 4) // Includes global test team
+            ->where('transferSuggestions.should_show_suggestion', true)
+            ->has('transferSuggestions.quick_transfer_teams.0', fn ($team) => $team->where('id', $this->team->id)
+                ->where('name', $this->team->name)
+                ->etc()
+            )
         );
     });
 
@@ -75,9 +73,8 @@ describe('Dashboard Transfer Suggestions', function () {
         $response = $this->actingAs($this->testUser)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-            $page->where('transferSuggestions.personal_websites_count', 2)
-                 ->where('transferSuggestions.should_show_suggestion', true)
+        $response->assertInertia(fn ($page) => $page->where('transferSuggestions.personal_websites_count', 2)
+            ->where('transferSuggestions.should_show_suggestion', true)
         );
     });
 });
@@ -87,14 +84,12 @@ describe('Website List Enhanced UX', function () {
         $response = $this->actingAs($this->testUser)->get('/ssl/websites');
 
         $response->assertOk();
-        $response->assertInertia(fn ($page) =>
-            $page->has('availableTeams.0', fn ($team) =>
-                $team->where('id', $this->team->id)
-                     ->where('name', $this->team->name)
-                     ->has('member_count')
-                     ->has('user_role')
-                     ->etc()
-            )
+        $response->assertInertia(fn ($page) => $page->has('availableTeams.0', fn ($team) => $team->where('id', $this->team->id)
+            ->where('name', $this->team->name)
+            ->has('member_count')
+            ->has('user_role')
+            ->etc()
+        )
         );
     });
 
@@ -219,9 +214,9 @@ describe('Single Website Transfer Enhancement', function () {
         $response->assertOk();
         $response->assertJsonStructure([
             'teams' => [
-                '*' => ['id', 'name', 'description']
+                '*' => ['id', 'name', 'description'],
             ],
-            'current_owner' => ['type', 'id', 'name']
+            'current_owner' => ['type', 'id', 'name'],
         ]);
 
         $response->assertJson([
@@ -229,7 +224,7 @@ describe('Single Website Transfer Enhancement', function () {
                 'type' => 'personal',
                 'id' => $this->personalWebsite->user_id,
                 'name' => $this->testUser->name,
-            ]
+            ],
         ]);
     });
 
@@ -243,7 +238,7 @@ describe('Single Website Transfer Enhancement', function () {
                 'type' => 'team',
                 'id' => $this->team->id,
                 'name' => $this->team->name,
-            ]
+            ],
         ]);
     });
 });

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Monitor;
 use App\Models\Website;
 use App\Services\SslMonitoringCacheService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Monitor;
 
 class SslDashboardController extends Controller
 {
@@ -18,17 +18,17 @@ class SslDashboardController extends Controller
         // Cache user's team IDs to avoid repeated queries
         $userTeamIds = $cacheService->cacheUserTeamIds(
             $user->id,
-            fn() => $user->teams()->pluck('teams.id')
+            fn () => $user->teams()->pluck('teams.id')
         );
 
         // Get all websites accessible to user with optimized eager loading
         $allUserWebsites = Website::where(function ($q) use ($user, $userTeamIds) {
             $q->where('user_id', $user->id) // Personal websites
-              ->orWhereIn('team_id', $userTeamIds); // Team websites
+                ->orWhereIn('team_id', $userTeamIds); // Team websites
         })
-        ->with(['team', 'user']) // Eager load relationships
-        ->orderBy('updated_at', 'desc') // Most recently updated first
-        ->get();
+            ->with(['team', 'user']) // Eager load relationships
+            ->orderBy('updated_at', 'desc') // Most recently updated first
+            ->get();
 
         // Calculate SSL statistics with caching
         $sslStatistics = $this->calculateSslStatistics($allUserWebsites, $cacheService);
@@ -92,8 +92,10 @@ class SslDashboardController extends Controller
                 if ($monitor->certificate_status === 'valid' && $monitor->certificate_expiration_date) {
                     $expirationDate = \Carbon\Carbon::parse($monitor->certificate_expiration_date);
                     $daysUntilExpiry = (int) now()->diffInDays($expirationDate, false);
+
                     return $daysUntilExpiry <= 10 && $daysUntilExpiry > 0;
                 }
+
                 return false;
             })->count();
 
@@ -106,7 +108,6 @@ class SslDashboardController extends Controller
             ];
         });
     }
-
 
     private function getCriticalSslAlerts($websites): array
     {
@@ -121,10 +122,10 @@ class SslDashboardController extends Controller
             ->where('certificate_check_enabled', true)
             ->where(function ($query) {
                 $query->where('certificate_status', 'invalid')
-                      ->orWhere(function ($q) {
-                          $q->where('certificate_status', 'valid')
+                    ->orWhere(function ($q) {
+                        $q->where('certificate_status', 'valid')
                             ->whereNotNull('certificate_expiration_date');
-                      });
+                    });
             })
             ->get();
 
@@ -292,7 +293,7 @@ class SslDashboardController extends Controller
         $suggestions = [
             'personal_websites_count' => $personalWebsites->count(),
             'available_teams_count' => $availableTeams->count(),
-            'quick_transfer_teams' => $availableTeams->map(fn($team) => [
+            'quick_transfer_teams' => $availableTeams->map(fn ($team) => [
                 'id' => $team->id,
                 'name' => $team->name,
                 'member_count' => $team->members()->count(),

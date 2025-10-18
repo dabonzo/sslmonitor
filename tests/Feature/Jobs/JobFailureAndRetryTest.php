@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Website;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Tests\Traits\MocksMonitorHttpRequests;
 
@@ -62,7 +61,8 @@ test('failed jobs are recorded in failed_jobs table', function () {
     ]);
 
     // Create a job that will fail
-    $job = new class($monitor) extends CheckMonitorJob {
+    $job = new class($monitor) extends CheckMonitorJob
+    {
         public function handle(): array
         {
             throw new \Exception('Simulated job failure');

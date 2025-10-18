@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::index
-* @see app/Http/Controllers/Debug/AlertTestingController.php:22
+* @see app/Http/Controllers/Debug/AlertTestingController.php:21
 * @route '/debug/alerts'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testAll
-* @see app/Http/Controllers/Debug/AlertTestingController.php:78
+* @see app/Http/Controllers/Debug/AlertTestingController.php:77
 * @route '/debug/alerts/test-all'
 */
 export const testAll = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -97,7 +97,7 @@ testAll.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testAll
-* @see app/Http/Controllers/Debug/AlertTestingController.php:78
+* @see app/Http/Controllers/Debug/AlertTestingController.php:77
 * @route '/debug/alerts/test-all'
 */
 testAll.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ testAll.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testAll
-* @see app/Http/Controllers/Debug/AlertTestingController.php:78
+* @see app/Http/Controllers/Debug/AlertTestingController.php:77
 * @route '/debug/alerts/test-all'
 */
 testAll.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -116,7 +116,7 @@ testAll.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testAll
-* @see app/Http/Controllers/Debug/AlertTestingController.php:78
+* @see app/Http/Controllers/Debug/AlertTestingController.php:77
 * @route '/debug/alerts/test-all'
 */
 const testAllForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -126,7 +126,7 @@ const testAllForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testAll
-* @see app/Http/Controllers/Debug/AlertTestingController.php:78
+* @see app/Http/Controllers/Debug/AlertTestingController.php:77
 * @route '/debug/alerts/test-all'
 */
 testAllForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -138,7 +138,7 @@ testAll.form = testAllForm
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testSsl
-* @see app/Http/Controllers/Debug/AlertTestingController.php:142
+* @see app/Http/Controllers/Debug/AlertTestingController.php:151
 * @route '/debug/alerts/test-ssl'
 */
 export const testSsl = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -153,7 +153,7 @@ testSsl.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testSsl
-* @see app/Http/Controllers/Debug/AlertTestingController.php:142
+* @see app/Http/Controllers/Debug/AlertTestingController.php:151
 * @route '/debug/alerts/test-ssl'
 */
 testSsl.url = (options?: RouteQueryOptions) => {
@@ -162,7 +162,7 @@ testSsl.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testSsl
-* @see app/Http/Controllers/Debug/AlertTestingController.php:142
+* @see app/Http/Controllers/Debug/AlertTestingController.php:151
 * @route '/debug/alerts/test-ssl'
 */
 testSsl.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -172,7 +172,7 @@ testSsl.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testSsl
-* @see app/Http/Controllers/Debug/AlertTestingController.php:142
+* @see app/Http/Controllers/Debug/AlertTestingController.php:151
 * @route '/debug/alerts/test-ssl'
 */
 const testSslForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -182,7 +182,7 @@ const testSslForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testSsl
-* @see app/Http/Controllers/Debug/AlertTestingController.php:142
+* @see app/Http/Controllers/Debug/AlertTestingController.php:151
 * @route '/debug/alerts/test-ssl'
 */
 testSslForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -194,7 +194,7 @@ testSsl.form = testSslForm
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testUptime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:180
+* @see app/Http/Controllers/Debug/AlertTestingController.php:191
 * @route '/debug/alerts/test-uptime'
 */
 export const testUptime = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -209,7 +209,7 @@ testUptime.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testUptime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:180
+* @see app/Http/Controllers/Debug/AlertTestingController.php:191
 * @route '/debug/alerts/test-uptime'
 */
 testUptime.url = (options?: RouteQueryOptions) => {
@@ -218,7 +218,7 @@ testUptime.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testUptime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:180
+* @see app/Http/Controllers/Debug/AlertTestingController.php:191
 * @route '/debug/alerts/test-uptime'
 */
 testUptime.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -228,7 +228,7 @@ testUptime.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testUptime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:180
+* @see app/Http/Controllers/Debug/AlertTestingController.php:191
 * @route '/debug/alerts/test-uptime'
 */
 const testUptimeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -238,7 +238,7 @@ const testUptimeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testUptime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:180
+* @see app/Http/Controllers/Debug/AlertTestingController.php:191
 * @route '/debug/alerts/test-uptime'
 */
 testUptimeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -250,7 +250,7 @@ testUptime.form = testUptimeForm
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testResponseTime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:223
+* @see app/Http/Controllers/Debug/AlertTestingController.php:236
 * @route '/debug/alerts/test-response-time'
 */
 export const testResponseTime = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -265,7 +265,7 @@ testResponseTime.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testResponseTime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:223
+* @see app/Http/Controllers/Debug/AlertTestingController.php:236
 * @route '/debug/alerts/test-response-time'
 */
 testResponseTime.url = (options?: RouteQueryOptions) => {
@@ -274,7 +274,7 @@ testResponseTime.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testResponseTime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:223
+* @see app/Http/Controllers/Debug/AlertTestingController.php:236
 * @route '/debug/alerts/test-response-time'
 */
 testResponseTime.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -284,7 +284,7 @@ testResponseTime.post = (options?: RouteQueryOptions): RouteDefinition<'post'> =
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testResponseTime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:223
+* @see app/Http/Controllers/Debug/AlertTestingController.php:236
 * @route '/debug/alerts/test-response-time'
 */
 const testResponseTimeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -294,7 +294,7 @@ const testResponseTimeForm = (options?: RouteQueryOptions): RouteFormDefinition<
 
 /**
 * @see \App\Http\Controllers\Debug\AlertTestingController::testResponseTime
-* @see app/Http/Controllers/Debug/AlertTestingController.php:223
+* @see app/Http/Controllers/Debug/AlertTestingController.php:236
 * @route '/debug/alerts/test-response-time'
 */
 testResponseTimeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

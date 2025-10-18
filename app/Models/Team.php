@@ -77,6 +77,7 @@ class Team extends Model
     public function getUserRole(User $user): ?string
     {
         $membership = $this->members()->where('user_id', $user->id)->first();
+
         return $membership?->pivot->role;
     }
 
@@ -86,7 +87,7 @@ class Team extends Model
     public function transferOwnership(User $newOwner): void
     {
         // Check if new owner is a team member
-        if (!$this->hasMember($newOwner)) {
+        if (! $this->hasMember($newOwner)) {
             throw new \Exception('New owner must be a team member');
         }
 
@@ -128,6 +129,7 @@ class Team extends Model
     public function canBeDeletedBy(User $user): bool
     {
         $role = $this->getUserRole($user);
+
         return $role === TeamMember::ROLE_OWNER;
     }
 
@@ -137,6 +139,7 @@ class Team extends Model
     public function canBeTransferredBy(User $user): bool
     {
         $role = $this->getUserRole($user);
+
         return $role === TeamMember::ROLE_OWNER;
     }
 }

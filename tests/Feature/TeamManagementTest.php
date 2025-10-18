@@ -1,11 +1,11 @@
 <?php
 
+use App\Mail\TeamInvitationMail;
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\TeamInvitation;
+use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Website;
-use App\Mail\TeamInvitationMail;
 use Illuminate\Support\Facades\Mail;
 use Tests\Traits\UsesCleanDatabase;
 
@@ -653,8 +653,8 @@ test('team member role permissions work correctly', function () {
 
 // Team Invitation Model Tests
 test('team invitation token generation is unique', function () {
-    $invitation1 = new TeamInvitation();
-    $invitation2 = new TeamInvitation();
+    $invitation1 = new TeamInvitation;
+    $invitation2 = new TeamInvitation;
 
     $token1 = TeamInvitation::generateToken();
     $token2 = TeamInvitation::generateToken();
@@ -774,7 +774,7 @@ test('team invitation email contains correct content', function () {
     $team = Team::factory()->create([
         'created_by_user_id' => $owner->id,
         'name' => 'Test Team',
-        'description' => 'A test team for SSL monitoring'
+        'description' => 'A test team for SSL monitoring',
     ]);
     TeamMember::create([
         'team_id' => $team->id,
@@ -790,7 +790,7 @@ test('team invitation email contains correct content', function () {
             'role' => TeamMember::ROLE_ADMIN,
         ]);
 
-    Mail::assertQueued(TeamInvitationMail::class, function ($mail) use ($team, $owner) {
+    Mail::assertQueued(TeamInvitationMail::class, function ($mail) {
         // Check that the mail object has correct data
         return $mail->invitation->team->name === 'Test Team' &&
                $mail->invitation->role === TeamMember::ROLE_ADMIN &&

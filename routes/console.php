@@ -28,12 +28,12 @@ Schedule::call(function () {
     if ($failedJobs > env('MAX_FAILED_JOBS', 10)) {
         \App\Support\AutomationLogger::error('High number of failed jobs detected', [
             'failed_jobs_count' => $failedJobs,
-            'threshold' => env('MAX_FAILED_JOBS', 10)
+            'threshold' => env('MAX_FAILED_JOBS', 10),
         ]);
     }
 
     \App\Support\AutomationLogger::scheduler('Queue health check completed', [
-        'failed_jobs_count' => $failedJobs
+        'failed_jobs_count' => $failedJobs,
     ]);
 })
     ->everyFiveMinutes()
@@ -55,7 +55,7 @@ Schedule::call(function () {
 
     \App\Support\AutomationLogger::scheduler('Daily cleanup completed', [
         'deleted_failed_jobs' => $deletedFailedJobs,
-        'deleted_completed_jobs' => $deletedJobs
+        'deleted_completed_jobs' => $deletedJobs,
     ]);
 })
     ->dailyAt('02:00')

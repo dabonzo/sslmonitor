@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Debug;
 
 use App\Http\Controllers\Controller;
-use App\Models\Website;
-use App\Models\AlertConfiguration;
-use App\Services\AlertService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
+use App\Mail\SlowResponseTimeAlert;
+use App\Mail\SslCertificateExpiryAlert;
+use App\Mail\SslCertificateInvalidAlert;
 use App\Mail\UptimeDownAlert;
 use App\Mail\UptimeRecoveredAlert;
-use App\Mail\SlowResponseTimeAlert;
-use App\Mail\SslCertificateInvalidAlert;
-use App\Mail\SslCertificateExpiryAlert;
+use App\Models\AlertConfiguration;
+use App\Models\Website;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class AlertTestingController extends Controller
 {
@@ -37,14 +36,14 @@ class AlertTestingController extends Controller
                     ['days' => 7, 'level' => 'urgent', 'label' => 'URGENT (7 days)'],
                     ['days' => 3, 'level' => 'critical', 'label' => 'CRITICAL (3 days)'],
                     ['days' => 0, 'level' => 'expired', 'label' => 'EXPIRED (0 days)'],
-                ]
+                ],
             ],
             'ssl_invalid' => [
                 'name' => 'SSL Certificate Invalid',
                 'description' => 'Test invalid SSL certificate alerts',
                 'levels' => [
                     ['level' => 'critical', 'label' => 'CRITICAL - Invalid Certificate'],
-                ]
+                ],
             ],
             'uptime_down' => [
                 'name' => 'Website Uptime',
@@ -52,7 +51,7 @@ class AlertTestingController extends Controller
                 'levels' => [
                     ['status' => 'down', 'level' => 'critical', 'label' => 'CRITICAL - Website Down'],
                     ['status' => 'recovered', 'level' => 'info', 'label' => 'INFO - Website Recovered'],
-                ]
+                ],
             ],
             'response_time' => [
                 'name' => 'Response Time',
@@ -60,7 +59,7 @@ class AlertTestingController extends Controller
                 'levels' => [
                     ['response_time' => 5000, 'level' => 'warning', 'label' => 'WARNING - 5 seconds'],
                     ['response_time' => 10000, 'level' => 'critical', 'label' => 'CRITICAL - 10 seconds'],
-                ]
+                ],
             ],
         ];
 
@@ -83,7 +82,7 @@ class AlertTestingController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         $results = [];
         $totalSent = 0;
@@ -94,30 +93,40 @@ class AlertTestingController extends Controller
             foreach ($sslLevels as $days) {
                 $result = $this->sendSslExpiryTest($website, $days);
                 $results[] = $result;
-                if ($result['success']) $totalSent++;
+                if ($result['success']) {
+                    $totalSent++;
+                }
             }
 
             // Test SSL invalid
             $result = $this->sendSslInvalidTest($website);
             $results[] = $result;
-            if ($result['success']) $totalSent++;
+            if ($result['success']) {
+                $totalSent++;
+            }
 
             // Test uptime down
             $result = $this->sendUptimeDownTest($website);
             $results[] = $result;
-            if ($result['success']) $totalSent++;
+            if ($result['success']) {
+                $totalSent++;
+            }
 
             // Test uptime recovered
             $result = $this->sendUptimeRecoveredTest($website);
             $results[] = $result;
-            if ($result['success']) $totalSent++;
+            if ($result['success']) {
+                $totalSent++;
+            }
 
             // Test response time alerts
             $responseTimes = [5000, 10000];
             foreach ($responseTimes as $responseTime) {
                 $result = $this->sendResponseTimeTest($website, $responseTime);
                 $results[] = $result;
-                if ($result['success']) $totalSent++;
+                if ($result['success']) {
+                    $totalSent++;
+                }
             }
 
             return response()->json([
@@ -129,11 +138,11 @@ class AlertTestingController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Alert testing failed: " . $e->getMessage());
+            Log::error('Alert testing failed: '.$e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Alert testing failed: ' . $e->getMessage(),
+                'message' => 'Alert testing failed: '.$e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -149,7 +158,7 @@ class AlertTestingController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         $results = [];
         $totalSent = 0;
@@ -158,7 +167,9 @@ class AlertTestingController extends Controller
             foreach ($request->days as $days) {
                 $result = $this->sendSslExpiryTest($website, $days);
                 $results[] = $result;
-                if ($result['success']) $totalSent++;
+                if ($result['success']) {
+                    $totalSent++;
+                }
             }
 
             return response()->json([
@@ -172,7 +183,7 @@ class AlertTestingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'SSL alert testing failed: ' . $e->getMessage(),
+                'message' => 'SSL alert testing failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -187,7 +198,7 @@ class AlertTestingController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         $results = [];
         $totalSent = 0;
@@ -201,7 +212,9 @@ class AlertTestingController extends Controller
                 }
 
                 $results[] = $result;
-                if ($result['success']) $totalSent++;
+                if ($result['success']) {
+                    $totalSent++;
+                }
             }
 
             return response()->json([
@@ -215,7 +228,7 @@ class AlertTestingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Uptime alert testing failed: ' . $e->getMessage(),
+                'message' => 'Uptime alert testing failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -230,7 +243,7 @@ class AlertTestingController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         $results = [];
         $totalSent = 0;
@@ -239,7 +252,9 @@ class AlertTestingController extends Controller
             foreach ($request->response_times as $responseTime) {
                 $result = $this->sendResponseTimeTest($website, $responseTime);
                 $results[] = $result;
-                if ($result['success']) $totalSent++;
+                if ($result['success']) {
+                    $totalSent++;
+                }
             }
 
             return response()->json([
@@ -253,7 +268,7 @@ class AlertTestingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Response time alert testing failed: ' . $e->getMessage(),
+                'message' => 'Response time alert testing failed: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -296,7 +311,7 @@ class AlertTestingController extends Controller
                 }
             }
 
-            Log::info("SSL expiry test simulation completed", [
+            Log::info('SSL expiry test simulation completed', [
                 'website_id' => $website->id,
                 'simulated_days_remaining' => $days,
                 'triggered_alerts' => $triggeredAlerts,
@@ -313,7 +328,8 @@ class AlertTestingController extends Controller
             ];
 
         } catch (\Exception $e) {
-            Log::error("SSL expiry test simulation failed: " . $e->getMessage());
+            Log::error('SSL expiry test simulation failed: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'type' => 'ssl_expiry',
@@ -336,7 +352,7 @@ class AlertTestingController extends Controller
                 new SslCertificateInvalidAlert($website, $checkData)
             );
 
-            Log::info("SSL invalid test alert sent", [
+            Log::info('SSL invalid test alert sent', [
                 'website_id' => $website->id,
                 'recipient' => $website->user->email,
             ]);
@@ -344,11 +360,12 @@ class AlertTestingController extends Controller
             return [
                 'success' => true,
                 'type' => 'ssl_invalid',
-                'message' => "SSL invalid alert sent",
+                'message' => 'SSL invalid alert sent',
             ];
 
         } catch (\Exception $e) {
-            Log::error("SSL invalid test alert failed: " . $e->getMessage());
+            Log::error('SSL invalid test alert failed: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'type' => 'ssl_invalid',
@@ -375,7 +392,7 @@ class AlertTestingController extends Controller
                 new UptimeDownAlert($website, $alertConfig, $uptimeData)
             );
 
-            Log::info("Uptime down test alert sent", [
+            Log::info('Uptime down test alert sent', [
                 'website_id' => $website->id,
                 'recipient' => $website->user->email,
             ]);
@@ -383,11 +400,12 @@ class AlertTestingController extends Controller
             return [
                 'success' => true,
                 'type' => 'uptime_down',
-                'message' => "Website down alert sent",
+                'message' => 'Website down alert sent',
             ];
 
         } catch (\Exception $e) {
-            Log::error("Uptime down test alert failed: " . $e->getMessage());
+            Log::error('Uptime down test alert failed: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'type' => 'uptime_down',
@@ -417,7 +435,7 @@ class AlertTestingController extends Controller
                 new UptimeRecoveredAlert($website, $alertConfig, $uptimeData, '5 minutes')
             );
 
-            Log::info("Uptime recovered test alert sent", [
+            Log::info('Uptime recovered test alert sent', [
                 'website_id' => $website->id,
                 'recipient' => $website->user->email,
             ]);
@@ -425,11 +443,12 @@ class AlertTestingController extends Controller
             return [
                 'success' => true,
                 'type' => 'uptime_recovered',
-                'message' => "Website recovered alert sent",
+                'message' => 'Website recovered alert sent',
             ];
 
         } catch (\Exception $e) {
-            Log::error("Uptime recovered test alert failed: " . $e->getMessage());
+            Log::error('Uptime recovered test alert failed: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'type' => 'uptime_recovered',
@@ -478,7 +497,7 @@ class AlertTestingController extends Controller
                 }
             }
 
-            Log::info("Response time test simulation completed", [
+            Log::info('Response time test simulation completed', [
                 'website_id' => $website->id,
                 'simulated_response_time' => $responseTime,
                 'triggered_alerts' => $triggeredAlerts,
@@ -495,7 +514,8 @@ class AlertTestingController extends Controller
             ];
 
         } catch (\Exception $e) {
-            Log::error("Response time test simulation failed: " . $e->getMessage());
+            Log::error('Response time test simulation failed: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'type' => 'response_time',
@@ -505,7 +525,7 @@ class AlertTestingController extends Controller
         }
     }
 
-    private function createTestAlertConfig(Website $website, string $alertType, int $thresholdDays = null): AlertConfiguration
+    private function createTestAlertConfig(Website $website, string $alertType, ?int $thresholdDays = null): AlertConfiguration
     {
         $config = new AlertConfiguration([
             'user_id' => $website->user_id,
@@ -541,7 +561,7 @@ class AlertTestingController extends Controller
 
     private function triggerAlert(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
-        Log::info("Triggering test alert", [
+        Log::info('Triggering test alert', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
             'alert_level' => $alertConfig->alert_level,
@@ -549,7 +569,7 @@ class AlertTestingController extends Controller
 
         // Send notifications based on configured channels
         foreach ($alertConfig->notification_channels as $channel) {
-            match($channel) {
+            match ($channel) {
                 'email' => $this->sendEmailAlert($alertConfig, $website, $checkData),
                 'dashboard' => $this->createDashboardNotification($alertConfig, $website, $checkData),
                 'slack' => $this->sendSlackAlert($alertConfig, $website, $checkData),
@@ -566,30 +586,26 @@ class AlertTestingController extends Controller
         try {
             $user = $website->user;
 
-            match($alertConfig->alert_type) {
-                AlertConfiguration::ALERT_SSL_EXPIRY =>
-                    Mail::to($user->email)->send(new SslCertificateExpiryAlert($website, $alertConfig, $checkData)),
+            match ($alertConfig->alert_type) {
+                AlertConfiguration::ALERT_SSL_EXPIRY => Mail::to($user->email)->send(new SslCertificateExpiryAlert($website, $alertConfig, $checkData)),
 
-                AlertConfiguration::ALERT_SSL_INVALID =>
-                    Mail::to($user->email)->send(new SslCertificateInvalidAlert($website, $checkData)),
+                AlertConfiguration::ALERT_SSL_INVALID => Mail::to($user->email)->send(new SslCertificateInvalidAlert($website, $checkData)),
 
-                AlertConfiguration::ALERT_UPTIME_DOWN =>
-                    Mail::to($user->email)->send(new UptimeDownAlert($website, $alertConfig, $checkData)),
+                AlertConfiguration::ALERT_UPTIME_DOWN => Mail::to($user->email)->send(new UptimeDownAlert($website, $alertConfig, $checkData)),
 
-                AlertConfiguration::ALERT_RESPONSE_TIME =>
-                    Mail::to($user->email)->send(new SlowResponseTimeAlert($website, $checkData)),
+                AlertConfiguration::ALERT_RESPONSE_TIME => Mail::to($user->email)->send(new SlowResponseTimeAlert($website, $checkData)),
 
                 default => Log::warning("No email template for alert type: {$alertConfig->alert_type}"),
             };
 
-            Log::info("Email alert sent", [
+            Log::info('Email alert sent', [
                 'alert_type' => $alertConfig->alert_type,
                 'recipient' => $user->email,
                 'website' => $website->name,
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Failed to send email alert: " . $e->getMessage(), [
+            Log::error('Failed to send email alert: '.$e->getMessage(), [
                 'alert_config_id' => $alertConfig->id,
                 'website_id' => $website->id,
             ]);
@@ -599,7 +615,7 @@ class AlertTestingController extends Controller
     private function createDashboardNotification(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
         // TODO: Implement dashboard notifications in Phase 4
-        Log::info("Dashboard notification created", [
+        Log::info('Dashboard notification created', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
         ]);
@@ -608,7 +624,7 @@ class AlertTestingController extends Controller
     private function sendSlackAlert(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
         // TODO: Implement Slack integration in Phase 5
-        Log::info("Slack alert would be sent", [
+        Log::info('Slack alert would be sent', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
         ]);
@@ -616,11 +632,22 @@ class AlertTestingController extends Controller
 
     private function getAlertLevel(?int $thresholdDays): string
     {
-        if ($thresholdDays === null) return 'critical';
-        if ($thresholdDays === 0) return 'critical';
-        if ($thresholdDays <= 3) return 'critical';
-        if ($thresholdDays <= 7) return 'urgent';
-        if ($thresholdDays <= 14) return 'warning';
+        if ($thresholdDays === null) {
+            return 'critical';
+        }
+        if ($thresholdDays === 0) {
+            return 'critical';
+        }
+        if ($thresholdDays <= 3) {
+            return 'critical';
+        }
+        if ($thresholdDays <= 7) {
+            return 'urgent';
+        }
+        if ($thresholdDays <= 14) {
+            return 'warning';
+        }
+
         return 'info';
     }
 }

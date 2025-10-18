@@ -10,7 +10,7 @@ uses(RefreshDatabase::class, MocksJavaScriptContentFetcher::class);
 describe('BrowserShot JavaScript Content Fetcher', function () {
     beforeEach(function () {
         $this->setUpMocksJavaScriptContentFetcher();
-        $this->fetcher = new JavaScriptContentFetcher();
+        $this->fetcher = new JavaScriptContentFetcher;
     });
 
     afterEach(function () {
@@ -29,7 +29,7 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
 
         test('no persistent resources needed for BrowserShot', function () {
             // BrowserShot doesn't require persistent browser instances like Playwright
-            $fetcher = new JavaScriptContentFetcher();
+            $fetcher = new JavaScriptContentFetcher;
             unset($fetcher); // Should work without issues
             expect(true)->toBeTrue();
         });
@@ -87,7 +87,7 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
             $monitor = Monitor::factory()->create([
                 'javascript_enabled' => true,
                 'javascript_wait_seconds' => 3,
-                'url' => 'https://example.com/test-js-wait'
+                'url' => 'https://example.com/test-js-wait',
             ]);
 
             $content = $this->fetcher->fetchContentForMonitor($monitor);
@@ -98,7 +98,7 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
         test('fetchContentForMonitor handles monitor without javascript', function () {
             $monitor = Monitor::factory()->create([
                 'javascript_enabled' => false,
-                'url' => 'https://example.com'
+                'url' => 'https://example.com',
             ]);
 
             $content = $this->fetcher->fetchContentForMonitor($monitor);
@@ -130,7 +130,7 @@ describe('BrowserShot JavaScript Content Fetcher', function () {
     describe('BrowserShot Integration', function () {
         test('browsershot does not require persistent resources', function () {
             // BrowserShot creates and manages browser instances automatically
-            $fetcher = new JavaScriptContentFetcher();
+            $fetcher = new JavaScriptContentFetcher;
 
             // No persistent browser properties like Playwright
             expect(true)->toBeTrue(); // BrowserShot is stateless

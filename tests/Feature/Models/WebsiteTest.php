@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Website;
 use App\Models\User;
+use App\Models\Website;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
@@ -98,7 +98,7 @@ test('website enforces unique url per user', function () {
         'user_id' => $user->id,
     ]);
 
-    expect(fn() => Website::create([
+    expect(fn () => Website::create([
         'name' => 'Second Site',
         'url' => 'https://example.com',
         'user_id' => $user->id,
@@ -124,7 +124,6 @@ test('different users can have same url', function () {
     expect($website1)->toBeInstanceOf(Website::class)
         ->and($website2)->toBeInstanceOf(Website::class);
 });
-
 
 test('website can update plugin data', function () {
     $website = Website::factory()->create();
@@ -179,7 +178,7 @@ test('website can be inactive', function () {
 });
 
 test('website has proper fillable attributes', function () {
-    $website = new Website();
+    $website = new Website;
 
     $fillable = $website->getFillable();
 

@@ -1,11 +1,11 @@
 <?php
 
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
 use App\Services\MonitorIntegrationService;
-use App\Models\Monitor;
-use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -25,8 +25,8 @@ describe('Website Controller', function () {
             Website::factory()->create(['user_id' => $otherUser->id]);
 
             // Create Spatie monitor for SSL monitoring
-            $timestamp = time() . '-' . rand(1000, 9999);
-            $testUrl = 'https://test-ssl-' . $timestamp . '.example.com';
+            $timestamp = time().'-'.rand(1000, 9999);
+            $testUrl = 'https://test-ssl-'.$timestamp.'.example.com';
             $userWebsites[0]->update(['url' => $testUrl]);
 
             Monitor::firstOrCreate(
@@ -61,13 +61,13 @@ describe('Website Controller', function () {
             Website::factory()->create([
                 'user_id' => $this->user->id,
                 'name' => 'Example Website',
-                'url' => 'https://example.com'
+                'url' => 'https://example.com',
             ]);
 
             Website::factory()->create([
                 'user_id' => $this->user->id,
                 'name' => 'Test Site',
-                'url' => 'https://test.com'
+                'url' => 'https://test.com',
             ]);
 
             $response = $this->get(route('ssl.websites.index', ['search' => 'example']));
@@ -140,8 +140,8 @@ describe('Website Controller', function () {
             $website = Website::factory()->create(['user_id' => $this->user->id]);
 
             // Create Spatie monitor for SSL monitoring
-            $timestamp = time() . '-' . rand(1000, 9999);
-            $testUrl = 'https://test-show-' . $timestamp . '.example.com';
+            $timestamp = time().'-'.rand(1000, 9999);
+            $testUrl = 'https://test-show-'.$timestamp.'.example.com';
             $website->update(['url' => $testUrl]);
 
             Monitor::firstOrCreate(
@@ -216,8 +216,8 @@ describe('Website Controller', function () {
             $website = Website::factory()->create(['user_id' => $this->user->id]);
 
             // Create related Spatie monitor data
-            $timestamp = time() . '-' . rand(1000, 9999);
-            $testUrl = 'https://test-delete-' . $timestamp . '.example.com';
+            $timestamp = time().'-'.rand(1000, 9999);
+            $testUrl = 'https://test-delete-'.$timestamp.'.example.com';
             $website->update(['url' => $testUrl]);
 
             $monitor = Monitor::firstOrCreate(

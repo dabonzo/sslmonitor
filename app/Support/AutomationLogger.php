@@ -2,8 +2,8 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AutomationLogger
 {
@@ -85,7 +85,7 @@ class AutomationLogger
             'timestamp' => Carbon::now()->toISOString(),
         ], $metrics);
 
-        Log::channel('queue')->info("[PERFORMANCE] Job completed", $context);
+        Log::channel('queue')->info('[PERFORMANCE] Job completed', $context);
     }
 
     /**

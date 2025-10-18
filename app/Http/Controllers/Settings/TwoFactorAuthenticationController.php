@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Services\TwoFactorAuthService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,7 +27,7 @@ class TwoFactorAuthenticationController extends Controller
         return Inertia::render('Settings/TwoFactor', [
             'twoFactorEnabled' => $this->twoFactorService->isEnabled($user),
             'recoveryCodes' => $this->twoFactorService->getRecoveryCodesCount($user),
-            'qrCodeSvg' => $user->two_factor_secret && !$this->twoFactorService->isEnabled($user)
+            'qrCodeSvg' => $user->two_factor_secret && ! $this->twoFactorService->isEnabled($user)
                 ? $this->generateQrCodeSvg($user)
                 : null,
         ]);
@@ -63,7 +63,7 @@ class TwoFactorAuthenticationController extends Controller
 
         $user = $request->user();
 
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             throw ValidationException::withMessages([
                 'code' => ['Two-factor authentication is not set up.'],
             ]);
@@ -75,7 +75,7 @@ class TwoFactorAuthenticationController extends Controller
             ]);
         }
 
-        if (!$this->twoFactorService->enableTwoFactorAuth($user, $request->code)) {
+        if (! $this->twoFactorService->enableTwoFactorAuth($user, $request->code)) {
             throw ValidationException::withMessages([
                 'code' => ['The provided two-factor authentication code was invalid.'],
             ]);
@@ -106,7 +106,7 @@ class TwoFactorAuthenticationController extends Controller
     {
         $user = $request->user();
 
-        if (!$this->twoFactorService->isEnabled($user)) {
+        if (! $this->twoFactorService->isEnabled($user)) {
             return response()->json(['error' => 'Two-factor authentication is not enabled.'], 400);
         }
 

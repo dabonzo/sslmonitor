@@ -101,6 +101,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getRoleInTeam(Team $team): ?string
     {
         $membership = TeamMember::where('team_id', $team->id)->where('user_id', $this->id)->first();
+
         return $membership?->role;
     }
 
@@ -110,6 +111,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canManageTeam(Team $team): bool
     {
         $role = $this->getRoleInTeam($team);
+
         return $role === TeamMember::ROLE_OWNER;
     }
 

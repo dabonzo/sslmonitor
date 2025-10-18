@@ -154,7 +154,7 @@ class PluginConfiguration extends Model
     public function addCapability(string $capability): void
     {
         $capabilities = $this->capabilities ?? [];
-        if (!in_array($capability, $capabilities)) {
+        if (! in_array($capability, $capabilities)) {
             $capabilities[] = $capability;
             $this->capabilities = $capabilities;
         }
@@ -163,11 +163,11 @@ class PluginConfiguration extends Model
     public function removeCapability(string $capability): void
     {
         $capabilities = $this->capabilities ?? [];
-        $this->capabilities = array_values(array_filter($capabilities, fn($c) => $c !== $capability));
+        $this->capabilities = array_values(array_filter($capabilities, fn ($c) => $c !== $capability));
     }
 
     // Status management
-    public function markAsActive(string $message = null): void
+    public function markAsActive(?string $message = null): void
     {
         $this->status = 'active';
         $this->status_message = $message;
@@ -180,14 +180,14 @@ class PluginConfiguration extends Model
         $this->status_message = $message;
     }
 
-    public function markAsDisabled(string $reason = null): void
+    public function markAsDisabled(?string $reason = null): void
     {
         $this->status = 'disabled';
         $this->is_enabled = false;
         $this->status_message = $reason;
     }
 
-    public function markAsInactive(string $message = null): void
+    public function markAsInactive(?string $message = null): void
     {
         $this->status = 'inactive';
         $this->status_message = $message;
@@ -203,7 +203,7 @@ class PluginConfiguration extends Model
 
     public function isRecentlyContacted(int $minutesThreshold = 60): bool
     {
-        if (!$this->last_contacted_at) {
+        if (! $this->last_contacted_at) {
             return false;
         }
 

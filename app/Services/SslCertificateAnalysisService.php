@@ -18,7 +18,7 @@ class SslCertificateAnalysisService
                     'capture_peer_cert' => true,
                     'verify_peer' => false,
                     'verify_peer_name' => false,
-                ]
+                ],
             ]);
 
             $socket = @stream_socket_client(
@@ -30,14 +30,14 @@ class SslCertificateAnalysisService
                 $context
             );
 
-            if (!$socket) {
+            if (! $socket) {
                 return $this->getErrorAnalysis("Connection failed: {$errstr}");
             }
 
             $cert = stream_context_get_params($socket)['options']['ssl']['peer_certificate'];
             fclose($socket);
 
-            if (!$cert) {
+            if (! $cert) {
                 return $this->getErrorAnalysis('No certificate found');
             }
 
@@ -170,12 +170,14 @@ class SslCertificateAnalysisService
                 }
             }
         }
+
         return $sans;
     }
 
     private function isWildcardCertificate(array $certInfo): bool
     {
         $cn = $certInfo['subject']['CN'] ?? '';
+
         return str_starts_with($cn, '*.');
     }
 
@@ -192,7 +194,7 @@ class SslCertificateAnalysisService
             }
             if (str_starts_with($domain, '*.')) {
                 $wildcardDomain = substr($domain, 2);
-                if (str_ends_with($requestedDomain, '.' . $wildcardDomain) || $requestedDomain === $wildcardDomain) {
+                if (str_ends_with($requestedDomain, '.'.$wildcardDomain) || $requestedDomain === $wildcardDomain) {
                     return true;
                 }
             }
@@ -208,7 +210,7 @@ class SslCertificateAnalysisService
 
     private function getKeyType(?int $type): string
     {
-        return match($type) {
+        return match ($type) {
             OPENSSL_KEYTYPE_RSA => 'RSA',
             OPENSSL_KEYTYPE_DSA => 'DSA',
             OPENSSL_KEYTYPE_EC => 'EC',
@@ -219,6 +221,7 @@ class SslCertificateAnalysisService
     private function isWeakSignature(string $algorithm): bool
     {
         $weakAlgorithms = ['md5', 'sha1'];
+
         return in_array(strtolower($algorithm), $weakAlgorithms);
     }
 
@@ -230,6 +233,7 @@ class SslCertificateAnalysisService
         if ($keyType === 'EC' && $keySize && $keySize < 256) {
             return true;
         }
+
         return false;
     }
 
@@ -268,7 +272,9 @@ class SslCertificateAnalysisService
             $riskLevel = 'high';
         } elseif ($expiryAnalysis['expires_soon']) {
             $risks[] = 'Certificate expires within 30 days';
-            if ($riskLevel === 'low') $riskLevel = 'medium';
+            if ($riskLevel === 'low') {
+                $riskLevel = 'medium';
+            }
         }
 
         if ($securityAnalysis['weak_key']) {
@@ -283,7 +289,9 @@ class SslCertificateAnalysisService
 
         if ($securityAnalysis['security_score'] < 70) {
             $risks[] = 'Low security score';
-            if ($riskLevel === 'low') $riskLevel = 'medium';
+            if ($riskLevel === 'low') {
+                $riskLevel = 'medium';
+            }
         }
 
         // Let's Encrypt specific recommendations
@@ -338,7 +346,7 @@ class SslCertificateAnalysisService
             'risk_assessment' => [
                 'level' => 'critical',
                 'score' => 0,
-                'issues' => ['Certificate analysis failed: ' . $error],
+                'issues' => ['Certificate analysis failed: '.$error],
                 'recommendations' => ['Verify website URL and SSL configuration'],
             ],
         ];

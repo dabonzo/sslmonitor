@@ -56,5 +56,5 @@ interface AgentCommunicatorInterface
     /**
      * Update agent software
      */
-    public function updateAgent(string $agentId, string $version = null): bool;
+    public function updateAgent(string $agentId, ?string $version = null): bool;
 }

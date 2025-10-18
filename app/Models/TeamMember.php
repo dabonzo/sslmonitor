@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TeamMember extends Model
 {
     public const ROLE_OWNER = 'OWNER';
+
     public const ROLE_ADMIN = 'ADMIN';
+
     public const ROLE_VIEWER = 'VIEWER';
 
     protected $fillable = [
@@ -114,7 +116,6 @@ class TeamMember extends Model
     {
         return $this->role === self::ROLE_ADMIN;
     }
-
 
     public function isViewer(): bool
     {

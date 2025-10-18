@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Debug;
 use App\Http\Controllers\Controller;
 use App\Models\DebugOverride;
 use App\Models\Website;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class SslOverridesController extends Controller
 {
@@ -19,13 +18,13 @@ class SslOverridesController extends Controller
         // Get user's websites with SSL monitoring enabled
         $websites = Website::with(['debugOverrides' => function ($query) use ($user) {
             $query->where('module_type', 'ssl_expiry')
-                  ->where('user_id', $user->id)
-                  ->active()
-                  ->notExpired();
+                ->where('user_id', $user->id)
+                ->active()
+                ->notExpired();
         }])
-        ->where('user_id', $user->id)
-        ->where('ssl_monitoring_enabled', true)
-        ->get();
+            ->where('user_id', $user->id)
+            ->where('ssl_monitoring_enabled', true)
+            ->get();
 
         // Format website data for frontend
         $formattedWebsites = $websites->map(function ($website) use ($user) {
@@ -50,7 +49,7 @@ class SslOverridesController extends Controller
             'stats' => [
                 'total_websites' => $formattedWebsites->count(),
                 'active_overrides' => $formattedWebsites->where('override')->count(),
-                'urgent_alerts' => $formattedWebsites->filter(fn($w) => $w['days_remaining'] <= 7)->count(),
+                'urgent_alerts' => $formattedWebsites->filter(fn ($w) => $w['days_remaining'] <= 7)->count(),
             ],
         ]);
     }
@@ -65,7 +64,7 @@ class SslOverridesController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         // Create or update SSL override
         $override = DebugOverride::updateOrCreate([
@@ -96,9 +95,9 @@ class SslOverridesController extends Controller
         $user = $request->user();
 
         $override = DebugOverride::where('id', $id)
-                               ->where('user_id', $user->id)
-                               ->where('module_type', 'ssl_expiry')
-                               ->firstOrFail();
+            ->where('user_id', $user->id)
+            ->where('module_type', 'ssl_expiry')
+            ->firstOrFail();
 
         $override->deactivate();
 
@@ -121,8 +120,8 @@ class SslOverridesController extends Controller
         $expiryDate = now()->addDays($request->days_ahead);
 
         $websites = Website::where('user_id', $user->id)
-                          ->whereIn('id', $request->website_ids)
-                          ->get();
+            ->whereIn('id', $request->website_ids)
+            ->get();
 
         $overrides = [];
         foreach ($websites as $website) {
@@ -161,9 +160,9 @@ class SslOverridesController extends Controller
         $user = $request->user();
 
         $deletedCount = DebugOverride::where('user_id', $user->id)
-                                   ->where('module_type', 'ssl_expiry')
-                                   ->whereIn('targetable_id', $request->website_ids)
-                                   ->update(['is_active' => false]);
+            ->where('module_type', 'ssl_expiry')
+            ->whereIn('targetable_id', $request->website_ids)
+            ->update(['is_active' => false]);
 
         return response()->json([
             'success' => true,
@@ -182,9 +181,9 @@ class SslOverridesController extends Controller
         $user = $request->user();
 
         $override = DebugOverride::where('id', $id)
-                               ->where('user_id', $user->id)
-                               ->where('module_type', 'ssl_expiry')
-                               ->firstOrFail();
+            ->where('user_id', $user->id)
+            ->where('module_type', 'ssl_expiry')
+            ->firstOrFail();
 
         $website = $override->targetable;
 
@@ -214,12 +213,11 @@ class SslOverridesController extends Controller
 
         $user = $request->user();
         $website = Website::where('user_id', $user->id)
-                         ->findOrFail($request->website_id);
+            ->findOrFail($request->website_id);
 
         // Get alert service for testing
         $alertService = app(\App\Services\AlertService::class);
 
-  
         try {
             // Test alerts with current effective expiry (including overrides)
             // Bypass cooldown for debug testing
@@ -236,7 +234,7 @@ class SslOverridesController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Alert test failed: ' . $e->getMessage(),
+                'message' => 'Alert test failed: '.$e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
         }

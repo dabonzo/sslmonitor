@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::index
-* @see app/Http/Controllers/Debug/SslOverridesController.php:15
+* @see app/Http/Controllers/Debug/SslOverridesController.php:14
 * @route '/debug/ssl-overrides'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::store
-* @see app/Http/Controllers/Debug/SslOverridesController.php:58
+* @see app/Http/Controllers/Debug/SslOverridesController.php:57
 * @route '/debug/ssl-overrides'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -97,7 +97,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::store
-* @see app/Http/Controllers/Debug/SslOverridesController.php:58
+* @see app/Http/Controllers/Debug/SslOverridesController.php:57
 * @route '/debug/ssl-overrides'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::store
-* @see app/Http/Controllers/Debug/SslOverridesController.php:58
+* @see app/Http/Controllers/Debug/SslOverridesController.php:57
 * @route '/debug/ssl-overrides'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -116,7 +116,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::store
-* @see app/Http/Controllers/Debug/SslOverridesController.php:58
+* @see app/Http/Controllers/Debug/SslOverridesController.php:57
 * @route '/debug/ssl-overrides'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -126,7 +126,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::store
-* @see app/Http/Controllers/Debug/SslOverridesController.php:58
+* @see app/Http/Controllers/Debug/SslOverridesController.php:57
 * @route '/debug/ssl-overrides'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -138,7 +138,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::update
-* @see app/Http/Controllers/Debug/SslOverridesController.php:175
+* @see app/Http/Controllers/Debug/SslOverridesController.php:174
 * @route '/debug/ssl-overrides/{id}'
 */
 export const update = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -153,7 +153,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::update
-* @see app/Http/Controllers/Debug/SslOverridesController.php:175
+* @see app/Http/Controllers/Debug/SslOverridesController.php:174
 * @route '/debug/ssl-overrides/{id}'
 */
 update.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -180,7 +180,7 @@ update.url = (args: { id: string | number } | [id: string | number ] | string | 
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::update
-* @see app/Http/Controllers/Debug/SslOverridesController.php:175
+* @see app/Http/Controllers/Debug/SslOverridesController.php:174
 * @route '/debug/ssl-overrides/{id}'
 */
 update.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -190,7 +190,7 @@ update.put = (args: { id: string | number } | [id: string | number ] | string | 
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::update
-* @see app/Http/Controllers/Debug/SslOverridesController.php:175
+* @see app/Http/Controllers/Debug/SslOverridesController.php:174
 * @route '/debug/ssl-overrides/{id}'
 */
 const updateForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -205,7 +205,7 @@ const updateForm = (args: { id: string | number } | [id: string | number ] | str
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::update
-* @see app/Http/Controllers/Debug/SslOverridesController.php:175
+* @see app/Http/Controllers/Debug/SslOverridesController.php:174
 * @route '/debug/ssl-overrides/{id}'
 */
 updateForm.put = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -222,7 +222,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::destroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:94
+* @see app/Http/Controllers/Debug/SslOverridesController.php:93
 * @route '/debug/ssl-overrides/{id}'
 */
 export const destroy = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -237,7 +237,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::destroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:94
+* @see app/Http/Controllers/Debug/SslOverridesController.php:93
 * @route '/debug/ssl-overrides/{id}'
 */
 destroy.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -264,7 +264,7 @@ destroy.url = (args: { id: string | number } | [id: string | number ] | string |
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::destroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:94
+* @see app/Http/Controllers/Debug/SslOverridesController.php:93
 * @route '/debug/ssl-overrides/{id}'
 */
 destroy.delete = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -274,7 +274,7 @@ destroy.delete = (args: { id: string | number } | [id: string | number ] | strin
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::destroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:94
+* @see app/Http/Controllers/Debug/SslOverridesController.php:93
 * @route '/debug/ssl-overrides/{id}'
 */
 const destroyForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -289,7 +289,7 @@ const destroyForm = (args: { id: string | number } | [id: string | number ] | st
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::destroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:94
+* @see app/Http/Controllers/Debug/SslOverridesController.php:93
 * @route '/debug/ssl-overrides/{id}'
 */
 destroyForm.delete = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -306,7 +306,7 @@ destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkStore
-* @see app/Http/Controllers/Debug/SslOverridesController.php:111
+* @see app/Http/Controllers/Debug/SslOverridesController.php:110
 * @route '/debug/ssl-overrides/bulk'
 */
 export const bulkStore = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -321,7 +321,7 @@ bulkStore.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkStore
-* @see app/Http/Controllers/Debug/SslOverridesController.php:111
+* @see app/Http/Controllers/Debug/SslOverridesController.php:110
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkStore.url = (options?: RouteQueryOptions) => {
@@ -330,7 +330,7 @@ bulkStore.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkStore
-* @see app/Http/Controllers/Debug/SslOverridesController.php:111
+* @see app/Http/Controllers/Debug/SslOverridesController.php:110
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkStore.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -340,7 +340,7 @@ bulkStore.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkStore
-* @see app/Http/Controllers/Debug/SslOverridesController.php:111
+* @see app/Http/Controllers/Debug/SslOverridesController.php:110
 * @route '/debug/ssl-overrides/bulk'
 */
 const bulkStoreForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -350,7 +350,7 @@ const bulkStoreForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'>
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkStore
-* @see app/Http/Controllers/Debug/SslOverridesController.php:111
+* @see app/Http/Controllers/Debug/SslOverridesController.php:110
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkStoreForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -362,7 +362,7 @@ bulkStore.form = bulkStoreForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkDestroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:154
+* @see app/Http/Controllers/Debug/SslOverridesController.php:153
 * @route '/debug/ssl-overrides/bulk'
 */
 export const bulkDestroy = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -377,7 +377,7 @@ bulkDestroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkDestroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:154
+* @see app/Http/Controllers/Debug/SslOverridesController.php:153
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkDestroy.url = (options?: RouteQueryOptions) => {
@@ -386,7 +386,7 @@ bulkDestroy.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkDestroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:154
+* @see app/Http/Controllers/Debug/SslOverridesController.php:153
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkDestroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -396,7 +396,7 @@ bulkDestroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> =>
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkDestroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:154
+* @see app/Http/Controllers/Debug/SslOverridesController.php:153
 * @route '/debug/ssl-overrides/bulk'
 */
 const bulkDestroyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -411,7 +411,7 @@ const bulkDestroyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::bulkDestroy
-* @see app/Http/Controllers/Debug/SslOverridesController.php:154
+* @see app/Http/Controllers/Debug/SslOverridesController.php:153
 * @route '/debug/ssl-overrides/bulk'
 */
 bulkDestroyForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -428,7 +428,7 @@ bulkDestroy.form = bulkDestroyForm
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::test
-* @see app/Http/Controllers/Debug/SslOverridesController.php:209
+* @see app/Http/Controllers/Debug/SslOverridesController.php:208
 * @route '/debug/ssl-overrides/test'
 */
 export const test = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -443,7 +443,7 @@ test.definition = {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::test
-* @see app/Http/Controllers/Debug/SslOverridesController.php:209
+* @see app/Http/Controllers/Debug/SslOverridesController.php:208
 * @route '/debug/ssl-overrides/test'
 */
 test.url = (options?: RouteQueryOptions) => {
@@ -452,7 +452,7 @@ test.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::test
-* @see app/Http/Controllers/Debug/SslOverridesController.php:209
+* @see app/Http/Controllers/Debug/SslOverridesController.php:208
 * @route '/debug/ssl-overrides/test'
 */
 test.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -462,7 +462,7 @@ test.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::test
-* @see app/Http/Controllers/Debug/SslOverridesController.php:209
+* @see app/Http/Controllers/Debug/SslOverridesController.php:208
 * @route '/debug/ssl-overrides/test'
 */
 const testForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -472,7 +472,7 @@ const testForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 
 /**
 * @see \App\Http\Controllers\Debug\SslOverridesController::test
-* @see app/Http/Controllers/Debug/SslOverridesController.php:209
+* @see app/Http/Controllers/Debug/SslOverridesController.php:208
 * @route '/debug/ssl-overrides/test'
 */
 testForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

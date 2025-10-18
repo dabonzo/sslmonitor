@@ -18,7 +18,7 @@ test('javascript content fetcher can test availability', function () {
 });
 
 test('javascript content fetcher can fetch simple html content', function () {
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Test with a simple data URL
     $content = $fetcher->fetchContent('data:text/html,<html><body><h1>Test Page</h1></body></html>', 1);
@@ -31,7 +31,7 @@ test('javascript content fetcher can fetch simple html content', function () {
 });
 
 test('javascript content fetcher returns empty string on error', function () {
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Test with invalid URL
     $content = $fetcher->fetchContent('invalid://url', 1);
@@ -48,7 +48,7 @@ test('javascript content fetcher can fetch content for monitor with javascript e
         'javascript_wait_seconds' => 2,
     ]);
 
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
     $content = $fetcher->fetchContentForMonitor($monitor);
 
     expect($content)->toContain('Monitor Test');
@@ -64,7 +64,7 @@ test('javascript content fetcher returns empty string for monitor without javasc
         'javascript_wait_seconds' => 5,
     ]);
 
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
     $content = $fetcher->fetchContentForMonitor($monitor);
 
     expect($content)->toBe('');
@@ -79,7 +79,7 @@ test('javascript content fetcher respects wait time bounds', function () {
         'javascript_wait_seconds' => 50, // Should be clamped to 30
     ]);
 
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // The wait seconds should be handled by the Monitor model's getJavaScriptWaitSeconds method
     expect($monitor->getJavaScriptWaitSeconds())->toBe(30);
@@ -88,22 +88,22 @@ test('javascript content fetcher respects wait time bounds', function () {
 });
 
 test('javascript content fetcher handles cleanup properly', function () {
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Fetch some content to initialize the browser
     $fetcher->fetchContent('data:text/html,<html><body>Cleanup Test</body></html>', 1);
 
     // Cleanup should not throw any exceptions
-    expect(fn() => $fetcher->cleanup())->not->toThrow();
+    expect(fn () => $fetcher->cleanup())->not->toThrow();
 
     // Multiple cleanups should be safe
-    expect(fn() => $fetcher->cleanup())->not->toThrow();
+    expect(fn () => $fetcher->cleanup())->not->toThrow();
 });
 
 test('javascript content fetcher logs errors appropriately', function () {
     Log::fake();
 
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Test with invalid URL that should cause an error
     $content = $fetcher->fetchContent('invalid://definitely-not-a-url', 1);
@@ -117,8 +117,8 @@ test('javascript content fetcher logs errors appropriately', function () {
 });
 
 test('javascript content fetcher can be instantiated multiple times', function () {
-    $fetcher1 = new JavaScriptContentFetcher();
-    $fetcher2 = new JavaScriptContentFetcher();
+    $fetcher1 = new JavaScriptContentFetcher;
+    $fetcher2 = new JavaScriptContentFetcher;
 
     // Both should be able to fetch content independently
     $content1 = $fetcher1->fetchContent('data:text/html,<html><body>Fetcher 1</body></html>', 1);
@@ -133,7 +133,7 @@ test('javascript content fetcher can be instantiated multiple times', function (
 
 test('javascript content fetcher destructor calls cleanup', function () {
     // This test verifies that the destructor is properly set up
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Fetch some content to initialize
     $fetcher->fetchContent('data:text/html,<html><body>Destructor Test</body></html>', 1);
@@ -147,7 +147,7 @@ test('javascript content fetcher destructor calls cleanup', function () {
 });
 
 test('javascript content fetcher handles network timeouts gracefully', function () {
-    $fetcher = new JavaScriptContentFetcher();
+    $fetcher = new JavaScriptContentFetcher;
 
     // Use a non-routable IP address to simulate a timeout
     $startTime = microtime(true);

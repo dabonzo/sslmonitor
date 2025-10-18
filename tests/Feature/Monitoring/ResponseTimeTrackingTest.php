@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\Traits\MocksMonitorHttpRequests;
 
 uses(RefreshDatabase::class);
@@ -285,6 +284,7 @@ test('average response time can be calculated from monitors', function () {
             'uptime_status' => 'up',
             'uptime_last_check_date' => now(),
         ]);
+
         return $monitor;
     });
 

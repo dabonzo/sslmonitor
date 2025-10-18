@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::index
-* @see app/Http/Controllers/WebsiteController.php:26
+* @see app/Http/Controllers/WebsiteController.php:24
 * @route '/ssl/websites'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -106,7 +106,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -116,7 +116,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -126,7 +126,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -136,7 +136,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -146,7 +146,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::create
-* @see app/Http/Controllers/WebsiteController.php:245
+* @see app/Http/Controllers/WebsiteController.php:243
 * @route '/ssl/websites/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -163,7 +163,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::store
-* @see app/Http/Controllers/WebsiteController.php:250
+* @see app/Http/Controllers/WebsiteController.php:248
 * @route '/ssl/websites'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -178,7 +178,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::store
-* @see app/Http/Controllers/WebsiteController.php:250
+* @see app/Http/Controllers/WebsiteController.php:248
 * @route '/ssl/websites'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -187,7 +187,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::store
-* @see app/Http/Controllers/WebsiteController.php:250
+* @see app/Http/Controllers/WebsiteController.php:248
 * @route '/ssl/websites'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -197,7 +197,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::store
-* @see app/Http/Controllers/WebsiteController.php:250
+* @see app/Http/Controllers/WebsiteController.php:248
 * @route '/ssl/websites'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -207,7 +207,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::store
-* @see app/Http/Controllers/WebsiteController.php:250
+* @see app/Http/Controllers/WebsiteController.php:248
 * @route '/ssl/websites'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -219,7 +219,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 export const show = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -234,7 +234,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 show.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -267,7 +267,7 @@ show.url = (args: { website: number | { id: number } } | [website: number | { id
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 show.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -277,7 +277,7 @@ show.get = (args: { website: number | { id: number } } | [website: number | { id
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 show.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -287,7 +287,7 @@ show.head = (args: { website: number | { id: number } } | [website: number | { i
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 const showForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -297,7 +297,7 @@ const showForm = (args: { website: number | { id: number } } | [website: number 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 showForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -307,7 +307,7 @@ showForm.get = (args: { website: number | { id: number } } | [website: number | 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::show
-* @see app/Http/Controllers/WebsiteController.php:350
+* @see app/Http/Controllers/WebsiteController.php:348
 * @route '/ssl/websites/{website}'
 */
 showForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -324,7 +324,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 export const edit = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -339,7 +339,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 edit.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -372,7 +372,7 @@ edit.url = (args: { website: number | { id: number } } | [website: number | { id
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 edit.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -382,7 +382,7 @@ edit.get = (args: { website: number | { id: number } } | [website: number | { id
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 edit.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -392,7 +392,7 @@ edit.head = (args: { website: number | { id: number } } | [website: number | { i
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 const editForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -402,7 +402,7 @@ const editForm = (args: { website: number | { id: number } } | [website: number 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 editForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -412,7 +412,7 @@ editForm.get = (args: { website: number | { id: number } } | [website: number | 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::edit
-* @see app/Http/Controllers/WebsiteController.php:400
+* @see app/Http/Controllers/WebsiteController.php:398
 * @route '/ssl/websites/{website}/edit'
 */
 editForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -429,7 +429,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 export const update = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -444,7 +444,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 update.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -477,7 +477,7 @@ update.url = (args: { website: number | { id: number } } | [website: number | { 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 update.put = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -487,7 +487,7 @@ update.put = (args: { website: number | { id: number } } | [website: number | { 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 update.patch = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -497,7 +497,7 @@ update.patch = (args: { website: number | { id: number } } | [website: number | 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 const updateForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -512,7 +512,7 @@ const updateForm = (args: { website: number | { id: number } } | [website: numbe
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 updateForm.put = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -527,7 +527,7 @@ updateForm.put = (args: { website: number | { id: number } } | [website: number 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::update
-* @see app/Http/Controllers/WebsiteController.php:409
+* @see app/Http/Controllers/WebsiteController.php:407
 * @route '/ssl/websites/{website}'
 */
 updateForm.patch = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -544,7 +544,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::destroy
-* @see app/Http/Controllers/WebsiteController.php:432
+* @see app/Http/Controllers/WebsiteController.php:430
 * @route '/ssl/websites/{website}'
 */
 export const destroy = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -559,7 +559,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::destroy
-* @see app/Http/Controllers/WebsiteController.php:432
+* @see app/Http/Controllers/WebsiteController.php:430
 * @route '/ssl/websites/{website}'
 */
 destroy.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -592,7 +592,7 @@ destroy.url = (args: { website: number | { id: number } } | [website: number | {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::destroy
-* @see app/Http/Controllers/WebsiteController.php:432
+* @see app/Http/Controllers/WebsiteController.php:430
 * @route '/ssl/websites/{website}'
 */
 destroy.delete = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -602,7 +602,7 @@ destroy.delete = (args: { website: number | { id: number } } | [website: number 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::destroy
-* @see app/Http/Controllers/WebsiteController.php:432
+* @see app/Http/Controllers/WebsiteController.php:430
 * @route '/ssl/websites/{website}'
 */
 const destroyForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -617,7 +617,7 @@ const destroyForm = (args: { website: number | { id: number } } | [website: numb
 
 /**
 * @see \App\Http\Controllers\WebsiteController::destroy
-* @see app/Http/Controllers/WebsiteController.php:432
+* @see app/Http/Controllers/WebsiteController.php:430
 * @route '/ssl/websites/{website}'
 */
 destroyForm.delete = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -634,7 +634,7 @@ destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::check
-* @see app/Http/Controllers/WebsiteController.php:446
+* @see app/Http/Controllers/WebsiteController.php:444
 * @route '/ssl/websites/{website}/check'
 */
 export const check = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -649,7 +649,7 @@ check.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::check
-* @see app/Http/Controllers/WebsiteController.php:446
+* @see app/Http/Controllers/WebsiteController.php:444
 * @route '/ssl/websites/{website}/check'
 */
 check.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -682,7 +682,7 @@ check.url = (args: { website: number | { id: number } } | [website: number | { i
 
 /**
 * @see \App\Http\Controllers\WebsiteController::check
-* @see app/Http/Controllers/WebsiteController.php:446
+* @see app/Http/Controllers/WebsiteController.php:444
 * @route '/ssl/websites/{website}/check'
 */
 check.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -692,7 +692,7 @@ check.post = (args: { website: number | { id: number } } | [website: number | { 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::check
-* @see app/Http/Controllers/WebsiteController.php:446
+* @see app/Http/Controllers/WebsiteController.php:444
 * @route '/ssl/websites/{website}/check'
 */
 const checkForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -702,7 +702,7 @@ const checkForm = (args: { website: number | { id: number } } | [website: number
 
 /**
 * @see \App\Http\Controllers\WebsiteController::check
-* @see app/Http/Controllers/WebsiteController.php:446
+* @see app/Http/Controllers/WebsiteController.php:444
 * @route '/ssl/websites/{website}/check'
 */
 checkForm.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -714,7 +714,7 @@ check.form = checkForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkDestroy
-* @see app/Http/Controllers/WebsiteController.php:616
+* @see app/Http/Controllers/WebsiteController.php:614
 * @route '/ssl/websites/bulk-destroy'
 */
 export const bulkDestroy = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -729,7 +729,7 @@ bulkDestroy.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkDestroy
-* @see app/Http/Controllers/WebsiteController.php:616
+* @see app/Http/Controllers/WebsiteController.php:614
 * @route '/ssl/websites/bulk-destroy'
 */
 bulkDestroy.url = (options?: RouteQueryOptions) => {
@@ -738,7 +738,7 @@ bulkDestroy.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkDestroy
-* @see app/Http/Controllers/WebsiteController.php:616
+* @see app/Http/Controllers/WebsiteController.php:614
 * @route '/ssl/websites/bulk-destroy'
 */
 bulkDestroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -748,7 +748,7 @@ bulkDestroy.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> =>
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkDestroy
-* @see app/Http/Controllers/WebsiteController.php:616
+* @see app/Http/Controllers/WebsiteController.php:614
 * @route '/ssl/websites/bulk-destroy'
 */
 const bulkDestroyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -763,7 +763,7 @@ const bulkDestroyForm = (options?: RouteQueryOptions): RouteFormDefinition<'post
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkDestroy
-* @see app/Http/Controllers/WebsiteController.php:616
+* @see app/Http/Controllers/WebsiteController.php:614
 * @route '/ssl/websites/bulk-destroy'
 */
 bulkDestroyForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -780,7 +780,7 @@ bulkDestroy.form = bulkDestroyForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkCheck
-* @see app/Http/Controllers/WebsiteController.php:636
+* @see app/Http/Controllers/WebsiteController.php:634
 * @route '/ssl/websites/bulk-check'
 */
 export const bulkCheck = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -795,7 +795,7 @@ bulkCheck.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkCheck
-* @see app/Http/Controllers/WebsiteController.php:636
+* @see app/Http/Controllers/WebsiteController.php:634
 * @route '/ssl/websites/bulk-check'
 */
 bulkCheck.url = (options?: RouteQueryOptions) => {
@@ -804,7 +804,7 @@ bulkCheck.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkCheck
-* @see app/Http/Controllers/WebsiteController.php:636
+* @see app/Http/Controllers/WebsiteController.php:634
 * @route '/ssl/websites/bulk-check'
 */
 bulkCheck.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -814,7 +814,7 @@ bulkCheck.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkCheck
-* @see app/Http/Controllers/WebsiteController.php:636
+* @see app/Http/Controllers/WebsiteController.php:634
 * @route '/ssl/websites/bulk-check'
 */
 const bulkCheckForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -824,7 +824,7 @@ const bulkCheckForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'>
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkCheck
-* @see app/Http/Controllers/WebsiteController.php:636
+* @see app/Http/Controllers/WebsiteController.php:634
 * @route '/ssl/websites/bulk-check'
 */
 bulkCheckForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -836,7 +836,7 @@ bulkCheck.form = bulkCheckForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 export const details = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -851,7 +851,7 @@ details.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 details.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -884,7 +884,7 @@ details.url = (args: { website: number | { id: number } } | [website: number | {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 details.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -894,7 +894,7 @@ details.get = (args: { website: number | { id: number } } | [website: number | {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 details.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -904,7 +904,7 @@ details.head = (args: { website: number | { id: number } } | [website: number | 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 const detailsForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -914,7 +914,7 @@ const detailsForm = (args: { website: number | { id: number } } | [website: numb
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 detailsForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -924,7 +924,7 @@ detailsForm.get = (args: { website: number | { id: number } } | [website: number
 
 /**
 * @see \App\Http\Controllers\WebsiteController::details
-* @see app/Http/Controllers/WebsiteController.php:686
+* @see app/Http/Controllers/WebsiteController.php:690
 * @route '/ssl/websites/{website}/details'
 */
 detailsForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -941,7 +941,7 @@ details.form = detailsForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 export const certificateAnalysis = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -956,7 +956,7 @@ certificateAnalysis.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 certificateAnalysis.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -989,7 +989,7 @@ certificateAnalysis.url = (args: { website: number | { id: number } } | [website
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 certificateAnalysis.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -999,7 +999,7 @@ certificateAnalysis.get = (args: { website: number | { id: number } } | [website
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 certificateAnalysis.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -1009,7 +1009,7 @@ certificateAnalysis.head = (args: { website: number | { id: number } } | [websit
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 const certificateAnalysisForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1019,7 +1019,7 @@ const certificateAnalysisForm = (args: { website: number | { id: number } } | [w
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 certificateAnalysisForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1029,7 +1029,7 @@ certificateAnalysisForm.get = (args: { website: number | { id: number } } | [web
 
 /**
 * @see \App\Http\Controllers\WebsiteController::certificateAnalysis
-* @see app/Http/Controllers/WebsiteController.php:750
+* @see app/Http/Controllers/WebsiteController.php:754
 * @route '/ssl/websites/{website}/certificate-analysis'
 */
 certificateAnalysisForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1046,7 +1046,7 @@ certificateAnalysis.form = certificateAnalysisForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::immediateCheck
-* @see app/Http/Controllers/WebsiteController.php:487
+* @see app/Http/Controllers/WebsiteController.php:485
 * @route '/ssl/websites/{website}/immediate-check'
 */
 export const immediateCheck = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1061,7 +1061,7 @@ immediateCheck.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::immediateCheck
-* @see app/Http/Controllers/WebsiteController.php:487
+* @see app/Http/Controllers/WebsiteController.php:485
 * @route '/ssl/websites/{website}/immediate-check'
 */
 immediateCheck.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1094,7 +1094,7 @@ immediateCheck.url = (args: { website: number | { id: number } } | [website: num
 
 /**
 * @see \App\Http\Controllers\WebsiteController::immediateCheck
-* @see app/Http/Controllers/WebsiteController.php:487
+* @see app/Http/Controllers/WebsiteController.php:485
 * @route '/ssl/websites/{website}/immediate-check'
 */
 immediateCheck.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1104,7 +1104,7 @@ immediateCheck.post = (args: { website: number | { id: number } } | [website: nu
 
 /**
 * @see \App\Http\Controllers\WebsiteController::immediateCheck
-* @see app/Http/Controllers/WebsiteController.php:487
+* @see app/Http/Controllers/WebsiteController.php:485
 * @route '/ssl/websites/{website}/immediate-check'
 */
 const immediateCheckForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1114,7 +1114,7 @@ const immediateCheckForm = (args: { website: number | { id: number } } | [websit
 
 /**
 * @see \App\Http\Controllers\WebsiteController::immediateCheck
-* @see app/Http/Controllers/WebsiteController.php:487
+* @see app/Http/Controllers/WebsiteController.php:485
 * @route '/ssl/websites/{website}/immediate-check'
 */
 immediateCheckForm.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1126,7 +1126,7 @@ immediateCheck.form = immediateCheckForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 export const checkStatus = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1141,7 +1141,7 @@ checkStatus.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 checkStatus.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1174,7 +1174,7 @@ checkStatus.url = (args: { website: number | { id: number } } | [website: number
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 checkStatus.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1184,7 +1184,7 @@ checkStatus.get = (args: { website: number | { id: number } } | [website: number
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 checkStatus.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -1194,7 +1194,7 @@ checkStatus.head = (args: { website: number | { id: number } } | [website: numbe
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 const checkStatusForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1204,7 +1204,7 @@ const checkStatusForm = (args: { website: number | { id: number } } | [website: 
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 checkStatusForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1214,7 +1214,7 @@ checkStatusForm.get = (args: { website: number | { id: number } } | [website: nu
 
 /**
 * @see \App\Http\Controllers\WebsiteController::checkStatus
-* @see app/Http/Controllers/WebsiteController.php:563
+* @see app/Http/Controllers/WebsiteController.php:561
 * @route '/ssl/websites/{website}/check-status'
 */
 checkStatusForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1231,7 +1231,7 @@ checkStatus.form = checkStatusForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToTeam
-* @see app/Http/Controllers/WebsiteController.php:778
+* @see app/Http/Controllers/WebsiteController.php:782
 * @route '/ssl/websites/{website}/transfer-to-team'
 */
 export const transferToTeam = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1246,7 +1246,7 @@ transferToTeam.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToTeam
-* @see app/Http/Controllers/WebsiteController.php:778
+* @see app/Http/Controllers/WebsiteController.php:782
 * @route '/ssl/websites/{website}/transfer-to-team'
 */
 transferToTeam.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1279,7 +1279,7 @@ transferToTeam.url = (args: { website: number | { id: number } } | [website: num
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToTeam
-* @see app/Http/Controllers/WebsiteController.php:778
+* @see app/Http/Controllers/WebsiteController.php:782
 * @route '/ssl/websites/{website}/transfer-to-team'
 */
 transferToTeam.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1289,7 +1289,7 @@ transferToTeam.post = (args: { website: number | { id: number } } | [website: nu
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToTeam
-* @see app/Http/Controllers/WebsiteController.php:778
+* @see app/Http/Controllers/WebsiteController.php:782
 * @route '/ssl/websites/{website}/transfer-to-team'
 */
 const transferToTeamForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1299,7 +1299,7 @@ const transferToTeamForm = (args: { website: number | { id: number } } | [websit
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToTeam
-* @see app/Http/Controllers/WebsiteController.php:778
+* @see app/Http/Controllers/WebsiteController.php:782
 * @route '/ssl/websites/{website}/transfer-to-team'
 */
 transferToTeamForm.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1311,7 +1311,7 @@ transferToTeam.form = transferToTeamForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:812
+* @see app/Http/Controllers/WebsiteController.php:816
 * @route '/ssl/websites/{website}/transfer-to-personal'
 */
 export const transferToPersonal = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1326,7 +1326,7 @@ transferToPersonal.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:812
+* @see app/Http/Controllers/WebsiteController.php:816
 * @route '/ssl/websites/{website}/transfer-to-personal'
 */
 transferToPersonal.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1359,7 +1359,7 @@ transferToPersonal.url = (args: { website: number | { id: number } } | [website:
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:812
+* @see app/Http/Controllers/WebsiteController.php:816
 * @route '/ssl/websites/{website}/transfer-to-personal'
 */
 transferToPersonal.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1369,7 +1369,7 @@ transferToPersonal.post = (args: { website: number | { id: number } } | [website
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:812
+* @see app/Http/Controllers/WebsiteController.php:816
 * @route '/ssl/websites/{website}/transfer-to-personal'
 */
 const transferToPersonalForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1379,7 +1379,7 @@ const transferToPersonalForm = (args: { website: number | { id: number } } | [we
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:812
+* @see app/Http/Controllers/WebsiteController.php:816
 * @route '/ssl/websites/{website}/transfer-to-personal'
 */
 transferToPersonalForm.post = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1391,7 +1391,7 @@ transferToPersonal.form = transferToPersonalForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 export const transferOptions = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1406,7 +1406,7 @@ transferOptions.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 transferOptions.url = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -1439,7 +1439,7 @@ transferOptions.url = (args: { website: number | { id: number } } | [website: nu
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 transferOptions.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -1449,7 +1449,7 @@ transferOptions.get = (args: { website: number | { id: number } } | [website: nu
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 transferOptions.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -1459,7 +1459,7 @@ transferOptions.head = (args: { website: number | { id: number } } | [website: n
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 const transferOptionsForm = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1469,7 +1469,7 @@ const transferOptionsForm = (args: { website: number | { id: number } } | [websi
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 transferOptionsForm.get = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1479,7 +1479,7 @@ transferOptionsForm.get = (args: { website: number | { id: number } } | [website
 
 /**
 * @see \App\Http\Controllers\WebsiteController::transferOptions
-* @see app/Http/Controllers/WebsiteController.php:844
+* @see app/Http/Controllers/WebsiteController.php:848
 * @route '/ssl/websites/{website}/transfer-options'
 */
 transferOptionsForm.head = (args: { website: number | { id: number } } | [website: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -1496,7 +1496,7 @@ transferOptions.form = transferOptionsForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToTeam
-* @see app/Http/Controllers/WebsiteController.php:991
+* @see app/Http/Controllers/WebsiteController.php:994
 * @route '/ssl/websites/bulk-transfer-to-team'
 */
 export const bulkTransferToTeam = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1511,7 +1511,7 @@ bulkTransferToTeam.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToTeam
-* @see app/Http/Controllers/WebsiteController.php:991
+* @see app/Http/Controllers/WebsiteController.php:994
 * @route '/ssl/websites/bulk-transfer-to-team'
 */
 bulkTransferToTeam.url = (options?: RouteQueryOptions) => {
@@ -1520,7 +1520,7 @@ bulkTransferToTeam.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToTeam
-* @see app/Http/Controllers/WebsiteController.php:991
+* @see app/Http/Controllers/WebsiteController.php:994
 * @route '/ssl/websites/bulk-transfer-to-team'
 */
 bulkTransferToTeam.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1530,7 +1530,7 @@ bulkTransferToTeam.post = (options?: RouteQueryOptions): RouteDefinition<'post'>
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToTeam
-* @see app/Http/Controllers/WebsiteController.php:991
+* @see app/Http/Controllers/WebsiteController.php:994
 * @route '/ssl/websites/bulk-transfer-to-team'
 */
 const bulkTransferToTeamForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1540,7 +1540,7 @@ const bulkTransferToTeamForm = (options?: RouteQueryOptions): RouteFormDefinitio
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToTeam
-* @see app/Http/Controllers/WebsiteController.php:991
+* @see app/Http/Controllers/WebsiteController.php:994
 * @route '/ssl/websites/bulk-transfer-to-team'
 */
 bulkTransferToTeamForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1552,7 +1552,7 @@ bulkTransferToTeam.form = bulkTransferToTeamForm
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:1032
+* @see app/Http/Controllers/WebsiteController.php:1035
 * @route '/ssl/websites/bulk-transfer-to-personal'
 */
 export const bulkTransferToPersonal = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1567,7 +1567,7 @@ bulkTransferToPersonal.definition = {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:1032
+* @see app/Http/Controllers/WebsiteController.php:1035
 * @route '/ssl/websites/bulk-transfer-to-personal'
 */
 bulkTransferToPersonal.url = (options?: RouteQueryOptions) => {
@@ -1576,7 +1576,7 @@ bulkTransferToPersonal.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:1032
+* @see app/Http/Controllers/WebsiteController.php:1035
 * @route '/ssl/websites/bulk-transfer-to-personal'
 */
 bulkTransferToPersonal.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -1586,7 +1586,7 @@ bulkTransferToPersonal.post = (options?: RouteQueryOptions): RouteDefinition<'po
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:1032
+* @see app/Http/Controllers/WebsiteController.php:1035
 * @route '/ssl/websites/bulk-transfer-to-personal'
 */
 const bulkTransferToPersonalForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -1596,7 +1596,7 @@ const bulkTransferToPersonalForm = (options?: RouteQueryOptions): RouteFormDefin
 
 /**
 * @see \App\Http\Controllers\WebsiteController::bulkTransferToPersonal
-* @see app/Http/Controllers/WebsiteController.php:1032
+* @see app/Http/Controllers/WebsiteController.php:1035
 * @route '/ssl/websites/bulk-transfer-to-personal'
 */
 bulkTransferToPersonalForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

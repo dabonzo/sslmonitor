@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\Website;
 use App\Models\AlertConfiguration;
+use App\Models\Website;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -51,10 +51,19 @@ class SslCertificateExpiryAlert extends Mailable
     {
         $days = $this->certificateData['ssl_days_remaining'] ?? 0;
 
-        if ($days <= 0) return 'EXPIRED';
-        if ($days <= 3) return 'CRITICAL';
-        if ($days <= 7) return 'URGENT';
-        if ($days <= 14) return 'WARNING';
+        if ($days <= 0) {
+            return 'EXPIRED';
+        }
+        if ($days <= 3) {
+            return 'CRITICAL';
+        }
+        if ($days <= 7) {
+            return 'URGENT';
+        }
+        if ($days <= 14) {
+            return 'WARNING';
+        }
+
         return 'INFO';
     }
 
@@ -71,6 +80,7 @@ class SslCertificateExpiryAlert extends Mailable
             if ($isLetsEncrypt) {
                 return 'CRITICAL: Verify Let\'s Encrypt auto-renewal is working. Manual intervention may be needed.';
             }
+
             return 'CRITICAL: Renew certificate immediately to prevent service disruption.';
         }
 
@@ -78,6 +88,7 @@ class SslCertificateExpiryAlert extends Mailable
             if ($isLetsEncrypt) {
                 return 'URGENT: Check Let\'s Encrypt auto-renewal configuration and logs.';
             }
+
             return 'URGENT: Schedule certificate renewal within the next few days.';
         }
 

@@ -21,8 +21,8 @@ return [
         // Try to find Firefox in shared Playwright directory (production)
         $playwrightShared = '/var/www/monitor.intermedien.at/web/shared/.playwright';
         if (is_dir($playwrightShared)) {
-            $firefoxDirs = glob($playwrightShared . '/firefox-*/firefox/firefox');
-            if (!empty($firefoxDirs)) {
+            $firefoxDirs = glob($playwrightShared.'/firefox-*/firefox/firefox');
+            if (! empty($firefoxDirs)) {
                 return $firefoxDirs[0];
             }
         }
@@ -32,8 +32,8 @@ return [
             // Try Playwright in node_modules first
             $playwrightPath = base_path('node_modules/playwright-core/.local-browsers');
             if (is_dir($playwrightPath)) {
-                $firefoxDirs = glob($playwrightPath . '/firefox-*/firefox/firefox');
-                if (!empty($firefoxDirs)) {
+                $firefoxDirs = glob($playwrightPath.'/firefox-*/firefox/firefox');
+                if (! empty($firefoxDirs)) {
                     return $firefoxDirs[0];
                 }
             }

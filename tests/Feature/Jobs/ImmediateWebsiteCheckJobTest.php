@@ -1,11 +1,9 @@
 <?php
 
 use App\Jobs\ImmediateWebsiteCheckJob;
-use App\Models\Website;
 use App\Models\User;
-use App\Support\AutomationLogger;
+use App\Models\Website;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Tests\Traits\MocksMonitorHttpRequests;
 

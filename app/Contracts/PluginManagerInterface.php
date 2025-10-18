@@ -78,5 +78,5 @@ interface PluginManagerInterface
     /**
      * Update plugin status
      */
-    public function updateStatus(string $pluginId, string $status, string $message = null): bool;
+    public function updateStatus(string $pluginId, string $status, ?string $message = null): bool;
 }

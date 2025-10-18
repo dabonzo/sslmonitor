@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 
 describe('Content Validation System', function () {
     beforeEach(function () {
-        $this->checker = new EnhancedContentChecker();
+        $this->checker = new EnhancedContentChecker;
         $this->monitor = Monitor::factory()->create([
             'url' => 'https://example.com',
             'javascript_enabled' => false,
@@ -44,7 +44,7 @@ describe('Content Validation System', function () {
     describe('Expected Strings Validation', function () {
         test('validates when all expected strings are present', function () {
             $this->monitor->update([
-                'content_expected_strings' => ['Welcome', 'Dashboard', 'User']
+                'content_expected_strings' => ['Welcome', 'Dashboard', 'User'],
             ]);
             $response = new Response(200, [], 'Welcome to the Dashboard, User');
 
@@ -53,7 +53,7 @@ describe('Content Validation System', function () {
 
         test('fails when expected string is missing', function () {
             $this->monitor->update([
-                'content_expected_strings' => ['Welcome', 'Dashboard', 'Missing']
+                'content_expected_strings' => ['Welcome', 'Dashboard', 'Missing'],
             ]);
             $response = new Response(200, [], 'Welcome to the Dashboard');
 
@@ -73,7 +73,7 @@ describe('Content Validation System', function () {
     describe('Forbidden Strings Validation', function () {
         test('validates when no forbidden strings are present', function () {
             $this->monitor->update([
-                'content_forbidden_strings' => ['Error', '404', 'Not Found']
+                'content_forbidden_strings' => ['Error', '404', 'Not Found'],
             ]);
             $response = new Response(200, [], 'Welcome to our site');
 
@@ -82,7 +82,7 @@ describe('Content Validation System', function () {
 
         test('fails when forbidden string is found', function () {
             $this->monitor->update([
-                'content_forbidden_strings' => ['Error', '404', 'Not Found']
+                'content_forbidden_strings' => ['Error', '404', 'Not Found'],
             ]);
             $response = new Response(200, [], 'Error 500: Internal server error');
 
@@ -102,7 +102,7 @@ describe('Content Validation System', function () {
     describe('Regex Pattern Validation', function () {
         test('validates when all regex patterns match', function () {
             $this->monitor->update([
-                'content_regex_patterns' => ['/\d{4}/', '/[A-Z][a-z]+/']
+                'content_regex_patterns' => ['/\d{4}/', '/[A-Z][a-z]+/'],
             ]);
             $response = new Response(200, [], 'Year 2024 Welcome');
 
@@ -111,7 +111,7 @@ describe('Content Validation System', function () {
 
         test('fails when regex pattern does not match', function () {
             $this->monitor->update([
-                'content_regex_patterns' => ['/\d{4}/', '/[A-Z][a-z]+/']
+                'content_regex_patterns' => ['/\d{4}/', '/[A-Z][a-z]+/'],
             ]);
             $response = new Response(200, [], 'no numbers or capitals');
 
@@ -134,7 +134,7 @@ describe('Content Validation System', function () {
                 'look_for_string' => 'base',
                 'content_expected_strings' => ['Welcome', 'User'],
                 'content_forbidden_strings' => ['Error', '404'],
-                'content_regex_patterns' => ['/\d{4}/']
+                'content_regex_patterns' => ['/\d{4}/'],
             ]);
             $response = new Response(200, [], 'Welcome User to our base system in 2024');
 
@@ -145,7 +145,7 @@ describe('Content Validation System', function () {
             $this->monitor->update([
                 'look_for_string' => 'missing',
                 'content_expected_strings' => ['Welcome'],
-                'content_forbidden_strings' => ['Error']
+                'content_forbidden_strings' => ['Error'],
             ]);
             $response = new Response(200, [], 'Welcome to our site');
 
@@ -157,7 +157,7 @@ describe('Content Validation System', function () {
         test('fails when enhanced validation fails even if basic passes', function () {
             $this->monitor->update([
                 'look_for_string' => 'Welcome',
-                'content_forbidden_strings' => ['Error']
+                'content_forbidden_strings' => ['Error'],
             ]);
             $response = new Response(200, [], 'Welcome! Error 500 occurred');
 
@@ -172,7 +172,7 @@ describe('Content Validation System', function () {
             $this->monitor->update([
                 'content_expected_strings' => null,
                 'content_forbidden_strings' => null,
-                'content_regex_patterns' => null
+                'content_regex_patterns' => null,
             ]);
             $response = new Response(200, [], 'Any content');
 
@@ -181,7 +181,7 @@ describe('Content Validation System', function () {
 
         test('handles empty string response', function () {
             $this->monitor->update([
-                'content_expected_strings' => ['text']
+                'content_expected_strings' => ['text'],
             ]);
             $response = new Response(200, [], '');
 
@@ -190,7 +190,7 @@ describe('Content Validation System', function () {
 
         test('handles case sensitive string matching', function () {
             $this->monitor->update([
-                'content_expected_strings' => ['Welcome']
+                'content_expected_strings' => ['Welcome'],
             ]);
             $response = new Response(200, [], 'welcome to our site');
 
@@ -216,7 +216,7 @@ describe('Content Validation System', function () {
             // Test fallback when validation fails but basic passes
             $this->monitor->update([
                 'look_for_string' => 'Content',
-                'content_expected_strings' => ['NotPresent']
+                'content_expected_strings' => ['NotPresent'],
             ]);
             $result = $this->checker->getFailureReason($response, $this->monitor);
             expect($result)->toBe('Expected word `NotPresent` was not found in response (uses word boundary matching).');
@@ -228,9 +228,9 @@ describe('BrowserShot JavaScript Content Fetching Integration', function () {
     test('skips browsershot fetching when javascript disabled', function () {
         $monitor = Monitor::factory()->create([
             'javascript_enabled' => false,
-            'content_expected_strings' => ['Welcome']
+            'content_expected_strings' => ['Welcome'],
         ]);
-        $checker = new EnhancedContentChecker();
+        $checker = new EnhancedContentChecker;
         $response = new Response(200, [], 'Welcome to our site');
 
         expect($checker->isValidResponse($response, $monitor))->toBeTrue();
@@ -239,7 +239,7 @@ describe('BrowserShot JavaScript Content Fetching Integration', function () {
     test('monitor tracks browsershot configuration correctly', function () {
         $monitor = Monitor::factory()->create([
             'javascript_enabled' => true,
-            'javascript_wait_seconds' => 10
+            'javascript_wait_seconds' => 10,
         ]);
 
         expect($monitor->hasJavaScriptEnabled())->toBeTrue();
@@ -248,7 +248,7 @@ describe('BrowserShot JavaScript Content Fetching Integration', function () {
 
     test('browsershot wait seconds are bounded correctly', function () {
         $monitor = Monitor::factory()->create([
-            'javascript_wait_seconds' => 0
+            'javascript_wait_seconds' => 0,
         ]);
         expect($monitor->getJavaScriptWaitSeconds())->toBe(1);
 

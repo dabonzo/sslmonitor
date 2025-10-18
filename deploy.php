@@ -1,15 +1,20 @@
 <?php
+
 namespace Deployer;
 
 require 'recipe/laravel.php';
 
 // Load environment variables from .env.deployer
-if (file_exists(__DIR__ . '/.env.deployer')) {
-    $lines = file(__DIR__ . '/.env.deployer', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+if (file_exists(__DIR__.'/.env.deployer')) {
+    $lines = file(__DIR__.'/.env.deployer', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') === false) continue;
-        list($key, $value) = explode('=', $line, 2);
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        if (strpos($line, '=') === false) {
+            continue;
+        }
+        [$key, $value] = explode('=', $line, 2);
         putenv("$key=$value");
     }
 }
@@ -91,6 +96,7 @@ task('playwright:update_env', function () {
 
     if (empty($firefoxPath)) {
         writeln('<comment>Firefox binary not found yet - config will auto-detect it</comment>');
+
         return;
     }
 
@@ -116,6 +122,7 @@ task('horizon:terminate', function () {
 
     if ($currentExists === 'no') {
         writeln('<info>No current deployment - skipping Horizon termination</info>');
+
         return;
     }
 
@@ -155,7 +162,7 @@ task('horizon:restart', function () {
             writeln('<error>⚠ Horizon service may not be running. Check with: sudo systemctl status ssl-monitor-horizon</error>');
         }
     } catch (\Exception $e) {
-        writeln('<error>Failed to restart Horizon: ' . $e->getMessage() . '</error>');
+        writeln('<error>Failed to restart Horizon: '.$e->getMessage().'</error>');
         throw $e;
     }
 })->desc('Restart Horizon systemd service');
@@ -214,7 +221,7 @@ task('deploy', [
     'horizon:terminate',
     'deploy:symlink',
     'horizon:restart',
-    //'deploy:fix_permissions',
+    // 'deploy:fix_permissions',
     'deploy:cleanup',
     'deploy:success',
 ])->desc('Deploy SSL Monitor v4 to production');

@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TeamInvitationMail;
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\TeamInvitation;
+use App\Models\TeamMember;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\TeamInvitationMail;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TeamController extends Controller
 {
@@ -76,7 +76,7 @@ class TeamController extends Controller
         $user = Auth::user();
 
         // Check if user is a member of this team
-        if (!$user->isMemberOf($team)) {
+        if (! $user->isMemberOf($team)) {
             abort(403, 'You are not a member of this team.');
         }
 
@@ -132,7 +132,7 @@ class TeamController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->canManageTeam($team)) {
+        if (! $user->canManageTeam($team)) {
             abort(403, 'You do not have permission to update this team.');
         }
 
@@ -153,7 +153,7 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->canManageTeam($team)) {
+        if (! $user->canManageTeam($team)) {
             abort(403, 'You do not have permission to delete this team.');
         }
 
@@ -183,13 +183,13 @@ class TeamController extends Controller
 
         // Check permissions - only owners and admins can invite
         $userRole = $user->getRoleInTeam($team);
-        if (!in_array($userRole, [TeamMember::ROLE_OWNER, TeamMember::ROLE_ADMIN])) {
+        if (! in_array($userRole, [TeamMember::ROLE_OWNER, TeamMember::ROLE_ADMIN])) {
             abort(403, 'You do not have permission to invite members to this team.');
         }
 
         $request->validate([
             'email' => 'required|email',
-            'role' => 'required|in:' . implode(',', TeamMember::getRoles()),
+            'role' => 'required|in:'.implode(',', TeamMember::getRoles()),
         ]);
 
         // Check if user is already a member
@@ -216,7 +216,7 @@ class TeamController extends Controller
             Mail::to($request->email)->send(new TeamInvitationMail($invitation));
         } catch (\Exception $e) {
             // Log error but don't fail the invitation creation
-            \Log::error('Failed to send team invitation email: ' . $e->getMessage());
+            \Log::error('Failed to send team invitation email: '.$e->getMessage());
         }
 
         return redirect()->back()->with('success', 'Invitation sent successfully!');
@@ -227,7 +227,7 @@ class TeamController extends Controller
         $currentUser = $request->user();
 
         // Only owners can remove members
-        if (!$currentUser->canManageTeam($team)) {
+        if (! $currentUser->canManageTeam($team)) {
             abort(403, 'You do not have permission to remove members from this team.');
         }
 
@@ -261,12 +261,12 @@ class TeamController extends Controller
         $currentUserRole = $currentUser->getRoleInTeam($team);
 
         // Must be at least ADMIN to change roles
-        if (!in_array($currentUserRole, [TeamMember::ROLE_OWNER, TeamMember::ROLE_ADMIN])) {
+        if (! in_array($currentUserRole, [TeamMember::ROLE_OWNER, TeamMember::ROLE_ADMIN])) {
             abort(403, 'You do not have permission to update member roles.');
         }
 
         $request->validate([
-            'role' => 'required|in:' . implode(',', TeamMember::getRoles()),
+            'role' => 'required|in:'.implode(',', TeamMember::getRoles()),
         ]);
 
         // Get target user's current role
@@ -274,7 +274,7 @@ class TeamController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$targetMember) {
+        if (! $targetMember) {
             return redirect()->back()->with('error', 'Member not found.');
         }
 
@@ -294,8 +294,8 @@ class TeamController extends Controller
             }
 
             // ADMIN can change between VIEWER and ADMIN
-            if (!in_array($targetCurrentRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN]) ||
-                !in_array($newRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN])) {
+            if (! in_array($targetCurrentRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN]) ||
+                ! in_array($newRole, [TeamMember::ROLE_VIEWER, TeamMember::ROLE_ADMIN])) {
                 abort(403, 'Admins can only change roles between VIEWER and ADMIN.');
             }
         }
@@ -326,7 +326,7 @@ class TeamController extends Controller
         $user = $request->user();
 
         // Check permissions and team ownership
-        if (!$user->canManageTeam($team) || $invitation->team_id !== $team->id) {
+        if (! $user->canManageTeam($team) || $invitation->team_id !== $team->id) {
             abort(403, 'You do not have permission to cancel this invitation.');
         }
 
@@ -340,7 +340,7 @@ class TeamController extends Controller
         $user = $request->user();
 
         // Check permissions and team ownership
-        if (!$user->canManageTeam($team) || $invitation->team_id !== $team->id) {
+        if (! $user->canManageTeam($team) || $invitation->team_id !== $team->id) {
             abort(403, 'You do not have permission to resend this invitation.');
         }
 
@@ -350,7 +350,7 @@ class TeamController extends Controller
         try {
             Mail::to($invitation->email)->send(new TeamInvitationMail($invitation));
         } catch (\Exception $e) {
-            \Log::error('Failed to resend team invitation email: ' . $e->getMessage());
+            \Log::error('Failed to resend team invitation email: '.$e->getMessage());
         }
 
         return redirect()->back()->with('success', 'Invitation resent successfully!');
@@ -361,7 +361,7 @@ class TeamController extends Controller
         $currentUser = $request->user();
 
         // Only current owner can transfer ownership
-        if (!$currentUser->canManageTeam($team)) {
+        if (! $currentUser->canManageTeam($team)) {
             abort(403, 'Only team owners can transfer ownership.');
         }
 
@@ -372,7 +372,7 @@ class TeamController extends Controller
         $newOwner = User::findOrFail($request->new_owner_id);
 
         // Verify new owner is a team member
-        if (!$newOwner->isMemberOf($team)) {
+        if (! $newOwner->isMemberOf($team)) {
             return redirect()->back()->with('error', 'The new owner must be a team member.');
         }
 
@@ -386,7 +386,7 @@ class TeamController extends Controller
 
             return redirect()->back()->with('success', "Team ownership transferred to {$newOwner->name} successfully!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to transfer ownership: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to transfer ownership: '.$e->getMessage());
         }
     }
 }

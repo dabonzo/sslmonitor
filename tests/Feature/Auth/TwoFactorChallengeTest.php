@@ -44,7 +44,7 @@ test('two factor challenge can verify correct code', function () {
     // Mock the service to simulate correct verification
     $mock = $this->mock(TwoFactorAuthService::class);
     $mock->shouldReceive('verifyKey')
-         ->andReturn(true);
+        ->andReturn(true);
 
     $response = $this->post(route('two-factor.challenge.store'), [
         'code' => '123456',
@@ -87,7 +87,7 @@ test('two factor challenge can verify recovery code', function () {
 
     $mock = $this->mock(TwoFactorAuthService::class);
     $mock->shouldReceive('verifyRecoveryCode')
-         ->andReturn(true);
+        ->andReturn(true);
 
     $response = $this->post(route('two-factor.challenge.store'), [
         'recovery_code' => 'RECOVERY1',

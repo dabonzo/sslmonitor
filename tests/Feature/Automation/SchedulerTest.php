@@ -37,6 +37,7 @@ test('scheduler unified monitor dispatch runs every minute', function () {
 
     $dispatchEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
+
         return str_contains($command, 'monitors:dispatch-scheduled-checks');
     });
 
@@ -53,6 +54,7 @@ test('scheduler sync command runs every 30 minutes', function () {
 
     $syncEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
+
         return str_contains($command, 'monitors:sync-websites');
     });
 
@@ -69,6 +71,7 @@ test('scheduler queue monitoring runs regularly', function () {
 
     $queueEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
+
         return str_contains($command, 'queue-health-check');
     });
 
@@ -85,6 +88,7 @@ test('scheduler commands have proper overlap protection', function () {
 
     $monitoringEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
+
         return str_contains($command, 'monitors:dispatch-scheduled-checks') ||
                str_contains($command, 'monitors:sync-websites');
     });
@@ -103,6 +107,7 @@ test('scheduler runs sync command in background', function () {
 
     $syncEvents = collect($events)->filter(function (Event $event) {
         $command = $event->command ?? $event->getSummaryForDisplay();
+
         return str_contains($command, 'monitors:sync-websites');
     });
 

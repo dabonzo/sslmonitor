@@ -30,7 +30,7 @@ class DispatchScheduledChecks extends Command
         $startTime = microtime(true);
 
         AutomationLogger::scheduler(
-            "Starting scheduled checks dispatch",
+            'Starting scheduled checks dispatch',
             ['command' => $this->signature]
         );
 
@@ -39,7 +39,7 @@ class DispatchScheduledChecks extends Command
         // Get monitors where uptime checking is enabled
         $monitors = Monitor::where('uptime_check_enabled', true)
             ->get()
-            ->filter(fn($monitor) => $monitor->shouldCheckUptime());
+            ->filter(fn ($monitor) => $monitor->shouldCheckUptime());
 
         $this->info("Found {$monitors->count()} monitors due for checking");
 
@@ -55,7 +55,7 @@ class DispatchScheduledChecks extends Command
         $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
         AutomationLogger::scheduler(
-            "Completed scheduled checks dispatch",
+            'Completed scheduled checks dispatch',
             [
                 'monitors_found' => $monitors->count(),
                 'jobs_dispatched' => $dispatched,
@@ -64,7 +64,7 @@ class DispatchScheduledChecks extends Command
         );
 
         $this->info("✓ Dispatched {$dispatched} check jobs in {$executionTime}ms");
-        $this->info("Jobs will be processed by Horizon workers");
+        $this->info('Jobs will be processed by Horizon workers');
 
         return Command::SUCCESS;
     }

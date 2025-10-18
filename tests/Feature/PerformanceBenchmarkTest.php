@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Team;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\Team;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
@@ -44,7 +44,7 @@ describe('Performance Benchmarks', function () {
         expect($executionTime)->toBeLessThan(1000)
             ->and($executionTime)->toBeGreaterThan(0);
 
-        echo "\n📊 Dashboard load time: " . round($executionTime, 2) . "ms";
+        echo "\n📊 Dashboard load time: ".round($executionTime, 2).'ms';
     });
 
     test('website index loads efficiently with search and filtering', function () {
@@ -68,7 +68,7 @@ describe('Performance Benchmarks', function () {
         // Website index should load in under 800ms with bulk query optimizations
         expect($executionTime)->toBeLessThan(800);
 
-        echo "\n📊 Website index load time: " . round($executionTime, 2) . "ms";
+        echo "\n📊 Website index load time: ".round($executionTime, 2).'ms';
 
         // Test search functionality performance
         $startTime = microtime(true);
@@ -83,7 +83,7 @@ describe('Performance Benchmarks', function () {
         // Search should be fast even with filtering
         expect($searchTime)->toBeLessThan(600);
 
-        echo "\n🔍 Search load time: " . round($searchTime, 2) . "ms";
+        echo "\n🔍 Search load time: ".round($searchTime, 2).'ms';
     });
 
     test('database queries are optimized with indexes', function () {
@@ -112,12 +112,12 @@ describe('Performance Benchmarks', function () {
         $queryCount = count($queries);
         expect($queryCount)->toBeLessThanOrEqual(12);
 
-        echo "\n📊 Total queries executed: " . $queryCount;
+        echo "\n📊 Total queries executed: ".$queryCount;
 
         // Log slow queries (>100ms) for analysis
         foreach ($queries as $query) {
             if ($query['time'] > 100) {
-                echo "\n⚠️  Slow query (" . round($query['time'], 2) . "ms): " . $query['query'];
+                echo "\n⚠️  Slow query (".round($query['time'], 2).'ms): '.$query['query'];
             }
         }
     });
@@ -152,9 +152,9 @@ describe('Performance Benchmarks', function () {
         $firstQueryCount = count($firstQueries);
         $secondQueryCount = count($secondQueries);
 
-        echo "\n📊 First request queries: " . $firstQueryCount;
-        echo "\n📊 Second request queries: " . $secondQueryCount;
-        echo "\n💾 Cache reduction: " . round((($firstQueryCount - $secondQueryCount) / $firstQueryCount) * 100, 1) . "%";
+        echo "\n📊 First request queries: ".$firstQueryCount;
+        echo "\n📊 Second request queries: ".$secondQueryCount;
+        echo "\n💾 Cache reduction: ".round((($firstQueryCount - $secondQueryCount) / $firstQueryCount) * 100, 1).'%';
 
         // In production, caching would reduce queries, but in testing environment
         // we just ensure both requests work without excessive queries
@@ -175,10 +175,10 @@ describe('Performance Benchmarks', function () {
         $mainBundle = null;
         foreach ($manifest as $file => $data) {
             if (str_ends_with($file, 'app.ts') && isset($data['file'])) {
-                $bundlePath = public_path('build/' . $data['file']);
+                $bundlePath = public_path('build/'.$data['file']);
                 if (file_exists($bundlePath)) {
                     $bundleSize = filesize($bundlePath);
-                    echo "\n📦 Main bundle size: " . round($bundleSize / 1024, 1) . "KB";
+                    echo "\n📦 Main bundle size: ".round($bundleSize / 1024, 1).'KB';
 
                     // Main bundle should be under 50KB with code splitting
                     expect($bundleSize)->toBeLessThan(50 * 1024); // 50KB
@@ -198,7 +198,7 @@ describe('Performance Benchmarks', function () {
             }
         }
 
-        echo "\n📦 Vendor chunks: " . $vendorChunks;
+        echo "\n📦 Vendor chunks: ".$vendorChunks;
         expect($vendorChunks)->toBeGreaterThan(0, 'Code splitting should create vendor chunks');
     });
 });

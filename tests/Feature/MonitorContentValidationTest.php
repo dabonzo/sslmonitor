@@ -30,7 +30,7 @@ describe('Monitor Content Validation Methods', function () {
             $this->monitor->update([
                 'content_expected_strings' => null,
                 'content_forbidden_strings' => null,
-                'content_regex_patterns' => null
+                'content_regex_patterns' => null,
             ]);
             expect($this->monitor->hasContentValidation())->toBeFalse();
         });
@@ -39,7 +39,7 @@ describe('Monitor Content Validation Methods', function () {
             $this->monitor->update([
                 'content_expected_strings' => [],
                 'content_forbidden_strings' => [],
-                'content_regex_patterns' => []
+                'content_regex_patterns' => [],
             ]);
             expect($this->monitor->hasContentValidation())->toBeFalse();
         });
@@ -183,7 +183,7 @@ describe('Monitor Content Validation Methods', function () {
             $this->monitor->update([
                 'content_expected_strings' => ['Welcome', 'Dashboard'],
                 'content_forbidden_strings' => ['Error', '404'],
-                'content_regex_patterns' => ['/\d+/', '/[A-Z]+/']
+                'content_regex_patterns' => ['/\d+/', '/[A-Z]+/'],
             ]);
 
             expect($this->monitor->content_expected_strings)->toBeArray();
@@ -194,7 +194,7 @@ describe('Monitor Content Validation Methods', function () {
         test('casts javascript settings correctly', function () {
             $this->monitor->update([
                 'javascript_enabled' => true,
-                'javascript_wait_seconds' => 10
+                'javascript_wait_seconds' => 10,
             ]);
 
             expect($this->monitor->javascript_enabled)->toBeBool();

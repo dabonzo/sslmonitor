@@ -15,7 +15,7 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
-    $email = 'test-' . time() . '@example.com';
+    $email = 'test-'.time().'@example.com';
 
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',

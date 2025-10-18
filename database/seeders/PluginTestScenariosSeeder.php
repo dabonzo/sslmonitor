@@ -55,8 +55,8 @@ class PluginTestScenariosSeeder extends Seeder
             'batch_size' => 50,
         ])->withAuthentication([
             'type' => 'api_key',
-            'api_key' => 'test_system_metrics_key_' . fake()->sha256(),
-            'secret' => 'test_secret_' . fake()->sha256(),
+            'api_key' => 'test_system_metrics_key_'.fake()->sha256(),
+            'secret' => 'test_secret_'.fake()->sha256(),
             'encryption' => 'aes256',
         ])->create([
             'user_id' => $user->id,
@@ -117,7 +117,7 @@ class PluginTestScenariosSeeder extends Seeder
             ],
         ])->withAuthentication([
             'type' => 'bearer_token',
-            'token' => 'xoxb-test-slack-token-' . fake()->sha256(),
+            'token' => 'xoxb-test-slack-token-'.fake()->sha256(),
         ])->create([
             'user_id' => $user->id,
             'plugin_name' => 'slack_notifications_test',
@@ -171,8 +171,8 @@ class PluginTestScenariosSeeder extends Seeder
             'retention_policy' => '30d',
         ])->withAuthentication([
             'type' => 'api_key',
-            'api_key' => 'grafana_api_key_' . fake()->sha256(),
-            'organization_id' => 'org_' . fake()->uuid(),
+            'api_key' => 'grafana_api_key_'.fake()->sha256(),
+            'organization_id' => 'org_'.fake()->uuid(),
         ])->create([
             'user_id' => $user->id,
             'plugin_name' => 'grafana_metrics_test',
@@ -192,8 +192,8 @@ class PluginTestScenariosSeeder extends Seeder
             'compression' => true,
         ])->withAuthentication([
             'type' => 'api_key',
-            'api_key' => 'datadog_api_key_' . fake()->sha256(),
-            'app_key' => 'datadog_app_key_' . fake()->sha256(),
+            'api_key' => 'datadog_api_key_'.fake()->sha256(),
+            'app_key' => 'datadog_app_key_'.fake()->sha256(),
         ])->create([
             'user_id' => $user->id,
             'plugin_name' => 'datadog_integration_test',
@@ -266,8 +266,8 @@ class PluginTestScenariosSeeder extends Seeder
         // Plugin with authentication but no configuration
         PluginConfiguration::factory()->agent()->active()->withCustomConfiguration([])->withAuthentication([
             'type' => 'oauth2',
-            'client_id' => 'oauth_client_' . fake()->uuid(),
-            'client_secret' => 'oauth_secret_' . fake()->sha256(),
+            'client_id' => 'oauth_client_'.fake()->uuid(),
+            'client_secret' => 'oauth_secret_'.fake()->sha256(),
             'scope' => 'read:metrics write:alerts',
             'token_endpoint' => 'https://auth.example.com/token',
         ])->create([

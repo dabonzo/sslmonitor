@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Team;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\Team;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -34,12 +34,12 @@ class TestUserSeeder extends Seeder
         $team = Team::updateOrCreate(
             [
                 'name' => 'Development Team',
-                'created_by_user_id' => $user->id
+                'created_by_user_id' => $user->id,
             ],
             [
                 'name' => 'Development Team',
                 'description' => 'Team for managing development and staging websites',
-                'created_by_user_id' => $user->id
+                'created_by_user_id' => $user->id,
             ]
         );
 
@@ -48,8 +48,8 @@ class TestUserSeeder extends Seeder
             $user->id => [
                 'role' => 'OWNER',
                 'joined_at' => now(),
-                'invited_by_user_id' => $user->id
-            ]
+                'invited_by_user_id' => $user->id,
+            ],
         ]);
 
         // Create test websites with SSL monitoring
@@ -88,7 +88,7 @@ class TestUserSeeder extends Seeder
             $website = Website::updateOrCreate(
                 [
                     'user_id' => $user->id,
-                    'url' => $websiteData['url']
+                    'url' => $websiteData['url'],
                 ],
                 [
                     'name' => $websiteData['name'],

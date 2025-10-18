@@ -62,11 +62,11 @@ class GlobalAlertTemplatesSeeder extends Seeder
     public static function createForUser(int $userId): void
     {
         $user = User::find($userId);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
-        $seeder = new self();
+        $seeder = new self;
         $seeder->createGlobalAlertsForUser($user);
     }
 }

@@ -1,11 +1,10 @@
 <?php
 
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
-use App\Models\Monitor;
 use Tests\Traits\MocksMonitorHttpRequests;
 
 uses(RefreshDatabase::class);

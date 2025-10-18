@@ -67,9 +67,9 @@ class StoreWebsiteRequest extends FormRequest
 
             // Convert http:// to https:// or add https:// if missing
             if (str_starts_with($url, 'http://')) {
-                $url = 'https://' . substr($url, 7); // Remove http:// and add https://
-            } elseif (!str_starts_with($url, 'https://')) {
-                $url = 'https://' . $url;
+                $url = 'https://'.substr($url, 7); // Remove http:// and add https://
+            } elseif (! str_starts_with($url, 'https://')) {
+                $url = 'https://'.$url;
             }
 
             // Normalize to lowercase and remove trailing slash

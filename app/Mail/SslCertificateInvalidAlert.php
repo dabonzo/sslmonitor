@@ -21,7 +21,7 @@ class SslCertificateInvalidAlert extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[CRITICAL] SSL Certificate Invalid Alert - ' . $this->website->name,
+            subject: '[CRITICAL] SSL Certificate Invalid Alert - '.$this->website->name,
         );
     }
 

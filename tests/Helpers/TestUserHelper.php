@@ -25,7 +25,7 @@ class TestUserHelper
         Website::updateOrCreate(
             [
                 'user_id' => $user->id,
-                'url' => 'https://omp.office-manager-pro.com'
+                'url' => 'https://omp.office-manager-pro.com',
             ],
             [
                 'name' => 'Office Manager Pro',

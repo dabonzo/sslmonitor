@@ -11,7 +11,7 @@ test('debug menu access middleware works correctly', function () {
     // Check if the global test user exists
     $user = User::where('email', 'bonzo@konjscina.com')->first();
 
-    if (!$user) {
+    if (! $user) {
         // If global test data isn't set up, create minimal test user
         $user = User::factory()->create([
             'name' => 'Bonzo',
@@ -30,6 +30,6 @@ test('debug menu access middleware works correctly', function () {
     expect($response->getStatusCode())->toBeIn([200, 403]);
 
     // If this passes, we know the routes and basic middleware work
-    echo "Debug route test completed - Status: " . $response->getStatusCode();
-    echo "Route exists and middleware is working correctly!";
+    echo 'Debug route test completed - Status: '.$response->getStatusCode();
+    echo 'Route exists and middleware is working correctly!';
 });

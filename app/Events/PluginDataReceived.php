@@ -3,9 +3,7 @@
 namespace App\Events;
 
 use App\Models\PluginConfiguration;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -25,8 +23,8 @@ class PluginDataReceived implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user.' . $this->plugin->user_id),
-            new PrivateChannel('plugin.' . $this->plugin->id),
+            new PrivateChannel('user.'.$this->plugin->user_id),
+            new PrivateChannel('plugin.'.$this->plugin->id),
         ];
     }
 

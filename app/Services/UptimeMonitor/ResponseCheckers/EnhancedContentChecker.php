@@ -17,7 +17,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
         // If JavaScript is enabled, fetch content using headless browser
         if ($this->isJavaScriptEnabled($monitor)) {
             try {
-                $jsFetcher = new JavaScriptContentFetcher();
+                $jsFetcher = new JavaScriptContentFetcher;
                 $waitSeconds = $this->getJavaScriptWaitSeconds($monitor);
                 $jsContent = $jsFetcher->fetchContent($monitor->url, $waitSeconds);
                 $jsFetcher->cleanup();
@@ -31,7 +31,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
                 \Illuminate\Support\Facades\Log::warning('JavaScript content fetching failed, falling back to regular content', [
                     'monitor_id' => $monitor->id,
                     'url' => $monitor->url,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -52,7 +52,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
         // If JavaScript is enabled, fetch content using headless browser
         if ($this->isJavaScriptEnabled($monitor)) {
             try {
-                $jsFetcher = new JavaScriptContentFetcher();
+                $jsFetcher = new JavaScriptContentFetcher;
                 $waitSeconds = $this->getJavaScriptWaitSeconds($monitor);
                 $jsContent = $jsFetcher->fetchContent($monitor->url, $waitSeconds);
                 $jsFetcher->cleanup();
@@ -298,7 +298,7 @@ class EnhancedContentChecker implements UptimeResponseChecker
 
         // Use word boundaries (\b) to match whole words only
         // The 'u' flag enables Unicode support
-        $pattern = '/\b' . $escapedWord . '\b/u';
+        $pattern = '/\b'.$escapedWord.'\b/u';
 
         return preg_match($pattern, $responseBody) === 1;
     }

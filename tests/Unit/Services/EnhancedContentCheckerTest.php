@@ -5,7 +5,7 @@ use App\Services\UptimeMonitor\ResponseCheckers\EnhancedContentChecker;
 use GuzzleHttp\Psr7\Response;
 
 beforeEach(function () {
-    $this->checker = new EnhancedContentChecker();
+    $this->checker = new EnhancedContentChecker;
 });
 
 test('enhanced content checker validates basic look_for_string functionality', function () {

@@ -6,14 +6,12 @@
  * This trait eliminates real SSL certificate connections during testing,
  * providing 99% performance improvement (30s+ → 0.20s per test).
  *
- * @package Tests\Traits
  * @see docs/TESTING_INSIGHTS.md for usage patterns
  */
 
 namespace Tests\Traits;
 
 use App\Services\SslCertificateAnalysisService;
-use Mockery;
 
 trait MocksSslCertificateAnalysis
 {
@@ -23,8 +21,6 @@ trait MocksSslCertificateAnalysis
      * This method replaces the SslCertificateAnalysisService with a mock
      * that returns realistic SSL certificate data without making real
      * network connections.
-     *
-     * @return void
      */
     protected function mockSslCertificateAnalysis(): void
     {
@@ -71,7 +67,7 @@ trait MocksSslCertificateAnalysis
                 'common_name' => $domain,
                 'san_domains' => [
                     $domain,
-                    'www.' . $domain,
+                    'www.'.$domain,
                 ],
                 'wildcard_supported' => false,
             ],

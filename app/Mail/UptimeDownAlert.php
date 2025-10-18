@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\Website;
 use App\Models\AlertConfiguration;
+use App\Models\Website;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;

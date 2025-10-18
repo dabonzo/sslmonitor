@@ -41,7 +41,7 @@ class WebsiteObserver
             'uptime_monitoring_enabled',
             'ssl_monitoring_enabled',
             'monitoring_config',
-            'url'
+            'url',
         ]);
 
         if ($monitoringChanged) {

@@ -100,7 +100,7 @@ class EmailSettings extends Model
 
     public function isConfigured(): bool
     {
-        return !empty($this->host) && !empty($this->from_address);
+        return ! empty($this->host) && ! empty($this->from_address);
     }
 
     public function isSmtp(): bool
@@ -110,7 +110,7 @@ class EmailSettings extends Model
 
     public function requiresAuthentication(): bool
     {
-        return !empty($this->username);
+        return ! empty($this->username);
     }
 
     public function getMailConfig(): array
@@ -123,7 +123,7 @@ class EmailSettings extends Model
             'username' => $this->username,
             'password' => $this->password,
             'timeout' => $this->timeout,
-            'local_domain' => '[' . ($_SERVER['SERVER_ADDR'] ?? '127.0.0.1') . ']',
+            'local_domain' => '['.($_SERVER['SERVER_ADDR'] ?? '127.0.0.1').']',
             'verify_peer' => $this->verify_peer,
         ];
     }

@@ -18,13 +18,12 @@ describe('Redis Performance Optimizations', function () {
         }
     });
 
-
     test('cache driver is properly configured', function () {
         $cacheDriver = config('cache.default');
         $cacheStore = Cache::getStore();
 
-        echo "\n📊 Cache driver: " . $cacheDriver;
-        echo "\n💾 Cache store: " . get_class($cacheStore);
+        echo "\n📊 Cache driver: ".$cacheDriver;
+        echo "\n💾 Cache store: ".get_class($cacheStore);
 
         // Test basic cache functionality
         $key = 'test_cache_connection';
@@ -37,12 +36,12 @@ describe('Redis Performance Optimizations', function () {
             echo "\n✅ Redis features available";
             expect($cacheDriver)->toBe('redis');
         } else {
-            echo "\n⚠️  Using " . $cacheDriver . " cache (Redis optimizations will be skipped)";
+            echo "\n⚠️  Using ".$cacheDriver.' cache (Redis optimizations will be skipped)';
         }
     });
 
     test('Redis cache tagging works correctly', function () {
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
 
         // Test cache tagging functionality
         Cache::tags(['test_tag'])->put('tagged_key', 'tagged_value', 60);
@@ -58,7 +57,7 @@ describe('Redis Performance Optimizations', function () {
         $websites = Website::factory()->count(20)->create(['user_id' => $user->id]);
         $urls = $websites->pluck('url')->toArray();
 
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
 
         // First call - should cache the data
         $startTime = microtime(true);
@@ -70,9 +69,9 @@ describe('Redis Performance Optimizations', function () {
         $secondResult = $cacheService->cacheMonitorsBulk($urls);
         $secondCallTime = (microtime(true) - $startTime) * 1000;
 
-        echo "\n📊 First call (cache miss): " . round($firstCallTime, 2) . "ms";
-        echo "\n💾 Second call (cache hit): " . round($secondCallTime, 2) . "ms";
-        echo "\n🚀 Performance improvement: " . round((($firstCallTime - $secondCallTime) / $firstCallTime) * 100, 1) . "%";
+        echo "\n📊 First call (cache miss): ".round($firstCallTime, 2).'ms';
+        echo "\n💾 Second call (cache hit): ".round($secondCallTime, 2).'ms';
+        echo "\n🚀 Performance improvement: ".round((($firstCallTime - $secondCallTime) / $firstCallTime) * 100, 1).'%';
 
         // Cache hit should be significantly faster
         expect($secondCallTime)->toBeLessThan($firstCallTime * 0.5); // At least 50% faster
@@ -82,7 +81,7 @@ describe('Redis Performance Optimizations', function () {
     });
 
     test('Redis pattern-based cache invalidation works efficiently', function () {
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
         $isRedis = Cache::getStore() instanceof \Illuminate\Cache\RedisStore;
 
         // Clear cache to start fresh
@@ -108,7 +107,7 @@ describe('Redis Performance Optimizations', function () {
         $method->invoke($cacheService, 'ssl_stats_*');
         $invalidationTime = (microtime(true) - $startTime) * 1000;
 
-        echo "\n🗑️ Pattern invalidation time: " . round($invalidationTime, 2) . "ms";
+        echo "\n🗑️ Pattern invalidation time: ".round($invalidationTime, 2).'ms';
 
         // Pattern-based invalidation should be fast (< 50ms)
         expect($invalidationTime)->toBeLessThan(50);
@@ -120,7 +119,7 @@ describe('Redis Performance Optimizations', function () {
     });
 
     test('Redis pipeline operations improve bulk operations performance', function () {
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
         $userIds = range(1, 10);
 
         // Test pipeline warmup operation
@@ -128,9 +127,9 @@ describe('Redis Performance Optimizations', function () {
         $result = $cacheService->warmupCacheForUsers($userIds);
         $pipelineTime = (microtime(true) - $startTime) * 1000;
 
-        echo "\n⚡ Pipeline warmup time: " . round($pipelineTime, 2) . "ms";
-        echo "\n📊 Users processed: " . $result['users_processed'];
-        echo "\n🔧 Pipeline operations: " . $result['pipeline_operations'];
+        echo "\n⚡ Pipeline warmup time: ".round($pipelineTime, 2).'ms';
+        echo "\n📊 Users processed: ".$result['users_processed'];
+        echo "\n🔧 Pipeline operations: ".$result['pipeline_operations'];
 
         expect($result['status'])->toBe('completed');
         expect($result['users_processed'])->toBe(10);
@@ -138,7 +137,7 @@ describe('Redis Performance Optimizations', function () {
     });
 
     test('Redis cache statistics provide useful metrics', function () {
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
 
         // Add some test data to Redis
         for ($i = 0; $i < 5; $i++) {
@@ -147,15 +146,15 @@ describe('Redis Performance Optimizations', function () {
 
         $stats = $cacheService->getCacheStatistics();
 
-        echo "\n📊 Cache driver: " . $stats['cache_driver'];
-        echo "\n💾 Redis connected: " . ($stats['redis_connected'] ? 'Yes' : 'No');
+        echo "\n📊 Cache driver: ".$stats['cache_driver'];
+        echo "\n💾 Redis connected: ".($stats['redis_connected'] ? 'Yes' : 'No');
 
         if (isset($stats['redis_memory_used'])) {
-            echo "\n🧠 Redis memory used: " . $stats['redis_memory_used'];
+            echo "\n🧠 Redis memory used: ".$stats['redis_memory_used'];
         }
 
         if (isset($stats['redis_keys_count'])) {
-            echo "\n🔑 Redis keys count: " . $stats['redis_keys_count'];
+            echo "\n🔑 Redis keys count: ".$stats['redis_keys_count'];
         }
 
         expect($stats['cache_driver'])->toBe('redis');
@@ -166,7 +165,7 @@ describe('Redis Performance Optimizations', function () {
     });
 
     test('bulk cache invalidation using Redis tags is efficient', function () {
-        $cacheService = new SslMonitoringCacheService();
+        $cacheService = new SslMonitoringCacheService;
 
         // Create tagged cache entries
         Cache::tags(['monitors'])->put('monitor_1', 'data_1', 300);
@@ -184,7 +183,7 @@ describe('Redis Performance Optimizations', function () {
         $cacheService->invalidateWebsiteCache('https://example.com');
         $invalidationTime = (microtime(true) - $startTime) * 1000;
 
-        echo "\n🗑️ Bulk invalidation time: " . round($invalidationTime, 2) . "ms";
+        echo "\n🗑️ Bulk invalidation time: ".round($invalidationTime, 2).'ms';
 
         // Bulk invalidation should be very fast with Redis tags
         expect($invalidationTime)->toBeLessThan(10);
@@ -219,9 +218,9 @@ describe('Redis Performance Optimizations', function () {
 
         $response2->assertStatus(200);
 
-        echo "\n📊 First load (cache miss): " . round($firstLoadTime, 2) . "ms";
-        echo "\n💾 Second load (cache hit): " . round($secondLoadTime, 2) . "ms";
-        echo "\n🚀 Redis cache improvement: " . round((($firstLoadTime - $secondLoadTime) / $firstLoadTime) * 100, 1) . "%";
+        echo "\n📊 First load (cache miss): ".round($firstLoadTime, 2).'ms';
+        echo "\n💾 Second load (cache hit): ".round($secondLoadTime, 2).'ms';
+        echo "\n🚀 Redis cache improvement: ".round((($firstLoadTime - $secondLoadTime) / $firstLoadTime) * 100, 1).'%';
 
         // Second load should be reasonably fast with Redis cache (allowing for test variance)
         expect($secondLoadTime)->toBeLessThan($firstLoadTime * 1.2); // Allow some variance in test timing

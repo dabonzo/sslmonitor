@@ -22,7 +22,7 @@ class CacheApiResponse
         }
 
         // Don't cache if user is not authenticated
-        if (!$request->user()) {
+        if (! $request->user()) {
             return $next($request);
         }
 
@@ -93,8 +93,8 @@ class CacheApiResponse
         $keyComponents = [
             'api_cache',
             $route,
-            'user_' . $user->id,
-            md5(serialize($queryParams))
+            'user_'.$user->id,
+            md5(serialize($queryParams)),
         ];
 
         return implode(':', $keyComponents);

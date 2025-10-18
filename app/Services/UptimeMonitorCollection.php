@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Monitor;
 use Generator;
 use GrahamCampbell\GuzzleFactory\GuzzleFactory;
 use GuzzleHttp\Exception\TransferException;
@@ -9,7 +10,6 @@ use GuzzleHttp\Promise\EachPromise;
 use Psr\Http\Message\ResponseInterface;
 use Spatie\UptimeMonitor\Helpers\ConsoleOutput;
 use Spatie\UptimeMonitor\MonitorCollection;
-use App\Models\Monitor;
 
 class UptimeMonitorCollection extends MonitorCollection
 {
@@ -85,7 +85,7 @@ class UptimeMonitorCollection extends MonitorCollection
 
     private function calculateResponseTime(int $index): float
     {
-        if (!isset($this->startTimes[$index])) {
+        if (! isset($this->startTimes[$index])) {
             return 0;
         }
 

@@ -1,11 +1,11 @@
 <?php
 
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
 use App\Services\SslCertificateAnalysisService;
-use App\Models\Monitor;
-use Tests\Traits\UsesCleanDatabase;
 use Tests\Traits\MocksSslCertificateAnalysis;
+use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
@@ -126,7 +126,7 @@ test('ssl certificate analysis service analyzes domain correctly', function () {
         'security',
         'certificate_authority',
         'chain_info',
-        'risk_assessment'
+        'risk_assessment',
     ]);
 
     expect($analysis['security'])->toHaveKeys([
@@ -135,7 +135,7 @@ test('ssl certificate analysis service analyzes domain correctly', function () {
         'signature_algorithm',
         'weak_signature',
         'weak_key',
-        'security_score'
+        'security_score',
     ]);
 });
 
@@ -153,7 +153,7 @@ test('ssl certificate analysis handles invalid domains gracefully', function () 
         'security',
         'certificate_authority',
         'chain_info',
-        'risk_assessment'
+        'risk_assessment',
     ]);
 });
 
@@ -168,7 +168,7 @@ test('ssl certificate analysis detects lets encrypt certificates', function () {
         'is_lets_encrypt',
         'ca_name',
         'ca_organization',
-        'ca_country'
+        'ca_country',
     ]);
 });
 
@@ -259,10 +259,10 @@ test('recent ssl activity shows latest monitor updates', function () {
         Monitor::updateOrCreate(
             ['url' => $website->url],
             [
-            'certificate_check_enabled' => true,
-            'certificate_status' => 'valid',
-            'updated_at' => now()->subMinutes(rand(1, 60)),
-        ]);
+                'certificate_check_enabled' => true,
+                'certificate_status' => 'valid',
+                'updated_at' => now()->subMinutes(rand(1, 60)),
+            ]);
     }
 
     $response = $this->actingAs($user)->get('/dashboard');

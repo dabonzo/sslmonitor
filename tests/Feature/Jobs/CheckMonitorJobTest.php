@@ -2,9 +2,7 @@
 
 use App\Jobs\CheckMonitorJob;
 use App\Models\Monitor;
-use App\Support\AutomationLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\Traits\MocksMonitorHttpRequests;
 
 uses(RefreshDatabase::class);
@@ -111,7 +109,7 @@ test('check monitor job updates monitor timestamp', function () {
                           $originalUpdatedAt->format('Y-m-d H:i:s');
 
     // If timestamps are the same due to precision, at least verify the job ran
-    if (!$timestampsDifferent) {
+    if (! $timestampsDifferent) {
         // The job should have processed the monitor - verify some evidence
         expect($monitor->exists)->toBeTrue();
     }

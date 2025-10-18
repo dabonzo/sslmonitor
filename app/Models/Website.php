@@ -93,7 +93,7 @@ class Website extends Model
     {
         $userId = $userId ?? auth()->id();
 
-        if (!$userId) {
+        if (! $userId) {
             return null;
         }
 
@@ -115,6 +115,7 @@ class Website extends Model
         }
 
         $monitor = $this->getSpatieMonitor();
+
         return $monitor?->certificate_expiration_date
             ? \Carbon\Carbon::parse($monitor->certificate_expiration_date)
             : null;
@@ -123,7 +124,7 @@ class Website extends Model
     public function getDaysRemaining(?int $userId = null): int
     {
         $expiry = $this->getEffectiveSslExpiryDate($userId);
-        if (!$expiry) {
+        if (! $expiry) {
             return 0;
         }
 
@@ -138,7 +139,6 @@ class Website extends Model
         return -(int) $expiry->diffInDays($now);
     }
 
-
     protected function setUrlAttribute(string $value): void
     {
         // URL sanitization logic from old_docs
@@ -148,8 +148,8 @@ class Website extends Model
         $url = rtrim($url, '/');
 
         // Add https if no protocol specified (case-insensitive check)
-        if (!str_starts_with(strtolower($url), 'http://') && !str_starts_with(strtolower($url), 'https://')) {
-            $url = 'https://' . $url;
+        if (! str_starts_with(strtolower($url), 'http://') && ! str_starts_with(strtolower($url), 'https://')) {
+            $url = 'https://'.$url;
         }
 
         // Convert all URLs to https and normalize (case-insensitive)
@@ -162,12 +162,12 @@ class Website extends Model
             $normalized .= strtolower($parsed['host']);
 
             if (isset($parsed['port']) && $parsed['port'] !== 443) {
-                $normalized .= ':' . $parsed['port'];
+                $normalized .= ':'.$parsed['port'];
             }
 
             // Normalize path - remove .. and empty segments
             if (isset($parsed['path']) && $parsed['path'] !== '/') {
-                $pathParts = array_filter(explode('/', $parsed['path']), function($part) {
+                $pathParts = array_filter(explode('/', $parsed['path']), function ($part) {
                     return $part !== '' && $part !== '.';
                 });
 
@@ -181,8 +181,8 @@ class Website extends Model
                     }
                 }
 
-                if (!empty($finalParts)) {
-                    $normalized .= '/' . implode('/', $finalParts);
+                if (! empty($finalParts)) {
+                    $normalized .= '/'.implode('/', $finalParts);
                 }
             }
 
@@ -200,17 +200,19 @@ class Website extends Model
     public function getCurrentSslStatus(): string
     {
         $monitor = $this->getSpatieMonitor();
+
         return $monitor?->certificate_status ?? 'not yet checked';
     }
 
     public function getCurrentUptimeStatus(): string
     {
         $monitor = $this->getSpatieMonitor();
+
         return $monitor?->uptime_status ?? 'not yet checked';
     }
 
     // Plugin-ready: Methods for future agent integration
-    public function getMonitoringConfig(string $key = null): mixed
+    public function getMonitoringConfig(?string $key = null): mixed
     {
         $config = $this->monitoring_config ?? [];
 
@@ -224,7 +226,7 @@ class Website extends Model
         $this->monitoring_config = $config;
     }
 
-    public function getPluginData(string $pluginName, string $key = null): mixed
+    public function getPluginData(string $pluginName, ?string $key = null): mixed
     {
         $data = $this->plugin_data[$pluginName] ?? [];
 
@@ -310,9 +312,9 @@ class Website extends Model
     public function getDisplayNameWithContext(): string
     {
         if ($this->isTeam()) {
-            return $this->name . ' (Team: ' . $this->team->name . ')';
+            return $this->name.' (Team: '.$this->team->name.')';
         }
 
-        return $this->name . ' (Personal)';
+        return $this->name.' (Personal)';
     }
 }

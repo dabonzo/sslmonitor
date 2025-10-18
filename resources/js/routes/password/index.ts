@@ -441,7 +441,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 export const confirm = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -456,7 +456,7 @@ confirm.definition = {
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 confirm.url = (options?: RouteQueryOptions) => {
@@ -465,7 +465,7 @@ confirm.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 confirm.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -475,7 +475,7 @@ confirm.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 confirm.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -485,7 +485,7 @@ confirm.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 const confirmForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -495,7 +495,7 @@ const confirmForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 confirmForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -505,7 +505,7 @@ confirmForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\Auth\ConfirmPasswordController::confirm
-* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:18
+* @see app/Http/Controllers/Auth/ConfirmPasswordController.php:16
 * @route '/confirm-password'
 */
 confirmForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

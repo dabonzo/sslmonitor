@@ -17,9 +17,9 @@ class MonitorIntegrationService
         $config = $website->monitoring_config ?? [];
 
         // Convert empty arrays to null for proper database storage
-        $expectedStrings = !empty($config['content_expected_strings']) ? $config['content_expected_strings'] : null;
-        $forbiddenStrings = !empty($config['content_forbidden_strings']) ? $config['content_forbidden_strings'] : null;
-        $regexPatterns = !empty($config['content_regex_patterns']) ? $config['content_regex_patterns'] : null;
+        $expectedStrings = ! empty($config['content_expected_strings']) ? $config['content_expected_strings'] : null;
+        $forbiddenStrings = ! empty($config['content_forbidden_strings']) ? $config['content_forbidden_strings'] : null;
+        $regexPatterns = ! empty($config['content_regex_patterns']) ? $config['content_regex_patterns'] : null;
 
         // Only use EnhancedContentChecker if content validation is configured
         $hasContentValidation = $expectedStrings || $forbiddenStrings || $regexPatterns;
@@ -144,8 +144,8 @@ class MonitorIntegrationService
     {
         $monitor = $this->getMonitorForWebsite($website);
 
-        if (!$monitor) {
-            return !$website->uptime_monitoring_enabled && !$website->ssl_monitoring_enabled;
+        if (! $monitor) {
+            return ! $website->uptime_monitoring_enabled && ! $website->ssl_monitoring_enabled;
         }
 
         return $monitor->uptime_check_enabled === $website->uptime_monitoring_enabled &&
@@ -159,7 +159,7 @@ class MonitorIntegrationService
     {
         $monitor = $this->getMonitorForWebsite($website);
 
-        if (!$monitor) {
+        if (! $monitor) {
             return [
                 'has_monitor' => false,
                 'uptime_status' => 'not_monitored',
@@ -193,6 +193,7 @@ class MonitorIntegrationService
         // Use config default if not specified in monitoring_config
         $defaultMinutes = config('uptime-monitor.uptime_check.run_interval_in_minutes', 5);
         $intervalSeconds = $config['check_interval'] ?? ($defaultMinutes * 60);
+
         return max(1, (int) ceil($intervalSeconds / 60)); // Minimum 1 minute
     }
 
@@ -214,6 +215,7 @@ class MonitorIntegrationService
         // Try to decode if it's a JSON string
         if (is_string($headers)) {
             $decoded = json_decode($headers, true);
+
             return is_array($decoded) ? $decoded : [];
         }
 

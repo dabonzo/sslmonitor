@@ -133,7 +133,7 @@ test('plugin configuration can customize recently contacted threshold', function
 });
 
 test('plugin configuration has proper fillable attributes', function () {
-    $plugin = new PluginConfiguration();
+    $plugin = new PluginConfiguration;
 
     $fillable = $plugin->getFillable();
 

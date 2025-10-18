@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 export const success = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ success.definition = {
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 success.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ success.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 success.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ success.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 success.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ success.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 const successForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const successForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 successForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ successForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\Auth\RegisteredUserController::success
-* @see app/Http/Controllers/Auth/RegisteredUserController.php:53
+* @see app/Http/Controllers/Auth/RegisteredUserController.php:52
 * @route '/registration-success'
 */
 successForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

@@ -21,11 +21,12 @@ class SetupProductionTestData extends Command
         // Check if user exists
         $user = User::where('email', 'bonzo@konjscina.com')->first();
 
-        if ($user && !$this->option('force')) {
+        if ($user && ! $this->option('force')) {
             $this->info('User bonzo@konjscina.com already exists.');
 
-            if (!$this->confirm('Do you want to continue and add/update websites?')) {
+            if (! $this->confirm('Do you want to continue and add/update websites?')) {
                 $this->comment('Operation cancelled.');
+
                 return self::SUCCESS;
             }
         } else {
@@ -48,13 +49,13 @@ class SetupProductionTestData extends Command
             [
                 'name' => 'Office Manager Pro',
                 'url' => 'https://omp.office-manager-pro.com',
-                'description' => 'Office management platform'
+                'description' => 'Office management platform',
             ],
             [
                 'name' => 'Redgas Austria',
                 'url' => 'https://www.redgas.at',
-                'description' => 'Austrian gas services website'
-            ]
+                'description' => 'Austrian gas services website',
+            ],
         ];
 
         $this->info('Processing websites...');
@@ -67,7 +68,7 @@ class SetupProductionTestData extends Command
             $website = Website::updateOrCreate(
                 [
                     'user_id' => $user->id,
-                    'url' => $websiteData['url']
+                    'url' => $websiteData['url'],
                 ],
                 [
                     'name' => $websiteData['name'],
@@ -76,8 +77,8 @@ class SetupProductionTestData extends Command
                     'monitoring_config' => [
                         'check_interval' => 3600, // 1 hour
                         'timeout' => 30,
-                        'description' => $websiteData['description']
-                    ]
+                        'description' => $websiteData['description'],
+                    ],
                 ]
             );
 
@@ -87,7 +88,7 @@ class SetupProductionTestData extends Command
             $this->comment('   Checking SSL certificate...');
 
             try {
-                $sslChecker = new SslCertificateChecker();
+                $sslChecker = new SslCertificateChecker;
                 $sslCheck = $sslChecker->checkAndStoreCertificate($website);
 
                 if ($sslCheck->status === 'valid' || $sslCheck->status === 'expiring') {
@@ -96,7 +97,7 @@ class SetupProductionTestData extends Command
                     $this->info("   ✅ Days until expiry: {$sslCheck->days_until_expiry}");
 
                     if ($sslCheck->days_until_expiry < 30) {
-                        $this->warn("   ⚠️  Certificate expires soon!");
+                        $this->warn('   ⚠️  Certificate expires soon!');
                     }
                 } else {
                     $this->error("   ❌ SSL Check failed: {$sslCheck->error_message}");

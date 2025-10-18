@@ -11,7 +11,6 @@ Route::get('dashboard', [App\Http\Controllers\SslDashboardController::class, 'in
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-
 // SSL Website Management Routes
 Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(function () {
     Route::resource('websites', App\Http\Controllers\WebsiteController::class);

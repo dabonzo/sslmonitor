@@ -1,10 +1,8 @@
 <?php
 
+use App\Models\DebugOverride;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\DebugOverride;
-use Illuminate\Support\Facades\Hash;
-use Tests\Traits\MocksSslCertificateAnalysis;
 
 // TDD RED PHASE: Test with real data from MariaDB database
 test('debug ssl override functionality works with real websites', function () {
@@ -20,15 +18,15 @@ test('debug ssl override functionality works with real websites', function () {
 
     // Get a real website with SSL monitoring
     $website = Website::where('user_id', $user->id)
-                    ->where('ssl_monitoring_enabled', true)
-                    ->first();
+        ->where('ssl_monitoring_enabled', true)
+        ->first();
     expect($website)->not->toBeNull('Should have at least one real website with SSL monitoring');
 
     // Clean up any existing debug overrides for this website to avoid confusion
     DebugOverride::where('targetable_type', Website::class)
-                  ->where('targetable_id', $website->id)
-                  ->where('user_id', $user->id)
-                  ->delete();
+        ->where('targetable_id', $website->id)
+        ->where('user_id', $user->id)
+        ->delete();
 
     // Get the real monitor for this website
     $monitor = $website->getSpatieMonitor();
@@ -89,7 +87,7 @@ test('debug ssl override functionality works with real websites', function () {
             'new_effective_expiry' => $newEffectiveExpiry?->format('Y-m-d H:i:s'),
             'new_days_remaining' => $newDaysRemaining,
             'original_expiry' => $monitor->certificate_expiration_date?->format('Y-m-d H:i:s'),
-        ]
+        ],
     ]);
 
     // TDD: After deactivation, should revert to original SSL expiry
@@ -106,13 +104,13 @@ test('multiple ssl overrides work with correct precedence', function () {
 
     $user = User::where('email', 'bonzo@konjscina.com')->first();
     $website = Website::where('user_id', $user->id)
-                    ->where('ssl_monitoring_enabled', true)
-                    ->first();
+        ->where('ssl_monitoring_enabled', true)
+        ->first();
 
     // Clean up ALL existing overrides for this website to ensure clean test
     DebugOverride::where('targetable_type', Website::class)
-                  ->where('targetable_id', $website->id)
-                  ->delete();
+        ->where('targetable_id', $website->id)
+        ->delete();
 
     $monitor = $website->getSpatieMonitor();
 
@@ -174,13 +172,13 @@ test('expired ssl overrides are ignored', function () {
 
     $user = User::where('email', 'bonzo@konjscina.com')->first();
     $website = Website::where('user_id', $user->id)
-                    ->where('ssl_monitoring_enabled', true)
-                    ->first();
+        ->where('ssl_monitoring_enabled', true)
+        ->first();
 
     // Clean up ALL existing overrides for this website to ensure clean test
     DebugOverride::where('targetable_type', Website::class)
-                  ->where('targetable_id', $website->id)
-                  ->delete();
+        ->where('targetable_id', $website->id)
+        ->delete();
 
     $monitor = $website->getSpatieMonitor();
 
@@ -231,18 +229,18 @@ test('ssl overrides are isolated by user', function () {
 
     // Get a different user (if exists)
     $otherUser = User::where('email', '!=', 'bonzo@konjscina.com')->first();
-    if (!$otherUser) {
+    if (! $otherUser) {
         $this->markTestSkipped('Need multiple users for isolation test');
     }
 
     $website = Website::where('user_id', $debugUser->id)
-                    ->where('ssl_monitoring_enabled', true)
-                    ->first();
+        ->where('ssl_monitoring_enabled', true)
+        ->first();
 
     // Clean up existing overrides
     DebugOverride::where('targetable_type', Website::class)
-                  ->where('targetable_id', $website->id)
-                  ->delete();
+        ->where('targetable_id', $website->id)
+        ->delete();
 
     $monitor = $website->getSpatieMonitor();
 

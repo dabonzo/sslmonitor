@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
-use App\Models\Website;
 use App\Models\AlertConfiguration;
 use App\Models\Monitor;
+use App\Models\User;
+use App\Models\Website;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
@@ -81,7 +81,7 @@ test('user can create a new website', function () {
     $response = $this->actingAs($user)
         ->post('/ssl/websites', [
             'name' => 'Test Website',
-            'url' => 'https://test-unique-' . time() . '.example.com',
+            'url' => 'https://test-unique-'.time().'.example.com',
             'ssl_monitoring_enabled' => true,
             'uptime_monitoring_enabled' => false,
         ]);
@@ -98,7 +98,7 @@ test('website creation normalizes url', function () {
     $response = $this->actingAs($user)
         ->post('/ssl/websites', [
             'name' => 'Normalized Website',
-            'url' => 'Example-Normalize-' . time() . '.COM/',
+            'url' => 'Example-Normalize-'.time().'.COM/',
         ]);
 
     $response->assertRedirect('/ssl/websites');
@@ -159,7 +159,7 @@ test('user can update their website', function () {
             'uptime_monitoring_enabled' => true,
         ]);
 
-    $response->assertRedirect("/ssl/websites?refresh=check");
+    $response->assertRedirect('/ssl/websites?refresh=check');
     $response->assertSessionHas('success');
 
     $website->refresh();

@@ -96,7 +96,7 @@ test('password reset request with non-existent email prevents user enumeration',
 
     // Request password reset for non-existent email
     $response = $this->post(route('password.email'), [
-        'email' => 'nonexistent@example.com'
+        'email' => 'nonexistent@example.com',
     ]);
 
     // Should show success message to prevent user enumeration
@@ -116,12 +116,12 @@ test('password reset request shows same message for existing and non-existent us
 
     // Test with existing user
     $existingUserResponse = $this->post(route('password.email'), [
-        'email' => $user->email
+        'email' => $user->email,
     ]);
 
     // Test with non-existent user
     $nonExistentResponse = $this->post(route('password.email'), [
-        'email' => 'fake@example.com'
+        'email' => 'fake@example.com',
     ]);
 
     // Both should show the same success message

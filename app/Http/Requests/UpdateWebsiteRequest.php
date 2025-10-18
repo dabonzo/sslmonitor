@@ -58,8 +58,8 @@ class UpdateWebsiteRequest extends FormRequest
             $url = trim($this->url);
 
             // Add protocol if missing
-            if (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://')) {
-                $url = 'https://' . $url;
+            if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
+                $url = 'https://'.$url;
             }
 
             // Normalize to lowercase and remove trailing slash

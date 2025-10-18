@@ -57,7 +57,7 @@ class DebugOverride extends Model
     {
         return $query->where(function ($q) {
             $q->whereNull('expires_at')
-              ->orWhere('expires_at', '>', now());
+                ->orWhere('expires_at', '>', now());
         });
     }
 
@@ -75,7 +75,7 @@ class DebugOverride extends Model
     public function isEffective(): bool
     {
         return $this->is_active &&
-               (!$this->expires_at || $this->expires_at->isFuture());
+               (! $this->expires_at || $this->expires_at->isFuture());
     }
 
     /**

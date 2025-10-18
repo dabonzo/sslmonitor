@@ -2,16 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\Website;
-use App\Models\User;
-use App\Models\AlertConfiguration;
+use App\Mail\SlowResponseTimeAlert;
 use App\Mail\SslCertificateExpiryAlert;
 use App\Mail\SslCertificateInvalidAlert;
 use App\Mail\UptimeDownAlert;
-use App\Mail\UptimeRecoveredAlert;
-use App\Mail\SlowResponseTimeAlert;
-use Illuminate\Support\Facades\Mail;
+use App\Models\AlertConfiguration;
+use App\Models\Website;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AlertService
 {
@@ -35,6 +33,7 @@ class AlertService
         if ($alertConfigs->isEmpty()) {
             // Create default alerts for new websites
             $this->createDefaultAlerts($website);
+
             return [];
         }
 
@@ -67,17 +66,17 @@ class AlertService
         Website::with('user')
             ->where(function ($query) {
                 $query->where('ssl_monitoring_enabled', true)
-                      ->orWhere('uptime_monitoring_enabled', true);
+                    ->orWhere('uptime_monitoring_enabled', true);
             })
             ->chunk(50, function ($websites) use (&$results) {
                 foreach ($websites as $website) {
                     try {
                         $alerts = $this->checkAndTriggerAlerts($website);
-                        if (!empty($alerts)) {
+                        if (! empty($alerts)) {
                             $results[$website->id] = $alerts;
                         }
                     } catch (\Exception $e) {
-                        Log::error("Alert check failed for website {$website->id}: " . $e->getMessage());
+                        Log::error("Alert check failed for website {$website->id}: ".$e->getMessage());
                     }
                 }
             });
@@ -108,7 +107,7 @@ class AlertService
      */
     private function triggerAlert(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
-        Log::info("Triggering alert", [
+        Log::info('Triggering alert', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
             'alert_level' => $alertConfig->alert_level,
@@ -116,7 +115,7 @@ class AlertService
 
         // Send notifications based on configured channels
         foreach ($alertConfig->notification_channels as $channel) {
-            match($channel) {
+            match ($channel) {
                 'email' => $this->sendEmailAlert($alertConfig, $website, $checkData),
                 'dashboard' => $this->createDashboardNotification($alertConfig, $website, $checkData),
                 'slack' => $this->sendSlackAlert($alertConfig, $website, $checkData),
@@ -136,30 +135,26 @@ class AlertService
         try {
             $user = $website->user;
 
-            match($alertConfig->alert_type) {
-                AlertConfiguration::ALERT_SSL_EXPIRY =>
-                    Mail::to($user->email)->send(new SslCertificateExpiryAlert($website, $alertConfig, $checkData)),
+            match ($alertConfig->alert_type) {
+                AlertConfiguration::ALERT_SSL_EXPIRY => Mail::to($user->email)->send(new SslCertificateExpiryAlert($website, $alertConfig, $checkData)),
 
-                AlertConfiguration::ALERT_SSL_INVALID =>
-                    Mail::to($user->email)->send(new SslCertificateInvalidAlert($website, $checkData)),
+                AlertConfiguration::ALERT_SSL_INVALID => Mail::to($user->email)->send(new SslCertificateInvalidAlert($website, $checkData)),
 
-                AlertConfiguration::ALERT_UPTIME_DOWN =>
-                    Mail::to($user->email)->send(new UptimeDownAlert($website, $alertConfig, $checkData)),
+                AlertConfiguration::ALERT_UPTIME_DOWN => Mail::to($user->email)->send(new UptimeDownAlert($website, $alertConfig, $checkData)),
 
-                AlertConfiguration::ALERT_RESPONSE_TIME =>
-                    Mail::to($user->email)->send(new SlowResponseTimeAlert($website, $checkData)),
+                AlertConfiguration::ALERT_RESPONSE_TIME => Mail::to($user->email)->send(new SlowResponseTimeAlert($website, $checkData)),
 
                 default => Log::warning("No email template for alert type: {$alertConfig->alert_type}"),
             };
 
-            Log::info("Email alert sent", [
+            Log::info('Email alert sent', [
                 'alert_type' => $alertConfig->alert_type,
                 'recipient' => $user->email,
                 'website' => $website->name,
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Failed to send email alert: " . $e->getMessage(), [
+            Log::error('Failed to send email alert: '.$e->getMessage(), [
                 'alert_config_id' => $alertConfig->id,
                 'website_id' => $website->id,
             ]);
@@ -172,7 +167,7 @@ class AlertService
     private function createDashboardNotification(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
         // TODO: Implement dashboard notifications in Phase 4
-        Log::info("Dashboard notification created", [
+        Log::info('Dashboard notification created', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
         ]);
@@ -184,7 +179,7 @@ class AlertService
     private function sendSlackAlert(AlertConfiguration $alertConfig, Website $website, array $checkData): void
     {
         // TODO: Implement Slack integration in Phase 5
-        Log::info("Slack alert would be sent", [
+        Log::info('Slack alert would be sent', [
             'alert_type' => $alertConfig->alert_type,
             'website_id' => $website->id,
         ]);
@@ -206,7 +201,7 @@ class AlertService
 
         // Check for active SSL debug overrides first
         $sslOverride = $website->getDebugOverride('ssl_expiry', $website->user_id);
-        if ($sslOverride && $sslOverride->is_active && !$sslOverride->isExpired()) {
+        if ($sslOverride && $sslOverride->is_active && ! $sslOverride->isExpired()) {
             // Use effective expiry date from debug override
             $effectiveExpiryDate = $website->getEffectiveSslExpiryDate($website->user_id);
             if ($effectiveExpiryDate) {
@@ -229,14 +224,14 @@ class AlertService
 
         // Check for active uptime monitoring debug overrides
         $uptimeOverride = $website->getDebugOverride('uptime_monitoring', $website->user_id);
-        if ($uptimeOverride && $uptimeOverride->is_active && !$uptimeOverride->isExpired()) {
+        if ($uptimeOverride && $uptimeOverride->is_active && ! $uptimeOverride->isExpired()) {
             $overrideData = $uptimeOverride->override_data;
             $checkData['uptime_status'] = $overrideData['uptime_status'] ?? $monitor?->uptime_status ?? 'unknown';
         }
 
         // Check for active response time debug overrides
         $responseTimeOverride = $website->getDebugOverride('response_time', $website->user_id);
-        if ($responseTimeOverride && $responseTimeOverride->is_active && !$responseTimeOverride->isExpired()) {
+        if ($responseTimeOverride && $responseTimeOverride->is_active && ! $responseTimeOverride->isExpired()) {
             $overrideData = $responseTimeOverride->override_data;
             $checkData['response_time'] = $overrideData['response_time'] ?? $monitor?->uptime_check_response_time_in_ms;
         }
@@ -254,7 +249,7 @@ class AlertService
             ->where('alert_type', $alertType)
             ->first();
 
-        if (!$alertConfig) {
+        if (! $alertConfig) {
             // Create a test alert configuration
             $alertConfig = new AlertConfiguration([
                 'user_id' => $website->user_id,
@@ -271,9 +266,11 @@ class AlertService
 
         try {
             $this->triggerAlert($alertConfig, $website, $checkData);
+
             return true;
         } catch (\Exception $e) {
-            Log::error("Test alert failed: " . $e->getMessage());
+            Log::error('Test alert failed: '.$e->getMessage());
+
             return false;
         }
     }

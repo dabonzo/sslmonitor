@@ -179,13 +179,13 @@ class AlertsController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'alert_type' => 'required|string|in:' . implode(',', [
+            'alert_type' => 'required|string|in:'.implode(',', [
                 AlertConfiguration::ALERT_SSL_EXPIRY,
                 AlertConfiguration::ALERT_SSL_INVALID,
                 AlertConfiguration::ALERT_UPTIME_DOWN,
                 AlertConfiguration::ALERT_RESPONSE_TIME,
             ]),
-            'alert_level' => 'required|string|in:' . implode(',', [
+            'alert_level' => 'required|string|in:'.implode(',', [
                 AlertConfiguration::LEVEL_CRITICAL,
                 AlertConfiguration::LEVEL_URGENT,
                 AlertConfiguration::LEVEL_WARNING,
@@ -248,12 +248,12 @@ class AlertsController extends Controller
 
         $alert = $query->first();
 
-        if (!$alert) {
+        if (! $alert) {
             // Create a new global template if it doesn't exist
             $defaults = AlertConfiguration::getDefaultConfigurations();
             $defaultConfig = collect($defaults)->firstWhere('alert_type', $validated['alert_type']);
 
-            if (!$defaultConfig) {
+            if (! $defaultConfig) {
                 return response()->json(['error' => 'Invalid alert type'], 400);
             }
 
@@ -281,7 +281,7 @@ class AlertsController extends Controller
         }
 
         // For Inertia requests, we want to return a redirect back to the page
-      // The page will reload with the updated data automatically
+        // The page will reload with the updated data automatically
         return redirect()->back()->with('success', 'Alert template updated successfully.');
     }
 
@@ -294,7 +294,7 @@ class AlertsController extends Controller
 
         $validated = $request->validate([
             'enabled' => 'required|boolean',
-            'alert_level' => 'required|string|in:' . implode(',', [
+            'alert_level' => 'required|string|in:'.implode(',', [
                 AlertConfiguration::LEVEL_CRITICAL,
                 AlertConfiguration::LEVEL_URGENT,
                 AlertConfiguration::LEVEL_WARNING,
@@ -303,7 +303,7 @@ class AlertsController extends Controller
             'threshold_days' => 'nullable|integer|min:1|max:365',
             'threshold_response_time' => 'nullable|integer|min:100|max:30000',
             'notification_channels' => 'required|array',
-            'notification_channels.*' => 'string|in:' . implode(',', [
+            'notification_channels.*' => 'string|in:'.implode(',', [
                 AlertConfiguration::CHANNEL_EMAIL,
                 AlertConfiguration::CHANNEL_SLACK,
                 AlertConfiguration::CHANNEL_DASHBOARD,
@@ -330,7 +330,7 @@ class AlertsController extends Controller
 
     private function getAlertLevelColorClass(string $level): string
     {
-        return match($level) {
+        return match ($level) {
             AlertConfiguration::LEVEL_CRITICAL => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
             AlertConfiguration::LEVEL_URGENT => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
             AlertConfiguration::LEVEL_WARNING => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
@@ -341,7 +341,7 @@ class AlertsController extends Controller
 
     private function getAlertTypeLabel(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             AlertConfiguration::ALERT_SSL_EXPIRY => 'SSL Certificate Expiry',
             AlertConfiguration::ALERT_SSL_INVALID => 'SSL Certificate Invalid',
             AlertConfiguration::ALERT_UPTIME_DOWN => 'Website Down',
@@ -471,7 +471,7 @@ class AlertsController extends Controller
 
             return response()->json(['message' => 'Test alert sent successfully']);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to send test alert: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to send test alert: '.$e->getMessage()], 500);
         }
     }
 }

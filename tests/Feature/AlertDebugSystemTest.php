@@ -1,15 +1,11 @@
 <?php
 
-use App\Models\User;
-use App\Models\Website;
 use App\Models\AlertConfiguration;
 use App\Models\DebugOverride;
+use App\Models\Website;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SslCertificateExpiryAlert;
-use App\Mail\SslCertificateInvalidAlert;
-use App\Mail\SlowResponseTimeAlert;
-use Tests\Traits\UsesCleanDatabase;
 use Tests\Traits\MocksSslCertificateAnalysis;
+use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 

@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Website;
-use App\Models\User;
-use App\Models\Monitor;
-use App\Jobs\ImmediateWebsiteCheckJob;
 use App\Jobs\CheckMonitorJob;
+use App\Jobs\ImmediateWebsiteCheckJob;
+use App\Models\Monitor;
+use App\Models\User;
+use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;

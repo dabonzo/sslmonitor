@@ -21,6 +21,6 @@ test('debug routes return proper responses for authenticated user', function () 
     // Test that we get a proper Laravel response (not 404)
     expect($response->getStatusCode())->not->toBe(404);
 
-    echo "Debug route test completed - Status: " . $response->getStatusCode();
+    echo 'Debug route test completed - Status: '.$response->getStatusCode();
     echo "\nRoute exists and middleware is working correctly!";
 });

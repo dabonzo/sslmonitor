@@ -1,14 +1,14 @@
 <?php
 
+use App\Mail\SslCertificateExpiryAlert;
+use App\Models\AlertConfiguration;
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\AlertConfiguration;
 use App\Services\AlertService;
-use App\Mail\SslCertificateExpiryAlert;
 use Illuminate\Support\Facades\Mail;
-use App\Models\Monitor;
-use Tests\Traits\UsesCleanDatabase;
 use Tests\Traits\MocksSslCertificateAnalysis;
+use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
@@ -140,7 +140,7 @@ test('alert service creates default alerts for new websites', function () {
             AlertConfiguration::ALERT_SSL_INVALID,
             AlertConfiguration::ALERT_UPTIME_DOWN,
             AlertConfiguration::ALERT_UPTIME_UP,
-            AlertConfiguration::ALERT_RESPONSE_TIME
+            AlertConfiguration::ALERT_RESPONSE_TIME,
         ])) {
             $expectedCount++;
 
@@ -256,7 +256,6 @@ test('alert service respects threshold days', function () {
     expect($triggeredAlerts)->toHaveCount(0);
     Mail::assertNotSent(SslCertificateExpiryAlert::class);
 });
-
 
 test('alert service can test alerts', function () {
     Mail::fake();

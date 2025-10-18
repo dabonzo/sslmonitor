@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\Monitor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -18,6 +18,7 @@ function getArrayValue($value): array
     if (is_null($value)) {
         return [];
     }
+
     return is_string($value) ? json_decode($value, true) : $value;
 }
 

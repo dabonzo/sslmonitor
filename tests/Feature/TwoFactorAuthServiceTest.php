@@ -11,7 +11,7 @@ beforeEach(function () {
 });
 
 test('service can generate secret key', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
     $secret = $service->generateSecretKey();
 
     expect($secret)->toBeString()
@@ -19,7 +19,7 @@ test('service can generate secret key', function () {
 });
 
 test('service can generate QR code URL', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
     $url = $service->getQRCodeUrl('Test App', 'test@example.com', 'TESTSECRETKEY123456');
 
     expect($url)->toBeString()
@@ -29,7 +29,7 @@ test('service can generate QR code URL', function () {
 });
 
 test('service can verify key without errors', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     // Just test that the method runs without throwing exceptions
     // In reality, this specific combination will return false, but that's expected
@@ -38,7 +38,7 @@ test('service can verify key without errors', function () {
 });
 
 test('service can generate recovery codes', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
     $codes = $service->generateRecoveryCodes(5);
 
     expect($codes)->toBeInstanceOf(\Illuminate\Support\Collection::class)
@@ -52,7 +52,7 @@ test('service can generate recovery codes', function () {
 });
 
 test('service can hash recovery codes', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
     $codes = collect(['CODE1', 'CODE2', 'CODE3']);
 
     $hashedCodes = $service->hashRecoveryCodes($codes);
@@ -112,7 +112,7 @@ test('service fails to enable two factor auth with invalid code', function () {
 
 test('service fails to enable two factor auth without secret', function () {
     $user = User::factory()->create();
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     $result = $service->enableTwoFactorAuth($user, '123456');
 
@@ -126,7 +126,7 @@ test('service can disable two factor auth', function () {
         'two_factor_confirmed_at' => now(),
     ]);
 
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
     $service->disableTwoFactorAuth($user);
 
     $user->refresh();
@@ -136,7 +136,7 @@ test('service can disable two factor auth', function () {
 });
 
 test('service correctly detects enabled state', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     // User with 2FA enabled
     $enabledUser = User::factory()->create([
@@ -159,7 +159,7 @@ test('service can verify recovery code', function () {
         ]),
     ]);
 
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     $result = $service->verifyRecoveryCode($user, 'CODE1');
     expect($result)->toBeTrue();
@@ -177,14 +177,14 @@ test('service fails to verify invalid recovery code', function () {
         ]),
     ]);
 
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     $result = $service->verifyRecoveryCode($user, 'INVALID');
     expect($result)->toBeFalse();
 });
 
 test('service returns correct recovery codes count', function () {
-    $service = new TwoFactorAuthService();
+    $service = new TwoFactorAuthService;
 
     // User with recovery codes
     $userWithCodes = User::factory()->create([

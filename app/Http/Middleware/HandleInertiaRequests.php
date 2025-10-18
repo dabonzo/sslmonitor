@@ -72,7 +72,7 @@ class HandleInertiaRequests extends Middleware
      */
     private function getUserPrimaryRole($user): ?string
     {
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 

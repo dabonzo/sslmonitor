@@ -44,9 +44,9 @@ class SslCertificateFactory extends Factory
             'is_valid' => true,
             'status' => 'valid',
             'certificate_chain' => [
-                'certificate' => '-----BEGIN CERTIFICATE-----' . "\n" . fake()->text(1000) . "\n" . '-----END CERTIFICATE-----',
-                'intermediate' => '-----BEGIN CERTIFICATE-----' . "\n" . fake()->text(800) . "\n" . '-----END CERTIFICATE-----',
-                'root' => '-----BEGIN CERTIFICATE-----' . "\n" . fake()->text(600) . "\n" . '-----END CERTIFICATE-----',
+                'certificate' => '-----BEGIN CERTIFICATE-----'."\n".fake()->text(1000)."\n".'-----END CERTIFICATE-----',
+                'intermediate' => '-----BEGIN CERTIFICATE-----'."\n".fake()->text(800)."\n".'-----END CERTIFICATE-----',
+                'root' => '-----BEGIN CERTIFICATE-----'."\n".fake()->text(600)."\n".'-----END CERTIFICATE-----',
             ],
             'security_metrics' => [
                 'key_size' => fake()->randomElement([2048, 3072, 4096]),
@@ -98,6 +98,7 @@ class SslCertificateFactory extends Factory
     public function selfSigned(): static
     {
         $domain = fake()->domainName();
+
         return $this->state([
             'subject' => $domain,
             'issuer' => $domain, // Self-signed: issuer = subject

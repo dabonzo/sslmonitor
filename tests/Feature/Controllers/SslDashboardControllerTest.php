@@ -1,12 +1,10 @@
 <?php
 
+use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
-use App\Models\Monitor;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Traits\UsesCleanDatabase;
-
-use Illuminate\Support\Facades\Hash;
 
 uses(UsesCleanDatabase::class);
 
@@ -91,7 +89,7 @@ describe('SSL Dashboard Controller', function () {
 
     it('calculates average response time for SSL checks', function () {
         $website = Website::factory()->create(['user_id' => $this->testUser->id]);
-        $testUrl = 'https://response-test-' . hrtime(true) . '.example.com';
+        $testUrl = 'https://response-test-'.hrtime(true).'.example.com';
         $website->update(['url' => $testUrl]);
 
         // Create Spatie monitor (Note: Spatie doesn't store SSL response time by default)
