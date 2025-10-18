@@ -22,5 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Website::observe(WebsiteObserver::class);
+
+        // Event listeners are auto-discovered via type-hinted handle() methods
+        // See: app/Listeners/* - Laravel automatically registers listeners
+        // that have type-hinted event parameters in their handle() method
     }
 }

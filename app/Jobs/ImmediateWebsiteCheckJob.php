@@ -14,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ImmediateWebsiteCheckJob implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels;
+    use InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * The number of times the job may be attempted.
@@ -64,13 +64,15 @@ class ImmediateWebsiteCheckJob implements ShouldQueue
             // Get or create Monitor (synced automatically by Observer)
             $monitor = $monitorService->getMonitorForWebsite($this->website);
 
-            if (!$monitor) {
+            if (! $monitor) {
                 // If no monitor exists, create one (Observer should have done this, but safety fallback)
                 $monitor = $monitorService->createOrUpdateMonitorForWebsite($this->website);
             }
 
             // Delegate to CheckMonitorJob - call handle() directly for synchronous execution with return value
             $checkJob = new CheckMonitorJob($monitor);
+            $checkJob->triggerType = 'manual_immediate';
+            $checkJob->triggeredByUserId = auth()->id();
             $results = $checkJob->handle();
 
             // Add website context to results

@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Events\MonitoringCheckCompleted;
+use App\Events\MonitoringCheckFailed;
+use App\Events\MonitoringCheckStarted;
 use App\Models\Monitor;
 use App\Support\AutomationLogger;
 use Carbon\Carbon;
@@ -12,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 
 class CheckMonitorJob implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels;
+    use InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * The number of times the job may be attempted.
@@ -30,6 +33,16 @@ class CheckMonitorJob implements ShouldQueue
     public Monitor $monitor;
 
     /**
+     * The trigger type for this check.
+     */
+    public string $triggerType = 'scheduled';
+
+    /**
+     * The user ID who triggered this check (if manual).
+     */
+    public ?int $triggeredByUserId = null;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(Monitor $monitor)
@@ -43,7 +56,15 @@ class CheckMonitorJob implements ShouldQueue
      */
     public function handle(): array
     {
+        $startedAt = now();
         $startTime = microtime(true);
+
+        // Fire started event
+        event(new MonitoringCheckStarted(
+            monitor: $this->monitor,
+            triggerType: $this->triggerType,
+            triggeredByUserId: $this->triggeredByUserId,
+        ));
 
         try {
             AutomationLogger::jobStart(self::class, [
@@ -78,6 +99,26 @@ class CheckMonitorJob implements ShouldQueue
                 ]
             );
 
+            // Gather check results for historical tracking
+            $checkResults = [
+                'check_type' => $this->determineCheckType(),
+                'status' => $this->determineOverallStatus($results),
+                'uptime_status' => $results['uptime']['status'] ?? null,
+                'http_status_code' => $results['uptime']['status_code'] ?? null,
+                'ssl_status' => $results['ssl']['status'] ?? null,
+                'days_until_expiration' => $this->calculateDaysUntilExpiration(),
+            ];
+
+            // Fire completed event
+            event(new MonitoringCheckCompleted(
+                monitor: $this->monitor,
+                triggerType: $this->triggerType,
+                triggeredByUserId: $this->triggeredByUserId,
+                startedAt: $startedAt,
+                completedAt: now(),
+                checkResults: $checkResults,
+            ));
+
             return $results;
 
         } catch (\Throwable $exception) {
@@ -85,6 +126,15 @@ class CheckMonitorJob implements ShouldQueue
                 'monitor_id' => $this->monitor->id,
                 'monitor_url' => $this->monitor->url,
             ]);
+
+            // Fire failed event
+            event(new MonitoringCheckFailed(
+                monitor: $this->monitor,
+                triggerType: $this->triggerType,
+                triggeredByUserId: $this->triggeredByUserId,
+                startedAt: $startedAt,
+                exception: $exception,
+            ));
 
             // Return error results instead of failing completely
             return [
@@ -111,11 +161,24 @@ class CheckMonitorJob implements ShouldQueue
 
             // Initialize ConsoleOutput for queue context to prevent static property access errors
             $consoleOutput = app(\Spatie\UptimeMonitor\Helpers\ConsoleOutput::class);
-            $consoleOutput->setOutput(new class extends \Illuminate\Console\Command {
+            $consoleOutput->setOutput(new class extends \Illuminate\Console\Command
+            {
                 protected $signature = 'queue:dummy';
-                public function info($string, $verbosity = null) { return null; }
-                public function error($string, $verbosity = null) { return null; }
-                public function warn($string, $verbosity = null) { return null; }
+
+                public function info($string, $verbosity = null)
+                {
+                    return null;
+                }
+
+                public function error($string, $verbosity = null)
+                {
+                    return null;
+                }
+
+                public function warn($string, $verbosity = null)
+                {
+                    return null;
+                }
             });
 
             // Use Spatie's MonitorCollection for uptime check
@@ -223,7 +286,7 @@ class CheckMonitorJob implements ShouldQueue
     private function shouldCheckSsl(): bool
     {
         // Always check SSL if certificate checking is disabled (to catch when it gets re-enabled)
-        if (!$this->monitor->certificate_check_enabled) {
+        if (! $this->monitor->certificate_check_enabled) {
             return false;
         }
 
@@ -249,6 +312,7 @@ class CheckMonitorJob implements ShouldQueue
         // Check if enough time has passed since last SSL check
         if ($this->monitor->updated_at) {
             $minutesSinceLastCheck = $this->monitor->updated_at->diffInMinutes();
+
             return $minutesSinceLastCheck >= $sslCheckInterval;
         }
 
@@ -281,6 +345,49 @@ class CheckMonitorJob implements ShouldQueue
             'check_duration_ms' => null, // Not a fresh check
             'from_cache' => true, // Indicate this is from cache
         ];
+    }
+
+    /**
+     * Determine the check type based on monitor configuration.
+     */
+    private function determineCheckType(): string
+    {
+        if ($this->monitor->uptime_check_enabled && $this->monitor->certificate_check_enabled) {
+            return 'both';
+        }
+
+        if ($this->monitor->uptime_check_enabled) {
+            return 'uptime';
+        }
+
+        if ($this->monitor->certificate_check_enabled) {
+            return 'ssl_certificate';
+        }
+
+        return 'both';
+    }
+
+    /**
+     * Determine the overall status of the check.
+     */
+    private function determineOverallStatus(array $results): string
+    {
+        $uptimeOk = ! isset($results['uptime']['status']) || $results['uptime']['status'] === 'up';
+        $sslOk = ! isset($results['ssl']['status']) || in_array($results['ssl']['status'], ['valid', 'expires_soon']);
+
+        return ($uptimeOk && $sslOk) ? 'success' : 'failed';
+    }
+
+    /**
+     * Calculate days until certificate expiration.
+     */
+    private function calculateDaysUntilExpiration(): ?int
+    {
+        if (! $this->monitor->certificate_expiration_date) {
+            return null;
+        }
+
+        return now()->diffInDays($this->monitor->certificate_expiration_date, false);
     }
 
     /**

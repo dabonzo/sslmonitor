@@ -221,11 +221,39 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            'monitoring-history' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-history'],
+                'balance' => 'auto',
+                'processes' => 3,
+                'tries' => 3,
+            ],
+            'monitoring-aggregation' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-aggregation'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'tries' => 2,
+            ],
         ],
 
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 3,
+            ],
+            'monitoring-history' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-history'],
+                'balance' => 'auto',
+                'processes' => 1,
+                'tries' => 3,
+            ],
+            'monitoring-aggregation' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-aggregation'],
+                'balance' => 'auto',
+                'processes' => 1,
+                'tries' => 2,
             ],
         ],
     ],
