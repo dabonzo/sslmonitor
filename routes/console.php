@@ -80,7 +80,7 @@ Schedule::call(function () {
         'total_users' => \App\Models\User::count(),
         'failed_jobs_last_week' => \Illuminate\Support\Facades\DB::table('failed_jobs')
             ->where('failed_at', '>', now()->subWeek())->count(),
-        'avg_response_time' => \App\Models\Monitor::avg('latest_run_runtime') ?? 0,
+        'avg_response_time' => \App\Models\Monitor::avg('uptime_check_response_time_in_ms') ?? 0,
     ];
 
     \App\Support\AutomationLogger::scheduler('Weekly health report', $stats);
