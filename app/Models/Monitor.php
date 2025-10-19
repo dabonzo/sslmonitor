@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Psr\Http\Message\ResponseInterface;
 use Spatie\UptimeMonitor\Models\Monitor as SpatieMonitor;
 
@@ -139,5 +140,24 @@ class Monitor extends SpatieMonitor
     {
         $patterns = $this->content_regex_patterns ?? [];
         $this->content_regex_patterns = array_values(array_filter($patterns, fn ($p) => $p !== $pattern));
+    }
+
+    /**
+     * Get website_id from the most recent monitoring result
+     *
+     * NOTE: Monitor model doesn't have website_id column.
+     * This accessor retrieves it from the monitoring_results table.
+     */
+    public function getWebsiteIdAttribute(): ?int
+    {
+        return $this->monitoringResults()->latest()->value('website_id');
+    }
+
+    /**
+     * Monitoring results relationship
+     */
+    public function monitoringResults(): HasMany
+    {
+        return $this->hasMany(MonitoringResult::class, 'monitor_id');
     }
 }

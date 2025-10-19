@@ -70,6 +70,19 @@ Route::middleware(['auth', 'verified'])->prefix('alerts')->name('alerts.')->grou
     Route::post('/test-all', [App\Http\Controllers\AlertConfigurationController::class, 'testAllAlerts'])->name('test-all');
 });
 
+// Monitoring Report Routes
+Route::middleware(['auth'])
+    ->prefix('api/monitors/{monitor}/reports')
+    ->name('api.monitors.reports.')
+    ->group(function () {
+        Route::get('/export-csv', [App\Http\Controllers\MonitoringReportController::class, 'exportCsv'])
+            ->name('export-csv');
+        Route::get('/summary', [App\Http\Controllers\MonitoringReportController::class, 'summary'])
+            ->name('summary');
+        Route::get('/daily-breakdown', [App\Http\Controllers\MonitoringReportController::class, 'dailyBreakdown'])
+            ->name('daily-breakdown');
+    });
+
 // Team Management Routes
 Route::middleware(['auth', 'verified'])->prefix('settings')->name('settings.')->group(function () {
     Route::get('/team', [App\Http\Controllers\TeamController::class, 'index'])->name('team');

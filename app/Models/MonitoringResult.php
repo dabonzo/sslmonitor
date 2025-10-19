@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class MonitoringResult extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'uuid', 'monitor_id', 'website_id', 'check_type', 'trigger_type',
         'triggered_by_user_id', 'started_at', 'completed_at', 'duration_ms',

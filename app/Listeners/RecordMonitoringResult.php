@@ -4,18 +4,23 @@ namespace App\Listeners;
 
 use App\Events\MonitoringCheckCompleted;
 use App\Models\MonitoringResult;
+use App\Services\AlertCorrelationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class RecordMonitoringResult implements ShouldQueue
 {
     public string $queue = 'monitoring-history';
 
+    public function __construct(
+        protected AlertCorrelationService $alertService
+    ) {}
+
     public function handle(MonitoringCheckCompleted $event): void
     {
         $monitor = $event->monitor;
         $results = $event->checkResults;
 
-        MonitoringResult::create([
+        $result = MonitoringResult::create([
             'monitor_id' => $monitor->id,
             'website_id' => $this->getWebsiteIdFromMonitor($monitor),
             'check_type' => $results['check_type'] ?? 'both',
@@ -73,6 +78,10 @@ class RecordMonitoringResult implements ShouldQueue
             ],
             'check_interval_minutes' => $monitor->uptime_check_interval_in_minutes,
         ]);
+
+        // Check and create alerts
+        $this->alertService->checkAndCreateAlerts($result);
+        $this->alertService->autoResolveAlerts($result);
     }
 
     private function getWebsiteIdFromMonitor($monitor): ?int

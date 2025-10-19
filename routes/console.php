@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\AggregateMonitoringSummariesJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -86,3 +87,31 @@ Schedule::call(function () {
 })
     ->weeklyOn(0, '03:00')
     ->name('weekly-health-report');
+
+// Aggregate monitoring data at different intervals
+Schedule::job(new AggregateMonitoringSummariesJob('hourly'))
+    ->hourly()
+    ->at('05')
+    ->withoutOverlapping()
+    ->name('aggregate-hourly-monitoring-summaries');
+
+Schedule::job(new AggregateMonitoringSummariesJob('daily'))
+    ->dailyAt('01:00')
+    ->withoutOverlapping()
+    ->name('aggregate-daily-monitoring-summaries');
+
+Schedule::job(new AggregateMonitoringSummariesJob('weekly'))
+    ->weeklyOn(1, '02:00')
+    ->withoutOverlapping()
+    ->name('aggregate-weekly-monitoring-summaries');
+
+Schedule::job(new AggregateMonitoringSummariesJob('monthly'))
+    ->monthlyOn(1, '03:00')
+    ->withoutOverlapping()
+    ->name('aggregate-monthly-monitoring-summaries');
+
+// Prune old monitoring data daily
+Schedule::command('monitoring:prune-old-data', ['--days' => 90])
+    ->dailyAt('04:00')
+    ->withoutOverlapping()
+    ->name('prune-monitoring-data');

@@ -2,6 +2,7 @@ import SslDashboardController from './SslDashboardController'
 import WebsiteController from './WebsiteController'
 import Settings from './Settings'
 import AlertConfigurationController from './AlertConfigurationController'
+import MonitoringReportController from './MonitoringReportController'
 import TeamController from './TeamController'
 import TeamInvitationController from './TeamInvitationController'
 import Debug from './Debug'
@@ -12,6 +13,7 @@ const Controllers = {
     WebsiteController: Object.assign(WebsiteController, WebsiteController),
     Settings: Object.assign(Settings, Settings),
     AlertConfigurationController: Object.assign(AlertConfigurationController, AlertConfigurationController),
+    MonitoringReportController: Object.assign(MonitoringReportController, MonitoringReportController),
     TeamController: Object.assign(TeamController, TeamController),
     TeamInvitationController: Object.assign(TeamInvitationController, TeamInvitationController),
     Debug: Object.assign(Debug, Debug),
