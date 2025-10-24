@@ -91,14 +91,30 @@ class WebsiteController extends Controller
         // Bulk fetch all monitors in a single query to avoid N+1
         $websiteUrls = $websites->pluck('url')->toArray();
         $monitors = Monitor::whereIn('url', $websiteUrls)
-            ->select(['url', 'certificate_status', 'certificate_expiration_date', 'certificate_issuer',
+            ->select(['id', 'url', 'certificate_status', 'certificate_expiration_date', 'certificate_issuer',
                 'uptime_status', 'uptime_last_check_date', 'uptime_check_failure_reason',
                 'uptime_check_times_failed_in_a_row', 'uptime_check_response_time_in_ms', 'updated_at'])
             ->get()
             ->keyBy('url');
 
+        // Fetch latest certificate subjects from monitoring_results
+        $monitorIds = $monitors->pluck('id')->filter()->toArray();
+        $latestCertificateSubjects = \DB::table('monitoring_results')
+            ->select('monitor_id', 'certificate_subject')
+            ->whereIn('monitor_id', $monitorIds)
+            ->whereNotNull('certificate_subject')
+            ->whereIn('id', function ($query) use ($monitorIds) {
+                $query->selectRaw('MAX(id)')
+                    ->from('monitoring_results')
+                    ->whereIn('monitor_id', $monitorIds)
+                    ->whereNotNull('certificate_subject')
+                    ->groupBy('monitor_id');
+            })
+            ->get()
+            ->keyBy('monitor_id');
+
         // Transform websites with enhanced SSL and uptime data for unified monitoring hub
-        $websites->through(function ($website) use ($monitors) {
+        $websites->through(function ($website) use ($monitors, $latestCertificateSubjects) {
             // Get monitor from our bulk collection instead of individual queries
             $monitor = $monitors->get($website->url);
 
@@ -127,12 +143,19 @@ class WebsiteController extends Controller
                     }
                 }
 
+                // Get certificate subject from latest monitoring result
+                $certificateSubject = null;
+                if ($monitor->id && isset($latestCertificateSubjects[$monitor->id])) {
+                    $certificateSubject = $latestCertificateSubjects[$monitor->id]->certificate_subject;
+                }
+
                 $sslData = [
                     'status' => $monitor->certificate_status,
                     'expires_at' => $monitor->certificate_expiration_date,
                     'days_remaining' => $daysRemaining ? (int) $daysRemaining : null,
                     'urgency_level' => $urgencyLevel,
                     'issuer' => $monitor->certificate_issuer,
+                    'subject' => $certificateSubject,
                     'is_valid' => $monitor->certificate_status === 'valid',
                     'last_checked' => $monitor->updated_at,
                 ];
