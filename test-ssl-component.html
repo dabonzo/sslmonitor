@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL Component Test</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>SSL Component Test</h1>
+
+        <div v-if="error" class="error">
+            <p>{{ error }}</p>
+        </div>
+
+        <div v-if="loading">Loading...</div>
+
+        <div v-if="sslData">
+            <h2>SSL Data Received:</h2>
+            <pre>{{ JSON.stringify(sslData, null, 2) }}</pre>
+
+            <h3>Computed Values:</h3>
+            <p>Days Until Expiration: {{ daysUntilExpiration }}</p>
+            <p>Status Color: {{ statusColor }}</p>
+            <p>Status Text: {{ statusText }}</p>
+
+            <h3>Trend Data:</h3>
+            <div v-for="(trend, index) in miniTrendData.slice(-5)" :key="index">
+                {{ trend.date }}: {{ trend.days_until_expiration }} days
+            </div>
+        </div>
+
+        <button @click="fetchSslData">Fetch SSL Data</button>
+        <button @click="testTrendData">Test Trend Data</button>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                const loading = ref(false);
+                const error = ref(null);
+                const sslData = ref(null);
+                const currentTime = ref(new Date());
+
+                // Test data matching the API response structure
+                const testSslData = {
+                    certificate_status: "valid",
+                    certificate_issuer: "Let's Encrypt",
+                    certificate_subject: "example.com",
+                    certificate_expiration_date: "2025-01-15T12:00:00Z",
+                    days_until_expiration: 30,
+                    is_valid: true,
+                    last_checked: "2025-10-19T10:00:00Z"
+                };
+
+                // Computed days until expiration
+                const daysUntilExpiration = computed(() => {
+                    if (sslData.value && typeof sslData.value.days_until_expiration === 'number' && sslData.value.days_until_expiration !== null) {
+                        return sslData.value.days_until_expiration;
+                    }
+
+                    if (!sslData.value?.certificate_expiration_date) return null;
+
+                    try {
+                        const expirationDate = new Date(sslData.value.certificate_expiration_date);
+                        const diffInMs = expirationDate.getTime() - currentTime.value.getTime();
+                        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+                        return diffInDays;
+                    } catch (error) {
+                        console.error('Error calculating days until expiration:', error);
+                        return null;
+                    }
+                });
+
+                // Status color
+                const statusColor = computed(() => {
+                    const days = daysUntilExpiration.value;
+                    if (days === null) return 'unknown';
+                    if (days > 30) return 'success';
+                    if (days > 7) return 'warning';
+                    return 'error';
+                });
+
+                // Status text
+                const statusText = computed(() => {
+                    const days = daysUntilExpiration.value;
+                    if (days === null) return 'Unknown Status';
+                    if (days < 0) return 'Expired';
+                    if (days === 0) return 'Expires Today';
+                    if (days === 1) return 'Expires Tomorrow';
+                    if (days <= 7) return `Expires in ${days} days`;
+                    if (days <= 30) return `Expires in ${days} days`;
+                    return 'Valid';
+                });
+
+                // Mini trend data
+                const miniTrendData = computed(() => {
+                    const days = 30;
+                    const data = [];
+                    const now = new Date();
+                    const currentDaysUntil = daysUntilExpiration.value || 0;
+
+                    for (let i = days; i >= 0; i--) {
+                        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                        data.push({
+                            date: date.toISOString().split('T')[0],
+                            days_until_expiration: Math.max(0, currentDaysUntil + i)
+                        });
+                    }
+
+                    return data;
+                });
+
+                const fetchSslData = async () => {
+                    loading.value = true;
+                    error.value = null;
+
+                    try {
+                        // Simulate API call with test data
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        sslData.value = testSslData;
+                    } catch (err) {
+                        error.value = err.message;
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const testTrendData = () => {
+                    console.log('Trend data:', miniTrendData.value);
+                    console.log('Days until expiration:', daysUntilExpiration.value);
+                };
+
+                return {
+                    loading,
+                    error,
+                    sslData,
+                    daysUntilExpiration,
+                    statusColor,
+                    statusText,
+                    miniTrendData,
+                    fetchSslData,
+                    testTrendData
+                };
+            }
+        }).mount('#app');
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</body>
+</html>

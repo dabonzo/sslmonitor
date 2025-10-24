@@ -1,5 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
-import reports from './reports'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\API\MonitorHistoryController::history
 * @see app/Http/Controllers/API/MonitorHistoryController.php:24
@@ -735,15 +734,6 @@ sslExpirationTrendsForm.head = (args: { monitor: number | { id: number } } | [mo
 
 sslExpirationTrends.form = sslExpirationTrendsForm
 
-const monitors = {
-    reports: Object.assign(reports, reports),
-    history: Object.assign(history, history),
-    trends: Object.assign(trends, trends),
-    summary: Object.assign(summary, summary),
-    uptimeStats: Object.assign(uptimeStats, uptimeStats),
-    sslInfo: Object.assign(sslInfo, sslInfo),
-    recentChecks: Object.assign(recentChecks, recentChecks),
-    sslExpirationTrends: Object.assign(sslExpirationTrends, sslExpirationTrends),
-}
+const MonitorHistoryController = { history, trends, summary, uptimeStats, sslInfo, recentChecks, sslExpirationTrends }
 
-export default monitors
+export default MonitorHistoryController

@@ -33,6 +33,11 @@ class CheckMonitorJob implements ShouldQueue
     public Monitor $monitor;
 
     /**
+     * The type of check to perform (uptime, ssl, both).
+     */
+    public string $checkType = 'both';
+
+    /**
      * The trigger type for this check.
      */
     public string $triggerType = 'scheduled';
@@ -45,9 +50,10 @@ class CheckMonitorJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Monitor $monitor)
+    public function __construct(Monitor $monitor, string $checkType = 'both')
     {
         $this->monitor = $monitor;
+        $this->checkType = $checkType;
         $this->onQueue(env('QUEUE_DEFAULT', 'default'));
     }
 
@@ -77,12 +83,30 @@ class CheckMonitorJob implements ShouldQueue
                 ['monitor_id' => $this->monitor->id]
             );
 
+            // Perform checks based on the check type
+            $uptimeResult = null;
+            $sslResult = null;
+
+            switch ($this->checkType) {
+                case 'uptime':
+                    $uptimeResult = $this->checkUptime();
+                    break;
+                case 'ssl':
+                    $sslResult = $this->checkSsl();
+                    break;
+                case 'both':
+                default:
+                    $uptimeResult = $this->checkUptime();
+                    $sslResult = $this->checkSsl();
+                    break;
+            }
+
             $results = [
                 'monitor_id' => $this->monitor->id,
                 'url' => $this->monitor->url,
                 'checked_at' => Carbon::now()->toISOString(),
-                'uptime' => $this->checkUptime(),
-                'ssl' => $this->shouldCheckSsl() ? $this->checkSsl() : $this->getLastSslResult(),
+                'uptime' => $uptimeResult,
+                'ssl' => $sslResult,
             ];
 
             AutomationLogger::jobComplete(self::class, $startTime, [
@@ -101,11 +125,12 @@ class CheckMonitorJob implements ShouldQueue
 
             // Gather check results for historical tracking
             $checkResults = [
-                'check_type' => $this->determineCheckType(),
+                'check_type' => $this->checkType === 'ssl' ? 'ssl_certificate' : $this->checkType,
                 'status' => $this->determineOverallStatus($results),
                 'uptime_status' => $results['uptime']['status'] ?? null,
                 'http_status_code' => $results['uptime']['status_code'] ?? null,
                 'ssl_status' => $results['ssl']['status'] ?? null,
+                'certificate_subject' => $results['ssl']['certificate_subject'] ?? null,
                 'days_until_expiration' => $this->calculateDaysUntilExpiration(),
             ];
 
@@ -245,11 +270,15 @@ class CheckMonitorJob implements ShouldQueue
                 $status = 'expires_soon';
             }
 
+            // Extract certificate subject (CN + SANs)
+            $certificateSubject = $this->extractCertificateSubject();
+
             $result = [
                 'status' => $status,
                 'expires_at' => $this->monitor->certificate_expiration_date?->toISOString(),
                 'issuer' => $this->monitor->certificate_issuer ?? 'Unknown',
                 'certificate_status' => $this->monitor->certificate_status,
+                'certificate_subject' => $certificateSubject,
                 'failure_reason' => $this->monitor->certificate_check_failure_reason,
                 'checked_at' => Carbon::now()->toISOString(),
                 'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
@@ -387,7 +416,90 @@ class CheckMonitorJob implements ShouldQueue
             return null;
         }
 
-        return now()->diffInDays($this->monitor->certificate_expiration_date, false);
+        return (int) now()->diffInDays($this->monitor->certificate_expiration_date, false);
+    }
+
+    /**
+     * Extract certificate subject (CN + Subject Alternative Names).
+     */
+    private function extractCertificateSubject(): ?string
+    {
+        try {
+            $url = (string) $this->monitor->url;
+            $parsedUrl = parse_url($url);
+
+            if (! isset($parsedUrl['host'])) {
+                return null;
+            }
+
+            $host = $parsedUrl['host'];
+            $port = $parsedUrl['scheme'] === 'https' ? 443 : 80;
+
+            $context = stream_context_create([
+                'ssl' => [
+                    'capture_peer_cert' => true,
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ],
+            ]);
+
+            $client = @stream_socket_client(
+                "ssl://{$host}:{$port}",
+                $errno,
+                $errstr,
+                30,
+                STREAM_CLIENT_CONNECT,
+                $context
+            );
+
+            if (! $client) {
+                return null;
+            }
+
+            $params = stream_context_get_params($client);
+            fclose($client);
+
+            if (! isset($params['options']['ssl']['peer_certificate'])) {
+                return null;
+            }
+
+            $cert = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
+
+            if (! $cert) {
+                return null;
+            }
+
+            $domains = [];
+
+            // Extract Common Name (CN)
+            if (isset($cert['subject']['CN'])) {
+                $domains[] = $cert['subject']['CN'];
+            }
+
+            // Extract Subject Alternative Names (SANs)
+            if (isset($cert['extensions']['subjectAltName'])) {
+                $sans = explode(', ', $cert['extensions']['subjectAltName']);
+                foreach ($sans as $san) {
+                    if (str_starts_with($san, 'DNS:')) {
+                        $domain = substr($san, 4);
+                        if (! in_array($domain, $domains)) {
+                            $domains[] = $domain;
+                        }
+                    }
+                }
+            }
+
+            return ! empty($domains) ? implode(', ', $domains) : null;
+
+        } catch (\Throwable $exception) {
+            AutomationLogger::error(
+                "Failed to extract certificate subject for monitor: {$this->monitor->url}",
+                ['monitor_id' => $this->monitor->id],
+                $exception
+            );
+
+            return null;
+        }
     }
 
     /**

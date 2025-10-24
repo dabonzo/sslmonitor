@@ -83,6 +83,11 @@ class Website extends Model
         return $this->belongsTo(User::class, 'assigned_by_user_id');
     }
 
+    public function monitoringResults(): HasMany
+    {
+        return $this->hasMany(MonitoringResult::class);
+    }
+
     public function debugOverrides(): HasMany
     {
         return $this->hasMany(DebugOverride::class, 'targetable_id')

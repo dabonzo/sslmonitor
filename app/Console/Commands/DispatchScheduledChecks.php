@@ -36,20 +36,41 @@ class DispatchScheduledChecks extends Command
 
         $this->info('Finding monitors due for checking...');
 
-        // Get monitors where uptime checking is enabled
-        $monitors = Monitor::where('uptime_check_enabled', true)
-            ->get()
-            ->filter(fn ($monitor) => $monitor->shouldCheckUptime());
+        // Get all monitors with smart scheduling logic
+        $allMonitors = Monitor::where('uptime_check_enabled', true)
+            ->orWhere('certificate_check_enabled', true)
+            ->get();
 
-        $this->info("Found {$monitors->count()} monitors due for checking");
-
-        // Dispatch CheckMonitorJob for each monitor
         $dispatched = 0;
-        foreach ($monitors as $monitor) {
-            CheckMonitorJob::dispatch($monitor);
+        $uptimeChecks = 0;
+        $sslChecks = 0;
+        $bothChecks = 0;
+
+        foreach ($allMonitors as $monitor) {
+            $checkType = $monitor->getCheckType();
+
+            if ($checkType === 'none') {
+                continue; // Skip if nothing to check
+            }
+
+            // Dispatch job with the correct check type
+            CheckMonitorJob::dispatch($monitor, $checkType);
             $dispatched++;
 
-            $this->comment("Dispatched check for: {$monitor->url}");
+            switch ($checkType) {
+                case 'uptime':
+                    $uptimeChecks++;
+                    $this->comment("Dispatched uptime check for: {$monitor->url}");
+                    break;
+                case 'ssl':
+                    $sslChecks++;
+                    $this->comment("Dispatched SSL check for: {$monitor->url}");
+                    break;
+                case 'both':
+                    $bothChecks++;
+                    $this->comment("Dispatched combined check for: {$monitor->url}");
+                    break;
+            }
         }
 
         $executionTime = round((microtime(true) - $startTime) * 1000, 2);
@@ -57,13 +78,19 @@ class DispatchScheduledChecks extends Command
         AutomationLogger::scheduler(
             'Completed scheduled checks dispatch',
             [
-                'monitors_found' => $monitors->count(),
+                'total_monitors' => $allMonitors->count(),
                 'jobs_dispatched' => $dispatched,
+                'uptime_checks' => $uptimeChecks,
+                'ssl_checks' => $sslChecks,
+                'both_checks' => $bothChecks,
                 'execution_time_ms' => $executionTime,
             ]
         );
 
         $this->info("✓ Dispatched {$dispatched} check jobs in {$executionTime}ms");
+        $this->info("  Uptime checks: {$uptimeChecks}");
+        $this->info("  SSL checks: {$sslChecks}");
+        $this->info("  Combined checks: {$bothChecks}");
         $this->info('Jobs will be processed by Horizon workers');
 
         return Command::SUCCESS;

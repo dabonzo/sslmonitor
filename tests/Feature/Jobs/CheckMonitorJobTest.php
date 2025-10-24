@@ -130,17 +130,9 @@ test('check monitor job records response time', function () {
     expect($result['uptime'])->toHaveKey('check_duration_ms')
         ->and($result['uptime']['check_duration_ms'])->toBeGreaterThan(0);
 
-    // SSL should be checked due to old timestamp, or return cached results
+    // SSL should be checked and return fresh results with duration
     expect($result['ssl'])->toHaveKey('check_duration_ms')
-        ->and($result['ssl'])->toHaveKey('from_cache');
-
-    if ($result['ssl']['from_cache'] ?? false) {
-        // If cached, duration should be null
-        expect($result['ssl']['check_duration_ms'])->toBeNull();
-    } else {
-        // If fresh check, duration should be greater than 0
-        expect($result['ssl']['check_duration_ms'])->toBeGreaterThan(0);
-    }
+        ->and($result['ssl']['check_duration_ms'])->toBeGreaterThan(0);
 });
 
 test('check monitor job handles exceptions internally without throwing', function () {

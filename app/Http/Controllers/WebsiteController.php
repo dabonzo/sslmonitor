@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWebsiteRequest;
 use App\Http\Requests\UpdateWebsiteRequest;
+use App\Http\Resources\MonitoringResultResource;
 use App\Jobs\ImmediateWebsiteCheckJob;
 use App\Models\Monitor;
 use App\Models\Website;
@@ -352,6 +353,22 @@ class WebsiteController extends Controller
         // Get Spatie monitor data
         $monitor = $website->getSpatieMonitor();
 
+        // Get recent historical monitoring results (last 30 days, limit to 100)
+        $recentResults = $website->monitoringResults()
+            ->with('triggeredBy:id,name,email')
+            ->where('started_at', '>=', now()->subDays(30))
+            ->orderBy('started_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        // Calculate basic statistics from historical data
+        $totalChecks = $recentResults->count();
+        $successfulChecks = $recentResults->where('status', 'success')->count();
+        $failedChecks = $recentResults->where('status', 'failed')->count();
+        $avgResponseTime = $recentResults->where('check_type', 'uptime')
+            ->where('status', 'success')
+            ->avg('response_time_ms');
+
         $websiteData = [
             'id' => $website->id,
             'name' => $website->name,
@@ -360,6 +377,7 @@ class WebsiteController extends Controller
             'uptime_monitoring_enabled' => $website->uptime_monitoring_enabled,
             'ssl_status' => $website->getCurrentSslStatus(),
             'uptime_status' => $website->getCurrentUptimeStatus(),
+            'monitor_id' => $monitor?->id,
             'monitor_data' => $monitor ? [
                 'certificate_status' => $monitor->certificate_status,
                 'certificate_expiration_date' => $monitor->certificate_expiration_date,
@@ -388,6 +406,16 @@ class WebsiteController extends Controller
             ]] : [],
             'created_at' => $website->created_at,
             'updated_at' => $website->updated_at,
+
+            // Historical monitoring data
+            'monitoring_history' => MonitoringResultResource::collection($recentResults),
+            'monitoring_stats' => [
+                'total_checks' => $totalChecks,
+                'successful_checks' => $successfulChecks,
+                'failed_checks' => $failedChecks,
+                'success_rate' => $totalChecks > 0 ? round(($successfulChecks / $totalChecks) * 100, 2) : 0,
+                'avg_response_time_ms' => $avgResponseTime ? round($avgResponseTime, 2) : null,
+            ],
         ];
 
         return Inertia::render('Ssl/Websites/Show', [
@@ -1027,6 +1055,143 @@ class WebsiteController extends Controller
         });
 
         return redirect()->back()->with('success', "Successfully transferred {$websites->count()} websites to {$team->name}.");
+    }
+
+    /**
+     * Get historical monitoring data for a website
+     */
+    public function history(Request $request, Website $website): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $website);
+
+        $request->validate([
+            'limit' => 'sometimes|integer|min:1|max:500',
+            'check_type' => 'sometimes|in:ssl,uptime,both',
+            'status' => 'sometimes|in:success,failed',
+            'trigger_type' => 'sometimes|in:scheduled,manual_immediate,manual_bulk',
+            'days' => 'sometimes|integer|min:1|max:365',
+        ]);
+
+        $query = $website->monitoringResults()
+            ->with('triggeredBy:id,name,email')
+            ->orderBy('started_at', 'desc');
+
+        // Filter by check type
+        if ($request->filled('check_type')) {
+            $checkType = $request->get('check_type');
+            if ($checkType !== 'both') {
+                $query->where('check_type', $checkType);
+            }
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        // Filter by trigger type
+        if ($request->filled('trigger_type')) {
+            $query->where('trigger_type', $request->get('trigger_type'));
+        }
+
+        // Filter by time range (days)
+        if ($request->filled('days')) {
+            $days = $request->get('days');
+            $query->where('started_at', '>=', now()->subDays($days));
+        }
+
+        // Apply pagination
+        $limit = $request->get('limit', 50);
+        $results = $query->paginate($limit);
+
+        return response()->json([
+            'data' => MonitoringResultResource::collection($results->items()),
+            'meta' => [
+                'current_page' => $results->currentPage(),
+                'from' => $results->firstItem(),
+                'last_page' => $results->lastPage(),
+                'per_page' => $results->perPage(),
+                'to' => $results->lastItem(),
+                'total' => $results->total(),
+            ],
+            'filters' => $request->only(['check_type', 'status', 'trigger_type', 'days']),
+        ]);
+    }
+
+    /**
+     * Get monitoring statistics for a website
+     */
+    public function statistics(Request $request, Website $website): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $website);
+
+        $request->validate([
+            'days' => 'sometimes|integer|min:1|max:365',
+        ]);
+
+        $days = $request->get('days', 30);
+        $startDate = now()->subDays($days);
+
+        $stats = [
+            'total_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->count(),
+            'successful_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('status', 'success')
+                ->count(),
+            'failed_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('status', 'failed')
+                ->count(),
+            'avg_response_time_ms' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('check_type', 'uptime')
+                ->where('status', 'success')
+                ->avg('response_time_ms'),
+            'avg_ssl_days_until_expiration' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('check_type', 'ssl')
+                ->where('status', 'success')
+                ->avg('days_until_expiration'),
+            'ssl_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('check_type', 'ssl')
+                ->count(),
+            'uptime_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('check_type', 'uptime')
+                ->count(),
+            'manual_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->whereIn('trigger_type', ['manual_immediate', 'manual_bulk'])
+                ->count(),
+            'scheduled_checks' => $website->monitoringResults()
+                ->where('started_at', '>=', $startDate)
+                ->where('trigger_type', 'scheduled')
+                ->count(),
+        ];
+
+        // Calculate success rate
+        $stats['success_rate'] = $stats['total_checks'] > 0
+            ? round(($stats['successful_checks'] / $stats['total_checks']) * 100, 2)
+            : 0;
+
+        // Round averages
+        $stats['avg_response_time_ms'] = $stats['avg_response_time_ms']
+            ? round($stats['avg_response_time_ms'], 2)
+            : null;
+        $stats['avg_ssl_days_until_expiration'] = $stats['avg_ssl_days_until_expiration']
+            ? round($stats['avg_ssl_days_until_expiration'], 2)
+            : null;
+
+        return response()->json([
+            'website_id' => $website->id,
+            'website_name' => $website->name,
+            'website_url' => $website->url,
+            'period_days' => $days,
+            'statistics' => $stats,
+        ]);
     }
 
     /**

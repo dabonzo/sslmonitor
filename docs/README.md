@@ -279,7 +279,7 @@
 
 ### Planning Documentation (Future Features)
 
-#### **[HISTORICAL_DATA_MASTER_PLAN.md](HISTORICAL_DATA_MASTER_PLAN.md)** (2,800+ lines) ⭐ **NEW - MASTER PLAN**
+#### **[HISTORICAL_DATA_MASTER_PLAN.md](HISTORICAL_DATA_MASTER_PLAN.md)** (2,800+ lines) ⭐ **MASTER PLAN**
 **Comprehensive consolidated plan for historical monitoring data tracking.**
 
 - **Complete implementation guide** (consolidates 2 previous plans)
@@ -291,14 +291,49 @@
 - **Complete code examples**: Models, events, listeners, migrations
 - **Testing strategy**: Maintain < 20s test suite
 
+**Implementation Status**: 84% Complete (Phase 1-3: 100%, Phase 4: 60%, Phase 5: 40%)
+
 **Quick Start**: See [HISTORICAL_DATA_QUICK_START.md](HISTORICAL_DATA_QUICK_START.md) (one-page guide)
 
-**Status**: 🎯 **READY TO IMPLEMENT** - Phase 1 can start immediately
+**Completion Guides**:
+- **[PHASE4_COMPLETION_PROMPT.md](PHASE4_COMPLETION_PROMPT.md)** - Complete Phase 4 (remaining 40%)
+- **[PHASE5_IMPLEMENTATION_PROMPT.md](PHASE5_IMPLEMENTATION_PROMPT.md)** - Complete Phase 5 (remaining 60%)
+
+**Status**: 🚧 **84% COMPLETE** - Phase 4 & 5 remaining before production deployment
 **When to use**: THE definitive guide for implementing historical data tracking
 
 **Supersedes**:
 - ~~MONITORING_HISTORY_PLAN.md~~ (archived - 6 table approach)
 - ~~MONITORING_DATA_TRACKING_PLAN.md~~ (archived - claimed completion without evidence)
+
+---
+
+#### **[PHASE4_COMPLETION_PROMPT.md](PHASE4_COMPLETION_PROMPT.md)** (664 lines)
+**Implementation guide for completing Phase 4 of historical data tracking.**
+
+- Complete `UpdateMonitoringSummaries` listener (real-time summary aggregation)
+- Complete `CheckAlertConditions` listener (automated alert checking)
+- Configure Laravel scheduler (5 automated jobs)
+- Add 8 comprehensive tests
+- **Estimated time**: 1-2 hours with `laravel-backend-specialist` agent
+- **Current progress**: 60% → Target: 100%
+
+**When to use**: When ready to complete Phase 4 before deployment
+
+---
+
+#### **[PHASE5_IMPLEMENTATION_PROMPT.md](PHASE5_IMPLEMENTATION_PROMPT.md)** (750+ lines)
+**Implementation guide for Phase 5 production optimization.**
+
+- Advanced caching implementation (MonitoringCacheService)
+- Query optimization and profiling tools
+- Load testing infrastructure (50+ websites, 72,000 checks/day)
+- Production monitoring setup (Horizon health checks)
+- Complete deployment checklist
+- **Estimated time**: 2-3 hours with specialized agents
+- **Current progress**: 40% → Target: 100%
+
+**When to use**: After Phase 4 completion, before production deployment
 
 ---
 
@@ -330,11 +365,11 @@ See **[archive/README.md](archive/README.md)** for complete archive index.
 
 ## 📊 Documentation Statistics
 
-- **Active Docs**: 25 files
-- **Total Lines**: ~16,500+ lines of active documentation
+- **Active Docs**: 27 files
+- **Total Lines**: ~18,000+ lines of active documentation
 - **Archived**: 7 files in archive/ + 2 superseded plans
 - **Test Coverage**: 530 tests passing, 13 skipped (100% pass rate)
-- **Last Major Update**: October 2025 (Historical data master plan + Alert system + Tailwind v4)
+- **Last Major Update**: October 2025 (Historical data Phase 4 & 5 completion prompts + Alert system + Tailwind v4)
 
 ---
 
@@ -355,6 +390,7 @@ See **[archive/README.md](archive/README.md)** for complete archive index.
 | **Deploying** | DEPLOYMENT.md, DEPLOYMENT_GUIDE.md |
 | **Using agents** | AGENT_USAGE_GUIDE.md |
 | **Performance tuning** | PERFORMANCE_WORKFLOW.md |
+| **Completing historical data** | PHASE4_COMPLETION_PROMPT.md, PHASE5_IMPLEMENTATION_PROMPT.md |
 
 ### By Role
 

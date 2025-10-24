@@ -170,7 +170,7 @@ test('database queries remain efficient during automation', function () {
 
     // Verify reasonable number of queries per website
     $queriesPerWebsite = count($queries) / $websites->count();
-    expect($queriesPerWebsite)->toBeLessThan(20); // Under 20 queries per website check
+    expect($queriesPerWebsite)->toBeLessThan(25); // Under 25 queries per website check (includes Phase 4 historical tracking)
 
     // Check for potential N+1 queries
     $selectQueries = collect($queries)->filter(function ($query) {

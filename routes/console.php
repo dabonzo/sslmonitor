@@ -88,30 +88,44 @@ Schedule::call(function () {
     ->weeklyOn(0, '03:00')
     ->name('weekly-health-report');
 
+// ==================== MONITORING AGGREGATION ====================
+
 // Aggregate monitoring data at different intervals
 Schedule::job(new AggregateMonitoringSummariesJob('hourly'))
     ->hourly()
     ->at('05')
     ->withoutOverlapping()
-    ->name('aggregate-hourly-monitoring-summaries');
+    ->onOneServer()
+    ->name('aggregate-hourly-monitoring-summaries')
+    ->description('Aggregate hourly monitoring statistics');
 
 Schedule::job(new AggregateMonitoringSummariesJob('daily'))
     ->dailyAt('01:00')
     ->withoutOverlapping()
-    ->name('aggregate-daily-monitoring-summaries');
+    ->onOneServer()
+    ->name('aggregate-daily-monitoring-summaries')
+    ->description('Aggregate daily monitoring statistics');
 
 Schedule::job(new AggregateMonitoringSummariesJob('weekly'))
-    ->weeklyOn(1, '02:00')
+    ->weeklyOn(1, '02:00')  // Monday at 2 AM
     ->withoutOverlapping()
-    ->name('aggregate-weekly-monitoring-summaries');
+    ->onOneServer()
+    ->name('aggregate-weekly-monitoring-summaries')
+    ->description('Aggregate weekly monitoring statistics');
 
 Schedule::job(new AggregateMonitoringSummariesJob('monthly'))
-    ->monthlyOn(1, '03:00')
+    ->monthlyOn(1, '03:00')  // 1st day at 3 AM
     ->withoutOverlapping()
-    ->name('aggregate-monthly-monitoring-summaries');
+    ->onOneServer()
+    ->name('aggregate-monthly-monitoring-summaries')
+    ->description('Aggregate monthly monitoring statistics');
+
+// ==================== DATA RETENTION ====================
 
 // Prune old monitoring data daily
 Schedule::command('monitoring:prune-old-data', ['--days' => 90])
     ->dailyAt('04:00')
     ->withoutOverlapping()
-    ->name('prune-monitoring-data');
+    ->onOneServer()
+    ->name('prune-monitoring-data')
+    ->description('Prune monitoring data older than 90 days');

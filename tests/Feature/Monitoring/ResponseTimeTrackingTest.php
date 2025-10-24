@@ -51,13 +51,9 @@ test('check monitor job records response time in results', function () {
         ->and($result['uptime']['check_duration_ms'])->toBeNumeric()
         ->and($result['uptime']['check_duration_ms'])->toBeGreaterThan(0);
 
-    // Verify SSL check result structure
+    // Verify SSL check result structure (always performs fresh check)
     expect($result['ssl'])->toHaveKey('check_duration_ms')
-        ->and($result['ssl'])->toHaveKey('from_cache')
-        ->and($result['ssl']['from_cache'])->toBeTrue(); // SSL should be cached due to interval logic
-
-    // For cached results, duration should be null
-    expect($result['ssl']['check_duration_ms'])->toBeNull();
+        ->and($result['ssl']['check_duration_ms'])->toBeGreaterThan(0);
 });
 
 test('monitor stores uptime response time after check', function () {
@@ -227,17 +223,9 @@ test('response time includes SSL check duration', function () {
     expect($result['uptime'])->toHaveKey('check_duration_ms')
         ->and($result['uptime']['check_duration_ms'])->toBeGreaterThan(0);
 
-    // SSL should report duration or be cached
+    // SSL should always report duration (performs fresh check)
     expect($result['ssl'])->toHaveKey('check_duration_ms')
-        ->and($result['ssl'])->toHaveKey('from_cache');
-
-    if ($result['ssl']['from_cache'] ?? false) {
-        // If cached, duration should be null
-        expect($result['ssl']['check_duration_ms'])->toBeNull();
-    } else {
-        // If fresh check, duration should be greater than 0
-        expect($result['ssl']['check_duration_ms'])->toBeGreaterThan(0);
-    }
+        ->and($result['ssl']['check_duration_ms'])->toBeGreaterThan(0);
 });
 
 test('response time persists across job executions', function () {

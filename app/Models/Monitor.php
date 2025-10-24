@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Psr\Http\Message\ResponseInterface;
 use Spatie\UptimeMonitor\Models\Monitor as SpatieMonitor;
@@ -159,5 +160,253 @@ class Monitor extends SpatieMonitor
     public function monitoringResults(): HasMany
     {
         return $this->hasMany(MonitoringResult::class, 'monitor_id');
+    }
+
+    /**
+     * Get SSL check interval in minutes (smart defaults)
+     * SSL checks have sensible defaults regardless of user uptime preference
+     */
+    public function getSslCheckIntervalInMinutes(): int
+    {
+        // Default SSL check interval - 12 hours
+        $sslInterval = 12 * 60; // 12 hours in minutes
+
+        // If certificate expires within 30 days, check more frequently
+        if ($this->certificate_expiration_date) {
+            $daysUntilExpiration = now()->diffInDays($this->certificate_expiration_date, false);
+
+            if ($daysUntilExpiration <= 30 && $daysUntilExpiration >= 0) {
+                $sslInterval = 60; // 1 hour for certificates expiring within 30 days
+            }
+
+            if ($daysUntilExpiration <= 7 && $daysUntilExpiration >= 0) {
+                $sslInterval = 30; // 30 minutes for certificates expiring within 7 days
+            }
+
+            if ($daysUntilExpiration <= 3 && $daysUntilExpiration >= 0) {
+                $sslInterval = 15; // 15 minutes for certificates expiring within 3 days
+            }
+
+            if ($daysUntilExpiration < 0) {
+                $sslInterval = 5; // 5 minutes for expired certificates
+            }
+        }
+
+        return $sslInterval;
+    }
+
+    /**
+     * Determine if SSL check should run (uses smart defaults, not user-configurable)
+     */
+    public function shouldRunSslCheck(): bool
+    {
+        if (! $this->certificate_check_enabled) {
+            return false;
+        }
+
+        $now = now();
+        $lastSslCheck = $this->getLastSslCheckDate();
+
+        // If never checked SSL before, run it now
+        if (! $lastSslCheck) {
+            return true;
+        }
+
+        $minutesSinceLastCheck = $lastSslCheck->diffInMinutes($now);
+        $sslInterval = $this->getSslCheckIntervalInMinutes();
+
+        return $minutesSinceLastCheck >= $sslInterval;
+    }
+
+    /**
+     * Determine if uptime check should run (user-configurable interval)
+     */
+    public function shouldRunUptimeCheck(): bool
+    {
+        if (! $this->uptime_check_enabled) {
+            return false;
+        }
+
+        $now = now();
+        $lastUptimeCheck = $this->uptime_last_check_date?->copy();
+
+        if (! $lastUptimeCheck) {
+            return true;
+        }
+
+        $minutesSinceLastCheck = $lastUptimeCheck->diffInMinutes($now);
+
+        return $minutesSinceLastCheck >= $this->uptime_check_interval_in_minutes;
+    }
+
+    /**
+     * Get the last SSL check date (more accurate than uptime_last_check_date)
+     */
+    public function getLastSslCheckDate(): ?Carbon
+    {
+        // Get the most recent monitoring result that included SSL checking
+        $lastSslResult = $this->monitoringResults()
+            ->whereNotNull('ssl_status')
+            ->latest('started_at')
+            ->first();
+
+        return $lastSslResult?->started_at;
+    }
+
+    /**
+     * Get the appropriate check type for this monitor run
+     */
+    public function getCheckType(): string
+    {
+        $shouldCheckUptime = $this->shouldRunUptimeCheck();
+        $shouldCheckSsl = $this->shouldRunSslCheck();
+
+        if ($shouldCheckUptime && $shouldCheckSsl) {
+            return 'both';
+        } elseif ($shouldCheckUptime) {
+            return 'uptime';
+        } elseif ($shouldCheckSsl) {
+            return 'ssl';
+        }
+
+        return 'none'; // Nothing to check
+    }
+
+    /**
+     * Get human-readable next check information
+     */
+    public function getNextCheckInfo(): array
+    {
+        $now = now();
+        $info = [];
+
+        // Uptime check info
+        if ($this->uptime_check_enabled) {
+            $lastUptimeCheck = $this->uptime_last_check_date?->copy();
+            if ($lastUptimeCheck) {
+                $nextUptimeCheck = $lastUptimeCheck->addMinutes($this->uptime_check_interval_in_minutes);
+                $info['uptime'] = [
+                    'enabled' => true,
+                    'interval_minutes' => $this->uptime_check_interval_in_minutes,
+                    'last_check' => $lastUptimeCheck,
+                    'next_check' => $nextUptimeCheck,
+                    'minutes_until_next' => $now->diffInMinutes($nextUptimeCheck, false)
+                ];
+            } else {
+                $info['uptime'] = [
+                    'enabled' => true,
+                    'interval_minutes' => $this->uptime_check_interval_in_minutes,
+                    'last_check' => null,
+                    'next_check' => $now,
+                    'minutes_until_next' => 0
+                ];
+            }
+        } else {
+            $info['uptime'] = ['enabled' => false];
+        }
+
+        // SSL check info
+        if ($this->certificate_check_enabled) {
+            $lastSslCheck = $this->getLastSslCheckDate();
+            $sslInterval = $this->getSslCheckIntervalInMinutes();
+
+            if ($lastSslCheck) {
+                $nextSslCheck = $lastSslCheck->addMinutes($sslInterval);
+                $info['ssl'] = [
+                    'enabled' => true,
+                    'interval_minutes' => $sslInterval,
+                    'last_check' => $lastSslCheck,
+                    'next_check' => $nextSslCheck,
+                    'minutes_until_next' => $now->diffInMinutes($nextSslCheck, false),
+                    'smart_interval_reason' => $this->getSslIntervalReason()
+                ];
+            } else {
+                $info['ssl'] = [
+                    'enabled' => true,
+                    'interval_minutes' => $sslInterval,
+                    'last_check' => null,
+                    'next_check' => $now,
+                    'minutes_until_next' => 0,
+                    'smart_interval_reason' => $this->getSslIntervalReason()
+                ];
+            }
+        } else {
+            $info['ssl'] = ['enabled' => false];
+        }
+
+        return $info;
+    }
+
+    /**
+     * Get the reason for the current SSL check interval
+     */
+    public function getSslIntervalReason(): string
+    {
+        if (! $this->certificate_expiration_date) {
+            return 'Default: 12 hours';
+        }
+
+        $daysUntilExpiration = now()->diffInDays($this->certificate_expiration_date, false);
+
+        if ($daysUntilExpiration < 0) {
+            return 'Critical: Certificate expired - checking every 5 minutes';
+        } elseif ($daysUntilExpiration <= 3) {
+            return 'Critical: Expires in ' . $daysUntilExpiration . ' days - checking every 15 minutes';
+        } elseif ($daysUntilExpiration <= 7) {
+            return 'Warning: Expires in ' . $daysUntilExpiration . ' days - checking every 30 minutes';
+        } elseif ($daysUntilExpiration <= 30) {
+            return 'Alert: Expires in ' . $daysUntilExpiration . ' days - checking every hour';
+        } else {
+            return 'Default: 12 hours';
+        }
+    }
+
+    /**
+     * Override the parent method to implement smarter check scheduling
+     * This determines if this monitor should be included in the current check run
+     */
+    public function shouldBeChecked(): bool
+    {
+        $checkType = $this->getCheckType();
+
+        return in_array($checkType, ['both', 'uptime', 'ssl']);
+    }
+
+    /**
+     * Get next check time for this monitor
+     */
+    public function getNextCheckTime(): Carbon
+    {
+        $now = now();
+        $checkType = $this->getCheckType();
+
+        if ($checkType === 'none') {
+            // If nothing to check, return the next uptime check time
+            return $now->addMinutes($this->uptime_check_interval_in_minutes);
+        }
+
+        return $now;
+    }
+
+    /**
+     * Get SSL check priority level (for critical certificates)
+     */
+    public function getSslCheckPriority(): int
+    {
+        if (! $this->certificate_expiration_date) {
+            return 1; // Low priority
+        }
+
+        $daysUntilExpiration = now()->diffInDays($this->certificate_expiration_date, false);
+
+        if ($daysUntilExpiration < 0) {
+            return 10; // Critical - already expired
+        } elseif ($daysUntilExpiration <= 7) {
+            return 8; // High - expires within a week
+        } elseif ($daysUntilExpiration <= 30) {
+            return 5; // Medium - expires within 30 days
+        } else {
+            return 1; // Low - plenty of time
+        }
     }
 }

@@ -37,6 +37,14 @@ Route::middleware(['auth', 'verified'])->prefix('ssl')->name('ssl.')->group(func
     Route::get('websites/{website}/check-status', [App\Http\Controllers\WebsiteController::class, 'checkStatus'])
         ->name('websites.check-status');
 
+    // Historical monitoring data routes
+    Route::get('websites/{website}/history', [App\Http\Controllers\WebsiteController::class, 'history'])
+        ->middleware('cache.api:60')
+        ->name('websites.history');
+    Route::get('websites/{website}/statistics', [App\Http\Controllers\WebsiteController::class, 'statistics'])
+        ->middleware('cache.api:120')
+        ->name('websites.statistics');
+
     // Website transfer routes
     Route::post('websites/{website}/transfer-to-team', [App\Http\Controllers\WebsiteController::class, 'transferToTeam'])->name('websites.transfer-to-team');
     Route::post('websites/{website}/transfer-to-personal', [App\Http\Controllers\WebsiteController::class, 'transferToPersonal'])->name('websites.transfer-to-personal');
@@ -81,6 +89,27 @@ Route::middleware(['auth'])
             ->name('summary');
         Route::get('/daily-breakdown', [App\Http\Controllers\MonitoringReportController::class, 'dailyBreakdown'])
             ->name('daily-breakdown');
+    });
+
+// Monitor History API Routes
+Route::middleware(['auth'])
+    ->prefix('api/monitors/{monitor}')
+    ->name('api.monitors.')
+    ->group(function () {
+        Route::get('/history', [App\Http\Controllers\API\MonitorHistoryController::class, 'history'])
+            ->name('history');
+        Route::get('/trends', [App\Http\Controllers\API\MonitorHistoryController::class, 'trends'])
+            ->name('trends');
+        Route::get('/summary', [App\Http\Controllers\API\MonitorHistoryController::class, 'summary'])
+            ->name('summary');
+        Route::get('/uptime-stats', [App\Http\Controllers\API\MonitorHistoryController::class, 'uptimeStats'])
+            ->name('uptime-stats');
+        Route::get('/ssl-info', [App\Http\Controllers\API\MonitorHistoryController::class, 'sslInfo'])
+            ->name('ssl-info');
+        Route::get('/recent-checks', [App\Http\Controllers\API\MonitorHistoryController::class, 'recentChecks'])
+            ->name('recent-checks');
+        Route::get('/ssl-expiration-trends', [App\Http\Controllers\API\MonitorHistoryController::class, 'sslExpirationTrends'])
+            ->name('ssl-expiration-trends');
     });
 
 // Team Management Routes

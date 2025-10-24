@@ -7,6 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Users, ArrowRightLeft, User, Shield } from 'lucide-vue-next';
 import SmartTeamPicker from '@/components/team/SmartTeamPicker.vue';
+import MonitoringHistoryChart from '@/Components/Monitoring/MonitoringHistoryChart.vue';
+import UptimeTrendCard from '@/Components/Monitoring/UptimeTrendCard.vue';
+import RecentChecksTimeline from '@/Components/Monitoring/RecentChecksTimeline.vue';
+import SslExpirationTrendCard from '@/Components/Monitoring/SslExpirationTrendCard.vue';
 
 interface SslCertificate {
   id: number;
@@ -43,6 +47,46 @@ interface TransferOptions {
   current_owner: CurrentOwner;
 }
 
+interface MonitoringResult {
+  id: number;
+  uuid: string;
+  check_type: string;
+  trigger_type: string;
+  status: string;
+  started_at: string;
+  completed_at: string;
+  duration_ms: number;
+  error_message: string | null;
+  uptime_status: string;
+  http_status_code: number | null;
+  response_time_ms: number;
+  ssl_status: string;
+  certificate_issuer: string | null;
+  certificate_expiration_date: string | null;
+  days_until_expiration: number | null;
+  content_validation_enabled: boolean;
+  javascript_rendered: boolean;
+}
+
+interface MonitoringStatistics {
+  website_id: number;
+  website_name: string;
+  website_url: string;
+  period_days: number;
+  statistics: {
+    total_checks: number;
+    successful_checks: number;
+    failed_checks: number;
+    avg_response_time_ms: number | null;
+    avg_ssl_days_until_expiration: number | null;
+    ssl_checks: number;
+    uptime_checks: number;
+    manual_checks: number;
+    scheduled_checks: number;
+    success_rate: number;
+  };
+}
+
 interface Website {
   id: number;
   name: string;
@@ -52,6 +96,7 @@ interface Website {
   ssl_status: string;
   ssl_certificates: SslCertificate[];
   recent_ssl_checks: SslCheck[];
+  monitor_id?: number;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +112,74 @@ const selectedTeam = ref<Team | null>(null);
 const selectedTeamId = ref<number | null>(null);
 const isTransferring = ref(false);
 const isLoadingTransferOptions = ref(false);
+
+// Historical data state
+const monitoringHistory = ref<MonitoringResult[]>([]);
+const monitoringStatistics = ref<MonitoringStatistics | null>(null);
+const isLoadingHistory = ref(false);
+const isLoadingStatistics = ref(false);
+const historyError = ref<string | null>(null);
+const statisticsError = ref<string | null>(null);
+
+// Historical data filters
+const historyFilters = ref({
+  per_page: 50,
+  check_type: '',
+  status: '',
+  trigger_type: '',
+  date_from: '',
+  date_to: ''
+});
+
+// Load monitoring history
+const loadMonitoringHistory = async () => {
+  if (isLoadingHistory.value) return;
+
+  isLoadingHistory.value = true;
+  historyError.value = null;
+
+  try {
+    const params = new URLSearchParams();
+    Object.entries(historyFilters.value).forEach(([key, value]) => {
+      if (value) params.append(key, value);
+    });
+
+    const response = await fetch(`/ssl/websites/${props.website.id}/history?${params}`);
+    if (response.ok) {
+      const data = await response.json();
+      monitoringHistory.value = data.data;
+    } else {
+      historyError.value = 'Failed to load monitoring history';
+    }
+  } catch (error) {
+    console.error('Failed to load monitoring history:', error);
+    historyError.value = 'Failed to load monitoring history';
+  } finally {
+    isLoadingHistory.value = false;
+  }
+};
+
+// Load monitoring statistics
+const loadMonitoringStatistics = async () => {
+  if (isLoadingStatistics.value) return;
+
+  isLoadingStatistics.value = true;
+  statisticsError.value = null;
+
+  try {
+    const response = await fetch(`/ssl/websites/${props.website.id}/statistics`);
+    if (response.ok) {
+      monitoringStatistics.value = await response.json();
+    } else {
+      statisticsError.value = 'Failed to load monitoring statistics';
+    }
+  } catch (error) {
+    console.error('Failed to load monitoring statistics:', error);
+    statisticsError.value = 'Failed to load monitoring statistics';
+  } finally {
+    isLoadingStatistics.value = false;
+  }
+};
 
 // Load transfer options
 const loadTransferOptions = async () => {
@@ -123,6 +236,8 @@ const transferToPersonal = () => {
 
 onMounted(() => {
   loadTransferOptions();
+  loadMonitoringHistory();
+  loadMonitoringStatistics();
 });
 </script>
 
@@ -302,6 +417,220 @@ onMounted(() => {
           <div v-if="isLoadingTransferOptions" class="text-center py-4">
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-border mx-auto"></div>
             <p class="text-sm text-foreground dark:text-muted-foreground mt-2">Loading transfer options...</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Historical Data Section -->
+      <section v-if="website.monitor_id" class="space-y-6">
+        <h2 class="text-2xl font-bold text-foreground">Historical Data</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Uptime Trend -->
+          <UptimeTrendCard
+            :monitor-id="website.monitor_id"
+            period="7d"
+          />
+
+          <!-- SSL Expiration Trend -->
+          <SslExpirationTrendCard
+            :monitor-id="website.monitor_id"
+          />
+
+          <!-- Recent Checks Timeline -->
+          <RecentChecksTimeline
+            :monitor-id="website.monitor_id"
+            :limit="10"
+          />
+        </div>
+
+        <!-- Response Time Chart -->
+        <div class="glass-card-strong p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">
+            Response Time Trend (7 Days)
+          </h3>
+          <MonitoringHistoryChart
+            :monitor-id="website.monitor_id"
+            period="7d"
+            :height="300"
+          />
+        </div>
+      </section>
+
+      <!-- Monitoring Statistics -->
+      <Card v-if="monitoringStatistics || isLoadingStatistics">
+        <CardHeader>
+          <CardTitle class="flex items-center space-x-2">
+            <div class="rounded-lg bg-muted p-2">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <span>Monitoring Statistics</span>
+          </CardTitle>
+          <CardDescription>
+            Performance overview for the last {{ monitoringStatistics?.period_days || 30 }} days
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <!-- Loading State -->
+          <div v-if="isLoadingStatistics" class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Loading statistics...</p>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="statisticsError" class="text-center py-8">
+            <div class="rounded-lg bg-destructive/10 p-4">
+              <p class="text-destructive">{{ statisticsError }}</p>
+            </div>
+          </div>
+
+          <!-- Statistics Display -->
+          <div v-else-if="monitoringStatistics" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-primary">{{ monitoringStatistics.statistics.total_checks }}</div>
+              <div class="text-sm text-muted-foreground">Total Checks</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600">{{ monitoringStatistics.statistics.success_rate }}%</div>
+              <div class="text-sm text-muted-foreground">Success Rate</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600">{{ monitoringStatistics.statistics.avg_response_time_ms || '--' }}ms</div>
+              <div class="text-sm text-muted-foreground">Avg Response</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-orange-600">{{ monitoringStatistics.statistics.scheduled_checks }}</div>
+              <div class="text-sm text-muted-foreground">Scheduled</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Historical Monitoring Data -->
+      <Card>
+        <CardHeader>
+          <CardTitle class="flex items-center space-x-2">
+            <div class="rounded-lg bg-muted p-2">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span>Historical Monitoring Data</span>
+          </CardTitle>
+          <CardDescription>
+            Detailed monitoring history with filtering and analysis
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-6">
+          <!-- Filters -->
+          <div class="flex flex-wrap gap-4 p-4 bg-muted rounded-lg">
+            <select v-model="historyFilters.check_type" @change="loadMonitoringHistory()" class="px-3 py-2 border rounded-md bg-background">
+              <option value="">All Check Types</option>
+              <option value="ssl">SSL Only</option>
+              <option value="uptime">Uptime Only</option>
+              <option value="both">Both</option>
+            </select>
+
+            <select v-model="historyFilters.status" @change="loadMonitoringHistory()" class="px-3 py-2 border rounded-md bg-background">
+              <option value="">All Statuses</option>
+              <option value="success">Success</option>
+              <option value="failure">Failure</option>
+            </select>
+
+            <select v-model="historyFilters.trigger_type" @change="loadMonitoringHistory()" class="px-3 py-2 border rounded-md bg-background">
+              <option value="">All Triggers</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="manual_immediate">Manual</option>
+            </select>
+
+            <button @click="loadMonitoringHistory()" class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+              Refresh
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="isLoadingHistory" class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Loading monitoring history...</p>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="historyError" class="text-center py-8">
+            <div class="rounded-lg bg-destructive/10 p-4">
+              <p class="text-destructive">{{ historyError }}</p>
+            </div>
+          </div>
+
+          <!-- History Table -->
+          <div v-else-if="monitoringHistory.length > 0" class="space-y-4">
+            <div class="rounded-lg border overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-muted">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Response</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">SSL</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-card divide-y divide-border">
+                    <tr v-for="result in monitoringHistory.slice(0, 20)" :key="result.id" class="hover:bg-muted/50">
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        <div>{{ new Date(result.started_at).toLocaleDateString() }}</div>
+                        <div class="text-muted-foreground">{{ new Date(result.started_at).toLocaleTimeString() }}</div>
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {{ result.check_type }}
+                        </span>
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                              :class="result.status === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
+                          {{ result.status }}
+                        </span>
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        <div v-if="result.response_time_ms">{{ result.response_time_ms }}ms</div>
+                        <div v-else class="text-muted-foreground">--</div>
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        <div v-if="result.ssl_status">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                :class="result.ssl_status === 'valid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'">
+                            {{ result.ssl_status }}
+                          </span>
+                        </div>
+                        <div v-else class="text-muted-foreground">--</div>
+                      </td>
+                      <td class="px-4 py-4 whitespace-nowrap text-sm">
+                        {{ result.duration_ms }}ms
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div v-if="monitoringHistory.length > 20" class="text-center text-sm text-muted-foreground">
+              Showing 20 of {{ monitoringHistory.length }} records. Use API for complete data.
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="text-center py-8">
+            <div class="rounded-lg bg-muted p-8">
+              <svg class="h-12 w-12 text-muted-foreground mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p class="text-muted-foreground">No monitoring history found</p>
+              <p class="text-sm text-muted-foreground mt-1">Historical data will appear here once monitoring runs</p>
+            </div>
           </div>
         </CardContent>
       </Card>

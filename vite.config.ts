@@ -57,5 +57,14 @@ export default defineConfig({
             '@inertiajs/vue3',
             'lucide-vue-next'
         ]
+    },
+    server: {
+        watch: {
+            ignored: [
+                '**/storage/**',
+                '**/vendor/**',
+                '**/node_modules/**',
+            ]
+        }
     }
 });
