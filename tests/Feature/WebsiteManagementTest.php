@@ -4,12 +4,21 @@ use App\Models\AlertConfiguration;
 use App\Models\Monitor;
 use App\Models\User;
 use App\Models\Website;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
+
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        // Return a mock Monitor instance to satisfy type hints
+        $mockMonitor = Mockery::mock(Monitor::class);
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn($mockMonitor);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(true);
+    });
 });
 
 // Website List/Index Tests
@@ -34,7 +43,7 @@ test('website list shows only user websites', function () {
 
     // Create another user with their own websites to test isolation
     $otherUser = User::factory()->create();
-    Website::factory()->count(2)->create(['user_id' => $otherUser->id]);
+    Website::withoutEvents(fn() => Website::factory()->count(2)->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)->get('/ssl/websites');
 
@@ -174,7 +183,7 @@ test('user can update their website', function () {
 test('user cannot update other users websites', function () {
     $user = $this->testUser;
     $otherUser = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)
         ->put("/ssl/websites/{$website->id}", [
@@ -190,7 +199,7 @@ test('user can delete their website', function () {
     $user = $this->testUser;
 
     // Create a test website for deletion
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $response = $this->actingAs($user)
         ->delete("/ssl/websites/{$website->id}");
@@ -204,7 +213,7 @@ test('user can delete their website', function () {
 test('user cannot delete other users websites', function () {
     $user = $this->testUser;
     $otherUser = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)
         ->delete("/ssl/websites/{$website->id}");
@@ -214,7 +223,7 @@ test('user cannot delete other users websites', function () {
 
 test('deleting website also deletes related alert configurations', function () {
     $user = $this->testUser;
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     // Create alert configurations for the website
     AlertConfiguration::factory()->count(2)->create([
@@ -238,7 +247,7 @@ test('deleting website also deletes related alert configurations', function () {
 test('user cannot manually check other users websites', function () {
     $user = $this->testUser;
     $otherUser = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)
         ->post("/ssl/websites/{$website->id}/check");
@@ -267,7 +276,7 @@ test('user can view website details', function () {
 test('user cannot view other users website details', function () {
     $user = $this->testUser;
     $otherUser = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)
         ->get("/ssl/websites/{$website->id}");
@@ -296,7 +305,7 @@ test('user can view certificate analysis', function () {
 test('user cannot view other users certificate analysis', function () {
     $user = $this->testUser;
     $otherUser = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $otherUser->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)
         ->get("/ssl/websites/{$website->id}/certificate-analysis");

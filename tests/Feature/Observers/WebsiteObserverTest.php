@@ -6,13 +6,16 @@ use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Traits\MocksMonitorHttpRequests;
+use Tests\Traits\MocksSslCertificateAnalysis;
 
 uses(RefreshDatabase::class);
 uses(MocksMonitorHttpRequests::class);
+uses(MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     // Mock all HTTP requests to avoid real network calls
     $this->setUpMocksMonitorHttpRequests();
+    $this->setUpMocksSslCertificateAnalysis();
 
     // Ensure clean state - explicitly truncate monitors table
     // (RefreshDatabase should handle this, but explicit cleanup ensures isolation)
@@ -166,8 +169,8 @@ test('updating unrelated website fields does not trigger monitor sync', function
     $monitor = Monitor::first();
     $originalUpdatedAt = $monitor->updated_at;
 
-    // Wait a moment to ensure timestamp difference
-    sleep(1);
+    // Travel forward in time to ensure timestamp difference without sleep()
+    $this->travel(2)->seconds();
 
     // Update unrelated field (name doesn't trigger sync)
     $website->update(['name' => 'New Name']);

@@ -51,18 +51,6 @@ test('debug ssl override functionality works with real websites', function () {
     $effectiveExpiry = $website->getEffectiveSslExpiryDate($user->id);
     $daysRemaining = $website->getDaysRemaining($user->id);
 
-    // Debug: Let's see what's actually happening
-    dump([
-        'website_id' => $website->id,
-        'website_name' => $website->name,
-        'override_expiry_date' => $override->override_data['expiry_date'],
-        'expected_date' => now()->addDays(7)->format('Y-m-d H:i:s'),
-        'effective_expiry_date' => $effectiveExpiry?->format('Y-m-d H:i:s'),
-        'days_remaining' => $daysRemaining,
-        'real_expiry' => $monitor->certificate_expiration_date?->format('Y-m-d H:i:s'),
-        'override_found' => $website->getDebugOverride('ssl_expiry', $user->id)?->id,
-    ]);
-
     // Assertions - these should work when functionality is implemented
     expect($override)->toBeInstanceOf(DebugOverride::class);
     expect($override->module_type)->toBe('ssl_expiry');
@@ -78,17 +66,6 @@ test('debug ssl override functionality works with real websites', function () {
 
     $newEffectiveExpiry = $website->getEffectiveSslExpiryDate($user->id);
     $newDaysRemaining = $website->getDaysRemaining($user->id);
-
-    // Debug: Show what happens after deactivation
-    dump([
-        'after_deactivation' => [
-            'override_id' => $override->id,
-            'override_is_active' => $override->refresh()->is_active,
-            'new_effective_expiry' => $newEffectiveExpiry?->format('Y-m-d H:i:s'),
-            'new_days_remaining' => $newDaysRemaining,
-            'original_expiry' => $monitor->certificate_expiration_date?->format('Y-m-d H:i:s'),
-        ],
-    ]);
 
     // TDD: After deactivation, should revert to original SSL expiry
     expect($override->refresh()->is_active)->toBeFalse();

@@ -351,4 +351,85 @@ class SslCertificateAnalysisService
             ],
         ];
     }
+
+    /**
+     * Analyze certificate and save complete data to website record.
+     */
+    public function analyzeAndSave(\App\Models\Website $website): array
+    {
+        try {
+            // Run existing analysis
+            $analysis = $this->analyzeCertificate($website->url);
+
+            // Handle error cases
+            if (isset($analysis['error']) && $analysis['error']) {
+                \App\Support\AutomationLogger::warning("SSL certificate analysis failed for website: {$website->url}", [
+                    'website_id' => $website->id,
+                    'error' => $analysis['message'] ?? 'Unknown error',
+                ]);
+
+                return $analysis;
+            }
+
+            // Extract the complete certificate data structure
+            $certificateData = [
+                // Basic Info
+                'subject' => $analysis['basic_info']['subject'] ?? null,
+                'issuer' => $analysis['basic_info']['issuer'] ?? null,
+                'serial_number' => $analysis['basic_info']['serial_number'] ?? null,
+                'signature_algorithm' => $analysis['basic_info']['signature_algorithm'] ?? null,
+
+                // Validity
+                'valid_from' => $analysis['validity']['valid_from'] ?? null,
+                'valid_until' => $analysis['validity']['valid_until'] ?? null,
+                'days_remaining' => $analysis['validity']['days_remaining'] ?? null,
+                'is_expired' => $analysis['validity']['is_expired'] ?? false,
+                'expires_soon' => $analysis['validity']['expires_soon'] ?? false,
+
+                // Security
+                'key_algorithm' => $analysis['security']['key_algorithm'] ?? null,
+                'key_size' => $analysis['security']['key_size'] ?? null,
+                'security_score' => $analysis['security']['security_score'] ?? null,
+                'risk_level' => $analysis['risk_assessment']['level'] ?? null,
+
+                // Domains
+                'primary_domain' => $analysis['domains']['primary_domain'] ?? null,
+                'subject_alt_names' => $analysis['domains']['subject_alt_names'] ?? [],
+                'covers_www' => $analysis['domains']['covers_requested_domain'] ?? false,
+                'is_wildcard' => $analysis['domains']['wildcard_cert'] ?? false,
+
+                // Chain
+                'chain_length' => $analysis['chain_info']['length'] ?? 0,
+                'chain_complete' => $analysis['chain_info']['chain_valid'] ?? false,
+                'intermediate_issuers' => $analysis['chain_info']['intermediate_cas'] ?? [],
+
+                // Metadata
+                'status' => 'success',
+                'analyzed_at' => now()->toIso8601String(),
+            ];
+
+            // Save to website record
+            $website->update([
+                'latest_ssl_certificate' => $certificateData,
+                'ssl_certificate_analyzed_at' => now(),
+            ]);
+
+            \App\Support\AutomationLogger::info("Saved SSL certificate data for website: {$website->url}", [
+                'website_id' => $website->id,
+                'subject' => $certificateData['subject'],
+                'days_remaining' => $certificateData['days_remaining'],
+            ]);
+
+            return $analysis;
+
+        } catch (\Throwable $exception) {
+            \App\Support\AutomationLogger::error(
+                "Failed to analyze and save SSL certificate for website: {$website->url}",
+                ['website_id' => $website->id],
+                $exception
+            );
+
+            throw $exception;
+        }
+    }
 }

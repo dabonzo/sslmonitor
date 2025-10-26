@@ -15,6 +15,12 @@ uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 beforeEach(function () {
     $this->setUpCleanDatabase();
     $this->setUpMocksSslCertificateAnalysis();
+
+    // Mock MonitorIntegrationService to prevent observer overhead
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn(null);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(null);
+    });
 });
 
 // Alert Configuration Tests
@@ -53,7 +59,7 @@ test('alert configuration shows default configurations', function () {
 
 test('user can update alert configuration', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
@@ -81,7 +87,7 @@ test('user can update alert configuration', function () {
 test('user cannot update other users alert configurations', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user2->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user2->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user2->id,
@@ -99,7 +105,7 @@ test('user cannot update other users alert configurations', function () {
 
 test('alert configuration validation works correctly', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
@@ -118,7 +124,7 @@ test('alert configuration validation works correctly', function () {
 // Alert Service Tests
 test('alert service creates default alerts for new websites', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertService = new AlertService(app(\App\Services\SslCertificateAnalysisService::class));
     $alertService->createDefaultAlerts($website);
@@ -160,7 +166,7 @@ test('alert service checks and triggers alerts correctly', function () {
     Mail::fake();
 
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     // Create alert configuration for SSL expiry
     $alertConfig = AlertConfiguration::factory()->create([
@@ -198,7 +204,7 @@ test('alert service does not trigger disabled alerts', function () {
     Mail::fake();
 
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
@@ -229,7 +235,7 @@ test('alert service respects threshold days', function () {
     Mail::fake();
 
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
@@ -261,7 +267,7 @@ test('alert service can test alerts', function () {
     Mail::fake();
 
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertService = new AlertService(app(\App\Services\SslCertificateAnalysisService::class));
     $result = $alertService->testAlert($website);
@@ -274,7 +280,7 @@ test('user can test alert from controller', function () {
     Mail::fake();
 
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $alertConfig = AlertConfiguration::factory()->create([
         'user_id' => $user->id,
@@ -418,8 +424,8 @@ test('alert cooldown prevents spam', function () {
 // Website-Specific Alert Configuration Tests
 test('alert configurations are website-specific', function () {
     $user = User::factory()->create();
-    $website1 = Website::factory()->create(['user_id' => $user->id]);
-    $website2 = Website::factory()->create(['user_id' => $user->id]);
+    $website1 = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
+    $website2 = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     // Create alert for website1 only
     $website1Alert = AlertConfiguration::factory()->create([

@@ -24,6 +24,9 @@ interface SslCertificate {
   is_valid: boolean;
   last_checked: string;
   response_time: number;
+  key_size?: number;
+  subject_alt_names?: string[];
+  last_analyzed?: string;
 }
 
 interface Website {
@@ -1359,13 +1362,23 @@ watch(activeTeam, () => {
 
                 <div v-if="selectedWebsite.ssl.certificate" class="space-y-2">
                   <div class="flex justify-between items-start">
+                    <span class="text-sm text-muted-foreground">Subject:</span>
+                    <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.subject }}</span>
+                  </div>
+
+                  <div class="flex justify-between items-start">
                     <span class="text-sm text-muted-foreground">Issuer:</span>
                     <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.issuer }}</span>
                   </div>
 
-                  <div class="flex justify-between items-start">
-                    <span class="text-sm text-muted-foreground">Subject:</span>
-                    <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.subject }}</span>
+                  <div v-if="selectedWebsite.ssl.certificate.signature_algorithm" class="flex justify-between items-start">
+                    <span class="text-sm text-muted-foreground">Algorithm:</span>
+                    <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.signature_algorithm }}</span>
+                  </div>
+
+                  <div v-if="selectedWebsite.ssl.certificate.key_size" class="flex justify-between items-start">
+                    <span class="text-sm text-muted-foreground">Key Size:</span>
+                    <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.key_size }} bits</span>
                   </div>
 
                   <div class="flex justify-between items-start">
@@ -1373,14 +1386,9 @@ watch(activeTeam, () => {
                     <span class="text-sm text-foreground text-right">{{ formatDate(selectedWebsite.ssl.certificate.expires_at) }}</span>
                   </div>
 
-                  <div class="flex justify-between items-start">
-                    <span class="text-sm text-muted-foreground">Algorithm:</span>
-                    <span class="text-sm text-foreground text-right">{{ selectedWebsite.ssl.certificate.signature_algorithm }}</span>
-                  </div>
-
-                  <div class="flex justify-between items-start">
-                    <span class="text-sm text-muted-foreground">Serial Number:</span>
-                    <span class="text-sm text-foreground text-right font-mono">{{ selectedWebsite.ssl.certificate.serial_number }}</span>
+                  <div v-if="selectedWebsite.ssl.certificate.last_analyzed" class="flex justify-between items-start pt-2 border-t border-border">
+                    <span class="text-xs text-muted-foreground">Last Analyzed:</span>
+                    <span class="text-xs text-muted-foreground text-right">{{ formatDate(selectedWebsite.ssl.certificate.last_analyzed) }}</span>
                   </div>
                 </div>
               </div>

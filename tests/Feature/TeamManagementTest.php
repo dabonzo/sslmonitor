@@ -7,12 +7,20 @@ use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Website;
 use Illuminate\Support\Facades\Mail;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
+
+    // Mock MonitorIntegrationService to prevent observer overhead
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn(null);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(null);
+    });
 });
 
 // Team Creation Tests
@@ -324,7 +332,7 @@ test('last owner cannot change their own role', function () {
 test('website can be transferred to team', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['created_by_user_id' => $user->id]);
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $user->id]));
 
     expect($website->isPersonal())->toBeTrue();
     expect($website->isTeam())->toBeFalse();
@@ -342,12 +350,12 @@ test('website can be transferred to team', function () {
 test('website can be transferred back to personal', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['created_by_user_id' => $user->id]);
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $user->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $user->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     expect($website->isTeam())->toBeTrue();
 
@@ -368,7 +376,7 @@ test('website transfer respects team member permissions', function () {
     $viewer = User::factory()->create();
 
     $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
-    $website = Website::factory()->create(['user_id' => $admin->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $admin->id]));
 
     // Add members to team
     TeamMember::create([
@@ -414,7 +422,7 @@ test('website transfer respects team member permissions', function () {
     expect($website->team_id)->toBe($team->id);
 
     // Test that manager can transfer
-    $website2 = Website::factory()->create(['user_id' => $manager->id]);
+    $website2 = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $manager->id]));
     $response = $this->actingAs($manager)
         ->post("/ssl/websites/{$website2->id}/transfer-to-team", [
             'team_id' => $team->id,
@@ -422,7 +430,7 @@ test('website transfer respects team member permissions', function () {
     $response->assertRedirect();
 
     // Test that viewer cannot transfer
-    $website3 = Website::factory()->create(['user_id' => $viewer->id]);
+    $website3 = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $viewer->id]));
     $response = $this->actingAs($viewer)
         ->post("/ssl/websites/{$website3->id}/transfer-to-team", [
             'team_id' => $team->id,
@@ -436,12 +444,12 @@ test('website transfer to personal requires admin or owner permissions', functio
     $viewer = User::factory()->create();
 
     $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $owner->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $owner->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     // Add members to team
     TeamMember::create([
@@ -501,7 +509,7 @@ test('website transfer fails when user is not team member', function () {
     $outsider = User::factory()->create();
 
     $team = Team::factory()->create(['created_by_user_id' => $owner->id]);
-    $website = Website::factory()->create(['user_id' => $outsider->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $outsider->id]));
 
     TeamMember::create([
         'team_id' => $team->id,
@@ -521,7 +529,7 @@ test('website transfer fails when user is not team member', function () {
 
 test('website transfer validates team exists', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $user->id]));
 
     $response = $this->actingAs($user)
         ->post("/ssl/websites/{$website->id}/transfer-to-team", [
@@ -534,7 +542,7 @@ test('website transfer validates team exists', function () {
 test('website transfer tracks assignment metadata', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['created_by_user_id' => $user->id]);
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $user->id]));
 
     TeamMember::create([
         'team_id' => $team->id,
@@ -564,7 +572,7 @@ test('website transfer options returns available teams', function () {
     $user = User::factory()->create();
     $team1 = Team::factory()->create(['created_by_user_id' => $user->id]);
     $team2 = Team::factory()->create(['created_by_user_id' => User::factory()->create()->id]);
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn () => Website::factory()->create(['user_id' => $user->id]));
 
     // Add user to team1 as owner and team2 as admin
     TeamMember::create([
@@ -599,12 +607,12 @@ test('website transfer options returns available teams', function () {
 test('website transfer clears assignment data when transferring to personal', function () {
     $user = User::factory()->create();
     $team = Team::factory()->create(['created_by_user_id' => $user->id]);
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $user->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $user->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     TeamMember::create([
         'team_id' => $team->id,
@@ -1034,19 +1042,19 @@ test('deleting team transfers websites to their original owners', function () {
     ]);
 
     // Create websites assigned by different users
-    $websiteByOwner = Website::factory()->create([
+    $websiteByOwner = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $owner->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $owner->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
-    $websiteByMember = Website::factory()->create([
+    $websiteByMember = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $member->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $member->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     $response = $this->actingAs($owner)
         ->delete("/settings/team/{$team->id}");
@@ -1080,12 +1088,12 @@ test('deleting team transfers websites without assigned_by to team owner', funct
     ]);
 
     // Create website without assigned_by_user_id (legacy data scenario)
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn () => Website::factory()->create([
         'user_id' => $owner->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => null,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     $response = $this->actingAs($owner)
         ->delete("/settings/team/{$team->id}");

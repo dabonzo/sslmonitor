@@ -42,6 +42,8 @@ class Website extends Model
             'uptime_monitoring_enabled' => 'boolean',
             'plugin_data' => 'array',
             'assigned_at' => 'datetime',
+            'latest_ssl_certificate' => 'array',
+            'ssl_certificate_analyzed_at' => 'datetime',
             'created_at' => 'datetime:Y-m-d H:i:s.u',
             'updated_at' => 'datetime:Y-m-d H:i:s.u',
         ];
@@ -321,5 +323,26 @@ class Website extends Model
         }
 
         return $this->name.' (Personal)';
+    }
+
+    /**
+     * Get the latest SSL certificate data
+     */
+    public function getCertificateAttribute(): ?array
+    {
+        return $this->latest_ssl_certificate;
+    }
+
+    /**
+     * Check if the certificate data is stale (older than 24 hours)
+     */
+    public function isCertificateDataStale(): bool
+    {
+        if (! $this->ssl_certificate_analyzed_at) {
+            return true;
+        }
+
+        // Consider stale if older than 24 hours
+        return $this->ssl_certificate_analyzed_at->lt(now()->subDay());
     }
 }

@@ -12,6 +12,13 @@ uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 beforeEach(function () {
     $this->setUpCleanDatabase();
     $this->setUpMocksSslCertificateAnalysis();
+
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        // Return a mock Monitor instance to satisfy type hints
+        $mockMonitor = Mockery::mock(Monitor::class);
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn($mockMonitor);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(true);
+    });
 });
 
 // SSL Dashboard Tests
@@ -39,8 +46,8 @@ test('ssl dashboard calculates statistics correctly', function () {
 
     // If we don't have enough websites, create additional ones
     if ($websites->count() < 4) {
-        $additionalWebsites = Website::factory()->count(4 - $websites->count())
-            ->create(['user_id' => $this->testUser->id]);
+        $additionalWebsites = Website::withoutEvents(fn() => Website::factory()->count(4 - $websites->count())
+            ->create(['user_id' => $this->testUser->id]));
         $websites = $websites->concat($additionalWebsites);
     }
 
@@ -101,7 +108,7 @@ test('ssl dashboard shows only user websites', function () {
 
     // Create another user with their own websites to ensure isolation
     $otherUser = User::factory()->create();
-    Website::factory()->count(2)->create(['user_id' => $otherUser->id]);
+    Website::withoutEvents(fn() => Website::factory()->count(2)->create(['user_id' => $otherUser->id]));
 
     $response = $this->actingAs($user)->get('/dashboard');
 
@@ -181,7 +188,7 @@ test('website ssl status is retrieved from spatie monitor', function () {
 
 test('website ssl status defaults when no monitor exists', function () {
     $user = $this->testUser;
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     expect($website->getCurrentSslStatus())->toBe('not yet checked');
 });
@@ -197,7 +204,7 @@ test('critical ssl alerts identify expiring certificates', function () {
     $user = $this->testUser;
 
     // Create a test website with expiring certificate
-    $testWebsite = Website::factory()->create(['user_id' => $user->id]);
+    $testWebsite = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     // Create monitor with certificate expiring in 5 days
     Monitor::updateOrCreate(['url' => $testWebsite->url], [
@@ -219,7 +226,7 @@ test('critical ssl alerts identify expired certificates', function () {
     $user = $this->testUser;
 
     // Create a test website with expired certificate
-    $testWebsite = Website::factory()->create(['user_id' => $user->id]);
+    $testWebsite = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     Monitor::updateOrCreate(['url' => $testWebsite->url], [
         'url' => $testWebsite->url,
@@ -253,7 +260,7 @@ test('ssl dashboard handles empty website list', function () {
 // Recent SSL Activity Tests
 test('recent ssl activity shows latest monitor updates', function () {
     $user = User::factory()->create();
-    $websites = Website::factory()->count(3)->create(['user_id' => $user->id]);
+    $websites = Website::withoutEvents(fn() => Website::factory()->count(3)->create(['user_id' => $user->id]));
 
     foreach ($websites as $website) {
         Monitor::updateOrCreate(
@@ -278,7 +285,7 @@ test('recent ssl activity shows latest monitor updates', function () {
 
 test('recent ssl activity excludes not yet checked monitors', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     Monitor::updateOrCreate(['url' => $website->url], [
         'url' => $website->url,
@@ -316,10 +323,10 @@ test('website url normalization works correctly', function () {
 // SSL Monitoring Enable/Disable Tests
 test('website ssl monitoring can be enabled and disabled', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $user->id,
         'ssl_monitoring_enabled' => true,
-    ]);
+    ]));
 
     expect($website->isSslMonitoringEnabled())->toBeTrue();
 
@@ -329,10 +336,10 @@ test('website ssl monitoring can be enabled and disabled', function () {
 
 test('website uptime monitoring can be enabled and disabled', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $user->id,
         'uptime_monitoring_enabled' => true,
-    ]);
+    ]));
 
     expect($website->isUptimeMonitoringEnabled())->toBeTrue();
 
@@ -343,7 +350,7 @@ test('website uptime monitoring can be enabled and disabled', function () {
 // Spatie Monitor Integration Tests
 test('website can retrieve associated spatie monitor', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create(['user_id' => $user->id]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $user->id]));
 
     $monitor = Monitor::updateOrCreate(['url' => $website->url], [
         'url' => $website->url,
@@ -358,11 +365,11 @@ test('website can retrieve associated spatie monitor', function () {
 
 test('website returns null when no spatie monitor exists', function () {
     $user = User::factory()->create();
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $user->id,
         'ssl_monitoring_enabled' => false,
         'uptime_monitoring_enabled' => false,
-    ]);
+    ]));
 
     expect($website->getSpatieMonitor())->toBeNull();
 });

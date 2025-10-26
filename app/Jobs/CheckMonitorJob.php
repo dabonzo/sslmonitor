@@ -290,6 +290,17 @@ class CheckMonitorJob implements ShouldQueue
                 $result
             );
 
+            // Trigger re-analysis if certificate has changed
+            if ($this->hasCertificateChanged()) {
+                // Certificate changed - trigger re-analysis to update saved data
+                $website = \App\Models\Website::where('url', (string) $this->monitor->url)->first();
+
+                if ($website) {
+                    dispatch(new AnalyzeSslCertificateJob($website))
+                        ->onQueue('monitoring-analysis');
+                }
+            }
+
             return $result;
 
         } catch (\Throwable $exception) {
@@ -417,6 +428,49 @@ class CheckMonitorJob implements ShouldQueue
         }
 
         return (int) now()->diffInDays($this->monitor->certificate_expiration_date, false);
+    }
+
+    /**
+     * Check if SSL certificate has changed (new certificate issued).
+     *
+     * @return bool True if certificate changed
+     */
+    private function hasCertificateChanged(): bool
+    {
+        $website = \App\Models\Website::where('url', (string) $this->monitor->url)->first();
+
+        if (! $website || ! $website->latest_ssl_certificate) {
+            return true; // No saved data, consider changed
+        }
+
+        $savedCertificate = $website->latest_ssl_certificate;
+        $currentSerialNumber = $this->monitor->certificate_serial_number ?? null;
+        $savedSerialNumber = $savedCertificate['serial_number'] ?? null;
+
+        // If serial numbers differ, certificate was renewed
+        if ($currentSerialNumber && $savedSerialNumber && $currentSerialNumber !== $savedSerialNumber) {
+            AutomationLogger::info("Certificate renewal detected for: {$this->monitor->url}", [
+                'old_serial' => $savedSerialNumber,
+                'new_serial' => $currentSerialNumber,
+            ]);
+
+            return true;
+        }
+
+        // If expiration date changed significantly (more than 1 day difference)
+        $savedExpiration = isset($savedCertificate['valid_until'])
+            ? \Carbon\Carbon::parse($savedCertificate['valid_until'])
+            : null;
+
+        if ($this->monitor->certificate_expiration_date && $savedExpiration) {
+            $daysDiff = abs($this->monitor->certificate_expiration_date->diffInDays($savedExpiration));
+
+            if ($daysDiff > 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

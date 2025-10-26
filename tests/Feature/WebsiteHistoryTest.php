@@ -4,18 +4,26 @@ use App\Models\Monitor;
 use App\Models\MonitoringResult;
 use App\Models\User;
 use App\Models\Website;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
+
+    // Mock MonitorIntegrationService to prevent observer overhead
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn(null);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(null);
+    });
 
     $this->user = User::factory()->create();
-    $this->website = Website::factory()->create([
+    $this->website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $this->user->id,
         'name' => 'Test Website',
-    ]);
+    ]));
 
     // Get or create the monitor for the website
     $this->monitor = $this->website->getSpatieMonitor() ?? Monitor::factory()->create([

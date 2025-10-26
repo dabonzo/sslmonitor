@@ -4,12 +4,20 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Website;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
+
+    // Mock MonitorIntegrationService to prevent observer overhead
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn(null);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(null);
+    });
 });
 
 test('admin who created website and then demoted to viewer cannot delete it', function () {
@@ -35,12 +43,12 @@ test('admin who created website and then demoted to viewer cannot delete it', fu
     ]);
 
     // Admin creates a team website
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $admin->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $admin->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     // Admin can delete before demotion
     expect($admin->can('delete', $website))->toBeTrue();
@@ -78,12 +86,12 @@ test('admin who created website and then demoted to viewer cannot edit it', func
         'invited_by_user_id' => $owner->id,
     ]);
 
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $admin->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $admin->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     // Admin can update before demotion
     expect($admin->can('update', $website))->toBeTrue();
@@ -121,12 +129,12 @@ test('admin who created website and then demoted to viewer cannot transfer to pe
         'invited_by_user_id' => $owner->id,
     ]);
 
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $admin->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $admin->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     // Demote admin to viewer
     $adminMember = TeamMember::where('team_id', $team->id)
@@ -167,12 +175,12 @@ test('owner can still manage website created by demoted admin', function () {
         'invited_by_user_id' => $owner->id,
     ]);
 
-    $website = Website::factory()->create([
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $admin->id,
         'team_id' => $team->id,
         'assigned_by_user_id' => $admin->id,
         'assigned_at' => now(),
-    ]);
+    ]));
 
     // Demote admin to viewer
     $adminMember = TeamMember::where('team_id', $team->id)

@@ -24,7 +24,7 @@ trait MocksSslCertificateAnalysis
      */
     protected function mockSslCertificateAnalysis(): void
     {
-        $this->mock(SslCertificateAnalysisService::class, function ($mock) {
+        test()->mock(SslCertificateAnalysisService::class, function ($mock) {
             $mock->shouldReceive('analyzeCertificate')
                 ->andReturnUsing(function ($domain) {
                     return $this->getMockSslAnalysis($domain);
@@ -38,6 +38,57 @@ trait MocksSslCertificateAnalysis
                         'issuer' => 'Mock CA',
                         'response_time' => 150,
                     ];
+                });
+
+            $mock->shouldReceive('analyzeAndSave')
+                ->zeroOrMoreTimes()
+                ->andReturnUsing(function ($website) {
+                    $domain = parse_url($website->url, PHP_URL_HOST) ?? $website->url;
+                    $analysis = $this->getMockSslAnalysis($domain);
+
+                    // Save the certificate data to website (simulate real behavior)
+                    $certificateData = [
+                        // Basic Info
+                        'subject' => $analysis['basic_info']['domain'] ?? $domain,
+                        'issuer' => $analysis['certificate_authority']['ca_name'] ?? 'Mock CA',
+                        'serial_number' => '01:23:45:67:89:AB:CD:EF',
+                        'signature_algorithm' => $analysis['security']['signature_algorithm'] ?? 'SHA256withRSA',
+
+                        // Validity
+                        'valid_from' => $analysis['validity']['issued_at'] ?? now()->subDays(60)->toIso8601String(),
+                        'valid_until' => $analysis['validity']['expires_at'] ?? now()->addDays(90)->toIso8601String(),
+                        'days_remaining' => $analysis['validity']['days_until_expiry'] ?? 90,
+                        'is_expired' => $analysis['validity']['is_expired'] ?? false,
+                        'expires_soon' => $analysis['validity']['expires_soon'] ?? false,
+
+                        // Security
+                        'key_algorithm' => $analysis['security']['key_algorithm'] ?? 'RSA',
+                        'key_size' => $analysis['security']['key_size'] ?? 2048,
+                        'security_score' => $analysis['security']['security_score'] ?? 95,
+                        'risk_level' => $analysis['risk_assessment']['risk_level'] ?? 'low',
+
+                        // Domains
+                        'primary_domain' => $analysis['domains']['common_name'] ?? $domain,
+                        'subject_alt_names' => $analysis['domains']['san_domains'] ?? [$domain, 'www.'.$domain],
+                        'covers_www' => true,
+                        'is_wildcard' => $analysis['domains']['wildcard_supported'] ?? false,
+
+                        // Chain
+                        'chain_length' => $analysis['chain_info']['chain_length'] ?? 3,
+                        'chain_complete' => true,
+                        'intermediate_issuers' => [],
+
+                        // Metadata
+                        'status' => 'success',
+                        'analyzed_at' => now()->toIso8601String(),
+                    ];
+
+                    $website->latest_ssl_certificate = $certificateData;
+                    $website->ssl_certificate_analyzed_at = now();
+                    $website->save();
+                    $website->refresh();
+
+                    return $analysis;
                 });
         });
     }

@@ -29,6 +29,13 @@ class WebsiteObserver
                 ]);
             }
         }
+
+        // Automatically analyze SSL certificate if SSL monitoring is enabled
+        if ($website->ssl_monitoring_enabled) {
+            dispatch(new \App\Jobs\AnalyzeSslCertificateJob($website))
+                ->onQueue('monitoring-analysis')
+                ->delay(now()->addSeconds(5)); // Small delay to ensure monitor is created
+        }
     }
 
     /**

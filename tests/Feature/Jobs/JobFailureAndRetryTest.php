@@ -9,13 +9,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\Traits\MocksMonitorHttpRequests;
+use Tests\Traits\MocksSslCertificateAnalysis;
 
 uses(RefreshDatabase::class);
 uses(MocksMonitorHttpRequests::class);
+uses(MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     // Mock all HTTP requests to avoid real network calls
     $this->setUpMocksMonitorHttpRequests();
+    $this->setUpMocksSslCertificateAnalysis();
 });
 
 test('check monitor job has correct retry configuration', function () {

@@ -1,20 +1,29 @@
 <?php
 
+use App\Models\AlertConfiguration;
+use App\Models\Monitor;
+use App\Models\User;
+use App\Models\Website;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
-});
+    $this->setUpMocksSslCertificateAnalysis();
 
-use App\Models\AlertConfiguration;
-use App\Models\User;
-use App\Models\Website;
+    // Mock MonitorIntegrationService to prevent real monitor operations
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mockMonitor = Mockery::mock(Monitor::class);
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn($mockMonitor);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(true);
+    });
+});
 
 it('displays alert settings page with proper data structure', function () {
     $user = User::factory()->create();
-    $websites = Website::factory()->count(3)->create(['user_id' => $user->id]);
+    $websites = Website::withoutEvents(fn () => Website::factory()->count(3)->create(['user_id' => $user->id]));
 
     $response = $this->actingAs($user)->get('/settings/alerts');
 
@@ -215,7 +224,7 @@ it('includes default configurations for users to enable', function () {
 
 it('groups alerts by website correctly', function () {
     $user = User::factory()->create();
-    $websites = Website::factory()->count(2)->create(['user_id' => $user->id]);
+    $websites = Website::withoutEvents(fn () => Website::factory()->count(2)->create(['user_id' => $user->id]));
 
     $response = $this->actingAs($user)->get('/settings/alerts');
 

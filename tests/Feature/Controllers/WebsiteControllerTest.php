@@ -17,12 +17,12 @@ beforeEach(function () {
 describe('Website Controller', function () {
     describe('index method', function () {
         it('displays list of user websites with SSL status', function () {
-            // Create websites for current user
-            $userWebsites = Website::factory()->count(3)->create(['user_id' => $this->user->id]);
+            // Create websites for current user (using withoutEvents to prevent observer delays)
+            $userWebsites = Website::withoutEvents(fn() => Website::factory()->count(3)->create(['user_id' => $this->user->id]));
 
             // Create website for another user (should not be shown)
             $otherUser = User::factory()->create();
-            Website::factory()->create(['user_id' => $otherUser->id]);
+            Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
             // Create Spatie monitor for SSL monitoring
             $timestamp = time().'-'.rand(1000, 9999);
@@ -58,17 +58,17 @@ describe('Website Controller', function () {
         });
 
         it('supports search functionality', function () {
-            Website::factory()->create([
+            Website::withoutEvents(fn() => Website::factory()->create([
                 'user_id' => $this->user->id,
                 'name' => 'Example Website',
                 'url' => 'https://example.com',
-            ]);
+            ]));
 
-            Website::factory()->create([
+            Website::withoutEvents(fn() => Website::factory()->create([
                 'user_id' => $this->user->id,
                 'name' => 'Test Site',
                 'url' => 'https://test.com',
-            ]);
+            ]));
 
             $response = $this->get(route('ssl.websites.index', ['search' => 'example']));
 
@@ -79,7 +79,7 @@ describe('Website Controller', function () {
         });
 
         it('supports pagination', function () {
-            Website::factory()->count(25)->create(['user_id' => $this->user->id]);
+            Website::withoutEvents(fn() => Website::factory()->count(25)->create(['user_id' => $this->user->id]));
 
             $response = $this->get(route('ssl.websites.index'));
 
@@ -137,7 +137,7 @@ describe('Website Controller', function () {
 
     describe('show method', function () {
         it('displays website details with SSL information', function () {
-            $website = Website::factory()->create(['user_id' => $this->user->id]);
+            $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $this->user->id]));
 
             // Create Spatie monitor for SSL monitoring
             $timestamp = time().'-'.rand(1000, 9999);
@@ -171,7 +171,7 @@ describe('Website Controller', function () {
 
         it('prevents access to other users websites', function () {
             $otherUser = User::factory()->create();
-            $website = Website::factory()->create(['user_id' => $otherUser->id]);
+            $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $otherUser->id]));
 
             $response = $this->get(route('ssl.websites.show', $website));
 
@@ -187,7 +187,7 @@ describe('Website Controller', function () {
                 $mock->shouldReceive('removeMonitorForWebsite')->never();
             });
 
-            $website = Website::factory()->create(['user_id' => $this->user->id]);
+            $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $this->user->id]));
 
             $updateData = [
                 'name' => 'Updated Website Name',
@@ -213,7 +213,7 @@ describe('Website Controller', function () {
 
     describe('destroy method', function () {
         it('deletes website and related data', function () {
-            $website = Website::factory()->create(['user_id' => $this->user->id]);
+            $website = Website::withoutEvents(fn() => Website::factory()->create(['user_id' => $this->user->id]));
 
             // Create related Spatie monitor data
             $timestamp = time().'-'.rand(1000, 9999);
@@ -242,7 +242,7 @@ describe('Website Controller', function () {
     it('requires authentication for all actions', function () {
         auth()->logout();
 
-        $website = Website::factory()->create();
+        $website = Website::withoutEvents(fn() => Website::factory()->create());
 
         $this->get(route('ssl.websites.index'))->assertRedirect(route('login'));
         $this->post(route('ssl.websites.store'))->assertRedirect(route('login'));

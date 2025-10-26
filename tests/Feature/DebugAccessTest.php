@@ -28,8 +28,4 @@ test('debug menu access middleware works correctly', function () {
 
     // Accept either 200 (success) or 403 (config not loaded) as valid
     expect($response->getStatusCode())->toBeIn([200, 403]);
-
-    // If this passes, we know the routes and basic middleware work
-    echo 'Debug route test completed - Status: '.$response->getStatusCode();
-    echo 'Route exists and middleware is working correctly!';
 });

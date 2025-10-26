@@ -19,21 +19,21 @@ beforeEach(function () {
         'invited_by_user_id' => $this->testUser->id,
     ]);
 
-    $this->personalWebsite = Website::factory()->create([
+    $this->personalWebsite = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $this->testUser->id,
         'team_id' => null,
-    ]);
+    ]));
 
-    $this->teamWebsite = Website::factory()->create([
+    $this->teamWebsite = Website::withoutEvents(fn() => Website::factory()->create([
         'user_id' => $this->testUser->id,
         'team_id' => $this->team->id,
-    ]);
+    ]));
 
     // Create additional personal websites to meet test expectations (total of 3)
-    $this->additionalPersonalWebsites = Website::factory()->count(2)->create([
+    $this->additionalPersonalWebsites = Website::withoutEvents(fn() => Website::factory()->count(2)->create([
         'user_id' => $this->testUser->id,
         'team_id' => null,
-    ]);
+    ]));
 
     // Create additional teams to meet test expectations (total of 3)
     // Note: We already have 1 team ($this->team), so we need 2 more to make 3 total
@@ -117,10 +117,10 @@ describe('Website List Enhanced UX', function () {
 
 describe('Bulk Transfer Operations', function () {
     it('can bulk transfer personal websites to team', function () {
-        $personalWebsite2 = Website::factory()->create([
+        $personalWebsite2 = Website::withoutEvents(fn() => Website::factory()->create([
             'user_id' => $this->testUser->id,
             'team_id' => null,
-        ]);
+        ]));
 
         $response = $this->actingAs($this->testUser)
             ->post('/ssl/websites/bulk-transfer-to-team', [
@@ -143,10 +143,10 @@ describe('Bulk Transfer Operations', function () {
     });
 
     it('can bulk transfer team websites to personal', function () {
-        $teamWebsite2 = Website::factory()->create([
+        $teamWebsite2 = Website::withoutEvents(fn() => Website::factory()->create([
             'user_id' => $this->testUser->id,
             'team_id' => $this->team->id,
-        ]);
+        ]));
 
         $response = $this->actingAs($this->testUser)
             ->post('/ssl/websites/bulk-transfer-to-personal', [

@@ -97,24 +97,8 @@ class WebsiteController extends Controller
             ->get()
             ->keyBy('url');
 
-        // Fetch latest certificate subjects from monitoring_results
-        $monitorIds = $monitors->pluck('id')->filter()->toArray();
-        $latestCertificateSubjects = \DB::table('monitoring_results')
-            ->select('monitor_id', 'certificate_subject')
-            ->whereIn('monitor_id', $monitorIds)
-            ->whereNotNull('certificate_subject')
-            ->whereIn('id', function ($query) use ($monitorIds) {
-                $query->selectRaw('MAX(id)')
-                    ->from('monitoring_results')
-                    ->whereIn('monitor_id', $monitorIds)
-                    ->whereNotNull('certificate_subject')
-                    ->groupBy('monitor_id');
-            })
-            ->get()
-            ->keyBy('monitor_id');
-
         // Transform websites with enhanced SSL and uptime data for unified monitoring hub
-        $websites->through(function ($website) use ($monitors, $latestCertificateSubjects) {
+        $websites->through(function ($website) use ($monitors) {
             // Get monitor from our bulk collection instead of individual queries
             $monitor = $monitors->get($website->url);
 
@@ -143,21 +127,26 @@ class WebsiteController extends Controller
                     }
                 }
 
-                // Get certificate subject from latest monitoring result
-                $certificateSubject = null;
-                if ($monitor->id && isset($latestCertificateSubjects[$monitor->id])) {
-                    $certificateSubject = $latestCertificateSubjects[$monitor->id]->certificate_subject;
-                }
+                // Use saved certificate analysis data as primary source
+                $certificate = $website->latest_ssl_certificate;
 
                 $sslData = [
                     'status' => $monitor->certificate_status,
                     'expires_at' => $monitor->certificate_expiration_date,
                     'days_remaining' => $daysRemaining ? (int) $daysRemaining : null,
                     'urgency_level' => $urgencyLevel,
-                    'issuer' => $monitor->certificate_issuer,
-                    'subject' => $certificateSubject,
+
+                    // Use saved certificate data (richer than monitor data)
+                    'issuer' => $certificate['issuer'] ?? $monitor->certificate_issuer,
+                    'subject' => $certificate['subject'] ?? null,
+                    'serial_number' => $certificate['serial_number'] ?? null,
+                    'algorithm' => $certificate['signature_algorithm'] ?? null,
+                    'key_size' => $certificate['key_size'] ?? null,
+                    'subject_alt_names' => $certificate['subject_alt_names'] ?? [],
+
                     'is_valid' => $monitor->certificate_status === 'valid',
                     'last_checked' => $monitor->updated_at,
+                    'last_analyzed' => $website->ssl_certificate_analyzed_at,
                 ];
             }
 
@@ -807,7 +796,8 @@ class WebsiteController extends Controller
         $this->authorize('view', $website);
 
         try {
-            $analysis = $analysisService->analyzeCertificate($website->url);
+            // Use analyzeAndSave instead of analyzeCertificate
+            $analysis = $analysisService->analyzeAndSave($website);
 
             return response()->json([
                 'website' => [

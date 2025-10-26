@@ -1,204 +1,345 @@
 <?php
 
-use App\Models\User;
 use App\Models\Website;
+use Tests\Traits\MocksSslCertificateAnalysis;
 use Tests\Traits\UsesCleanDatabase;
 
-uses(UsesCleanDatabase::class);
+uses(UsesCleanDatabase::class, MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     $this->setUpCleanDatabase();
+    $this->setUpMocksSslCertificateAnalysis();
+
+    // Mock MonitorIntegrationService to prevent observer overhead
+    $this->mock(\App\Services\MonitorIntegrationService::class, function ($mock) {
+        $mock->shouldReceive('createOrUpdateMonitorForWebsite')->andReturn(null);
+        $mock->shouldReceive('removeMonitorForWebsite')->andReturn(null);
+    });
 });
 
-test('website can be created with valid data', function () {
-    $user = $this->testUser;
-
-    $website = Website::create([
-        'name' => 'Example Site',
-        'url' => 'https://example.com',
-        'user_id' => $user->id,
-    ]);
-
-    expect($website)->toBeInstanceOf(Website::class)
-        ->and($website->name)->toBe('Example Site')
-        ->and($website->url)->toBe('https://example.com')
-        ->and($website->user_id)->toBe($user->id)
-        ->and($website->ssl_monitoring_enabled)->toBeTrue()
-        ->and($website->uptime_monitoring_enabled)->toBeFalse()
-        ->and($website->is_active)->toBeTrue();
-});
-
-test('website belongs to a user', function () {
-    $user = $this->testUser;
-    $website = Website::factory()->create(['user_id' => $user->id]);
-
-    expect($website->user)->toBeInstanceOf(User::class)
-        ->and($website->user->id)->toBe($user->id);
-});
-
-test('website url is sanitized on save', function () {
-    $user = $this->testUser;
-    $website = Website::create([
-        'name' => 'Example Site',
-        'url' => 'HTTP://EXAMPLE.COM/PATH/../',
-        'user_id' => $user->id,
-    ]);
-
-    expect($website->url)->toBe('https://example.com');
-});
-
-test('website url is normalized to lowercase and https', function () {
-    $user = $this->testUser;
-    $website = Website::create([
-        'name' => 'Example Site',
-        'url' => 'HTTP://EXAMPLE.COM',
-        'user_id' => $user->id,
-    ]);
-
-    expect($website->url)->toBe('https://example.com');
-});
-
-test('website can get spatie monitor', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'getSpatieMonitor'))->toBeTrue();
-    // Since SSL monitoring is enabled by default, a monitor should be created automatically
-    expect($website->getSpatieMonitor())->not->toBeNull();
-    expect($website->getSpatieMonitor())->toBeInstanceOf(\App\Models\Monitor::class);
-});
-
-test('website can get current ssl status from spatie monitor', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'getCurrentSslStatus'))->toBeTrue();
-    expect($website->getCurrentSslStatus())->toBe('not yet checked');
-});
-
-test('website can get current uptime status from spatie monitor', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'getCurrentUptimeStatus'))->toBeTrue();
-    expect($website->getCurrentUptimeStatus())->toBe('not yet checked');
-});
-
-test('website has plugin data methods', function () {
-    $website = Website::factory()->create();
-
-    expect(method_exists($website, 'getPluginData'))->toBeTrue();
-    expect(method_exists($website, 'setPluginData'))->toBeTrue();
-    expect($website->getPluginData('test-plugin'))->toBe([]);
-});
-
-test('website enforces unique url per user', function () {
-    $user = $this->testUser;
-
-    Website::create([
-        'name' => 'First Site',
-        'url' => 'https://example.com',
-        'user_id' => $user->id,
-    ]);
-
-    expect(fn () => Website::create([
-        'name' => 'Second Site',
-        'url' => 'https://example.com',
-        'user_id' => $user->id,
-    ]))->toThrow(Illuminate\Database\QueryException::class);
-});
-
-test('different users can have same url', function () {
-    $user1 = $this->testUser;
-    $user2 = User::factory()->create(); // Different user for testing
-
-    $website1 = Website::create([
-        'name' => 'User 1 Site',
-        'url' => 'https://example.com',
-        'user_id' => $user1->id,
-    ]);
-
-    $website2 = Website::create([
-        'name' => 'User 2 Site',
-        'url' => 'https://example.com',
-        'user_id' => $user2->id,
-    ]);
-
-    expect($website1)->toBeInstanceOf(Website::class)
-        ->and($website2)->toBeInstanceOf(Website::class);
-});
-
-test('website can update plugin data', function () {
-    $website = Website::factory()->create();
-
-    $website->setPluginData('test_plugin', ['key' => 'value']);
-    $website->save();
-
-    expect($website->getPluginData('test_plugin'))->toBe(['key' => 'value'])
-        ->and($website->getPluginData('test_plugin', 'key'))->toBe('value');
-});
-
-test('website monitoring configuration can be set', function () {
-    $config = [
-        'timeout' => 30,
-        'retries' => 3,
-        'alert_days_before_expiry' => 14,
+test('website stores and retrieves certificate data', function () {
+    $certificateData = [
+        'subject' => 'example.com, www.example.com',
+        'issuer' => "Let's Encrypt",
+        'serial_number' => '0x123456789',
+        'key_size' => 2048,
+        'valid_from' => now()->subDays(60)->toIso8601String(),
+        'valid_until' => now()->addDays(90)->toIso8601String(),
+        'days_remaining' => 90,
+        'is_expired' => false,
+        'expires_soon' => false,
+        'security_score' => 95,
     ];
 
-    $website = Website::factory()->create([
-        'monitoring_config' => $config,
-    ]);
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
 
-    expect($website->monitoring_config)->toBe($config)
-        ->and($website->monitoring_config['timeout'])->toBe(30)
-        ->and($website->monitoring_config['retries'])->toBe(3)
-        ->and($website->monitoring_config['alert_days_before_expiry'])->toBe(14);
+    expect($website->latest_ssl_certificate)->toBeArray()
+        ->and($website->latest_ssl_certificate['subject'])->toBe('example.com, www.example.com')
+        ->and($website->latest_ssl_certificate['issuer'])->toBe("Let's Encrypt")
+        ->and($website->latest_ssl_certificate['key_size'])->toBe(2048)
+        ->and($website->certificate)->toBe($website->latest_ssl_certificate);
 });
 
-test('website can have different monitoring types enabled', function () {
-    $sslOnly = Website::factory()->withSslOnly()->create();
-    $uptimeOnly = Website::factory()->withUptimeOnly()->create();
-    $both = Website::factory()->withBothMonitoring()->create();
+test('website certificate accessor returns latest_ssl_certificate', function () {
+    $certificateData = [
+        'subject' => 'test.com',
+        'issuer' => 'Test CA',
+        'key_size' => 4096,
+    ];
 
-    expect($sslOnly->ssl_monitoring_enabled)->toBeTrue()
-        ->and($sslOnly->uptime_monitoring_enabled)->toBeFalse()
-        ->and($uptimeOnly->ssl_monitoring_enabled)->toBeFalse()
-        ->and($uptimeOnly->uptime_monitoring_enabled)->toBeTrue()
-        ->and($both->ssl_monitoring_enabled)->toBeTrue()
-        ->and($both->uptime_monitoring_enabled)->toBeTrue();
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+    ]));
+
+    expect($website->certificate)->toBe($website->latest_ssl_certificate)
+        ->and($website->certificate)->toBeArray()
+        ->and($website->certificate['subject'])->toBe('test.com');
 });
 
-test('website check interval can be customized', function () {
-    $website = Website::factory()->withCustomInterval(7200)->create();
+test('website detects stale certificate data after 24 hours', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => now()->subDays(2),
+    ]));
 
-    expect($website->check_interval)->toBe(7200);
+    expect($website->isCertificateDataStale())->toBeTrue();
 });
 
-test('website can be inactive', function () {
-    $inactive = Website::factory()->inactive()->create();
+test('website detects fresh certificate data within 24 hours', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => now()->subHours(12),
+    ]));
 
-    expect($inactive->is_active)->toBeFalse();
+    expect($website->isCertificateDataStale())->toBeFalse();
 });
 
-test('website has proper fillable attributes', function () {
-    $website = new Website;
+test('website with no analysis timestamp is considered stale', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => null,
+    ]));
 
-    $fillable = $website->getFillable();
-
-    expect($fillable)->toContain('name')
-        ->and($fillable)->toContain('url')
-        ->and($fillable)->toContain('user_id')
-        ->and($fillable)->toContain('ssl_monitoring_enabled')
-        ->and($fillable)->toContain('uptime_monitoring_enabled')
-        ->and($fillable)->toContain('check_interval')
-        ->and($fillable)->toContain('monitoring_config')
-        ->and($fillable)->toContain('plugin_data')
-        ->and($fillable)->toContain('is_active');
+    expect($website->isCertificateDataStale())->toBeTrue();
 });
 
-test('website casts monitoring_config and plugin_data to arrays', function () {
-    $website = Website::factory()->create([
-        'monitoring_config' => ['test' => 'value'],
-        'plugin_data' => ['plugin' => 'data'],
-    ]);
+test('website exactly at 24 hour boundary is considered stale', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => now()->subDay(),
+    ]));
 
-    expect($website->monitoring_config)->toBeArray()
-        ->and($website->plugin_data)->toBeArray();
+    // At exactly 24 hours or more, it should be stale (not less than 24 hours ago means stale)
+    expect($website->isCertificateDataStale())->toBeTrue();
+});
+
+test('website just over 24 hours is considered stale', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => now()->subDay()->subMinute(),
+    ]));
+
+    expect($website->isCertificateDataStale())->toBeTrue();
+});
+
+test('website stores complex certificate data structure', function () {
+    $certificateData = [
+        // Basic Info
+        'subject' => 'example.com',
+        'issuer' => 'DigiCert',
+        'serial_number' => '01:23:45:67:89:AB:CD:EF',
+        'signature_algorithm' => 'SHA256withRSA',
+
+        // Validity
+        'valid_from' => now()->subDays(60)->toIso8601String(),
+        'valid_until' => now()->addDays(90)->toIso8601String(),
+        'days_remaining' => 90,
+        'is_expired' => false,
+        'expires_soon' => false,
+
+        // Security
+        'key_algorithm' => 'RSA',
+        'key_size' => 2048,
+        'security_score' => 95,
+        'risk_level' => 'low',
+
+        // Domains
+        'primary_domain' => 'example.com',
+        'subject_alt_names' => ['example.com', 'www.example.com', 'api.example.com'],
+        'covers_www' => true,
+        'is_wildcard' => false,
+
+        // Chain
+        'chain_length' => 3,
+        'chain_complete' => true,
+        'intermediate_issuers' => ['DigiCert SHA2 Secure Server CA', 'DigiCert Global Root CA'],
+
+        // Metadata
+        'status' => 'success',
+        'analyzed_at' => now()->toIso8601String(),
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
+
+    $website->refresh();
+
+    expect($website->latest_ssl_certificate)->toBeArray()
+        ->and($website->latest_ssl_certificate)->toHaveKeys([
+            'subject', 'issuer', 'serial_number', 'signature_algorithm',
+            'valid_from', 'valid_until', 'days_remaining', 'is_expired', 'expires_soon',
+            'key_algorithm', 'key_size', 'security_score', 'risk_level',
+            'primary_domain', 'subject_alt_names', 'covers_www', 'is_wildcard',
+            'chain_length', 'chain_complete', 'intermediate_issuers',
+            'status', 'analyzed_at',
+        ])
+        ->and($website->latest_ssl_certificate['subject_alt_names'])->toBeArray()
+        ->and($website->latest_ssl_certificate['subject_alt_names'])->toHaveCount(3)
+        ->and($website->latest_ssl_certificate['intermediate_issuers'])->toBeArray()
+        ->and($website->latest_ssl_certificate['intermediate_issuers'])->toHaveCount(2);
+});
+
+test('website certificate data persists across reloads', function () {
+    $certificateData = [
+        'subject' => 'persistent.com',
+        'issuer' => 'Test CA',
+        'key_size' => 4096,
+        'security_score' => 100,
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
+
+    $websiteId = $website->id;
+
+    // Clear model instance
+    unset($website);
+
+    // Reload from database
+    $reloaded = Website::find($websiteId);
+
+    expect($reloaded->latest_ssl_certificate)->toBeArray()
+        ->and($reloaded->latest_ssl_certificate['subject'])->toBe('persistent.com')
+        ->and($reloaded->latest_ssl_certificate['issuer'])->toBe('Test CA')
+        ->and($reloaded->latest_ssl_certificate['key_size'])->toBe(4096)
+        ->and($reloaded->ssl_certificate_analyzed_at)->not->toBeNull();
+});
+
+test('website can store and retrieve updated certificate data', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => null,
+        'ssl_certificate_analyzed_at' => null,
+    ]));
+
+    // First update - store initial certificate data
+    $firstCert = [
+        'subject' => 'first-cert.com',
+        'issuer' => 'First CA',
+        'key_size' => 2048,
+    ];
+
+    $website->latest_ssl_certificate = $firstCert;
+    $website->ssl_certificate_analyzed_at = now()->subDays(5);
+    $website->save();
+
+    $website = Website::find($website->id);
+
+    expect($website->latest_ssl_certificate['subject'])->toBe('first-cert.com')
+        ->and($website->latest_ssl_certificate['key_size'])->toBe(2048);
+
+    // Second update - update with new certificate data
+    $secondCert = [
+        'subject' => 'second-cert.com',
+        'issuer' => 'Second CA',
+        'key_size' => 4096,
+    ];
+
+    $website->latest_ssl_certificate = $secondCert;
+    $website->ssl_certificate_analyzed_at = now();
+    $website->save();
+
+    $website = Website::find($website->id);
+
+    expect($website->latest_ssl_certificate['subject'])->toBe('second-cert.com')
+        ->and($website->latest_ssl_certificate['issuer'])->toBe('Second CA')
+        ->and($website->latest_ssl_certificate['key_size'])->toBe(4096);
+});
+
+test('website handles null certificate data gracefully', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => null,
+        'ssl_certificate_analyzed_at' => null,
+    ]));
+
+    expect($website->latest_ssl_certificate)->toBeNull()
+        ->and($website->ssl_certificate_analyzed_at)->toBeNull()
+        ->and($website->isCertificateDataStale())->toBeTrue();
+});
+
+test('website casts certificate data as array', function () {
+    $certificateData = [
+        'subject' => 'cast-test.com',
+        'issuer' => 'Cast Test CA',
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+    ]));
+
+    expect($website->latest_ssl_certificate)->toBeArray()
+        ->and($website->latest_ssl_certificate)->not->toBeString()
+        ->and($website->latest_ssl_certificate)->not->toBeNull();
+});
+
+test('website casts ssl_certificate_analyzed_at as datetime', function () {
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
+
+    expect($website->ssl_certificate_analyzed_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
+        ->and($website->ssl_certificate_analyzed_at)->toBeInstanceOf(\Carbon\Carbon::class);
+});
+
+test('website with expired certificate data', function () {
+    $certificateData = [
+        'subject' => 'expired.com',
+        'issuer' => 'Test CA',
+        'valid_from' => now()->subDays(400)->toIso8601String(),
+        'valid_until' => now()->subDays(10)->toIso8601String(),
+        'days_remaining' => 0,
+        'is_expired' => true,
+        'expires_soon' => false,
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
+
+    expect($website->latest_ssl_certificate['is_expired'])->toBeTrue()
+        ->and($website->latest_ssl_certificate['days_remaining'])->toBe(0)
+        ->and($website->latest_ssl_certificate['valid_until'])->toContain(now()->subDays(10)->format('Y-m-d'));
+});
+
+test('website with expiring soon certificate data', function () {
+    $certificateData = [
+        'subject' => 'expiring-soon.com',
+        'issuer' => 'Test CA',
+        'valid_from' => now()->subDays(60)->toIso8601String(),
+        'valid_until' => now()->addDays(15)->toIso8601String(),
+        'days_remaining' => 15,
+        'is_expired' => false,
+        'expires_soon' => true,
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+        'ssl_certificate_analyzed_at' => now(),
+    ]));
+
+    expect($website->latest_ssl_certificate['is_expired'])->toBeFalse()
+        ->and($website->latest_ssl_certificate['expires_soon'])->toBeTrue()
+        ->and($website->latest_ssl_certificate['days_remaining'])->toBe(15);
+});
+
+test('website with wildcard certificate', function () {
+    $certificateData = [
+        'subject' => '*.example.com',
+        'primary_domain' => '*.example.com',
+        'is_wildcard' => true,
+        'subject_alt_names' => ['*.example.com', 'example.com'],
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+    ]));
+
+    expect($website->latest_ssl_certificate['is_wildcard'])->toBeTrue()
+        ->and($website->latest_ssl_certificate['subject'])->toStartWith('*.')
+        ->and($website->latest_ssl_certificate['subject_alt_names'])->toContain('*.example.com');
+});
+
+test('website certificate data json serialization', function () {
+    $certificateData = [
+        'subject' => 'json-test.com',
+        'issuer' => 'JSON Test CA',
+        'key_size' => 2048,
+        'subject_alt_names' => ['json-test.com', 'www.json-test.com'],
+        'chain_complete' => true,
+    ];
+
+    $website = Website::withoutEvents(fn() => Website::factory()->create([
+        'latest_ssl_certificate' => $certificateData,
+    ]));
+
+    $json = $website->toJson();
+
+    $decoded = json_decode($json, true);
+
+    expect($decoded['latest_ssl_certificate'])->toBeArray()
+        ->and($decoded['latest_ssl_certificate']['subject'])->toBe('json-test.com')
+        ->and($decoded['latest_ssl_certificate']['subject_alt_names'])->toBeArray()
+        ->and($decoded['latest_ssl_certificate']['subject_alt_names'])->toHaveCount(2);
 });

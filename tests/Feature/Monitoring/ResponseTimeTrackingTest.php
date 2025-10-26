@@ -8,13 +8,16 @@ use App\Models\Website;
 use App\Services\MonitorIntegrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Traits\MocksMonitorHttpRequests;
+use Tests\Traits\MocksSslCertificateAnalysis;
 
 uses(RefreshDatabase::class);
 uses(MocksMonitorHttpRequests::class);
+uses(MocksSslCertificateAnalysis::class);
 
 beforeEach(function () {
     // Mock all HTTP requests to avoid real network calls
     $this->setUpMocksMonitorHttpRequests();
+    $this->setUpMocksSslCertificateAnalysis();
 });
 
 test('check monitor job records response time in results', function () {
