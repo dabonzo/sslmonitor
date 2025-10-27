@@ -1,21 +1,23 @@
-# SSL Monitor v3 - Professional SSL Certificate & Uptime Monitoring
+# SSL Monitor v4 - Professional SSL Certificate & Uptime Monitoring
 
-> **Next-Generation SSL Monitoring Platform**
-> Built with Laravel 12, Vue 3, Inertia.js, and VRISTO professional admin template
+> **Enterprise-Grade SSL Monitoring Platform**
+> Built with Laravel 12, Vue 3, Inertia.js, and TailwindCSS v4
 
 ---
 
 ## 🎯 Overview
 
-**SSL Monitor v3** is a comprehensive, enterprise-grade SSL certificate and uptime monitoring platform designed for businesses that demand reliability, professional presentation, and advanced monitoring capabilities.
+**SSL Monitor v4** is a comprehensive, enterprise-grade SSL certificate and uptime monitoring platform designed for businesses that demand reliability, professional presentation, and advanced monitoring capabilities.
 
-### 🌟 What Makes SSL Monitor v3 Special
+### 🌟 What Makes SSL Monitor v4 Special
 
-- **Professional UI**: Built with VRISTO admin template for enterprise-grade user experience
-- **Modern Architecture**: Laravel 12 + Vue 3 + Inertia.js for optimal performance and developer experience
-- **Advanced Monitoring**: Beyond basic SSL checks - comprehensive uptime validation with JavaScript support
+- **Modern UI**: Built with TailwindCSS v4 semantic design system for enterprise-grade user experience
+- **Advanced Architecture**: Laravel 12 + Vue 3 + Inertia.js + TypeScript for optimal performance and developer experience
+- **Advanced Monitoring**: Beyond basic SSL checks - comprehensive uptime validation with JavaScript rendering support
 - **Team Collaboration**: Full team management with role-based permissions and real-time collaboration
 - **Visual Excellence**: Professional dashboard with charts, real-time updates, and responsive design
+- **Dynamic SSL Thresholds**: Intelligent percentage-based expiration detection adapts to certificate validity periods
+- **Historical Data Tracking**: Complete monitoring history with trends, aggregations, and advanced analytics
 
 ---
 
@@ -316,17 +318,34 @@ See [DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md) for detailed development 
 
 ## 📞 Support & Documentation
 
-- **📖 User Guide** - Comprehensive end-user documentation
-- **🔧 Admin Guide** - Setup and configuration instructions
-- **💻 Developer Guide** - Technical implementation details
-- **🧪 Testing Guide** - Quality assurance and testing procedures
+Complete documentation is organized in `docs/` with the following structure:
+
+### 🚀 **Getting Started**
+- **📖 Main Documentation** - `docs/README.md` (comprehensive documentation index)
+- **🔧 Development Primer** - `docs/core/DEVELOPMENT_PRIMER.md` (essential starting point)
+- **💻 Coding Standards** - `docs/core/CODING_GUIDE.md` (coding patterns and conventions)
+
+### 🧪 **Development & Testing**
+- **🧪 Testing Guide** - `docs/testing/TESTING_INSIGHTS.md` (testing patterns and best practices)
+- **🎨 Styling Guide** - `docs/styling/TAILWIND_V4_STYLING_GUIDE.md` (TailwindCSS v4 reference)
+- **⚡ Performance Workflow** - `docs/core/PERFORMANCE_WORKFLOW.md` (performance optimization)
+
+### 🏗️ **Architecture & Features**
+- **🏗️ Architecture Docs** - `docs/architecture/` (system design and components)
+- **✨ Feature Documentation** - `docs/features/` (team management, SSL monitoring, alerts)
+- **🚀 Deployment Guides** - `docs/deployment/` (CI/CD and production deployment)
+
+### 📋 **Implementation Tracking**
+- **📋 Implementation Plans** - `docs/implementation-plans/` (planned features)
+- **✅ Completed Features** - `docs/implementation-finished/` (successfully implemented features)
+- **📊 Historical Data Project** - `docs/historical-data/` (advanced analytics implementation)
 
 ---
 
 ## 📄 License
 
-SSL Monitor v3 is proprietary software. All rights reserved.
+SSL Monitor v4 is proprietary software. All rights reserved.
 
 ---
 
-**SSL Monitor v3** - Professional SSL certificate monitoring made simple, secure, and scalable.
+**SSL Monitor v4** - Enterprise-grade SSL certificate monitoring made simple, secure, and scalable.

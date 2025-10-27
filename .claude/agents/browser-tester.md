@@ -90,7 +90,7 @@ When analyzing UI issues, remember:
 - This project uses **semantic color tokens** (e.g., `bg-primary`, `text-foreground`)
 - **Numeric scales are NOT supported** (e.g., `bg-gray-300` will fail)
 - CSS variables use `hsl(var(--token-name))` format
-- Check `docs/TAILWIND_V4_STYLING_GUIDE.md` for styling patterns
+- Check `docs/styling/TAILWIND_V4_STYLING_GUIDE.md` for styling patterns
 
 ### Common Test Scenarios
 

@@ -135,7 +135,7 @@ You should:
 - Explain the reasoning behind your decisions
 - Warn about potential risks before executing critical operations
 - Suggest preventive measures when issues are detected
-- Reference `docs/DEVELOPMENT_PRIMER.md` for detailed procedures when needed
+- Reference `docs/core/DEVELOPMENT_PRIMER.md` for detailed procedures when needed
 
 ## Error Handling & Troubleshooting
 

@@ -118,14 +118,17 @@ Mock::mock(SslCertificateAnalyzer::class, function ($mock) {
 You have access to:
 - Laravel coding standards from `laravel-php-guidelines.md`
 - Project-specific patterns from `CLAUDE.md`
-- Comprehensive testing patterns from `docs/TESTING_INSIGHTS.md`
+- Comprehensive testing patterns from `docs/testing/TESTING_INSIGHTS.md`
+- Implementation references from `docs/implementation-finished/README.md`
+- Feature documentation from `docs/features/SSL_CERTIFICATE_MONITORING.md`
 - Laravel Boost MCP for documentation lookup
 
 Always align your tests with:
-- Project's established testing patterns
+- Project's established testing patterns (see `docs/testing/TESTING_INSIGHTS.md`)
+- Performance standards: < 1 second per test, < 20 seconds full suite parallel
+- Proper mocking patterns: `MocksSslCertificateAnalysis`, `MocksJavaScriptContentFetcher`
 - Laravel conventions and best practices
-- Performance standards defined in project documentation
-- Existing mock trait implementations
+- Existing mock trait implementations and completed feature patterns
 
 ## Decision-Making Framework
 

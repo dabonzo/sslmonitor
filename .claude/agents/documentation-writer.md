@@ -67,14 +67,49 @@ Follow Laravel/PHP standards from the project's coding guidelines:
 
 ## Existing Documentation Structure
 
-The project has established documentation files:
-- **DEVELOPMENT_PRIMER.md** - Development overview, setup, and quick start guide
-- **CODING_GUIDE.md** - Vue/TypeScript component patterns and best practices
-- **TESTING_INSIGHTS.md** - Testing patterns, performance standards, and mocking strategies
-- **STYLING_GUIDE.md** - Tailwind v4 CSS patterns and design system
-- **CLAUDE.md** - Project overview and AI assistant guidance
+The project has established documentation organized in `docs/` folder structure:
 
-**CRITICAL**: Always update existing documentation files rather than creating new ones unless explicitly requested. Maintain consistency with established patterns and structure.
+### Core Development Guides (`docs/core/`)
+- **DEVELOPMENT_PRIMER.md** - Essential guide for development, architecture overview, setup, and quick start
+- **CODING_GUIDE.md** - Project-specific coding standards and patterns
+- **AGENT_USAGE_GUIDE.md** - Guide for using Claude Code agents effectively
+- **PERFORMANCE_WORKFLOW.md** - Performance optimization workflow and best practices
+
+### Testing Documentation (`docs/testing/`)
+- **TESTING_INSIGHTS.md** - Complete testing guide with patterns, performance optimization, and debugging
+- **EXTERNAL_SERVICE_PATTERNS.md** - Patterns for integrating external services and APIs
+
+### Styling & Frontend (`docs/styling/`)
+- **TAILWIND_V4_STYLING_GUIDE.md** - Complete technical reference for Tailwind CSS v4
+- **TAILWIND_V4_QUICK_REFERENCE.md** - One-page cheat sheet for Tailwind v4
+- **TAILWIND_V4_CONVERSION_SUMMARY.md** - Summary of Tailwind v3 → v4 conversion
+- **STYLING_GUIDE.md** - Frontend styling standards and component patterns
+
+### Architecture Documentation (`docs/architecture/`)
+- **ALERT_SYSTEM_ARCHITECTURE.md** - Complete alert system architecture
+- **QUEUE_AND_SCHEDULER_ARCHITECTURE.md** - Hybrid queue/scheduler architecture
+- **HISTORICAL_DATA_BACKEND_ARCHITECTURE.md** - Backend data architecture
+- **OPTIMIZED_MONITORING_SCHEMA.md** - Database schema design
+- **SCHEMA_OPTIMIZATION_SUMMARY.md** - Schema optimization summary
+
+### Feature Documentation (`docs/features/`)
+- **TEAMS_AND_ROLES.md** - Complete team management and role-based permissions
+- **TOAST_NOTIFICATIONS.md** - Toast notification system documentation
+- **SSL_CERTIFICATE_MONITORING.md** - Complete SSL certificate monitoring system
+- **DEBUG_LOGGING_ENHANCEMENT.md** - Debug logging system and enhancement patterns
+- **ALERT_TESTING_FIX_DOCUMENTATION.md** - Alert system bug fix documentation
+
+### Deployment Documentation (`docs/deployment/`)
+- **DEPLOYMENT.md** - Complete production deployment guide using GitHub Actions CI/CD
+- **DEPLOYMENT_GUIDE.md** - Deployer.org deployment guide with systemd services
+
+### Implementation Tracking
+- **implementation-plans/** - Active implementation plans
+- **implementation-finished/** - Successfully implemented features with detailed documentation
+- **historical-data/** - Historical data tracking project documentation
+- **archive/** - Completed/superseded docs organized by type
+
+**CRITICAL**: Always update existing documentation files rather than creating new ones unless explicitly requested. Maintain consistency with established patterns and folder structure.
 
 ## Documentation Workflow
 

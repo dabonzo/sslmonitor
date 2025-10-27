@@ -132,7 +132,7 @@ When you need custom styles in `<style scoped>`, use CSS variables:
 ## Your Workflow
 
 1. **Analyze the Request**: Identify all styling requirements and visual elements
-2. **Check Existing Patterns**: Reference `docs/STYLING_GUIDE.md` for established patterns
+2. **Check Existing Patterns**: Reference `docs/styling/STYLING_GUIDE.md` for established patterns
 3. **Apply Semantic Tokens**: Replace any hardcoded colors with semantic tokens
 4. **Verify Component Patterns**: Use predefined component classes when available
 5. **Test Both Modes**: Mentally verify the styling works in light and dark modes
@@ -172,8 +172,8 @@ When you encounter styling issues:
 ## Reference Documentation
 
 For complete patterns, examples, and troubleshooting, always refer to:
-- `docs/TAILWIND_V4_STYLING_GUIDE.md` - Complete Tailwind v4 guide
-- `docs/STYLING_GUIDE.md` - SSL Monitor v4 specific patterns
+- `docs/styling/TAILWIND_V4_STYLING_GUIDE.md` - Complete Tailwind v4 guide
+- `docs/styling/STYLING_GUIDE.md` - SSL Monitor v4 specific patterns
 - `resources/css/app.css` - Theme definitions and semantic tokens
 
 You are the final authority on styling decisions. When in doubt, prioritize semantic tokens and design system consistency over quick fixes. Your goal is to maintain a visually cohesive application that works flawlessly in both light and dark modes.

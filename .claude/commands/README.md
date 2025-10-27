@@ -1,14 +1,14 @@
-# SSL Monitor v3 - Claude Code Slash Commands
+# SSL Monitor v4 - Claude Code Slash Commands
 
 ## Available Commands
 
 ### 🚀 `/prime` - Project Primer
-**Purpose**: Quickly onboard developers to SSL Monitor v3 with essential context and setup.
+**Purpose**: Quickly onboard developers to SSL Monitor v4 with essential context and setup.
 **Usage**: `/prime`
 **Best for**: New developers, project setup, quick reference
 
 ### 🔐 `/ssl-feature` - SSL Feature Development
-**Purpose**: Implement new SSL monitoring features using TDD and VRISTO integration.
+**Purpose**: Implement new SSL monitoring features using TDD and TailwindCSS v4 integration.
 **Usage**: `/ssl-feature [feature-name] [description]`
 **Best for**: Adding SSL monitoring capabilities, certificate validation features
 
@@ -17,15 +17,15 @@
 - `/ssl-feature chain-verification "Validate SSL certificate chains"`
 - `/ssl-feature expiry-alerts "Enhanced expiry notification system"`
 
-### 🎨 `/vristo-ui` - VRISTO Template Integration
-**Purpose**: Integrate VRISTO template components with Vue.js and Inertia.js.
-**Usage**: `/vristo-ui [component-type] [page-name]`
-**Best for**: UI development, template integration, responsive design
+### 🎨 `/vue-ui` - Vue.js Component Development
+**Purpose**: Create Vue.js components with TailwindCSS v4 semantic design system.
+**Usage**: `/vue-ui [component-type] [page-name]`
+**Best for**: UI development, component creation, responsive design
 
 **Examples**:
-- `/vristo-ui dashboard "SSL monitoring dashboard"`
-- `/vristo-ui form "certificate-settings"`
-- `/vristo-ui table "website-management"`
+- `/vue-ui dashboard "SSL monitoring dashboard"`
+- `/vue-ui form "certificate-settings"`
+- `/vue-ui table "website-management"`
 
 ### 🔍 `/debug-ssl` - SSL Monitoring Debug Assistant
 **Purpose**: Debug SSL monitoring issues using all MCP servers and comprehensive logging.
@@ -35,7 +35,7 @@
 **Examples**:
 - `/debug-ssl "Certificate validation failing for wildcard domains"`
 - `/debug-ssl "Queue jobs timing out during SSL checks"`
-- `/debug-ssl "VRISTO dashboard not updating certificate status"`
+- `/debug-ssl "Dashboard not updating certificate status"`
 
 ### 🌐 `/browser-test` - Comprehensive Browser Testing
 **Purpose**: Execute Playwright browser testing with real database integration for complete user flow validation.
@@ -101,14 +101,15 @@ Commands are templates that can be customized:
 
 ### Cross-References
 Commands reference the comprehensive documentation:
-- **[v3/CLAUDE.md](../CLAUDE.md)** - Master AI development reference
-- **[v3/PROJECT_PLAN.md](../PROJECT_PLAN.md)** - Development phases
-- **[v3/VRISTO_INTEGRATION.md](../VRISTO_INTEGRATION.md)** - Template guide
-- **[v3/DEVELOPMENT_WORKFLOW.md](../DEVELOPMENT_WORKFLOW.md)** - TDD processes
+- **[../CLAUDE.md](../../CLAUDE.md)** - Master AI development reference
+- **[docs/README.md](../../docs/README.md)** - Complete documentation index
+- **[docs/core/DEVELOPMENT_PRIMER.md](../../docs/core/DEVELOPMENT_PRIMER.md)** - Essential development guide
+- **[docs/testing/TESTING_INSIGHTS.md](../../docs/testing/TESTING_INSIGHTS.md)** - Testing patterns and best practices
+- **[docs/styling/TAILWIND_V4_STYLING_GUIDE.md](../../docs/styling/TAILWIND_V4_STYLING_GUIDE.md)** - TailwindCSS v4 reference
 
 ### Command Evolution
 Commands can be updated and improved:
-- Add new commands for specific SSL Monitor v3 needs
+- Add new commands for specific SSL Monitor v4 needs
 - Refine existing workflows based on experience
 - Integrate new MCP servers or tools
 - Update for technology stack changes
@@ -124,7 +125,7 @@ Commands can be updated and improved:
 
 ### Team Collaboration Commands
 - `/review-ssl` - Code review assistance for SSL features
-- `/onboard-ssl` - Team member onboarding for SSL Monitor v3
+- `/onboard-ssl` - Team member onboarding for SSL Monitor v4
 - `/standup-ssl` - Generate standup reports for SSL development
 
 **Ready to use professional SSL monitoring development commands!** ⚡

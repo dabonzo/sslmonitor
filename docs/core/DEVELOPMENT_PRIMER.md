@@ -20,7 +20,7 @@
 - **JavaScript Content Validation**: Dynamic content checking with BrowserShot
 - **Advanced Notifications**: Toast system with Laravel flash message integration
 - **Debug Menu**: Comprehensive debug tools for SSL overrides and alert testing
-- **Modern Styling**: Tailwind CSS v4 with semantic token system (see `docs/TAILWIND_V4_STYLING_GUIDE.md`)
+- **Modern Styling**: Tailwind CSS v4 with semantic token system (see `docs/styling/TAILWIND_V4_STYLING_GUIDE.md`)
 
 ### Alert System (Recently Fixed ✅)
 **Status**: Production ready with 5 alert types
@@ -32,7 +32,7 @@
 
 **Critical Fix Applied**: The alert system was sending duplicate alerts (6 emails instead of 1) due to fetching both global templates and website-specific configurations. Fixed by using ONLY website-specific configurations during monitoring.
 
-**Documentation**: See `docs/ALERT_SYSTEM_ARCHITECTURE.md` and `docs/ALERT_TESTING_FIX_DOCUMENTATION.md` for complete details.
+**Documentation**: See `docs/architecture/ALERT_SYSTEM_ARCHITECTURE.md` and `docs/alert-testing-fix-documentation.md` for complete details.
 
 ### Dynamic SSL Thresholds (Recently Implemented ✅)
 **Status**: Production ready with intelligent expiration detection
@@ -50,7 +50,7 @@
 - Appropriate early warnings for commercial certificates
 - Backward compatible with existing monitoring data
 
-**Documentation**: See `docs/SSL_CERTIFICATE_MONITORING.md` for complete user guide
+**Documentation**: See `docs/features/SSL_CERTIFICATE_MONITORING.md` for complete user guide
 
 ### 🔍 **Before Starting: Ask Clarifying Questions**
 
@@ -529,15 +529,15 @@ if ($websites->count() < 4) {
 - **Latest Implementation**: Dynamic SSL Thresholds (33% validity period threshold with 30-day minimum)
 
 ### **📚 Testing Documentation**
-- **Comprehensive Guide**: See `docs/TESTING_INSIGHTS.md` for detailed patterns
+- **Comprehensive Guide**: See `docs/testing/TESTING_INSIGHTS.md` for detailed patterns
 - **Performance Analysis**: Parallel testing impact and optimization strategies
 - **Debugging Strategies**: Common failure patterns and solutions
 - **Test Architecture**: Modern Pest 4 setup with centralized data management
 
 ### **📖 Documentation Index**
-For a complete overview of all available documentation, see **[docs/README.md](README.md)**:
+For a complete overview of all available documentation, see **[../README.md](../README.md)**:
 - 24 active documentation files organized by category
-- SSL certificate monitoring with dynamic thresholds guide (`SSL_CERTIFICATE_MONITORING.md`)
+- SSL certificate monitoring with dynamic thresholds guide (`features/SSL_CERTIFICATE_MONITORING.md`)
 - Quick reference guide by task and role
 - Architecture documentation (Alert System, Queue System, Teams)
 - Tailwind v4 styling guides (complete reference, quick reference, conversion summary)
@@ -646,7 +646,7 @@ class Website extends Model
 |---------------|---------------|
 | **Navigation menus** | `resources/js/config/navigation.ts` |
 | **Theme functionality** | `resources/js/components/ThemeCustomizer.vue` |
-| **Tailwind v4 styling** | `docs/TAILWIND_V4_STYLING_GUIDE.md`, `docs/TAILWIND_V4_QUICK_REFERENCE.md` |
+| **Tailwind v4 styling** | `docs/styling/TAILWIND_V4_STYLING_GUIDE.md`, `docs/styling/TAILWIND_V4_QUICK_REFERENCE.md` |
 | **Color definitions** | `resources/css/app.css` (Tailwind v4 semantic tokens) |
 | **Toast notifications** | `resources/js/composables/useToast.ts` |
 | **Website management** | `app/Http/Controllers/SSL/WebsiteController.php` |
@@ -654,7 +654,7 @@ class Website extends Model
 | **Alert system** | `app/Services/AlertService.php`, `app/Models/AlertConfiguration.php` |
 | **Alert testing/debug** | `app/Http/Controllers/Debug/AlertTestingController.php` |
 | **Monitoring logic** | `app/Models/Monitor.php` (CUSTOM extended Spatie model) |
-| **SSL monitoring docs** | `docs/SSL_CERTIFICATE_MONITORING.md` |
+| **SSL monitoring docs** | `docs/features/SSL_CERTIFICATE_MONITORING.md` |
 | **Dynamic SSL thresholds** | `app/Jobs/CheckMonitorJob.php` (determineSslStatus method) |
 | **Scheduler tasks** | `routes/console.php` |
 | **Queue configuration** | `config/horizon.php` |

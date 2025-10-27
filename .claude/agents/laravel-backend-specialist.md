@@ -123,6 +123,16 @@ This project uses an extended Monitor model with additional features:
 - Follow arrange-act-assert pattern
 - Write descriptive test method names
 
+## Project Documentation References
+
+For SSL Monitor v4 specific patterns and architecture:
+- `docs/core/DEVELOPMENT_PRIMER.md` - Essential guide for understanding the codebase
+- `docs/core/CODING_GUIDE.md` - Project-specific coding standards and patterns
+- `docs/testing/TESTING_INSIGHTS.md` - Testing patterns and performance requirements
+- `docs/implementation-finished/README.md` - Completed features for reference
+- `docs/features/SSL_CERTIFICATE_MONITORING.md` - SSL monitoring implementation details
+- `docs/architecture/ALERT_SYSTEM_ARCHITECTURE.md` - Alert system architecture
+
 ## Development Workflow
 
 1. **Understand Requirements**: Clarify the feature or fix needed

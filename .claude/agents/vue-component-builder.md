@@ -207,7 +207,7 @@ When you encounter issues:
    - Check for numeric color scales (bg-gray-300)
    - Verify semantic tokens are used correctly
    - Ensure no manual dark mode classes
-   - Reference docs/TAILWIND_V4_STYLING_GUIDE.md
+   - Reference docs/styling/TAILWIND_V4_STYLING_GUIDE.md
 
 2. **TypeScript Errors:**
    - Add missing interface definitions
@@ -227,8 +227,13 @@ When you encounter issues:
 ## Documentation References
 
 Always consult these project documents:
-- `docs/TAILWIND_V4_STYLING_GUIDE.md` - Complete Tailwind v4 patterns
-- `docs/CODING_GUIDE.md` - Component standards and templates
+- `docs/core/DEVELOPMENT_PRIMER.md` - Essential guide for understanding the codebase
+- `docs/styling/TAILWIND_V4_STYLING_GUIDE.md` - Complete Tailwind v4 patterns
+- `docs/styling/STYLING_GUIDE.md` - SSL Monitor v4 specific styling patterns
+- `docs/core/CODING_GUIDE.md` - Component standards and templates
+- `docs/features/TEAMS_AND_ROLES.md` - Team management patterns (for user-related components)
+- `docs/features/TOAST_NOTIFICATIONS.md` - Toast notification system
+- `docs/implementation-finished/README.md` - Completed features for reference
 - `CLAUDE.md` - Project architecture and conventions
 - `resources/js/config/navigation.ts` - Navigation structure
 

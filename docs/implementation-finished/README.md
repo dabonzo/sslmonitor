@@ -172,14 +172,14 @@ Each completed implementation followed this workflow:
 ## Related Documentation
 
 ### User Guides
-- `docs/SSL_CERTIFICATE_MONITORING.md` - SSL certificate monitoring with dynamic thresholds
+- `../features/SSL_CERTIFICATE_MONITORING.md` - SSL certificate monitoring with dynamic thresholds
 
 ### Architecture Documentation
-- `docs/architecture/HISTORICAL_DATA_BACKEND_ARCHITECTURE.md` - Backend data architecture
-- `docs/architecture/OPTIMIZED_MONITORING_SCHEMA.md` - Database schema design
+- `../architecture/HISTORICAL_DATA_BACKEND_ARCHITECTURE.md` - Backend data architecture
+- `../architecture/OPTIMIZED_MONITORING_SCHEMA.md` - Database schema design
 
 ### Testing Documentation
-- `docs/testing/TESTING_INSIGHTS.md` - Testing patterns and best practices
+- `../testing/TESTING_INSIGHTS.md` - Testing patterns and best practices
 - `tests/Feature/Jobs/DynamicSslThresholdsTest.php` - SSL threshold tests
 - `tests/Feature/Jobs/CheckMonitorJobTest.php` - Monitor job tests
 
@@ -215,7 +215,7 @@ Completed implementations are:
 - ✅ Referenced in CLAUDE.md for AI context
 - ✅ Available for reference in future implementations
 
-For new features to implement, see: `docs/implementation-plans/README.md`
+For new features to implement, see: `../implementation-plans/README.md`
 
 ---
 

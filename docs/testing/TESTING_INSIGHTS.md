@@ -497,6 +497,20 @@ $website->update(['url' => 'https://test.com']);
 Log::info('Website updated', ['website_id' => $website->id]);
 ```
 
+## 🔗 API Testing Documentation
+
+### Historical Data API Testing
+For comprehensive API testing patterns and examples specific to the historical data endpoints, see:
+**`../historical-data/API_TESTING_GUIDE.md`** - Complete API testing guide with:
+- API endpoint testing patterns
+- Authentication and authorization testing
+- Data validation and response testing
+- Performance testing for API endpoints
+- Error handling and edge case testing
+- Integration with Vue frontend components
+
+---
+
 ## 📝 Testing Documentation Standards
 
 ### **1. Test Documentation Pattern**

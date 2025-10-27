@@ -2,7 +2,7 @@
 
 **Quick reference for implementing historical data tracking in SSL Monitor v4**
 
-📚 **Full Documentation**: See `HISTORICAL_DATA_MASTER_PLAN.md` (2,800+ lines)
+📚 **Full Documentation**: See `../implementation-finished/HISTORICAL_DATA_MASTER_PLAN.md` (2,800+ lines)
 
 **🚧 Implementation Status**: 94% Complete
 - ✅ Phase 1: 100% (Database tables and models)
@@ -12,8 +12,8 @@
 - ⚠️ Phase 5: 40% (Basic caching/queue config done)
 
 **📋 Completion Guides**:
-- **Phase 4**: ✅ COMPLETE - See `PHASE4_COMPLETION_PROMPT.md` for implementation details
-- **Phase 5**: See `PHASE5_IMPLEMENTATION_PROMPT.md` (2-3 hours remaining)
+- **Phase 4**: ✅ COMPLETE - See `../implementation-finished/PHASE4_COMPLETION_PROMPT.md` for implementation details
+- **Phase 5**: See `../implementation-finished/PHASE5_IMPLEMENTATION_PROMPT.md` (2-3 hours remaining)
 
 ---
 
@@ -312,7 +312,7 @@ private function extractCertificateData(): array
 ```
 
 **Related Implementation Prompts**:
-- **Next Feature**: `DYNAMIC_SSL_THRESHOLDS_IMPLEMENTATION.md` - Dynamic expiration thresholds based on certificate validity period
+- **Next Feature**: `../implementation-finished/DYNAMIC_SSL_THRESHOLDS_IMPLEMENTATION.md` - Dynamic expiration thresholds based on certificate validity period
 
 ---
 
@@ -480,12 +480,12 @@ test('monitoring check creates historical record', function () {
 
 ## 📚 Further Reading
 
-- **Full Plan**: `HISTORICAL_DATA_MASTER_PLAN.md` (complete implementation guide)
-- **Phase 4 Completion**: `PHASE4_COMPLETION_PROMPT.md` (finish remaining listeners and scheduler)
-- **Phase 5 Implementation**: `PHASE5_IMPLEMENTATION_PROMPT.md` (production optimization)
-- **Testing**: `TESTING_INSIGHTS.md` (testing patterns)
-- **Queue System**: `QUEUE_AND_SCHEDULER_ARCHITECTURE.md` (queue setup)
-- **Development**: `DEVELOPMENT_PRIMER.md` (development workflow)
+- **Full Plan**: `../implementation-finished/HISTORICAL_DATA_MASTER_PLAN.md` (complete implementation guide)
+- **Phase 4 Completion**: `../implementation-finished/PHASE4_COMPLETION_PROMPT.md` (finish remaining listeners and scheduler)
+- **Phase 5 Implementation**: `../implementation-finished/PHASE5_IMPLEMENTATION_PROMPT.md` (production optimization)
+- **Testing**: `../testing/TESTING_INSIGHTS.md` (testing patterns)
+- **Queue System**: `../architecture/QUEUE_AND_SCHEDULER_ARCHITECTURE.md` (queue setup)
+- **Development**: `../core/DEVELOPMENT_PRIMER.md` (development workflow)
 
 ---
 
