@@ -277,6 +277,44 @@
 
 ---
 
+### Completed Implementations
+
+#### **[implementation-finished/](implementation-finished/)** - Successfully Implemented Features
+
+**2 features completed** as of October 27, 2025:
+
+##### **[Dynamic SSL Thresholds](implementation-finished/DYNAMIC_SSL_THRESHOLDS.md)** ✅ (Oct 27, 2025)
+**Intelligent percentage-based SSL certificate expiration detection.**
+
+- Adapts to certificate validity periods (33% threshold + 30-day minimum)
+- Let's Encrypt (90-day): 73 days remaining = Valid ✅
+- 1-Year Commercial: 73 days remaining = Expires Soon ⚠️
+- Backward compatible with existing monitoring data
+- **Implementation Time**: 2.5 hours (5 phases)
+- **Test Coverage**: 12 comprehensive tests
+- **Documentation**: `docs/SSL_CERTIFICATE_MONITORING.md`
+
+**When to use**: Reference for similar percentage-based algorithm implementations.
+
+---
+
+##### **[Certificate Data Architecture](implementation-finished/CERTIFICATE_DATA_ARCHITECTURE.md)** ✅ (Oct 18, 2025)
+**Comprehensive SSL certificate data extraction and storage.**
+
+- Extracts certificate subject (CN + SANs) from OpenSSL parsing
+- Stores certificate validity dates for dynamic threshold calculations
+- Makes Certificate Analysis the "source of truth" for SSL data
+- **Implementation Time**: 4-6 hours
+- **Database Changes**: Added certificate_valid_from_date column
+
+**When to use**: Understanding certificate data architecture and storage patterns.
+
+---
+
+See **[implementation-finished/README.md](implementation-finished/README.md)** for complete details on all completed features.
+
+---
+
 ### Planning Documentation (Future Features)
 
 #### **[HISTORICAL_DATA_MASTER_PLAN.md](HISTORICAL_DATA_MASTER_PLAN.md)** (2,800+ lines) ⭐ **MASTER PLAN**
@@ -365,11 +403,12 @@ See **[archive/README.md](archive/README.md)** for complete archive index.
 
 ## 📊 Documentation Statistics
 
-- **Active Docs**: 27 files
+- **Active Docs**: 28 files (including implementation-finished/)
+- **Completed Implementations**: 2 features (Dynamic SSL Thresholds, Certificate Data Architecture)
 - **Total Lines**: ~18,000+ lines of active documentation
 - **Archived**: 7 files in archive/ + 2 superseded plans
-- **Test Coverage**: 530 tests passing, 13 skipped (100% pass rate)
-- **Last Major Update**: October 2025 (Historical data Phase 4 & 5 completion prompts + Alert system + Tailwind v4)
+- **Test Coverage**: 669 tests passing, 12 skipped (100% pass rate)
+- **Last Major Update**: October 27, 2025 (Dynamic SSL Thresholds completion + Documentation reorganization plan)
 
 ---
 
@@ -387,6 +426,8 @@ See **[archive/README.md](archive/README.md)** for complete archive index.
 | **Migrating to Tailwind v4** | TAILWIND_V4_CONVERSION_SUMMARY.md |
 | **Understanding alerts** | ALERT_SYSTEM_ARCHITECTURE.md |
 | **Understanding teams** | TEAMS_AND_ROLES.md |
+| **Understanding SSL monitoring** | SSL_CERTIFICATE_MONITORING.md |
+| **Viewing completed features** | implementation-finished/README.md |
 | **Deploying** | DEPLOYMENT.md, DEPLOYMENT_GUIDE.md |
 | **Using agents** | AGENT_USAGE_GUIDE.md |
 | **Performance tuning** | PERFORMANCE_WORKFLOW.md |

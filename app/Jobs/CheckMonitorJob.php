@@ -131,6 +131,7 @@ class CheckMonitorJob implements ShouldQueue
                 'http_status_code' => $results['uptime']['status_code'] ?? null,
                 'ssl_status' => $results['ssl']['status'] ?? null,
                 'certificate_subject' => $results['ssl']['certificate_subject'] ?? null,
+                'certificate_valid_from_date' => $results['ssl']['certificate_valid_from'] ?? null,
                 'days_until_expiration' => $this->calculateDaysUntilExpiration(),
             ];
 
@@ -260,25 +261,23 @@ class CheckMonitorJob implements ShouldQueue
             // Refresh to get latest data
             $this->monitor->refresh();
 
-            // Determine status based on Spatie's certificate data
-            $status = 'valid';
-            if ($this->monitor->certificate_status === 'invalid') {
-                $status = 'invalid';
-            } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->isPast()) {
-                $status = 'expired';
-            } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->diffInDays() <= 30) {
-                $status = 'expires_soon';
-            }
+            // Extract certificate data (subject + validity dates)
+            $certificateData = $this->extractCertificateData();
 
-            // Extract certificate subject (CN + SANs)
-            $certificateSubject = $this->extractCertificateSubject();
+            // Determine status using dynamic thresholds
+            $status = $this->determineSslStatus(
+                expiresAt: $this->monitor->certificate_expiration_date,
+                validFrom: $certificateData['valid_from'],
+                certificateStatus: $this->monitor->certificate_status
+            );
 
             $result = [
                 'status' => $status,
                 'expires_at' => $this->monitor->certificate_expiration_date?->toISOString(),
                 'issuer' => $this->monitor->certificate_issuer ?? 'Unknown',
                 'certificate_status' => $this->monitor->certificate_status,
-                'certificate_subject' => $certificateSubject,
+                'certificate_subject' => $certificateData['subject'],
+                'certificate_valid_from' => $certificateData['valid_from']?->toISOString(),
                 'failure_reason' => $this->monitor->certificate_check_failure_reason,
                 'checked_at' => Carbon::now()->toISOString(),
                 'check_duration_ms' => round((microtime(true) - $startTime) * 1000),
@@ -365,15 +364,13 @@ class CheckMonitorJob implements ShouldQueue
      */
     private function getLastSslResult(): array
     {
-        // Determine status based on Spatie's certificate data
-        $status = 'valid';
-        if ($this->monitor->certificate_status === 'invalid') {
-            $status = 'invalid';
-        } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->isPast()) {
-            $status = 'expired';
-        } elseif ($this->monitor->certificate_expiration_date && $this->monitor->certificate_expiration_date->diffInDays() <= 30) {
-            $status = 'expires_soon';
-        }
+        // Determine status using dynamic thresholds
+        // Note: We don't have valid_from from cache, so will use fallback logic
+        $status = $this->determineSslStatus(
+            expiresAt: $this->monitor->certificate_expiration_date,
+            validFrom: null,  // Not available from cached data
+            certificateStatus: $this->monitor->certificate_status
+        );
 
         return [
             'status' => $status,
@@ -431,6 +428,153 @@ class CheckMonitorJob implements ShouldQueue
     }
 
     /**
+     * Determine SSL certificate status based on dynamic, percentage-based thresholds.
+     *
+     * This method implements intelligent, adaptive SSL expiration detection that accounts for different
+     * certificate validity periods. Unlike fixed day-based thresholds (e.g., "warn at 30 days"), this
+     * approach uses the certificate's total validity period to determine when alerts should trigger.
+     *
+     * ## Dynamic Threshold Algorithm
+     *
+     * The system uses **two criteria** and triggers "expires_soon" when EITHER is met:
+     * 1. **Percentage-based threshold**: < 33% of total validity period remaining
+     * 2. **Minimum day threshold**: < 30 days remaining (safety net for any certificate)
+     *
+     * This dual approach ensures:
+     * - Short-lived certificates (Let's Encrypt 90-day): Alert when ~30 days left (33% of 90)
+     * - Medium-lived certificates (1-year commercial): Alert when ~120 days left (33% of 365)
+     * - Long-lived certificates (2-year commercial): Alert when ~241 days left (33% of 730)
+     *
+     * ## Percentage Calculation Details
+     *
+     * When valid_from date is available:
+     * ```
+     * total_validity_days = validFrom.diffInDays(expiresAt)
+     * days_remaining = now().diffInDays(expiresAt)
+     * percent_remaining = (days_remaining / total_validity_days) * 100
+     * ```
+     *
+     * If percentage < 33% OR days_remaining < 30, status becomes 'expires_soon'.
+     *
+     * ## Processing Flow
+     *
+     * 1. **Invalid certificates** (certificate_status === 'invalid'):
+     *    - Always return 'invalid', regardless of expiration date
+     *    - Indicates certificate validation error (e.g., hostname mismatch, untrusted CA)
+     *
+     * 2. **Missing expiration date**:
+     *    - Return 'valid' (cannot determine status without expiration data)
+     *    - Should not occur with standard SSL certificates
+     *
+     * 3. **Expired certificates** (expiresAt in past):
+     *    - Return 'expired' immediately
+     *    - Checked before percentage calculation for early exit
+     *
+     * 4. **With valid_from date** (percentage-based):
+     *    - Calculate total validity period and remaining percentage
+     *    - Apply dual thresholds (33% OR 30 days)
+     *    - Return 'valid' or 'expires_soon'
+     *
+     * 5. **Fallback** (valid_from unavailable):
+     *    - Use legacy 30-day threshold only
+     *    - Ensures backward compatibility with older monitoring results
+     *    - valid_from may be unavailable due to: cached results, old monitoring data, extraction failures
+     *
+     * ## Practical Examples
+     *
+     * ### Let's Encrypt 90-day Certificate
+     * - Issued: 2025-10-27, Expires: 2025-12-26 (90 days)
+     * - Today with 73 days remaining:
+     *   - Percentage: (73 / 90) × 100 = 81.1% remaining
+     *   - Status: VALID (81% > 33%, 73 days > 30)
+     * - Why: Premature alerts would trigger multiple times during certificate's lifetime
+     *
+     * ### 1-Year Commercial Certificate
+     * - Issued: 2024-10-27, Expires: 2025-10-27 (365 days)
+     * - Today with 73 days remaining:
+     *   - Percentage: (73 / 365) × 100 = 20% remaining
+     *   - Status: EXPIRES_SOON (20% < 33%, 73 days > 30)
+     * - Why: Only 20% of lifetime remaining warrants renewal alert
+     *
+     * ### 2-Year Commercial Certificate
+     * - Issued: 2023-10-27, Expires: 2025-10-27 (730 days)
+     * - Today with 73 days remaining:
+     *   - Percentage: (73 / 730) × 100 = 10% remaining
+     *   - Status: EXPIRES_SOON (10% < 33%, 73 days > 30)
+     * - Why: With 10% left, renewal should already be in progress
+     *
+     * ### Edge Case: 10-Year Certificate with 25 Days Left
+     * - Total validity: 3650 days
+     * - Days remaining: 25
+     * - Percentage: (25 / 3650) × 100 = 0.68% remaining
+     * - Status: EXPIRES_SOON (0.68% < 33%, AND 25 days < 30 minimum)
+     * - Why: 30-day minimum prevents missing imminent expiration of ultra-long certificates
+     *
+     * ## Backward Compatibility
+     *
+     * For older monitoring results where valid_from date was not extracted:
+     * - Falls back to traditional 30-day threshold
+     * - Allows gradual migration as new checks populate valid_from data
+     * - Eventually all results will have valid_from, enabling full percentage-based logic
+     *
+     * @param  ?Carbon  $expiresAt  Certificate expiration date (Not Valid After)
+     * @param  ?Carbon  $validFrom  Certificate issue date (Not Valid Before) - null for backward compatibility
+     * @param  string  $certificateStatus  Spatie certificate validation status: 'valid' or 'invalid'
+     * @return string Certificate status string:
+     *                 - 'invalid': Certificate has validation errors
+     *                 - 'expired': Certificate has passed expiration date
+     *                 - 'expires_soon': Certificate < 33% validity remaining OR < 30 days
+     *                 - 'valid': Certificate is healthy and not expiring soon
+     *
+     * @see https://carbon.nesbot.com/docs/ Carbon date manipulation documentation
+     * @see https://www.php.net/manual/en/function.openssl-x509-parse.php OpenSSL certificate parsing
+     */
+    private function determineSslStatus(
+        ?Carbon $expiresAt,
+        ?Carbon $validFrom,
+        string $certificateStatus
+    ): string {
+        // Handle invalid certificate
+        if ($certificateStatus === 'invalid') {
+            return 'invalid';
+        }
+
+        // Handle missing expiration date
+        if (! $expiresAt) {
+            return 'valid';
+        }
+
+        // Handle expired certificate
+        if ($expiresAt->isPast()) {
+            return 'expired';
+        }
+
+        $daysRemaining = now()->diffInDays($expiresAt, false);
+
+        // If we have valid_from date, use percentage-based thresholds
+        if ($validFrom && $validFrom->isBefore($expiresAt)) {
+            $totalValidityDays = $validFrom->diffInDays($expiresAt);
+            $percentRemaining = ($daysRemaining / $totalValidityDays) * 100;
+
+            // Expires soon if:
+            // - Less than 33% of validity period remaining
+            // - OR less than 30 days (minimum threshold for any certificate)
+            if ($percentRemaining < 33 || $daysRemaining < 30) {
+                return 'expires_soon';
+            }
+
+            return 'valid';
+        }
+
+        // Fallback to legacy 30-day threshold if valid_from unavailable
+        if ($daysRemaining <= 30) {
+            return 'expires_soon';
+        }
+
+        return 'valid';
+    }
+
+    /**
      * Check if SSL certificate has changed (new certificate issued).
      *
      * @return bool True if certificate changed
@@ -474,16 +618,22 @@ class CheckMonitorJob implements ShouldQueue
     }
 
     /**
-     * Extract certificate subject (CN + Subject Alternative Names).
+     * Extract certificate subject (CN + SANs) and validity dates.
+     *
+     * @return array{subject: ?string, valid_from: ?Carbon, expires_at: ?Carbon}
      */
-    private function extractCertificateSubject(): ?string
+    private function extractCertificateData(): array
     {
         try {
             $url = (string) $this->monitor->url;
             $parsedUrl = parse_url($url);
 
             if (! isset($parsedUrl['host'])) {
-                return null;
+                return [
+                    'subject' => null,
+                    'valid_from' => null,
+                    'expires_at' => null,
+                ];
             }
 
             $host = $parsedUrl['host'];
@@ -507,20 +657,32 @@ class CheckMonitorJob implements ShouldQueue
             );
 
             if (! $client) {
-                return null;
+                return [
+                    'subject' => null,
+                    'valid_from' => null,
+                    'expires_at' => null,
+                ];
             }
 
             $params = stream_context_get_params($client);
             fclose($client);
 
             if (! isset($params['options']['ssl']['peer_certificate'])) {
-                return null;
+                return [
+                    'subject' => null,
+                    'valid_from' => null,
+                    'expires_at' => null,
+                ];
             }
 
             $cert = openssl_x509_parse($params['options']['ssl']['peer_certificate']);
 
             if (! $cert) {
-                return null;
+                return [
+                    'subject' => null,
+                    'valid_from' => null,
+                    'expires_at' => null,
+                ];
             }
 
             $domains = [];
@@ -543,16 +705,33 @@ class CheckMonitorJob implements ShouldQueue
                 }
             }
 
-            return ! empty($domains) ? implode(', ', $domains) : null;
+            // Extract validity dates
+            $validFrom = isset($cert['validFrom_time_t'])
+                ? Carbon::createFromTimestamp($cert['validFrom_time_t'])
+                : null;
+
+            $expiresAt = isset($cert['validTo_time_t'])
+                ? Carbon::createFromTimestamp($cert['validTo_time_t'])
+                : null;
+
+            return [
+                'subject' => ! empty($domains) ? implode(', ', $domains) : null,
+                'valid_from' => $validFrom,
+                'expires_at' => $expiresAt,
+            ];
 
         } catch (\Throwable $exception) {
             AutomationLogger::error(
-                "Failed to extract certificate subject for monitor: {$this->monitor->url}",
+                "Failed to extract certificate data for monitor: {$this->monitor->url}",
                 ['monitor_id' => $this->monitor->id],
                 $exception
             );
 
-            return null;
+            return [
+                'subject' => null,
+                'valid_from' => null,
+                'expires_at' => null,
+            ];
         }
     }
 

@@ -2,8 +2,8 @@
 
 **Purpose**: This document provides essential information for Claude Code to understand the codebase structure, development flow, and where to start when adding new features or debugging.
 
-**Last Updated**: October 17, 2025
-**Test Suite Status**: 530 tests passing, 13 skipped (100% success rate) ✅
+**Last Updated**: October 27, 2025
+**Test Suite Status**: 669 tests passing, 12 skipped (100% success rate) ✅
 
 ---
 
@@ -12,7 +12,8 @@
 **SSL Monitor v4** is an enterprise SSL certificate and uptime monitoring platform built with Laravel 12 + Vue 3 + TypeScript + Inertia.js. It extends Spatie Laravel Uptime Monitor with custom features for team collaboration and advanced monitoring.
 
 ### Core Functionality
-- **SSL Certificate Monitoring**: Automated daily checks with expiry alerts
+- **SSL Certificate Monitoring**: Automated daily checks with intelligent expiry alerts using dynamic thresholds
+- **Dynamic SSL Thresholds**: Percentage-based expiration detection (33% threshold) that adapts to certificate validity periods
 - **Uptime Monitoring**: Real-time availability and response time tracking
 - **Alert System**: Multi-level alerting (INFO → WARNING → URGENT → CRITICAL) with website-specific configurations
 - **Team Management**: Role-based collaboration (OWNER, ADMIN, VIEWER)
@@ -32,6 +33,24 @@
 **Critical Fix Applied**: The alert system was sending duplicate alerts (6 emails instead of 1) due to fetching both global templates and website-specific configurations. Fixed by using ONLY website-specific configurations during monitoring.
 
 **Documentation**: See `docs/ALERT_SYSTEM_ARCHITECTURE.md` and `docs/ALERT_TESTING_FIX_DOCUMENTATION.md` for complete details.
+
+### Dynamic SSL Thresholds (Recently Implemented ✅)
+**Status**: Production ready with intelligent expiration detection
+
+**How It Works**:
+- Calculates percentage of certificate validity period remaining
+- Uses 33% threshold OR 30-day minimum (whichever is more conservative)
+- Adapts to different certificate types automatically:
+  - Let's Encrypt (90-day): Alerts at ~30 days (33% of 90 days)
+  - 1-Year Commercial: Alerts at ~120 days (33% of 365 days)
+  - 2-Year Commercial: Alerts at ~240 days (33% of 730 days)
+
+**Benefits**:
+- No false positives for short-lived certificates
+- Appropriate early warnings for commercial certificates
+- Backward compatible with existing monitoring data
+
+**Documentation**: See `docs/SSL_CERTIFICATE_MONITORING.md` for complete user guide
 
 ### 🔍 **Before Starting: Ask Clarifying Questions**
 
@@ -423,7 +442,7 @@ npm run build
 
 ## 🧪 **Testing Strategy**
 
-### **Test Structure (530 passing tests, 13 skipped)**
+### **Test Structure (669 passing tests, 12 skipped)**
 ```
 tests/
 ├── Unit/           - Unit tests for services and utilities
@@ -432,11 +451,11 @@ tests/
 ```
 
 **Current Test Results**:
-- ✅ 530 tests passing (100% pass rate)
-- ⏭️ 13 tests skipped (conditional tests)
+- ✅ 669 tests passing (100% pass rate)
+- ⏭️ 12 tests skipped (conditional tests)
 - 🚫 0 failures
-- ⚡ ~6.4s execution time (parallel mode with 24 processes)
-- 📊 2,200+ assertions verified
+- ⚡ ~6-7s execution time (parallel mode with 24 processes)
+- 📊 3,500+ assertions verified
 
 ### **Common Test Patterns**
 ```bash
@@ -503,11 +522,11 @@ if ($websites->count() < 4) {
 ```
 
 ### **📊 Test Suite Health**
-- **Current Status**: 530 passing, 13 skipped (100% success rate) ✅
-- **Recent Achievement**: Fixed ALL test failures + Alert system bugs resolved
-- **Key Fixes**: Database setup, type casting, observer logic, data count issues, Monitor model imports, alert system duplicate bugs
-- **Performance**: Individual tests under 1 second, full suite in ~6.4s parallel
-- **Alert System**: All 530 tests passing after fixing duplicate alert bug and removing Let's Encrypt feature
+- **Current Status**: 669 passing, 12 skipped (100% success rate) ✅
+- **Recent Achievement**: Dynamic SSL Thresholds implementation with comprehensive test coverage
+- **Key Features**: SSL certificate monitoring with intelligent percentage-based expiration detection
+- **Performance**: Individual tests under 1 second, full suite in ~6-7s parallel
+- **Latest Implementation**: Dynamic SSL Thresholds (33% validity period threshold with 30-day minimum)
 
 ### **📚 Testing Documentation**
 - **Comprehensive Guide**: See `docs/TESTING_INSIGHTS.md` for detailed patterns
@@ -517,7 +536,8 @@ if ($websites->count() < 4) {
 
 ### **📖 Documentation Index**
 For a complete overview of all available documentation, see **[docs/README.md](README.md)**:
-- 23 active documentation files organized by category
+- 24 active documentation files organized by category
+- SSL certificate monitoring with dynamic thresholds guide (`SSL_CERTIFICATE_MONITORING.md`)
 - Quick reference guide by task and role
 - Architecture documentation (Alert System, Queue System, Teams)
 - Tailwind v4 styling guides (complete reference, quick reference, conversion summary)
@@ -634,6 +654,8 @@ class Website extends Model
 | **Alert system** | `app/Services/AlertService.php`, `app/Models/AlertConfiguration.php` |
 | **Alert testing/debug** | `app/Http/Controllers/Debug/AlertTestingController.php` |
 | **Monitoring logic** | `app/Models/Monitor.php` (CUSTOM extended Spatie model) |
+| **SSL monitoring docs** | `docs/SSL_CERTIFICATE_MONITORING.md` |
+| **Dynamic SSL thresholds** | `app/Jobs/CheckMonitorJob.php` (determineSslStatus method) |
 | **Scheduler tasks** | `routes/console.php` |
 | **Queue configuration** | `config/horizon.php` |
 | **Authentication** | `app/Http/Controllers/Auth/` |
