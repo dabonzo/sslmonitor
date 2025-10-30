@@ -6,6 +6,11 @@ use App\Models\Website;
 
 // TDD RED PHASE: Test with real data from MariaDB database
 test('debug ssl override functionality works with real websites', function () {
+    // Skip this test when using SQLite (parallel testing mode)
+    if (config('database.default') === 'sqlite') {
+        $this->markTestSkipped('Debug tests require MariaDB connection');
+    }
+
     // RED: This test should fail initially because we haven't implemented the functionality
 
     // Configure this test to use MariaDB instead of SQLite
@@ -76,6 +81,11 @@ test('debug ssl override functionality works with real websites', function () {
 
 // TDD: Test multiple overrides scenario
 test('multiple ssl overrides work with correct precedence', function () {
+    // Skip this test when using SQLite (parallel testing mode)
+    if (config('database.default') === 'sqlite') {
+        $this->markTestSkipped('Debug tests require MariaDB connection');
+    }
+
     config(['database.default' => 'mariadb']);
     config(['database.connections.mariadb.database' => 'laravel']);
 
@@ -144,6 +154,11 @@ test('multiple ssl overrides work with correct precedence', function () {
 
 // TDD: Test expired overrides are ignored
 test('expired ssl overrides are ignored', function () {
+    // Skip this test when using SQLite (parallel testing mode)
+    if (config('database.default') === 'sqlite') {
+        $this->markTestSkipped('Debug tests require MariaDB connection');
+    }
+
     config(['database.default' => 'mariadb']);
     config(['database.connections.mariadb.database' => 'laravel']);
 
@@ -199,6 +214,11 @@ test('expired ssl overrides are ignored', function () {
 
 // TDD: Test user isolation works correctly
 test('ssl overrides are isolated by user', function () {
+    // Skip this test when using SQLite (parallel testing mode)
+    if (config('database.default') === 'sqlite') {
+        $this->markTestSkipped('Debug tests require MariaDB connection');
+    }
+
     config(['database.default' => 'mariadb']);
     config(['database.connections.mariadb.database' => 'laravel']);
 

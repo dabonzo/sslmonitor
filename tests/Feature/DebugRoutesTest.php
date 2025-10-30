@@ -3,6 +3,11 @@
 use App\Models\User;
 
 test('debug routes return proper responses for authenticated user', function () {
+    // Skip this test when using SQLite (parallel testing mode)
+    if (config('database.default') === 'sqlite') {
+        $this->markTestSkipped('Debug tests require MariaDB connection');
+    }
+
     // Configure to use MariaDB instead of SQLite for real user access
     config(['database.default' => 'mariadb']);
     config(['database.connections.mariadb.database' => 'laravel']);
