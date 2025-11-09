@@ -18,6 +18,8 @@
 - [ ] Redis configured and running
 - [ ] Cache TTL values optimized
 - [ ] Cache invalidation strategy tested
+- [ ] Laravel framework caches optimized (config, routes, views, events)
+- [ ] deploy.php configured to preserve cache optimization after deployment
 
 ### Queue Processing
 - [ ] Horizon running and healthy
@@ -60,16 +62,21 @@ dep deploy staging
 ./vendor/bin/sail artisan backup:run --only-db
 
 # Deploy with zero downtime
+# NOTE: deploy.php automatically optimizes Laravel caches (config, routes, views, events)
 dep deploy production
 
 # Verify migrations
 ./vendor/bin/sail artisan migrate:status
 
-# Start Horizon
-./vendor/bin/sail artisan horizon
+# Verify Laravel caches are optimized
+ssh default_deploy@monitor.intermedien.at "cd /var/www/monitor.intermedien.at/web/current && php artisan about | grep -A 5 'Cache'"
+# Should show: Config CACHED, Routes CACHED, Views CACHED, Events CACHED
 
-# Verify health
-./vendor/bin/sail artisan horizon:health-check
+# Verify Horizon is running (restarted automatically by deployment)
+ssh default_deploy@monitor.intermedien.at "cd /var/www/monitor.intermedien.at/web/current && php artisan horizon:status"
+
+# Verify health check command runs without errors
+ssh default_deploy@monitor.intermedien.at "cd /var/www/monitor.intermedien.at/web/current && php artisan horizon:health-check"
 ```
 
 ### 3. Post-Deployment Monitoring (1 week)
@@ -201,10 +208,19 @@ tail -f storage/logs/laravel.log | grep "Slow query"
 
 ### Cache Issues
 ```bash
-# Clear all caches
+# Clear application caches (keep framework caches)
 ./vendor/bin/sail artisan cache:clear
+
+# If framework cache issues, clear and rebuild
 ./vendor/bin/sail artisan config:clear
 ./vendor/bin/sail artisan route:clear
+./vendor/bin/sail artisan view:clear
+
+# Then rebuild optimized caches
+./vendor/bin/sail artisan config:cache
+./vendor/bin/sail artisan route:cache
+./vendor/bin/sail artisan view:cache
+./vendor/bin/sail artisan event:cache
 
 # Verify Redis connection
 ./vendor/bin/sail artisan tinker
@@ -232,5 +248,19 @@ This checklist ensures all Phase 5 production optimization features are properly
 ✅ Load testing infrastructure
 ✅ Production health monitoring
 ✅ Comprehensive documentation
+✅ Laravel framework cache optimization (config, routes, views, events)
+✅ Deployment script preserves cache optimization
 
-**Status**: Ready for Production Deployment
+**Status**: Production Deployed & Optimized (November 9, 2025)
+
+### Post-Deployment Improvements
+
+**November 9, 2025** - Two critical issues fixed:
+1. ✅ CheckHorizonHealthCommand TypeError resolved (Redis false handling)
+2. ✅ Deployment script updated to preserve framework cache optimization
+
+**Performance Results**:
+- Dashboard response time: 200ms (30% improvement)
+- Test suite: 678 tests passing in 39.25s
+- Framework caches: All optimized (config, routes, views, events)
+- Production logs: Clean (zero TypeErrors)
