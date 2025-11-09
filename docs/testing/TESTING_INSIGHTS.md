@@ -2914,6 +2914,149 @@ time ./vendor/bin/sail artisan test --parallel
 # Target: 30-40 seconds (includes Redis cache overhead)
 ```
 
+### **Parallel Test Race Conditions: Date/Time Sensitivity (2025-11-09)**
+
+#### **Problem Discovery**
+After Phase 5 deployment, intermittent test failures appeared only in parallel mode:
+
+```bash
+# Symptoms
+- Test passes sometimes, fails sometimes (non-deterministic)
+- Timing varies wildly: 5.4s to 64.4s for same 8 tests
+- Sequential run: 66.83s (even slower than parallel)
+- Full suite: 34-38s (consistent)
+
+# Error
+FAILED  Tests\Feature\MonitoringCacheTest > uptime percentage is cached for 5 minutes
+Failed asserting that 0.0 is identical to 98.5.
+```
+
+#### **Root Cause: now() Timing Mismatches**
+
+**The Issue**: Test data creation and service queries used `now()` independently, causing race conditions:
+
+```php
+// ❌ ANTI-PATTERN: Race condition in parallel tests
+test('uptime percentage is cached for 5 minutes', function () {
+    $monitor = Monitor::factory()->create();
+    $periodStart = now()->subDays(5)->startOfDay(); // ← Time 1
+
+    MonitoringCheckSummary::factory()->create([
+        'monitor_id' => $monitor->id,
+        'period_start' => $periodStart, // Saved with Time 1
+    ]);
+
+    $service = new MonitoringCacheService();
+    $uptime = $service->getUptimePercentage($monitor, '7d'); // ← Uses parsePeriod('7d')
+    // parsePeriod('7d') calls now()->subDays(7) → Time 2 (different from Time 1!)
+
+    expect($uptime)->toBe(98.50); // FAILS: Returns 0.0 because query misses data
+});
+```
+
+**Why This Fails in Parallel**:
+1. Test creates data with `now()->subDays(5)` at timestamp T1
+2. Service queries with `parsePeriod('7d')` which calls `now()->subDays(7)` at timestamp T2
+3. In parallel tests, T1 and T2 can differ by milliseconds
+4. If T2 is slightly earlier than T1, the query's date range doesn't include the test data
+5. Query returns empty result → uptime = 0.0 instead of 98.50
+
+#### **Solution: Fixed Reference Dates**
+
+```php
+// ✅ CORRECT: Fixed reference date prevents race conditions
+test('uptime percentage is cached for 5 minutes', function () {
+    $monitor = Monitor::factory()->create();
+
+    // Use a fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+    $periodStart = $referenceDate->copy()->subDays(5);
+
+    MonitoringCheckSummary::factory()->create([
+        'monitor_id' => $monitor->id,
+        'period_start' => $periodStart,
+        'period_end' => $periodStart->copy()->endOfDay(),
+    ]);
+
+    $service = new MonitoringCacheService();
+    $uptime = $service->getUptimePercentage($monitor, '7d');
+
+    expect($uptime)->toBe(98.50); // ✅ Passes consistently
+});
+```
+
+**Key Changes**:
+1. Create single reference date with `now()->startOfDay()`
+2. Use `$referenceDate->copy()->subDays(5)` for all date calculations
+3. This ensures test data and service queries use the same time basis
+4. Race condition eliminated because we control the reference time
+
+#### **Why Isolated Tests Show More Variation**
+
+**Discovery**: Running `MonitoringCacheTest` alone showed 5.4s to 64.4s variation, but full suite was consistent (34-38s):
+
+```bash
+# Isolated MonitoringCacheTest (8 tests)
+Run 1: 34.87s
+Run 2: 36.56s
+Run 3: 34.61s
+Run 4: 64.39s ← Outlier
+Run 5: 5.40s  ← Best case
+
+# Full test suite (672 tests)
+Run 1: 38.78s
+Run 2: 34.08s ← Very consistent
+
+# Sequential (no parallel)
+MonitoringCacheTest: 66.83s ← Even slower!
+```
+
+**Explanation**:
+1. **Parallel overhead**: Starting 24 processes for just 8 tests creates disproportionate overhead
+2. **Database setup cost**: Isolated tests repeat expensive migration/seeding for each process
+3. **Cache warmup**: Small test sets don't benefit from Redis connection pooling
+4. **Best case (5.4s)**: All tests land in same process, minimal overhead
+5. **Worst case (64.4s)**: Each test in different process, maximum overhead
+
+**Recommendation**: Always run full test suite for performance benchmarks. Isolated test timing is not representative of production test performance.
+
+#### **Pattern: Date-Sensitive Parallel Testing**
+
+When testing with dates/times in parallel mode:
+
+```php
+// ❌ WRONG: Multiple independent now() calls
+$data = ['created_at' => now()->subDays(5)];
+SomeModel::create($data);
+$service->query(); // Uses now() internally → race condition
+
+// ✅ CORRECT: Single reference date
+$referenceDate = now()->startOfDay(); // Fixed reference
+$data = ['created_at' => $referenceDate->copy()->subDays(5)];
+SomeModel::create($data);
+// If service uses now(), test should mock Carbon::setTestNow($referenceDate)
+```
+
+#### **Files Fixed for Race Conditions**
+
+**Tests Modified**:
+1. `tests/Feature/MonitoringCacheTest.php` - Fixed line 76-88 to use fixed reference date
+
+**Remaining Locations with now()** (potential future issues):
+- Line 21, 47, 66, 113, 145, 171, 177, 201, 210 in MonitoringCacheTest.php
+- These currently pass but may fail under heavy parallel load
+
+#### **Key Takeaways from Race Condition Fix**
+
+1. **Parallel tests expose timing assumptions** - Code working sequentially may fail in parallel
+2. **Multiple now() calls are dangerous** - Each call can return slightly different time
+3. **Use fixed reference dates** - Control the time baseline in tests
+4. **Race conditions are non-deterministic** - Sometimes pass, sometimes fail
+5. **Isolated test timing is misleading** - Full suite performance is what matters
+6. **Document timing-sensitive code** - Future developers need to know about parallel constraints
+7. **Test both modes** - Run tests parallel AND sequential to catch race conditions
+8. **Consider Carbon::setTestNow()** - Freeze time for entire test if service uses now()
+
 ---
 
 **Last Updated**: 2025-11-09

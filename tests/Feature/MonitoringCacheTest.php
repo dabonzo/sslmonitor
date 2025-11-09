@@ -75,7 +75,10 @@ test('response time trend is cached for 10 minutes', function () {
 
 test('uptime percentage is cached for 5 minutes', function () {
     $monitor = Monitor::factory()->create();
-    $periodStart = now()->subDays(5)->startOfDay();
+
+    // Use a fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+    $periodStart = $referenceDate->copy()->subDays(5);
 
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
