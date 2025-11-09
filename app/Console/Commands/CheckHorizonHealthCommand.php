@@ -52,7 +52,12 @@ class CheckHorizonHealthCommand extends Command
         try {
             $masters = Redis::connection('horizon')->smembers('masters');
 
-            return is_array($masters) && count($masters) > 0;
+            // Redis smembers() can return false if the key doesn't exist
+            if ($masters === false || ! is_array($masters)) {
+                return false;
+            }
+
+            return count($masters) > 0;
         } catch (\Exception $e) {
             return false;
         }
