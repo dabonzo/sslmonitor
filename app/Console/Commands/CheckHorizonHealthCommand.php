@@ -52,7 +52,7 @@ class CheckHorizonHealthCommand extends Command
         try {
             $masters = Redis::connection('horizon')->smembers('masters');
 
-            return count($masters) > 0;
+            return is_array($masters) && count($masters) > 0;
         } catch (\Exception $e) {
             return false;
         }
