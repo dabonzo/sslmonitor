@@ -4,11 +4,13 @@ use App\Models\Monitor;
 use App\Models\MonitoringResult;
 use App\Models\Website;
 use App\Services\MonitoringHistoryService;
+use Illuminate\Support\Facades\Cache;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
 
 beforeEach(function () {
+    Cache::flush(); // Clear cache to prevent test interference
     $this->setUpCleanDatabase();
     $this->service = app(MonitoringHistoryService::class);
     $this->monitor = Monitor::first();

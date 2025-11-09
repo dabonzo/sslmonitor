@@ -48,7 +48,7 @@ test('creates hourly summary on monitoring check completed', function () {
     );
 
     // Manually invoke listener (because ShouldQueue listeners don't execute automatically in sync tests)
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
     $listener->handle($event);
 
     // Verify summary created
@@ -71,7 +71,7 @@ test('updates existing summary when check in same period', function () {
         'certificate_check_enabled' => true,
     ]);
 
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
 
     // Create first result
     MonitoringResult::factory()->create([
@@ -151,7 +151,7 @@ test('calculates percentiles correctly', function () {
         checkResults: []
     );
 
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
     $listener->handle($event);
 
     $summary = MonitoringCheckSummary::where('monitor_id', $testMonitor->id)->first();
@@ -180,7 +180,7 @@ test('handles empty result set gracefully', function () {
         checkResults: []
     );
 
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
     $listener->handle($event);
 
     // No summary should be created when there are no results
@@ -226,7 +226,7 @@ test('aggregates SSL statistics correctly', function () {
         checkResults: []
     );
 
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
     $listener->handle($event);
 
     $summary = MonitoringCheckSummary::where('monitor_id', $testMonitor->id)->first();
@@ -275,7 +275,7 @@ test('calculates uptime percentage correctly', function () {
         checkResults: []
     );
 
-    $listener = new \App\Listeners\UpdateMonitoringSummaries();
+    $listener = app(\App\Listeners\UpdateMonitoringSummaries::class);
     $listener->handle($event);
 
     $summary = MonitoringCheckSummary::where('monitor_id', $testMonitor->id)->first();

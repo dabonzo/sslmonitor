@@ -40,6 +40,12 @@ Schedule::call(function () {
     ->everyFiveMinutes()
     ->name('queue-health-check');
 
+// Every 5 minutes: Horizon health check
+Schedule::command('horizon:health-check')
+    ->everyFiveMinutes()
+    ->name('horizon-health-check')
+    ->description('Check Horizon queue processing health');
+
 // Daily at 2 AM: Cleanup old jobs and logs
 Schedule::call(function () {
     \App\Support\AutomationLogger::scheduler('Daily cleanup started');

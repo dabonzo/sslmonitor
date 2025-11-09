@@ -110,58 +110,50 @@ describe('SSL Dashboard Controller', function () {
     });
 
     it('handles dashboard with real user websites', function () {
-        // Create additional test monitors with different SSL statuses to match expectations
-        $user = $this->testUser;
+        // Clear existing test data from Pest.php beforeEach to ensure clean state
+        Website::where('user_id', $this->testUser->id)->delete();
+        Monitor::whereIn('url', ['https://omp.office-manager-pro.com', 'https://www.redgas.at', 'https://www.fairnando.at', 'https://www.gebrauchte.at'])->delete();
 
-        // Get existing websites and create monitors with different SSL statuses
-        $websites = $this->realWebsites->take(4);
+        // Create test data efficiently with unique URLs - much faster than firstOrCreate + update
+        $timestamp = hrtime(true) . '_' . rand(1000, 9999);
 
-        // If we don't have enough websites, create additional ones
-        if ($websites->count() < 4) {
-            $additionalWebsites = Website::factory()->count(4 - $websites->count())
-                ->create(['user_id' => $this->testUser->id]);
-            $websites = $websites->concat($additionalWebsites);
-        }
+        // Create monitors directly (without separate websites) with specific SSL statuses
+        // Monitor 1 & 2: valid certificates
+        $monitor1 = Monitor::factory()->create([
+            'url' => "https://valid1-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(90),
+        ]);
 
-        // Create monitors for all websites if they don't exist
-        foreach ($websites as $website) {
-            Monitor::firstOrCreate(
-                ['url' => $website->url],
-                [
-                    'certificate_check_enabled' => true,
-                    'certificate_status' => 'valid',
-                    'uptime_check_enabled' => true,
-                    'uptime_status' => 'up',
-                    'certificate_expiration_date' => now()->addDays(90),
-                    'uptime_check_interval_in_minutes' => 5,
-                ]
-            );
-        }
+        $monitor2 = Monitor::factory()->create([
+            'url' => "https://valid2-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(60),
+        ]);
 
-        // Now set up the different SSL statuses
-        if ($websites->count() >= 4) {
-            // First website: valid certificate
-            Monitor::where('url', $websites[0]->url)->update([
-                'certificate_status' => 'valid',
-                'certificate_expiration_date' => now()->addDays(90),
-            ]);
+        // Monitor 3: expiring soon
+        $monitor3 = Monitor::factory()->create([
+            'url' => "https://expiring-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(7),
+        ]);
 
-            // Second website: valid certificate
-            Monitor::where('url', $websites[1]->url)->update([
-                'certificate_status' => 'valid',
-                'certificate_expiration_date' => now()->addDays(60),
-            ]);
+        // Monitor 4: expired
+        $monitor4 = Monitor::factory()->create([
+            'url' => "https://expired-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'invalid',
+            'certificate_expiration_date' => now()->subDays(1),
+        ]);
 
-            // Third website: expiring soon
-            Monitor::where('url', $websites[2]->url)->update([
-                'certificate_status' => 'valid',
-                'certificate_expiration_date' => now()->addDays(7),
-            ]);
-
-            // Fourth website: expired
-            Monitor::where('url', $websites[3]->url)->update([
-                'certificate_status' => 'invalid',
-                'certificate_expiration_date' => now()->subDays(1),
+        // Create corresponding websites for the user
+        foreach ([$monitor1, $monitor2, $monitor3, $monitor4] as $monitor) {
+            Website::factory()->create([
+                'user_id' => $this->testUser->id,
+                'url' => $monitor->url,
             ]);
         }
 

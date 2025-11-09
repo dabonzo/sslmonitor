@@ -9,6 +9,9 @@ use Illuminate\Support\Carbon;
 
 final class MonitoringHistoryService
 {
+    public function __construct(
+        protected MonitoringCacheService $cache
+    ) {}
     /**
      * Get trend data for charts with labels and datasets
      *
@@ -95,32 +98,61 @@ final class MonitoringHistoryService
     {
         $periodInfo = $this->getPeriodInfo($period);
 
-        $stats = MonitoringResult::query()
+        // Try to use cached summary stats first
+        $cachedStats = $this->cache->getSummaryStats($monitor, $period);
+
+        // If no summary data exists (total_checks = 0), fall back to direct query
+        if ($cachedStats['total_checks'] === 0) {
+            $stats = MonitoringResult::query()
+                ->where('monitor_id', $monitor->id)
+                ->where('started_at', '>=', $periodInfo['start'])
+                ->where('started_at', '<=', $periodInfo['end'])
+                ->selectRaw('
+                    COUNT(*) as total_checks,
+                    SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as successful_checks,
+                    SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as failed_checks,
+                    AVG(CASE WHEN response_time_ms IS NOT NULL THEN response_time_ms END) as avg_response_time,
+                    MIN(response_time_ms) as min_response_time,
+                    MAX(response_time_ms) as max_response_time
+                ', ['success', 'failed'])
+                ->first();
+
+            $totalChecks = (int) $stats->total_checks;
+            $successfulChecks = (int) $stats->successful_checks;
+            $uptimePercentage = $totalChecks > 0 ? round(($successfulChecks / $totalChecks) * 100, 2) : 0.0;
+
+            return [
+                'total_checks' => $totalChecks,
+                'successful_checks' => $successfulChecks,
+                'failed_checks' => (int) $stats->failed_checks,
+                'uptime_percentage' => $uptimePercentage,
+                'avg_response_time' => round((float) $stats->avg_response_time, 2),
+                'min_response_time' => $stats->min_response_time,
+                'max_response_time' => $stats->max_response_time,
+                'period_start' => $periodInfo['start'],
+                'period_end' => $periodInfo['end'],
+            ];
+        }
+
+        // Use cached data and get min/max from detailed stats
+        $detailedStats = MonitoringResult::query()
             ->where('monitor_id', $monitor->id)
             ->where('started_at', '>=', $periodInfo['start'])
             ->where('started_at', '<=', $periodInfo['end'])
             ->selectRaw('
-                COUNT(*) as total_checks,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as successful_checks,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as failed_checks,
-                AVG(CASE WHEN response_time_ms IS NOT NULL THEN response_time_ms END) as avg_response_time,
                 MIN(response_time_ms) as min_response_time,
                 MAX(response_time_ms) as max_response_time
-            ', ['success', 'failed'])
+            ')
             ->first();
 
-        $totalChecks = (int) $stats->total_checks;
-        $successfulChecks = (int) $stats->successful_checks;
-        $uptimePercentage = $totalChecks > 0 ? round(($successfulChecks / $totalChecks) * 100, 2) : 0.0;
-
         return [
-            'total_checks' => $totalChecks,
-            'successful_checks' => $successfulChecks,
-            'failed_checks' => (int) $stats->failed_checks,
-            'uptime_percentage' => $uptimePercentage,
-            'avg_response_time' => round((float) $stats->avg_response_time, 2),
-            'min_response_time' => $stats->min_response_time,
-            'max_response_time' => $stats->max_response_time,
+            'total_checks' => $cachedStats['total_checks'],
+            'successful_checks' => $cachedStats['successful_checks'],
+            'failed_checks' => $cachedStats['failed_checks'],
+            'uptime_percentage' => $cachedStats['uptime_percentage'],
+            'avg_response_time' => $cachedStats['average_response_time'],
+            'min_response_time' => $detailedStats->min_response_time ?? null,
+            'max_response_time' => $detailedStats->max_response_time ?? null,
             'period_start' => $periodInfo['start'],
             'period_end' => $periodInfo['end'],
         ];
@@ -133,25 +165,33 @@ final class MonitoringHistoryService
      */
     public function getUptimePercentage(Monitor $monitor, string $period = '30d'): float
     {
-        $periodInfo = $this->getPeriodInfo($period);
+        // Try cached version first
+        $cachedUptime = $this->cache->getUptimePercentage($monitor, $period);
 
-        $result = MonitoringResult::query()
-            ->where('monitor_id', $monitor->id)
-            ->where('started_at', '>=', $periodInfo['start'])
-            ->where('started_at', '<=', $periodInfo['end'])
-            ->selectRaw('
-                COUNT(*) as total_checks,
-                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as successful_checks
-            ', ['success'])
-            ->first();
+        // If no data (0.0), fall back to direct query
+        if ($cachedUptime === 0.0) {
+            $periodInfo = $this->getPeriodInfo($period);
 
-        $totalChecks = (int) $result->total_checks;
+            $result = MonitoringResult::query()
+                ->where('monitor_id', $monitor->id)
+                ->where('started_at', '>=', $periodInfo['start'])
+                ->where('started_at', '<=', $periodInfo['end'])
+                ->selectRaw('
+                    COUNT(*) as total_checks,
+                    SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as successful_checks
+                ', ['success'])
+                ->first();
 
-        if ($totalChecks === 0) {
-            return 0.0;
+            $totalChecks = (int) $result->total_checks;
+
+            if ($totalChecks === 0) {
+                return 0.0;
+            }
+
+            return round(((int) $result->successful_checks / $totalChecks) * 100, 2);
         }
 
-        return round(((int) $result->successful_checks / $totalChecks) * 100, 2);
+        return $cachedUptime;
     }
 
     /**
@@ -162,38 +202,62 @@ final class MonitoringHistoryService
      */
     public function getResponseTimeTrend(Monitor $monitor, string $period = '7d'): array
     {
-        $periodInfo = $this->getPeriodInfo($period);
+        $trendData = $this->cache->getResponseTimeTrend($monitor, $period);
 
-        $results = MonitoringResult::query()
-            ->where('monitor_id', $monitor->id)
-            ->where('started_at', '>=', $periodInfo['start'])
-            ->whereNotNull('response_time_ms')
-            ->orderBy('started_at')
-            ->get();
+        // If no cached data, fall back to direct query
+        if (empty($trendData)) {
+            $periodInfo = $this->getPeriodInfo($period);
 
-        // Group by time intervals
-        $grouped = $results->groupBy(function ($result) use ($period) {
-            return match ($period) {
-                '7d' => $result->started_at->format('Y-m-d H:00'),
-                '30d' => $result->started_at->format('Y-m-d'),
-                '90d' => $result->started_at->format('Y-m-d'),
-                default => $result->started_at->format('Y-m-d H:00'),
-            };
-        });
+            $results = MonitoringResult::query()
+                ->where('monitor_id', $monitor->id)
+                ->where('started_at', '>=', $periodInfo['start'])
+                ->whereNotNull('response_time_ms')
+                ->orderBy('started_at')
+                ->get();
 
-        $labels = [];
-        $data = [];
-        $allResponseTimes = [];
+            // Group by time intervals
+            $grouped = $results->groupBy(function ($result) use ($period) {
+                return match ($period) {
+                    '7d' => $result->started_at->format('Y-m-d H:00'),
+                    '30d' => $result->started_at->format('Y-m-d'),
+                    '90d' => $result->started_at->format('Y-m-d'),
+                    default => $result->started_at->format('Y-m-d H:00'),
+                };
+            });
 
-        foreach ($grouped as $time => $items) {
-            $labels[] = $time;
-            $avgTime = round($items->avg('response_time_ms'), 2);
-            $data[] = $avgTime;
-            $allResponseTimes = array_merge($allResponseTimes, $items->pluck('response_time_ms')->toArray());
+            $labels = [];
+            $data = [];
+            $allResponseTimes = [];
+
+            foreach ($grouped as $time => $items) {
+                $labels[] = $time;
+                $avgTime = round($items->avg('response_time_ms'), 2);
+                $data[] = $avgTime;
+                $allResponseTimes = array_merge($allResponseTimes, $items->pluck('response_time_ms')->toArray());
+            }
+
+            $overallAvg = count($allResponseTimes) > 0
+                ? round(array_sum($allResponseTimes) / count($allResponseTimes), 2)
+                : 0.0;
+
+            return [
+                'labels' => $labels,
+                'data' => $data,
+                'avg' => $overallAvg,
+            ];
         }
 
-        $overallAvg = count($allResponseTimes) > 0
-            ? round(array_sum($allResponseTimes) / count($allResponseTimes), 2)
+        // Transform cached data to match existing return format
+        $labels = [];
+        $data = [];
+
+        foreach ($trendData as $point) {
+            $labels[] = $point['timestamp'];
+            $data[] = $point['avg_response_time'];
+        }
+
+        $overallAvg = count($data) > 0
+            ? round(array_sum($data) / count($data), 2)
             : 0.0;
 
         return [

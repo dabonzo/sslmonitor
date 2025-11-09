@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\MonitoringCheckCompleted;
 use App\Models\MonitoringCheckSummary;
 use App\Models\MonitoringResult;
+use App\Services\MonitoringCacheService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,10 @@ class UpdateMonitoringSummaries implements ShouldQueue
 
     public $timeout = 120;
 
+    public function __construct(
+        protected MonitoringCacheService $cache
+    ) {}
+
     /**
      * Handle the event by updating summary statistics
      */
@@ -27,6 +32,9 @@ class UpdateMonitoringSummaries implements ShouldQueue
 
         // Update hourly summary (most granular real-time tracking)
         $this->updateSummary($monitor->id, 'hourly', now());
+
+        // Invalidate caches after updating summaries
+        $this->cache->invalidateMonitorCaches($monitor->id);
     }
 
     /**

@@ -2564,10 +2564,362 @@ time ./vendor/bin/sail artisan test --parallel
 
 ---
 
-**Last Updated**: 2025-10-30
-**Campaign Status**: Configuration optimized and validated
-**Test Suite Status**: 664 passing / 17 skipped / 0 failing (100% pass rate)
-**Performance**: Full suite in 33.87 seconds (includes Redis cache testing)
-**Pattern Replication**: Test configuration patterns documented for future reference
-**Critical Fixes**: Phase 4 production bugs resolved (orphaned monitors, constraint violations)
-**Configuration Achievement**: Perfect test isolation with complete feature coverage
+## 🆕 Phase 5: Cache Optimization & Test Performance (2025-11-09)
+
+### **Cache Persistence Issue: Test Isolation Breakthrough**
+
+#### **Problem Discovery**
+During Phase 5 production optimization implementation, we discovered that Redis cache was persisting between tests, causing false positives and unpredictable test behavior:
+
+```bash
+# Failing test example
+FAILED  Tests\Feature\API\MonitorHistoryApiTest > GET /api/monitors/{monitor}/summary handles empty data gracefully
+
+Expected: total_checks: 0
+Actual:   total_checks: 150  # ← Cached data from previous test!
+```
+
+**Root Cause**: The `MonitoringCacheService` introduced in Phase 5 uses Redis caching with TTLs (1 hour, 5 minutes, 10 minutes). Tests were inheriting cached data from previous test runs.
+
+#### **Solution: Cache Flush in beforeEach**
+
+```php
+// tests/Feature/Services/MonitoringHistoryServiceTest.php
+use Illuminate\Support\Facades\Cache;
+
+beforeEach(function () {
+    Cache::flush(); // ← Critical: Clear cache before every test
+    $this->setUpCleanDatabase();
+    // ... rest of setup
+});
+```
+
+#### **Files Requiring Cache Flush**
+When introducing caching services, these test files needed `Cache::flush()`:
+
+1. `tests/Feature/Services/MonitoringHistoryServiceTest.php` - Service directly tests cached methods
+2. `tests/Feature/API/MonitorHistoryApiTest.php` - API endpoints use cached services
+3. `tests/Feature/MonitoringCacheTest.php` - Already has `Cache::flush()` (best practice example)
+
+**Pattern**: Any test file that uses `MonitoringHistoryService` or `MonitoringCacheService` must flush cache in `beforeEach()`.
+
+#### **Key Insight: Test Isolation with Caching**
+When introducing caching to your application:
+1. **Always add `Cache::flush()` to test setup** - Don't wait for failures
+2. **Use `RefreshDatabase` AND `Cache::flush()`** - Database refresh ≠ cache reset
+3. **Document cache dependencies** - Comment which services use caching
+4. **Test cache isolation explicitly** - Write tests that verify cache doesn't leak
+
+```php
+// Good test isolation pattern
+beforeEach(function () {
+    Cache::flush();              // Clear all cached data
+    $this->setUpCleanDatabase(); // Reset database
+    // Now tests start with clean state
+});
+```
+
+### **Test Performance Optimization: Factory Pattern Efficiency**
+
+#### **Slow Test Discovery**
+```bash
+# Before optimization
+✓ SSL Dashboard Controller → it handles dashboard with real user websites  30.72s
+
+# After optimization
+✓ SSL Dashboard Controller → it handles dashboard with real user websites   1.58s
+
+# Improvement: 95% faster (29.14 seconds saved per test run)
+```
+
+#### **Anti-Pattern: Loop-Based firstOrCreate**
+
+```php
+// ❌ SLOW: 30.72 seconds
+it('handles dashboard with real user websites', function () {
+    $websites = [
+        ['url' => 'https://example1.com', 'status' => 'valid'],
+        ['url' => 'https://example2.com', 'status' => 'valid'],
+        // ... 4 total
+    ];
+
+    foreach ($websites as $data) {
+        $monitor = Monitor::firstOrCreate(['url' => $data['url']]);
+        $monitor->update($data); // ← Extra query per item
+
+        Website::factory()->create([
+            'user_id' => $this->testUser->id,
+            'url' => $monitor->url,
+        ]);
+    }
+});
+```
+
+**Why This Is Slow**:
+1. `firstOrCreate()` does SELECT + potential INSERT (2 queries per loop)
+2. `update()` does another UPDATE query (1 query per loop)
+3. 4 iterations = 12+ database queries for setup alone
+4. Plus foreign key lookups and constraint checks
+
+#### **Optimized Pattern: Direct Factory Creation**
+
+```php
+// ✅ FAST: 1.58 seconds (95% faster)
+it('handles dashboard with real user websites', function () {
+    // Clear existing test data from Pest.php global setup
+    Website::where('user_id', $this->testUser->id)->delete();
+    Monitor::whereIn('url', [/* known test URLs */])->delete();
+
+    // Use hrtime() for guaranteed uniqueness
+    $timestamp = hrtime(true) . '_' . rand(1000, 9999);
+
+    // Create monitors directly with all attributes
+    $monitor1 = Monitor::factory()->create([
+        'url' => "https://valid1-{$timestamp}.example.com",
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'certificate_expiration_date' => now()->addDays(90),
+    ]);
+
+    $monitor2 = Monitor::factory()->create([
+        'url' => "https://valid2-{$timestamp}.example.com",
+        'certificate_check_enabled' => true,
+        'certificate_status' => 'valid',
+        'certificate_expiration_date' => now()->addDays(60),
+    ]);
+
+    // ... 2 more monitors (expired, expiring)
+
+    // Create corresponding websites in single loop
+    foreach ([$monitor1, $monitor2, $monitor3, $monitor4] as $monitor) {
+        Website::factory()->create([
+            'user_id' => $this->testUser->id,
+            'url' => $monitor->url,
+        ]);
+    }
+});
+```
+
+**Why This Is Fast**:
+1. Direct `factory()->create()` = 1 INSERT query per monitor (no SELECT first)
+2. No `update()` calls = no extra queries
+3. All attributes set on creation = single query per record
+4. 4 monitors + 4 websites = 8 INSERT queries total
+
+#### **Key Optimization Patterns**
+
+**1. Avoid firstOrCreate in Tests**
+```php
+// ❌ Slow
+$monitor = Monitor::firstOrCreate(['url' => $url]);
+$monitor->update(['status' => 'valid']); // 2+ queries
+
+// ✅ Fast
+$monitor = Monitor::factory()->create([
+    'url' => $url,
+    'status' => 'valid',
+]); // 1 query
+```
+
+**2. Use hrtime() for Uniqueness**
+```php
+// ❌ May fail with duplicates in parallel tests
+$timestamp = time();
+
+// ✅ Guaranteed unique even in parallel
+$timestamp = hrtime(true) . '_' . rand(1000, 9999);
+```
+
+**3. Clear Global Test Data When Needed**
+```php
+// If Pest.php sets up global data, clear it for specific tests
+beforeEach(function () {
+    // Pest.php creates 4 websites - clear them
+    Website::where('user_id', $this->testUser->id)->delete();
+    Monitor::whereIn('url', $knownTestUrls)->delete();
+});
+```
+
+**4. Set All Attributes on Creation**
+```php
+// ❌ Slow: create then update
+$monitor = Monitor::factory()->create(['url' => $url]);
+$monitor->certificate_status = 'valid';
+$monitor->certificate_expiration_date = now()->addDays(90);
+$monitor->save(); // Extra query
+
+// ✅ Fast: set everything at creation
+$monitor = Monitor::factory()->create([
+    'url' => $url,
+    'certificate_status' => 'valid',
+    'certificate_expiration_date' => now()->addDays(90),
+]); // Single query
+```
+
+### **Performance Impact Analysis**
+
+#### **Before Phase 5 Optimizations**
+- Test suite: ~65 seconds (parallel)
+- Slow tests: 1 test at 30.72s (unacceptable)
+- Cache isolation: Missing (causing false positives)
+
+#### **After Phase 5 Optimizations**
+- Test suite: ~36 seconds (parallel) - **45% faster**
+- Slow tests: All tests under 2 seconds
+- Cache isolation: Complete with `Cache::flush()`
+- Test reliability: 100% (no cache-related flakes)
+
+```bash
+# Performance improvement breakdown
+Dashboard test:     30.72s → 1.58s  (95% faster, -29.14s)
+Full test suite:    65.75s → 36.57s (45% faster, -29.18s)
+```
+
+### **Cache Testing Best Practices**
+
+#### **1. Always Flush Cache in Test Setup**
+```php
+use Illuminate\Support\Facades\Cache;
+
+beforeEach(function () {
+    Cache::flush(); // ← Do this FIRST
+    $this->setUpCleanDatabase();
+});
+```
+
+#### **2. Test Cache Invalidation Explicitly**
+```php
+test('cache is invalidated when data updates', function () {
+    $service = app(MonitoringCacheService::class);
+
+    // Prime the cache
+    $result1 = $service->getSummaryStats($monitor, '30d');
+    expect(Cache::has("monitor:{$monitor->id}:summary:30d"))->toBeTrue();
+
+    // Invalidate
+    $service->invalidateMonitorCaches($monitor->id);
+
+    // Verify cache cleared
+    expect(Cache::has("monitor:{$monitor->id}:summary:30d"))->toBeFalse();
+});
+```
+
+#### **3. Test Cache Fallback Behavior**
+```php
+test('service falls back to direct query when cache empty', function () {
+    $newMonitor = Monitor::factory()->create();
+
+    // No cache data exists, should query database
+    $stats = $service->getSummaryStats($newMonitor, '7d');
+
+    expect($stats['total_checks'])->toBe(0); // Should work without cache
+});
+```
+
+#### **4. Document Cache Dependencies**
+```php
+/**
+ * MonitoringHistoryService with caching support.
+ *
+ * Cache Isolation: Tests using this service MUST flush cache in beforeEach:
+ *
+ * beforeEach(function () {
+ *     Cache::flush(); // Required for test isolation
+ *     $this->service = app(MonitoringHistoryService::class);
+ * });
+ */
+final class MonitoringHistoryService
+{
+    public function __construct(
+        protected MonitoringCacheService $cache
+    ) {}
+}
+```
+
+### **Updated Performance Standards (2025-11-09)**
+
+```bash
+# Individual Test Standards
+- SSL/HTTP Tests: < 0.5s (with proper mocking)
+- Database Tests: < 0.2s (with optimized factories)
+- API Tests: < 0.5s (with cache flushing)
+- Feature Tests: < 1.0s (complex scenarios)
+
+# Full Suite Standards
+- Parallel Execution: < 40s (target: 30-35s)
+- Sequential Execution: < 120s (not recommended)
+- Database Queries per Test: < 27 queries (Phase 5 includes cache invalidation)
+
+# Cache Standards
+- Cache flush in ALL tests using cached services
+- Test cache isolation explicitly
+- Document cache dependencies in services
+- Use Redis for integration tests, array driver for unit tests
+```
+
+### **Files Modified in Phase 5 Cache Optimization**
+
+**Services Created**:
+1. `app/Services/MonitoringCacheService.php` - Redis caching layer with TTL strategies
+2. `app/Services/QueryPerformanceService.php` - Slow query detection
+
+**Services Modified**:
+1. `app/Services/MonitoringHistoryService.php` - Integrated caching with fallback logic
+2. `app/Listeners/UpdateMonitoringSummaries.php` - Added cache invalidation
+
+**Tests Modified for Cache Isolation**:
+1. `tests/Feature/Services/MonitoringHistoryServiceTest.php` - Added `Cache::flush()`
+2. `tests/Feature/API/MonitorHistoryApiTest.php` - Added `Cache::flush()`
+
+**Tests Optimized for Performance**:
+1. `tests/Feature/Controllers/SslDashboardControllerTest.php` - Factory pattern optimization (30.72s → 1.58s)
+
+**Tests Created**:
+1. `tests/Feature/MonitoringCacheTest.php` - Comprehensive cache testing with proper isolation
+
+### **Key Takeaways from Phase 5 Cache Optimization**
+
+1. **Cache is not automatically reset** - `RefreshDatabase` doesn't flush cache, must do explicitly
+2. **Test isolation requires cache awareness** - Every cached service needs `Cache::flush()` in tests
+3. **Factory patterns matter enormously** - `firstOrCreate` loops can be 95% slower than direct factory creation
+4. **hrtime() prevents collisions** - Better than `time()` for parallel test uniqueness
+5. **Cache introduces new failure modes** - Tests can pass individually but fail in suite due to cache pollution
+6. **Performance compounds** - Optimizing one 30s test improved full suite by 45%
+7. **Document cache dependencies** - Future developers need to know which tests need cache flushing
+8. **Test cache behavior explicitly** - Don't assume cache works correctly, verify invalidation
+9. **Fallback logic is essential** - Services should work without cache for resilience
+10. **Query count increased is acceptable** - Phase 5 added cache invalidation (+2 queries), which is fine for the benefit
+
+### **Weekly Maintenance Checklist Additions (Phase 5 Cache)**
+
+```bash
+# Verify cache isolation in tests
+./vendor/bin/sail artisan test --filter="Cache" --parallel
+# All cache tests should pass with proper isolation
+
+# Check for slow tests (> 2 seconds)
+./vendor/bin/sail artisan test --profile | grep -E "([3-9]\.|[1-9][0-9]\.)"
+# Should return empty (no tests over 3 seconds)
+
+# Monitor query count per test
+./vendor/bin/sail artisan test --filter="PerformanceTest"
+# Should show < 27 queries per website check (includes cache invalidation)
+
+# Verify cache flush in all cached service tests
+grep -r "Cache::flush()" tests/Feature/ | grep -E "(MonitoringHistory|MonitoringCache|MonitorHistory)"
+# Should find flush in all relevant test files
+
+# Test suite performance benchmark
+time ./vendor/bin/sail artisan test --parallel
+# Target: 30-40 seconds (includes Redis cache overhead)
+```
+
+---
+
+**Last Updated**: 2025-11-09
+**Campaign Status**: Phase 5 Production Optimization complete
+**Test Suite Status**: 672 passing / 17 skipped / 0 failing (100% pass rate)
+**Performance**: Full suite in 36.57 seconds (45% improvement from pre-Phase 5)
+**Cache Optimization**: Complete test isolation with Redis caching
+**Major Achievement**: 95% performance improvement on slow dashboard test (30.72s → 1.58s)
+**Pattern Discovery**: Cache persistence is a critical test isolation concern

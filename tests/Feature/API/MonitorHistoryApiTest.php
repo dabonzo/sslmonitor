@@ -4,11 +4,13 @@ use App\Models\Monitor;
 use App\Models\MonitoringResult;
 use App\Models\User;
 use App\Models\Website;
+use Illuminate\Support\Facades\Cache;
 use Tests\Traits\UsesCleanDatabase;
 
 uses(UsesCleanDatabase::class);
 
 beforeEach(function () {
+    Cache::flush(); // Clear cache to prevent test interference
     $this->setUpCleanDatabase();
     $this->user = User::first();
     $this->monitor = Monitor::first();

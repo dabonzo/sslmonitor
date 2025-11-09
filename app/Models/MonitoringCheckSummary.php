@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MonitoringCheckSummary extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'monitor_id', 'website_id', 'summary_period', 'period_start', 'period_end',
         'total_uptime_checks', 'successful_uptime_checks', 'failed_uptime_checks',
