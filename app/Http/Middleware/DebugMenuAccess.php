@@ -16,10 +16,10 @@ class DebugMenuAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // TEMPORARY BYPASS: Always allow debug menu for testing
-        // if (!config('debug_menu.menu_enabled')) {
-        //     abort(403, 'Debug menu is disabled');
-        // }
+        // Check if debug menu is enabled in configuration
+        if (! config('debug_menu.menu_enabled')) {
+            abort(403, 'Debug menu is disabled');
+        }
 
         $user = $request->user();
 
@@ -28,9 +28,12 @@ class DebugMenuAccess
             abort(403, 'Authentication required for debug access');
         }
 
-        // TEMPORARY BYPASS: Hardcode allowed users for testing
-        $allowedUsers = ['bonzo@konjscina.com'];
-        $allowedRoles = ['OWNER', 'ADMIN'];
+        // Get allowed users and roles from configuration
+        $allowedUsersString = config('debug_menu.menu_users', '');
+        $allowedUsers = array_filter(array_map('trim', explode(',', $allowedUsersString)));
+
+        $allowedRolesString = config('debug_menu.menu_roles', 'OWNER,ADMIN');
+        $allowedRoles = array_filter(array_map('trim', explode(',', $allowedRolesString)));
 
         $hasEmailAccess = in_array($user->email, $allowedUsers);
         $hasRoleAccess = in_array($user->primary_role, $allowedRoles);
@@ -39,8 +42,8 @@ class DebugMenuAccess
             abort(403, 'Access denied - insufficient debug privileges');
         }
 
-        // TEMPORARY BYPASS: Always log for testing
-        if (true) {
+        // Log access if audit is enabled
+        if (config('debug_menu.menu_audit', true)) {
             Log::info('Debug menu accessed', [
                 'user_id' => $user->id,
                 'user_email' => $user->email,
