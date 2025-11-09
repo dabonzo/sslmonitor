@@ -14,11 +14,15 @@ beforeEach(function () {
 
 test('summary stats are cached for 1 hour', function () {
     $monitor = Monitor::factory()->create();
+
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'daily',
         'uptime_percentage' => 95.00,
-        'period_start' => now()->subDays(15),
+        'period_start' => $referenceDate->copy()->subDays(15),
     ]);
 
     $service = new MonitoringCacheService();
@@ -40,11 +44,14 @@ test('cache is invalidated when summaries are updated', function () {
     $monitor = Monitor::factory()->create();
     $service = new MonitoringCacheService();
 
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     // Create initial cache
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'daily',
-        'period_start' => now()->subDays(15),
+        'period_start' => $referenceDate->copy()->subDays(15),
     ]);
 
     $service->getSummaryStats($monitor, '30d');
@@ -59,11 +66,15 @@ test('cache is invalidated when summaries are updated', function () {
 
 test('response time trend is cached for 10 minutes', function () {
     $monitor = Monitor::factory()->create();
+
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     MonitoringCheckSummary::factory()->hourly()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'hourly',
         'average_response_time_ms' => 150,
-        'period_start' => now()->subHours(3),
+        'period_start' => $referenceDate->copy()->subHours(3),
     ]);
 
     $service = new MonitoringCacheService();
@@ -107,10 +118,13 @@ test('cache invalidation clears all period caches', function () {
     $monitor = Monitor::factory()->create();
     $service = new MonitoringCacheService();
 
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'daily',
-        'period_start' => now()->subDays(5),
+        'period_start' => $referenceDate->copy()->subDays(5),
     ]);
 
     // Create caches for multiple periods
@@ -134,6 +148,10 @@ test('cache invalidation clears all period caches', function () {
 
 test('summary stats return correct data structure', function () {
     $monitor = Monitor::factory()->create();
+
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'daily',
@@ -142,7 +160,7 @@ test('summary stats return correct data structure', function () {
         'total_checks' => 100,
         'successful_uptime_checks' => 95,
         'failed_uptime_checks' => 5,
-        'period_start' => now()->subDays(10),
+        'period_start' => $referenceDate->copy()->subDays(10),
     ]);
 
     $service = new MonitoringCacheService();
@@ -164,17 +182,20 @@ test('summary stats return correct data structure', function () {
 test('response time trend returns correct format', function () {
     $monitor = Monitor::factory()->create();
 
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     // Create hourly summaries
     MonitoringCheckSummary::factory()->hourly()->create([
         'monitor_id' => $monitor->id,
         'average_response_time_ms' => 150,
-        'period_start' => now()->subHours(2),
+        'period_start' => $referenceDate->copy()->subHours(2),
     ]);
 
     MonitoringCheckSummary::factory()->hourly()->create([
         'monitor_id' => $monitor->id,
         'average_response_time_ms' => 200,
-        'period_start' => now()->subHour(),
+        'period_start' => $referenceDate->copy()->subHour(),
     ]);
 
     $service = new MonitoringCacheService();
@@ -192,13 +213,16 @@ test('different periods use different cache keys', function () {
     $monitor = Monitor::factory()->create();
     $service = new MonitoringCacheService();
 
+    // Use fixed reference date to avoid timing issues in parallel tests
+    $referenceDate = now()->startOfDay();
+
     // Create summaries within 7 days (will be included in 7d period)
     MonitoringCheckSummary::factory()->create([
         'monitor_id' => $monitor->id,
         'summary_period' => 'daily',
         'uptime_percentage' => 95.00,
         'total_checks' => 100,
-        'period_start' => now()->subDays(5),
+        'period_start' => $referenceDate->copy()->subDays(5),
     ]);
 
     // Create summary outside 7 days but within 30 days (only in 30d period)
@@ -207,7 +231,7 @@ test('different periods use different cache keys', function () {
         'summary_period' => 'daily',
         'uptime_percentage' => 88.00,
         'total_checks' => 50,
-        'period_start' => now()->subDays(20),
+        'period_start' => $referenceDate->copy()->subDays(20),
     ]);
 
     // Cache for different periods

@@ -34,17 +34,64 @@ describe('SSL Dashboard Controller', function () {
     });
 
     it('calculates SSL statistics correctly for user websites only', function () {
-        // Seed test data
-        $this->artisan('db:seed', ['--class' => 'TestUserSeeder']);
+        // Clear existing test data to ensure clean state
+        Website::where('user_id', $this->testUser->id)->delete();
+
+        // Create test data efficiently using factory pattern (much faster than seeder)
+        $timestamp = hrtime(true) . '_' . rand(1000, 9999);
+
+        // Create 4 monitors with different SSL statuses for test user
+        $validMonitor1 = Monitor::factory()->create([
+            'url' => "https://valid1-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(90),
+        ]);
+
+        $validMonitor2 = Monitor::factory()->create([
+            'url' => "https://valid2-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(60),
+        ]);
+
+        $expiringSoonMonitor = Monitor::factory()->create([
+            'url' => "https://expiring-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+            'certificate_expiration_date' => now()->addDays(7),
+        ]);
+
+        $expiredMonitor = Monitor::factory()->create([
+            'url' => "https://expired-{$timestamp}.example.com",
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'invalid',
+            'certificate_expiration_date' => now()->subDays(1),
+        ]);
+
+        // Create corresponding websites for test user
+        foreach ([$validMonitor1, $validMonitor2, $expiringSoonMonitor, $expiredMonitor] as $monitor) {
+            Website::factory()->create([
+                'user_id' => $this->testUser->id,
+                'url' => $monitor->url,
+            ]);
+        }
 
         // Create another user with websites to ensure filtering works
         $otherUser = User::factory()->create();
-        $otherWebsite = Website::factory()->create(['user_id' => $otherUser->id]);
+        $otherMonitor = Monitor::factory()->create([
+            'url' => "https://other-{$timestamp}.example.com",
+            'certificate_status' => 'valid',
+        ]);
+        Website::factory()->create([
+            'user_id' => $otherUser->id,
+            'url' => $otherMonitor->url,
+        ]);
 
         $response = $this->get(route('dashboard'));
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->where('sslStatistics.total_websites', 4) // Only bonzo's websites
+            ->where('sslStatistics.total_websites', 4) // Only test user's websites
             ->where('sslStatistics.valid_certificates', 3)
             ->where('sslStatistics.expiring_soon', 1)
         );
@@ -88,18 +135,24 @@ describe('SSL Dashboard Controller', function () {
     });
 
     it('calculates average response time for SSL checks', function () {
-        $website = Website::factory()->create(['user_id' => $this->testUser->id]);
-        $testUrl = 'https://response-test-'.hrtime(true).'.example.com';
-        $website->update(['url' => $testUrl]);
+        // Clear existing test data to ensure clean state
+        Website::where('user_id', $this->testUser->id)->delete();
 
-        // Create Spatie monitor (Note: Spatie doesn't store SSL response time by default)
-        Monitor::firstOrCreate(
-            ['url' => $testUrl],
-            [
-                'certificate_check_enabled' => true,
-                'certificate_status' => 'valid',
-            ]
-        );
+        // Create test data efficiently using factory pattern
+        $testUrl = 'https://response-test-'.hrtime(true).'.example.com';
+
+        // Create Spatie monitor directly (Note: Spatie doesn't store SSL response time by default)
+        Monitor::factory()->create([
+            'url' => $testUrl,
+            'certificate_check_enabled' => true,
+            'certificate_status' => 'valid',
+        ]);
+
+        // Create corresponding website
+        Website::factory()->create([
+            'user_id' => $this->testUser->id,
+            'url' => $testUrl,
+        ]);
 
         $response = $this->get(route('dashboard'));
 
