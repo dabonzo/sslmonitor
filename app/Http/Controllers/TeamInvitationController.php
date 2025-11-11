@@ -25,6 +25,21 @@ class TeamInvitationController extends Controller
             return redirect('/')->with('error', 'This invitation is invalid or has expired.');
         }
 
+        // Auto-accept if user is already logged in with the invitation email
+        $user = Auth::user();
+        if ($user && $user->email === $invitation->email) {
+            try {
+                DB::transaction(function () use ($invitation, $user) {
+                    $invitation->accept($user);
+                });
+
+                return redirect('/settings/team')
+                    ->with('success', "You've successfully joined the {$invitation->team->name} team!");
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
+
         // Load team and inviter information
         $invitation->load(['team', 'invitedBy']);
 

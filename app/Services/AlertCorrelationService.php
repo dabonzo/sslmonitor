@@ -12,6 +12,11 @@ class AlertCorrelationService
      */
     public function checkAndCreateAlerts(MonitoringResult $result): void
     {
+        // Check SSL invalid alert
+        if ($result->ssl_status === 'invalid') {
+            $this->checkSslInvalidAlert($result);
+        }
+
         // Check SSL expiration alert
         if ($result->ssl_status && $result->days_until_expiration !== null) {
             $this->checkSslExpirationAlert($result);
@@ -25,6 +30,47 @@ class AlertCorrelationService
         // Check response time alert
         if ($result->response_time_ms && $result->response_time_ms > 5000) {
             $this->checkResponseTimeAlert($result);
+        }
+    }
+
+    protected function checkSslInvalidAlert(MonitoringResult $result): void
+    {
+        // Check if alert already exists for this monitor
+        $existingAlert = MonitoringAlert::where('monitor_id', $result->monitor_id)
+            ->where('alert_type', 'ssl_invalid')
+            ->whereNull('resolved_at')
+            ->first();
+
+        if (! $existingAlert) {
+            MonitoringAlert::create([
+                'monitor_id' => $result->monitor_id,
+                'website_id' => $result->website_id,
+                'affected_check_result_id' => $result->id,
+                'alert_type' => 'ssl_invalid',
+                'alert_severity' => 'critical',
+                'alert_title' => 'SSL Certificate Invalid',
+                'alert_message' => $result->error_message ?? 'SSL certificate validation failed',
+                'trigger_value' => [
+                    'error_message' => $result->error_message,
+                    'certificate_issuer' => $result->certificate_issuer,
+                    'certificate_expiration_date' => $result->certificate_expiration_date?->toIso8601String(),
+                ],
+                'threshold_value' => null,
+                'first_detected_at' => now(),
+                'last_occurred_at' => now(),
+            ]);
+        } else {
+            // Update existing alert with latest occurrence
+            $existingAlert->update([
+                'last_occurred_at' => now(),
+                'occurrence_count' => $existingAlert->occurrence_count + 1,
+                'affected_check_result_id' => $result->id,
+                'trigger_value' => [
+                    'error_message' => $result->error_message,
+                    'certificate_issuer' => $result->certificate_issuer,
+                    'certificate_expiration_date' => $result->certificate_expiration_date?->toIso8601String(),
+                ],
+            ]);
         }
     }
 
@@ -163,7 +209,18 @@ class AlertCorrelationService
      */
     public function autoResolveAlerts(MonitoringResult $result): void
     {
-        // Auto-resolve SSL alerts if certificate is renewed
+        // Auto-resolve SSL invalid alerts if certificate becomes valid
+        if ($result->ssl_status === 'valid') {
+            MonitoringAlert::where('monitor_id', $result->monitor_id)
+                ->where('alert_type', 'ssl_invalid')
+                ->whereNull('resolved_at')
+                ->update([
+                    'resolved_at' => now(),
+                    'acknowledgment_note' => 'SSL certificate now valid - auto-resolved',
+                ]);
+        }
+
+        // Auto-resolve SSL expiration alerts if certificate is renewed
         if ($result->ssl_status === 'valid' && $result->days_until_expiration > 30) {
             MonitoringAlert::where('monitor_id', $result->monitor_id)
                 ->where('alert_type', 'ssl_expiring')

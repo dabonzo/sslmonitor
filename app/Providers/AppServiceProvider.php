@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Monitor;
+use App\Models\MonitoringAlert;
 use App\Models\Website;
+use App\Observers\MonitoringAlertObserver;
 use App\Observers\MonitorObserver;
 use App\Observers\WebsiteObserver;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Website::observe(WebsiteObserver::class);
         Monitor::observe(MonitorObserver::class);
+        MonitoringAlert::observe(MonitoringAlertObserver::class);
 
         // Event listeners are auto-discovered via type-hinted handle() methods
         // See: app/Listeners/* - Laravel automatically registers listeners
