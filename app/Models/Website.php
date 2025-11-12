@@ -25,6 +25,8 @@ class Website extends Model
         'plugin_data',
         'is_active',
         'check_interval',
+        'latest_ssl_certificate',
+        'ssl_certificate_analyzed_at',
     ];
 
     protected $attributes = [

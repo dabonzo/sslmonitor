@@ -235,6 +235,13 @@ return [
                 'processes' => 2,
                 'tries' => 2,
             ],
+            'monitoring-analysis' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-analysis'],
+                'balance' => 'auto',
+                'processes' => 2,
+                'tries' => 3,
+            ],
         ],
 
         'local' => [
@@ -254,6 +261,13 @@ return [
                 'balance' => 'auto',
                 'processes' => 1,
                 'tries' => 2,
+            ],
+            'monitoring-analysis' => [
+                'connection' => 'redis',
+                'queue' => ['monitoring-analysis'],
+                'balance' => 'auto',
+                'processes' => 1,
+                'tries' => 3,
             ],
         ],
     ],
