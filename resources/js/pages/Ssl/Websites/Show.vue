@@ -528,7 +528,7 @@ onMounted(() => {
           <div class="flex flex-wrap gap-4 p-4 bg-muted rounded-lg">
             <select v-model="historyFilters.check_type" @change="loadMonitoringHistory()" class="px-3 py-2 border rounded-md bg-background">
               <option value="">All Check Types</option>
-              <option value="ssl">SSL Only</option>
+              <option value="ssl_certificate">SSL Only</option>
               <option value="uptime">Uptime Only</option>
               <option value="both">Both</option>
             </select>

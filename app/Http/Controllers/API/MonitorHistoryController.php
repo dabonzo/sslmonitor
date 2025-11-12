@@ -27,7 +27,7 @@ class MonitorHistoryController extends Controller
 
         $validated = $request->validate([
             'limit' => 'nullable|integer|min:1|max:1000',
-            'check_type' => 'nullable|string|in:combined,ssl,uptime,content',
+            'check_type' => 'nullable|string|in:both,ssl_certificate,uptime',
             'status' => 'nullable|string|in:success,failed',
             'days' => 'nullable|integer|min:1|max:365',
         ]);

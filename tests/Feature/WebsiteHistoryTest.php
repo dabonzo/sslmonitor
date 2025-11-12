@@ -76,7 +76,7 @@ test('history endpoint filters by check type', function () {
     MonitoringResult::factory()->count(5)->create([
         'website_id' => $this->website->id,
         'monitor_id' => $this->monitor->id,
-        'check_type' => 'ssl',
+        'check_type' => 'ssl_certificate',
     ]);
 
     MonitoringResult::factory()->count(3)->create([
@@ -86,7 +86,7 @@ test('history endpoint filters by check type', function () {
     ]);
 
     $response = $this->actingAs($this->user)
-        ->getJson(route('ssl.websites.history', ['website' => $this->website, 'check_type' => 'ssl']));
+        ->getJson(route('ssl.websites.history', ['website' => $this->website, 'check_type' => 'ssl_certificate']));
 
     $response->assertOk();
     expect($response->json('data'))->toHaveCount(5);

@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\TeamInvitationController::existing
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 export const existing = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ existing.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::existing
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 existing.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -43,7 +43,7 @@ existing.url = (args: { token: string | number } | [token: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::existing
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 existing.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -53,7 +53,7 @@ existing.post = (args: { token: string | number } | [token: string | number ] | 
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::existing
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 const existingForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -63,7 +63,7 @@ const existingForm = (args: { token: string | number } | [token: string | number
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::existing
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 existingForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -75,7 +75,7 @@ existing.form = existingForm
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::newMethod
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 export const newMethod = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -90,7 +90,7 @@ newMethod.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::newMethod
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 newMethod.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -117,7 +117,7 @@ newMethod.url = (args: { token: string | number } | [token: string | number ] | 
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::newMethod
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 newMethod.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -127,7 +127,7 @@ newMethod.post = (args: { token: string | number } | [token: string | number ] |
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::newMethod
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 const newMethodForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -137,7 +137,7 @@ const newMethodForm = (args: { token: string | number } | [token: string | numbe
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::newMethod
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 newMethodForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

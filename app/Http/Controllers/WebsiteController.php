@@ -1079,7 +1079,7 @@ class WebsiteController extends Controller
 
         $request->validate([
             'limit' => 'sometimes|integer|min:1|max:500',
-            'check_type' => 'sometimes|in:ssl,uptime,both',
+            'check_type' => 'sometimes|in:ssl_certificate,uptime,both',
             'status' => 'sometimes|in:success,failed',
             'trigger_type' => 'sometimes|in:scheduled,manual_immediate,manual_bulk',
             'days' => 'sometimes|integer|min:1|max:365',

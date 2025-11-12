@@ -64,7 +64,7 @@ class UpdateMonitoringSummaries implements ShouldQueue
                 DB::raw('MAX(response_time_ms) as max_response_time'),
 
                 // SSL statistics
-                DB::raw('SUM(CASE WHEN check_type IN ("ssl", "both") AND ssl_status IS NOT NULL THEN 1 ELSE 0 END) as total_ssl_checks'),
+                DB::raw('SUM(CASE WHEN check_type IN ("ssl_certificate", "both") AND ssl_status IS NOT NULL THEN 1 ELSE 0 END) as total_ssl_checks'),
                 DB::raw('SUM(CASE WHEN ssl_status = "valid" THEN 1 ELSE 0 END) as successful_ssl_checks'),
                 DB::raw('SUM(CASE WHEN ssl_status IN ("invalid", "expired") THEN 1 ELSE 0 END) as failed_ssl_checks'),
                 DB::raw('SUM(CASE WHEN days_until_expiration IS NOT NULL AND days_until_expiration <= 30 THEN 1 ELSE 0 END) as certificates_expiring'),

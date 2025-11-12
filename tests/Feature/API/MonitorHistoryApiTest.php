@@ -82,7 +82,7 @@ test('GET /api/monitors/{monitor}/history filters by check_type parameter', func
     MonitoringResult::factory()->count(10)->create([
         'monitor_id' => $this->monitor->id,
         'website_id' => $this->website->id,
-        'check_type' => 'ssl',
+        'check_type' => 'ssl_certificate',
     ]);
 
     MonitoringResult::factory()->count(15)->create([
@@ -93,14 +93,14 @@ test('GET /api/monitors/{monitor}/history filters by check_type parameter', func
 
     // Act: Filter by SSL check type
     $response = $this->actingAs($this->user)
-        ->getJson("/api/monitors/{$this->monitor->id}/history?check_type=ssl");
+        ->getJson("/api/monitors/{$this->monitor->id}/history?check_type=ssl_certificate");
 
     // Assert: Only SSL checks should be returned
     $response->assertOk()
         ->assertJsonCount(10, 'data');
 
     foreach ($response->json('data') as $item) {
-        expect($item['check_type'])->toBe('ssl');
+        expect($item['check_type'])->toBe('ssl_certificate');
     }
 });
 

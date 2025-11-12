@@ -203,7 +203,7 @@ test('aggregates SSL statistics correctly', function () {
         'monitor_id' => $testMonitor->id,
         'website_id' => $this->website->id,
         'started_at' => now(),
-        'check_type' => 'ssl',
+        'check_type' => 'ssl_certificate',
         'ssl_status' => 'valid',
         'days_until_expiration' => 90,
     ]);
@@ -212,7 +212,7 @@ test('aggregates SSL statistics correctly', function () {
         'monitor_id' => $testMonitor->id,
         'website_id' => $this->website->id,
         'started_at' => now(),
-        'check_type' => 'ssl',
+        'check_type' => 'ssl_certificate',
         'ssl_status' => 'expires_soon',
         'days_until_expiration' => 5,
     ]);

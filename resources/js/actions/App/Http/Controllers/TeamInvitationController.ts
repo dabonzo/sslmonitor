@@ -100,7 +100,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::accept
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 export const accept = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -115,7 +115,7 @@ accept.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::accept
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 accept.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -142,7 +142,7 @@ accept.url = (args: { token: string | number } | [token: string | number ] | str
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::accept
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 accept.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -152,7 +152,7 @@ accept.post = (args: { token: string | number } | [token: string | number ] | st
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::accept
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 const acceptForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -162,7 +162,7 @@ const acceptForm = (args: { token: string | number } | [token: string | number ]
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::accept
-* @see app/Http/Controllers/TeamInvitationController.php:51
+* @see app/Http/Controllers/TeamInvitationController.php:66
 * @route '/team/invitations/{token}/accept'
 */
 acceptForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -174,7 +174,7 @@ accept.form = acceptForm
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::acceptWithRegistration
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 export const acceptWithRegistration = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -189,7 +189,7 @@ acceptWithRegistration.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::acceptWithRegistration
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 acceptWithRegistration.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -216,7 +216,7 @@ acceptWithRegistration.url = (args: { token: string | number } | [token: string 
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::acceptWithRegistration
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 acceptWithRegistration.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -226,7 +226,7 @@ acceptWithRegistration.post = (args: { token: string | number } | [token: string
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::acceptWithRegistration
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 const acceptWithRegistrationForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -236,7 +236,7 @@ const acceptWithRegistrationForm = (args: { token: string | number } | [token: s
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::acceptWithRegistration
-* @see app/Http/Controllers/TeamInvitationController.php:82
+* @see app/Http/Controllers/TeamInvitationController.php:97
 * @route '/team/invitations/{token}/register'
 */
 acceptWithRegistrationForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -248,7 +248,7 @@ acceptWithRegistration.form = acceptWithRegistrationForm
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::decline
-* @see app/Http/Controllers/TeamInvitationController.php:128
+* @see app/Http/Controllers/TeamInvitationController.php:143
 * @route '/team/invitations/{token}/decline'
 */
 export const decline = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -263,7 +263,7 @@ decline.definition = {
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::decline
-* @see app/Http/Controllers/TeamInvitationController.php:128
+* @see app/Http/Controllers/TeamInvitationController.php:143
 * @route '/team/invitations/{token}/decline'
 */
 decline.url = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -290,7 +290,7 @@ decline.url = (args: { token: string | number } | [token: string | number ] | st
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::decline
-* @see app/Http/Controllers/TeamInvitationController.php:128
+* @see app/Http/Controllers/TeamInvitationController.php:143
 * @route '/team/invitations/{token}/decline'
 */
 decline.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -300,7 +300,7 @@ decline.post = (args: { token: string | number } | [token: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::decline
-* @see app/Http/Controllers/TeamInvitationController.php:128
+* @see app/Http/Controllers/TeamInvitationController.php:143
 * @route '/team/invitations/{token}/decline'
 */
 const declineForm = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -310,7 +310,7 @@ const declineForm = (args: { token: string | number } | [token: string | number 
 
 /**
 * @see \App\Http\Controllers\TeamInvitationController::decline
-* @see app/Http/Controllers/TeamInvitationController.php:128
+* @see app/Http/Controllers/TeamInvitationController.php:143
 * @route '/team/invitations/{token}/decline'
 */
 declineForm.post = (args: { token: string | number } | [token: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
